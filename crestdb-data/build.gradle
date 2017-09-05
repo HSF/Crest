@@ -1,0 +1,100 @@
+group = 'hep.crest.data'
+description = 'crestdb-data'
+
+buildscript {
+    ext {
+        springBootVersion = '1.5.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/libs-snapshot' }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+sourceSets {
+	main {
+		java {
+		  srcDir 'src/gen/java'
+		}
+	}
+    generated {
+        java {
+            srcDir "$projectDir/generated/java"
+        }
+    }
+    println main.output.classesDir		
+}
+    
+
+dependencies {
+
+////	compile group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc', version:springboot_version
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version:springboot_version
+   
+	compile group: 'com.querydsl', name: 'querydsl-jpa', version: '4.1.3'
+    compile "com.querydsl:querydsl-apt:4.1.3:jpa" // Magic happens here   
+    compile("com.h2database:h2")
+    compile group: 'org.hibernate', name: 'hibernate-validator', version: '5.4.1.Final'
+    
+    compile group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
+    compile group: 'org.reflections', name: 'reflections', version:'0.9.10'
+    compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
+	testCompile("org.springframework.boot:spring-boot-starter-test")    
+}
+
+bootRun {
+	systemProperties System.properties
+}
+
+compileJava {
+    options.compilerArgs << "-s"
+    options.compilerArgs << "$projectDir/generated/java"
+
+    doFirst {
+        // make sure that directory exists
+        file(new File(projectDir, "/generated/java")).mkdirs()
+    }
+}
+
+clean.doLast {
+    // clean-up directory when necessary
+    file(new File(projectDir, "/generated")).deleteDir()
+}
+
+
+Properties props = mprops
+
+task sourcesForRelease(type: Copy) {
+    from 'src/main/java'
+    into 'build/adjustedSrc'
+    filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [ SCHEMA_NAME: props.get('schema.name')])
+}
+
+task compileForRelease(type: JavaCompile, dependsOn: sourcesForRelease) {
+    source = sourcesForRelease.destinationDir
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = file('build/adjustedClasses')
+}
+
+task copyAdjustedClasses(type: Copy, dependsOn: compileForRelease) {
+    from 'build/adjustedClasses'
+    into 'build/classes/main'
+}
+
+task cleanClassesDir(type: Delete) {
+      delete fileTree(dir: "build/classes/main")
+}
+
+// THIS DOES NOT WORK WITH THE GEN DIRECTORY ADDED FOR SOURCES.... BE CAREFUL
+//copyAdjustedClasses.dependsOn compileJava
+//copyAdjustedClasses.dependsOn classes
+//copyAdjustedClasses.dependsOn cleanClassesDir
+//assemble.dependsOn copyAdjustedClasses
+//jar.dependsOn copyAdjustedClasses

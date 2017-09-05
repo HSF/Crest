@@ -1,0 +1,134 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+group = 'hep.crest.server'
+description = 'crestdb-web'
+
+buildscript {
+    ext {
+        //springBootVersion = '2.0.0.BUILD-SNAPSHOT'
+        springBootVersion = '1.5.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    	jcenter()
+        maven { url 'https://repo.spring.io/libs-snapshot' }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'org.akhikhl.gretty:gretty:+'    
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'war'
+//////apply plugin: 'org.akhikhl.gretty'
+
+// Load properties for later filtering
+Properties props  = mprops
+
+sourceSets {
+	main {
+		java {
+		  srcDir 'src/gen/java'
+		}
+	}
+    println main.output.classesDir	
+}
+
+ext {
+	jersey2_version = "2.22.2"
+	swagger_core_version = "1.5.13"
+}
+
+dependencies {
+//    compile project(':vhfmgrApi-data')
+	compile "hep.crest.data:crestdb-data:$version"
+	compile "io.swagger:swagger-core:$swagger_core_version"
+	compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:springboot_version
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version:springboot_version
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version:springboot_version
+ 
+    compile 'org.springframework:spring-aspects:4.1.8.RELEASE'
+    // The following is needed for the javadoc.
+    compile 'javax.interceptor:javax.interceptor-api:1.2'
+// THIS SHOULD BE LOADED ALREADY BY SPRING ????
+//	compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$jersey2_version"
+	compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey2_version"
+//	compile('org.apache.tomcat.embed:tomcat-embed-jasper:8.0.30')
+//	compile "org.glassfish.jersey.core:jersey-server:$jersey2_version"
+
+	compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version"
+
+	if (props.get('server') == "tomcat") {
+    	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    } else if (props.get('server') == "undertow") {
+	  	providedRuntime("org.springframework.boot:spring-boot-starter-undertow")
+	}
+	testCompile("org.springframework.boot:spring-boot-starter-test")    	
+}
+
+bootRun {
+	systemProperties System.properties
+}
+
+//def profiles = 'prod'
+
+//bootRun {
+//  args = ["--spring.profiles.active=" + profiles]
+//}
+
+//task setDevProperties(dependsOn: bootRun) << {
+//  doFirst {
+//    System.setProperty('spring.profiles.active', profiles)
+//  }
+//}
+
+task hello {
+    doLast {
+    	String greeting = 'hello from Ant'
+    	ant.echo(message: greeting)
+    }
+}
+
+def tomcatparams = [
+	murl: props.get('tcurl'),
+	muser: props.get('tcuser'),
+	mpasswd: props.get('tcpassword'),
+	ctx: props.get('context'),
+	mwar: ("${project.buildDir}/libs/"+war.archiveName)
+]
+
+println 'URL for tomcat server: '+tomcatparams.murl+' war file: '+tomcatparams.mwar+' context: '+tomcatparams.ctx
+println 'CATALINA_HOME/lib = '+props.get('catalina_home_libs')
+
+task (deploy) {
+doLast {
+    ant.taskdef(name:'deploy',classname: 'org.apache.catalina.ant.DeployTask'){
+        classpath {
+            fileset(dir: mprops.get('catalina_home_libs'), includes: '*.jar')
+        }
+    }
+	println 'Deploying war using: '+tomcatparams.murl+' '+tomcatparams.mwar
+	ant.deploy(url: tomcatparams.murl, username: tomcatparams.muser, password: tomcatparams.mpasswd, path: tomcatparams.ctx, war: tomcatparams.mwar)
+}
+}
+
+task (undeploy) {
+ doLast {
+    ant.taskdef(name:'undeploy',classname: 'org.apache.catalina.ant.UndeployTask'){
+        classpath {
+            fileset(dir: mprops.get('catalina_home_libs'), includes: '*.jar')
+        }
+    }
+	println 'Undeploying war using: '+tomcatparams.murl+' '+tomcatparams.ctx
+	ant.undeploy(url: tomcatparams.murl, username: tomcatparams.muser, password: tomcatparams.mpasswd, path: tomcatparams.ctx)
+ }
+}
+
+task explodedWar(type: Copy) {
+	into "$buildDir/api"
+	with war
+}
+

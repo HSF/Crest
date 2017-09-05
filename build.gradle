@@ -1,0 +1,72 @@
+allprojects  {
+  apply plugin: 'maven'
+  group = 'hep.crest'
+  version = '1.0-SNAPSHOT'
+}
+
+// SVOM
+// Define a project specific method
+// Load properties for later filtering
+// Functions to get project properties from local file	
+Properties getProjectProperties() {
+	String propertiesfile = "${project.rootDir}/vhf-filter-values.properties"
+	File generalPropertiesFile = file(propertiesfile)
+	println 'Loaded properties file: '+generalPropertiesFile.name
+	Properties mprops = new Properties()    
+    mprops.load(generalPropertiesFile.newDataInputStream())
+	println 'Getting properties from main gradle script...'+mprops
+    return mprops
+}
+
+//SVOM-END
+
+ext {
+	mprops = getProjectProperties()
+    swagger_annotations_version = "1.5.13"
+    jackson_version = "2.7.5"
+    spring_version = "4.1.4.RELEASE"
+    springboot_version = "1.5.2.RELEASE"
+    junit_version = "4.12"
+    oltu_version = "1.0.1"
+    orika_version = "1.5.1"
+}
+apply from: 'vhf.gradle'
+
+subprojects {
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    tasks.withType(JavaCompile) {
+  	    options.encoding = 'UTF-8'
+    }
+  
+	repositories {
+	    mavenLocal()
+	    
+	    maven { url "http://repo.spring.io/milestone" }
+	    maven { url "https://jcenter.bintray.com/" }
+	    maven { url "https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo" }
+	    maven { url "http://repo.maven.apache.org/maven2" }
+	}
+
+  
+	dependencies {
+	    compile "io.swagger:swagger-annotations:$swagger_annotations_version"
+	   	compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
+	   	compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
+    		compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
+    		compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+    		compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
+	  
+		// NATS Messaging:
+		compile group: 'com.github.cloudfoundry-community', name: 'nats-client-spring', version: '0.6.6'
+			  
+	    compile group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
+//	    compile group: 'org.xerial', name: 'sqlite-jdbc', version:'3.8.11.2'
+//	    compile group: 'org.hsqldb', name: 'hsqldb', version:'2.3.2'
+//	    compile group: 'com.h2database', name: 'h2', version:'1.4.182'
+//	    compile group: 'commons-dbcp', name: 'commons-dbcp', version:'1.4'
+	    testCompile "junit:junit:$junit_version"    
+	}
+		
+}
