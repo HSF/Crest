@@ -1,0 +1,46 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+server:
+    port: 8090
+    servlet-path: /
+spring:
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:h2:/tmp/cresth2;DB_CLOSE_ON_EXIT=FALSE
+      testWhileIdle: true
+      validationQuery: SELECT 1
+      driverClassName: org.h2.Driver
+      username: root
+      password: root
+---
+spring:
+    profiles: prod
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=db-d0002.cern.ch)(PORT=10654))(ENABLE=BROKEN)(CONNECT_DATA=(SERVICE_NAME=intr.cern.ch)))
+      testWhileIdle: true
+      validationQuery: SELECT 1 FROM DUAL
+      driverClassName: oracle.jdbc.OracleDriver
+      username: ATLAS_PHYS_COND_W
+      password: ${crest.db.password}
+      dbcp2.initial-size: 7
+      dbcp2.max-total: 50
+      dbcp2.pool-prepared-statements: true
+      tomcat.max-wait: 10000
+      tomcat.max-active: 50
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: validate
+        hibernate.show_sql: false
+server:
+    port: 8080 
+    tomcat:
+      max-connections: 100

@@ -1,26 +1,48 @@
 package hep.crest.server.swagger.api.impl;
 
-import hep.crest.server.swagger.api.*;
-import hep.crest.swagger.model.*;
-
-import hep.crest.swagger.model.TagDto;
-
 import java.util.List;
-import hep.crest.server.swagger.api.NotFoundException;
 
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.repositories.querydsl.IFilteringCriteria;
+import hep.crest.data.repositories.querydsl.SearchCriteria;
+import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.services.TagService;
+import hep.crest.server.swagger.api.ApiResponseMessage;
+import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.server.swagger.api.TagsApiService;
+import hep.crest.swagger.model.GlobalTagDto;
+import hep.crest.swagger.model.TagDto;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class TagsApiServiceImpl extends TagsApiService {
+	
+	
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
+	@Autowired
+	PageRequestHelper prh;
+
+	@Autowired
+	@Qualifier("tagFiltering")
+	private IFilteringCriteria filtering;
+
+	@Autowired
+	TagService tagService;
+	
     @Override
     public Response createTag(TagDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
         // do some magic!
@@ -28,12 +50,59 @@ public class TagsApiServiceImpl extends TagsApiService {
     }
     @Override
     public Response findTag(String name, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		this.log.info("TagRestController processing request for tag name " + name);
+		try {
+			TagDto dto = tagService.findOne(name);
+			if (dto == null) {
+				log.debug("Entity not found for name " + name);
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,"Entity not found for name "+name);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();				
+			}
+			return Response.ok().entity(dto).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
     }
     @Override
     public Response listTags( String by,  Integer page,  Integer size,  String sort, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+		try {
+			log.debug("Search resource list using by={}, page={}, size={}, sort={}",by,page,size,sort);
+			PageRequest preq = prh.createPageRequest(page, size, sort);
+			List<TagDto> dtolist = null;
+			if (by.equals("none")) {
+				dtolist = tagService.findAllTags(null, preq);
+			} else {
+
+				List<SearchCriteria> params = prh.createMatcherCriteria(by);
+				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
+				BooleanExpression wherepred = null;
+
+				for (BooleanExpression exp : expressions) {
+					if (wherepred == null) {
+						wherepred = exp;
+					} else {
+						wherepred = wherepred.and(exp);
+					}
+				}
+				dtolist = tagService.findAllTags(wherepred, preq);
+			}
+			if (dtolist == null) {
+				String message = "No resource has been found";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,message);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();	
+			}
+			GenericEntity<List<TagDto>> entitylist = new GenericEntity<List<TagDto>>(dtolist) {};
+			return Response.ok().entity(entitylist).build();
+
+		} catch (CdbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
     }
 }
