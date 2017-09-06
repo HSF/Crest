@@ -59,7 +59,7 @@ subprojects {
     		compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
 	  
 		// NATS Messaging:
-		compile group: 'com.github.cloudfoundry-community', name: 'nats-client-spring', version: '0.6.6'
+		//compile group: 'com.github.cloudfoundry-community', name: 'nats-client-spring', version: '0.6.6'
 			  
 	    compile group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
 //	    compile group: 'org.xerial', name: 'sqlite-jdbc', version:'3.8.11.2'
