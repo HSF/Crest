@@ -102,6 +102,7 @@ def tomcatparams = [
 
 println 'URL for tomcat server: '+tomcatparams.murl+' war file: '+tomcatparams.mwar+' context: '+tomcatparams.ctx
 println 'CATALINA_HOME/lib = '+props.get('catalina_home_libs')
+println 'Properties loaded from file: '+props.get('dbpassword')
 
 task (deploy) {
 doLast {
