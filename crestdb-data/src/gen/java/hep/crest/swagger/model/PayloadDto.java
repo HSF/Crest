@@ -18,15 +18,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import javax.validation.constraints.*;
 
 /**
  * PayloadDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
 public class PayloadDto   {
   @JsonProperty("hash")
   private String hash = null;
@@ -38,10 +36,10 @@ public class PayloadDto   {
   private String objectType = null;
 
   @JsonProperty("data")
-  private List<byte[]> data = new ArrayList<byte[]>();
+  private byte[] data = null;
 
   @JsonProperty("streamerInfo")
-  private List<byte[]> streamerInfo = new ArrayList<byte[]>();
+  private byte[] streamerInfo = null;
 
   @JsonProperty("insertionTime")
   private Date insertionTime = null;
@@ -103,13 +101,8 @@ public class PayloadDto   {
     this.objectType = objectType;
   }
 
-  public PayloadDto data(List<byte[]> data) {
+  public PayloadDto data(byte[] data) {
     this.data = data;
-    return this;
-  }
-
-  public PayloadDto addDataItem(byte[] dataItem) {
-    this.data.add(dataItem);
     return this;
   }
 
@@ -119,21 +112,16 @@ public class PayloadDto   {
   **/
   @JsonProperty("data")
   @ApiModelProperty(value = "")
-  public List<byte[]> getData() {
+  public byte[] getData() {
     return data;
   }
 
-  public void setData(List<byte[]> data) {
+  public void setData(byte[] data) {
     this.data = data;
   }
 
-  public PayloadDto streamerInfo(List<byte[]> streamerInfo) {
+  public PayloadDto streamerInfo(byte[] streamerInfo) {
     this.streamerInfo = streamerInfo;
-    return this;
-  }
-
-  public PayloadDto addStreamerInfoItem(byte[] streamerInfoItem) {
-    this.streamerInfo.add(streamerInfoItem);
     return this;
   }
 
@@ -143,11 +131,11 @@ public class PayloadDto   {
   **/
   @JsonProperty("streamerInfo")
   @ApiModelProperty(value = "")
-  public List<byte[]> getStreamerInfo() {
+  public byte[] getStreamerInfo() {
     return streamerInfo;
   }
 
-  public void setStreamerInfo(List<byte[]> streamerInfo) {
+  public void setStreamerInfo(byte[] streamerInfo) {
     this.streamerInfo = streamerInfo;
   }
 

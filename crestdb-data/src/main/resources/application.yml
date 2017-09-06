@@ -1,0 +1,22 @@
+# ===============================
+# = PROFILES /
+#             datasources
+#             ...
+# ===============================
+# Defaults
+
+spring:
+    datasource:
+      url: jdbc:h2:/tmp/cresth2;DB_CLOSE_ON_EXIT=FALSE
+      testWhileIdle: true
+      validationQuery: SELECT 1
+      driverClassName: org.h2.Driver
+      username: root
+      password: root
+
+---
+spring:
+    profiles: dev
+    datasource:
+      url: jdbc:h2:/tmp/cresth2dev;DB_CLOSE_ON_EXIT=FALSE
+      
