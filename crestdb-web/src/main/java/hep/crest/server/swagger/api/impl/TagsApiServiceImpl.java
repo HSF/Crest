@@ -45,8 +45,18 @@ public class TagsApiServiceImpl extends TagsApiService {
 	
     @Override
     public Response createTag(TagDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+   		log.info("TagRestController processing request for creating a tag");
+		try {
+			TagDto saved = tagService.insertTag(body);
+			return Response.created(info.getRequestUri()).entity(saved).build();
+
+		} catch (CdbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
     }
     @Override
     public Response findTag(String name, SecurityContext securityContext, UriInfo info) throws NotFoundException {

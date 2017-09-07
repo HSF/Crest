@@ -4,6 +4,15 @@
 #             ...
 # ===============================
 # Defaults
+cdb:
+  iovsgroups_maxage: 600
+  iovsgroups_snapshot_maxage: 3600
+  iovs_maxage: 600
+  iovs_snapshot_maxage: 3600
+  payloads_maxage: 604800
+  timetype_groupsize: 1000
+  runtype_groupsize: 1000
+
 server:
     port: 8090
     servlet-path: /

@@ -20,6 +20,8 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
@@ -101,9 +103,9 @@ public class IovsApi  {
         @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GroupDto.class) })
     public Response selectGroups(@ApiParam(value = "tagname: the tag name {none}",required=true, defaultValue="none") @DefaultValue("none") @QueryParam("tagname") String tagname
 ,@ApiParam(value = "snapshot: the snapshot time {0}", defaultValue="0") @DefaultValue("0") @QueryParam("snapshot") Long snapshot
-,@Context SecurityContext securityContext,@Context UriInfo info)
+,@Context SecurityContext securityContext,@Context UriInfo info,@Context Request request, @Context HttpHeaders headers)
     throws NotFoundException {
-        return delegate.selectGroups(tagname,snapshot,securityContext,info);
+        return delegate.selectGroups(tagname,snapshot,securityContext,info,request,headers);
     }
     @GET
     @Path("/selectIovs")

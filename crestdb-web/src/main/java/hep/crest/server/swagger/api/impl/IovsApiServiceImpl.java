@@ -1,61 +1,198 @@
 package hep.crest.server.swagger.api.impl;
 
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.Tag;
+import hep.crest.data.repositories.querydsl.IFilteringCriteria;
+import hep.crest.data.repositories.querydsl.SearchCriteria;
+import hep.crest.server.caching.CachingPolicyService;
+import hep.crest.server.caching.CachingProperties;
+import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.services.IovService;
+import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.*;
 import hep.crest.swagger.model.*;
 
-import hep.crest.swagger.model.GroupDto;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.TagSummaryDto;
-
+import java.util.Date;
 import java.util.List;
-import hep.crest.server.swagger.api.NotFoundException;
-
 import java.io.InputStream;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.ResponseBuilder;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+
 import javax.validation.constraints.*;
+
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class IovsApiServiceImpl extends IovsApiService {
-    @Override
-    public Response createIov(IovDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response findAllIovs( String tagname,  Integer page,  Integer size,  String sort, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response getSize( @NotNull String tagname,  Long snapshot, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response getSizeByTag( @NotNull String tagname, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response selectGroups( @NotNull String tagname,  Long snapshot, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response selectIovs( String tagname,  String since,  String until,  Long snapshot, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response selectSnapshot( @NotNull String tagname,  @NotNull Long snapshot, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
+
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
+	@Autowired
+	PageRequestHelper prh;
+
+	@Autowired
+	@Qualifier("iovFiltering")
+	private IFilteringCriteria filtering;
+
+	@Autowired
+	private CachingPolicyService cachesvc;
+
+	@Autowired
+	IovService iovService;
+	
+	@Autowired
+	TagService tagService;
+
+	@Autowired
+	private CachingProperties cprops;
+
+	@Override
+	public Response createIov(IovDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
+		log.info("IovRestController processing request for creating a tag");
+		try {
+			IovDto saved = iovService.insertIov(body);
+			return Response.created(info.getRequestUri()).entity(saved).build();
+
+		} catch (CdbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+
+	@Override
+	public Response findAllIovs(String tagname, Integer page, Integer size, String sort,
+			SecurityContext securityContext, UriInfo info) throws NotFoundException {
+		try {
+			log.debug("Search resource list using tag={}, page={}, size={}, sort={}", tagname, page, size, sort);
+			PageRequest preq = prh.createPageRequest(page, size, sort);
+			List<IovDto> dtolist = null;
+			if (tagname.equals("none")) {
+				dtolist = iovService.findAllIovs(null, preq);
+			} else {
+
+				List<SearchCriteria> params = prh.createMatcherCriteria("tagname:" + tagname);
+				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
+				BooleanExpression wherepred = null;
+
+				for (BooleanExpression exp : expressions) {
+					if (wherepred == null) {
+						wherepred = exp;
+					} else {
+						wherepred = wherepred.and(exp);
+					}
+				}
+				dtolist = iovService.findAllIovs(wherepred, preq);
+			}
+			if (dtolist == null) {
+				String message = "No resource has been found";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, message);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			}
+			GenericEntity<List<IovDto>> entitylist = new GenericEntity<List<IovDto>>(dtolist) {
+			};
+			return Response.ok().entity(entitylist).build();
+
+		} catch (CdbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+
+	@Override
+	public Response getSize(@NotNull String tagname, Long snapshot, SecurityContext securityContext, UriInfo info)
+			throws NotFoundException {
+		// do some magic!
+		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+	}
+
+	@Override
+	public Response getSizeByTag(@NotNull String tagname, SecurityContext securityContext, UriInfo info)
+			throws NotFoundException {
+		// do some magic!
+		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+	}
+
+	@Override
+	public Response selectGroups(@NotNull String tagname, Long snapshot, SecurityContext securityContext, UriInfo info,
+			Request request, HttpHeaders headers) throws NotFoundException {
+		this.log.info("IovRestController processing request for iovs groups using tag name " + tagname);
+		try {
+			GroupDto groups = null;
+			// Integer maxage = 60;
+			// Search for tag in order to load the time type:
+			TagDto tagentity = tagService.findOne(tagname);
+			if (tagentity == null) {
+				throw new CdbServiceException("Cannot find tag for name " + tagname);
+			}
+			ResponseBuilder builder = cachesvc.verifyLastModified(request, tagentity);
+			if (builder != null) {
+				// Get request headers: this is just to dump the If-Modified-Since
+				String ifmodsince = headers.getHeaderString("If-Modified-Since");
+				log.debug("The output data are not modified since " + ifmodsince);
+				return builder.build();
+			}
+			Integer groupsize = null;
+			String timetype = tagentity.getTimeType();
+			if (timetype.equalsIgnoreCase("run")) {
+				groupsize = cprops.getRuntype_groupsize();
+			} else {
+				groupsize = cprops.getTimetype_groupsize();
+			}
+			// Set caching policy depending on snapshot argument
+			// this is filling a mag-age parameter in the header
+			CacheControl cc = cachesvc.getGroupsCacheControl(snapshot);
+			// Retrieve all iovs groups
+			Date snap = null;
+			if (snapshot != 0L) {
+				snap = new Date(snapshot);
+			}
+			groups = iovService.selectGroupDtoByTagNameAndSnapshotTime(tagname, snap, groupsize);
+			return Response.ok().entity(groups).cacheControl(cc).build();
+
+		} catch (Exception e) {
+			String msg = "Error in selectGroups : " + tagname + ", " + snapshot;
+			log.error("Exception catched by REST controller for " + msg + " : " + e.getMessage());
+			String message = msg + " -- " + e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+
+	}
+
+	@Override
+	public Response selectIovs(String tagname, String since, String until, Long snapshot,
+			SecurityContext securityContext, UriInfo info) throws NotFoundException {
+		// do some magic!
+		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+	}
+
+	@Override
+	public Response selectSnapshot(@NotNull String tagname, @NotNull Long snapshot, SecurityContext securityContext,
+			UriInfo info) throws NotFoundException {
+		// do some magic!
+		return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+	}
 }
