@@ -1,0 +1,1030 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"version": "2.0",
+		"title": "CrestDB REST API",
+		"termsOfService": "http://svom.swagger.fr/terms/",
+		"description": "Crest Rest Api to manage data for calibration files.",
+		"contact": {
+			"email": "andrea.formica@cern.ch"
+		},
+		"license": {
+			"name": "Apache 2.0",
+			"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+		}
+	},
+	"host": "localhost:8080",
+	"basePath": "/crest",
+	"tags": [
+		{
+			"name": "iovs"
+		},
+		{
+			"name": "payloads"
+		},
+		{
+			"name": "admin"
+		},
+		{
+			"name": "globaltags"
+		},
+		{
+			"name": "globaltagmaps"
+		},
+		{
+			"name": "tags"
+		},
+		{
+			"name": "fs"
+		}		
+	],
+	"schemes": [
+		"http"
+	],
+	"paths": {
+		"/admin/globaltags/{name}": {
+			"put": {
+				"tags": [
+					"admin"
+				],
+				"summary": "Update a GlobalTag in the database.",
+				"description": "This method allows to update a GlobalTag.Arguments: the name has to uniquely identify a global tag.",
+				"operationId": "updateGlobalTag",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a GlobalTagDto object: { name: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"admin"
+				],
+				"summary": "Remove a GlobalTag from the database.",
+				"description": "This method allows to remove a GlobalTag.Arguments: the name has to uniquely identify a global tag.",
+				"operationId": "removeGlobalTag",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"default": {
+						"description": "successful operation"
+					}
+				}
+			}
+		},
+		"/admin/tags/{name}": {
+			"delete": {
+				"tags": [
+					"admin"
+				],
+				"summary": "Remove a Tag from the database.",
+				"description": "This method allows to remove a Tag.Arguments: the name has to uniquely identify a tag.",
+				"operationId": "removeTag",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"default": {
+						"description": "successful operation"
+					}
+				}
+			}
+		},
+		"/fs/tar": {
+			"post": {
+				"tags": [
+					"fs"
+				],
+				"summary": "Dump a tag into filesystem and retrieve the tar file asynchronously.",
+				"description": "This method allows to request a tar file from the server using a tag specified in input.",
+				"operationId": "buildTar",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"text/plain"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": true,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "snapshot",
+						"in": "query",
+						"description": "snapshot: the snapshot time {0}",
+						"required": true,
+						"type": "integer",
+						"default": 0,
+						"format": "int64"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "string"				
+						} 						
+					}
+				}
+			}
+		},
+		"/globaltagmaps": {
+			"post": {
+				"tags": [
+					"globaltagmaps"
+				],
+				"summary": "Create a GlobalTagMap in the database.",
+				"description": "This method allows to insert a GlobalTag.Arguments: GlobalTagMapDto should be provided in the body as a JSON file.",
+				"operationId": "createGlobalTagMap",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a globaltagmapdto object: { globaltagname: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapDto"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapDto"
+						}
+					}
+				}
+			}
+		},
+		"/globaltagmaps/{name}": {
+			"get": {
+				"tags": [
+					"globaltagmaps"
+				],
+				"summary": "Find GlobalTagMapDto lists.",
+				"description": "This method search for mappings using the global tag name.",
+				"operationId": "findGlobalTagMap",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/globaltags": {
+			"get": {
+				"tags": [
+					"globaltags"
+				],
+				"summary": "Finds a GlobalTagDtos lists.",
+				"description": "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]",
+				"operationId": "listGlobalTags",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "by",
+						"in": "query",
+						"description": "by: the search pattern {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "page",
+						"in": "query",
+						"description": "page: the page number {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int32"
+					},
+					{
+						"name": "size",
+						"in": "query",
+						"description": "size: the page size {1000}",
+						"required": false,
+						"type": "integer",
+						"default": 1000,
+						"format": "int32"
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "sort: the sort pattern {name:ASC}",
+						"required": false,
+						"type": "string",
+						"default": "name:ASC"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"globaltags"
+				],
+				"summary": "Create a GlobalTag in the database.",
+				"description": "This method allows to insert a GlobalTag.Arguments: GlobalTagDto should be provided in the body as a JSON file.",
+				"operationId": "createGlobalTag",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a globaltagdto object: { name: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+						}
+					},
+					{
+						"name": "force",
+						"in": "query",
+						"description": "force: tell the server if it should use or not the insertion time provided {default: false}",
+						"required": false,
+						"type": "string",
+						"default": "false"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+						}
+					}
+				}
+			}
+		},
+		"/globaltags/{name}": {
+			"get": {
+				"tags": [
+					"globaltags"
+				],
+				"summary": "Finds a GlobalTagDto by name",
+				"description": "This method will search for a global tag with the given name. Only one global tag should be returned.",
+				"operationId": "findGlobalTag",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+						}
+					}
+				}
+			}
+		},
+		"/globaltags/{name}/tags": {
+			"get": {
+				"tags": [
+					"globaltags"
+				],
+				"summary": "Finds a TagDtos lists associated to the global tag name in input.",
+				"description": "This method allows to trace a global tag.Arguments: record=<record> filter output by record, label=<label> filter output by label",
+				"operationId": "findGlobalTagFetchTags",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"name": "record",
+						"in": "query",
+						"description": "record:  the record string {}",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "label",
+						"in": "query",
+						"description": "label:  the label string {}",
+						"required": false,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/iovs": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Finds a IovDtos lists.",
+				"description": "This method allows to perform search by tagname and sorting.Arguments: tagname={a tag name}, page={ipage}, size={isize},      sort=<pattern>, where pattern is <field>:[DESC|ASC]",
+				"operationId": "findAllIovs",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "page",
+						"in": "query",
+						"description": "page: the page number {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int32"
+					},
+					{
+						"name": "size",
+						"in": "query",
+						"description": "size: the page size {10000}",
+						"required": false,
+						"type": "integer",
+						"default": 10000,
+						"format": "int32"
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "sort: the sort pattern {id.since:ASC}",
+						"required": false,
+						"type": "string",
+						"default": "id.since:ASC"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Create a Iov in the database.",
+				"description": "This method allows to insert a Iov.Arguments: IovDto should be provided in the body as a JSON file.",
+				"operationId": "createIov",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a iovdto object: { name: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+						}
+					}
+				}
+			}
+		},
+		"/iovs/getSize": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Get the number o iovs for the given tag.",
+				"description": "This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}, snapshotTime={snapshot time in milliseconds (Long) from epoch}",
+				"operationId": "getSize",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": true,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "snapshot",
+						"in": "query",
+						"description": "snapshot: the snapshot time {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int64"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "integer",
+							"format": "int64"
+						}
+					}
+				}
+			}
+		},
+		"/iovs/getSizeByTag": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Get the number o iovs for tags matching pattern.",
+				"description": "This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}",
+				"operationId": "getSizeByTag",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": true,
+						"type": "string",
+						"default": "none"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/TagSummaryDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/iovs/selectGroups": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Select groups for a given tagname.",
+				"description": "This method allows to select a list of groups.Arguments: tagname={a tag name}, snapshot={snapshot time as long}",
+				"operationId": "selectGroups",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": true,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "snapshot",
+						"in": "query",
+						"description": "snapshot: the snapshot time {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int64"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GroupDto"
+						}
+					}
+				}
+			}
+		},
+		"/iovs/selectIovs": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Select iovs for a given tagname and in a given range.",
+				"description": "This method allows to select a list of iovs in a tag, using a given range in time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, until={until time as string}, snapshot={snapshot time as long}",
+				"operationId": "selectIovs",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "since",
+						"in": "query",
+						"description": "since: the since time as a string {0}",
+						"required": false,
+						"type": "string",
+						"default": "0"
+					},
+					{
+						"name": "until",
+						"in": "query",
+						"description": "until: the until time as a string {INF}",
+						"required": false,
+						"type": "string",
+						"default": "INF"
+					},
+					{
+						"name": "snapshot",
+						"in": "query",
+						"description": "snapshot: the snapshot time {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int64"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/iovs/selectSnapshot": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Select snapshot for a given tagname and insertion time.",
+				"description": "This method allows to select a list of all iovs in a tag, using (optionally) a given snapshot time.Arguments: tagname={a tag name}, snapshot={snapshot time as long}",
+				"operationId": "selectSnapshot",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": true,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "snapshot",
+						"in": "query",
+						"description": "snapshot: the snapshot time {0}",
+						"required": true,
+						"type": "integer",
+						"default": 0,
+						"format": "int64"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payloads": {
+			"post": {
+				"tags": [
+					"payloads"
+				],
+				"summary": "Create a Payload in the database.",
+				"description": "This method allows to insert a Payload.Arguments: PayloadDto should be provided in the body as a JSON file.",
+				"operationId": "createPayload",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a iovdto object: { name: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+						}
+					}
+				}
+			}
+		},
+		"/payloads/upload": {
+			"post": {
+				"tags": [
+					"payloads"
+				],
+				"summary": "Create a Payload in the database.",
+				"description": "This method allows to insert a Payload.Arguments: PayloadDto should be provided in the body as a JSON file.",
+				"operationId": "createPayloadMultiForm",
+				"consumes": [
+					"multipart/form-data"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "file",
+						"in": "formData",
+						"description": "The file",
+						"required": true,
+						"type": "file"
+					},
+					{
+						"name": "payload",
+						"in": "formData",
+						"description": "Json body for payloaddto",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+						}
+					}
+				}
+			}
+		},
+		"/payloads/{hash}": {
+			"get": {
+				"tags": [
+					"payloads"
+				],
+				"summary": "Finds a payload resource associated to the hash.",
+				"description": "This method retrieves a payload resource.Arguments: hash=<hash> the hash of the payload",
+				"operationId": "getPayload",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "hash",
+						"in": "path",
+						"description": "hash:  the hash of the payload",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+						}
+					}
+				}
+			}
+		},
+		"/payloads/{hash}/data": {
+			"get": {
+				"tags": [
+					"payloads"
+				],
+				"summary": "Finds payload data by hash; the payload object contains the real BLOB.",
+				"description": "Select one payload at the time, no regexp searches allowed here",
+				"operationId": "getBlob",
+				"produces": [
+					"application/octet-stream"
+				],
+				"parameters": [
+					{
+						"name": "hash",
+						"in": "path",
+						"description": "hash of the payload",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"/payloads/{hash}/meta": {
+			"get": {
+				"tags": [
+					"payloads"
+				],
+				"summary": "Finds a payload resource associated to the hash.",
+				"description": "This method retrieves metadata of the payload resource.Arguments: hash=<hash> the hash of the payload",
+				"operationId": "getPayloadMetaInfo",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "hash",
+						"in": "path",
+						"description": "hash:  the hash of the payload",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+						}
+					}
+				}
+			}
+		},
+		"/tags": {
+			"get": {
+				"tags": [
+					"tags"
+				],
+				"summary": "Finds a TagDtos lists.",
+				"description": "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]",
+				"operationId": "listTags",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "by",
+						"in": "query",
+						"description": "by: the search pattern {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "page",
+						"in": "query",
+						"description": "page: the page number {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int32"
+					},
+					{
+						"name": "size",
+						"in": "query",
+						"description": "size: the page size {1000}",
+						"required": false,
+						"type": "integer",
+						"default": 1000,
+						"format": "int32"
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "sort: the sort pattern {name:ASC}",
+						"required": false,
+						"type": "string",
+						"default": "name:ASC"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"tags"
+				],
+				"summary": "Create a Tag in the database.",
+				"description": "This method allows to insert a Tag.Arguments: TagDto should be provided in the body as a JSON file.",
+				"operationId": "createTag",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a tagdto object: { name: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+						}
+					}
+				}
+			}
+		},
+		"/tags/{name}": {
+			"get": {
+				"tags": [
+					"tags"
+				],
+				"summary": "Finds a TagDto by name",
+				"description": "This method will search for a tag with the given name. Only one tag should be returned.",
+				"operationId": "findTag",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"description": "name: the tag name",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -4,7 +4,7 @@
 #             ...
 # ===============================
 # Defaults
-cdb:
+caching:
   iovsgroups_maxage: 600
   iovsgroups_snapshot_maxage: 3600
   iovs_maxage: 600
@@ -13,6 +13,9 @@ cdb:
   timetype_groupsize: 1000
   runtype_groupsize: 1000
 
+crest:
+  dump_dir: /tmp/crest-dump/
+  
 server:
     port: 8090
     servlet-path: /

@@ -9,6 +9,7 @@ import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.stereotype.Component;
 
 import hep.crest.server.swagger.api.AdminApi;
+import hep.crest.server.swagger.api.FsApi;
 import hep.crest.server.swagger.api.GlobaltagmapsApi;
 import hep.crest.server.swagger.api.GlobaltagsApi;
 import hep.crest.server.swagger.api.IovsApi;
@@ -30,6 +31,7 @@ public class JerseyConfig extends ResourceConfig {
 		register(GlobaltagmapsApi.class);
 		register(IovsApi.class);
 		register(PayloadsApi.class);
+		register(FsApi.class);
 		register(MultiPartFeature.class);
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 	}

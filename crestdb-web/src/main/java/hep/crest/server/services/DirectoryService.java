@@ -19,6 +19,7 @@ import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.server.caching.CachingProperties;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
@@ -46,6 +47,9 @@ public class DirectoryService {
 	@Autowired
 	private PayloadService pyldservice;
 	
+	@Autowired
+	private CrestProperties cprops;
+
 	public TagDto getTag(String tagname) {
 		return fstagrepository.findOne(tagname);
 	}
@@ -74,7 +78,7 @@ public class DirectoryService {
 	public Future<String> dumpTag(String tagname, Date snapshot, String path) {
 		String threadname = Thread.currentThread().getName();
 		log.debug("Running task in asynchronous mode for name "+threadname);
-		DirectoryUtilities du = new DirectoryUtilities("/tmp/cdms/"+path);
+		DirectoryUtilities du = new DirectoryUtilities(cprops.getDump_dir()+path);
 		try {
 			fstagrepository.setDirtools(du);
 			fsiovrepository.setDirtools(du);

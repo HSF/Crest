@@ -1,0 +1,10 @@
+{
+  "groupId":"hep.crest.client",
+  "artifactId":"crestdb-client",
+  "artifactVersion":"1.0.0",
+  "library":"okhttp-gson",
+  "invokerPackage":"hep.crest.client",
+  "apiPackage":"hep.crest.client.swagger.api",
+  "modelPackage":"hep.crest.swagger.model"
+}
+

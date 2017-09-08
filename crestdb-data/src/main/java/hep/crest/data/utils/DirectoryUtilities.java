@@ -31,14 +31,6 @@ public class DirectoryUtilities {
 	private 	ObjectMapper mapper = new ObjectMapper();
 	
 	private String _basedir = "/tmp/cdms";
-//	private static DirectoryUtilities dirutils = null;
-//	
-//	public static DirectoryUtilities getInstance() {
-//		if (dirutils == null) {
-//			dirutils = new DirectoryUtilities();
-//		}
-//		return dirutils;
-//	}
 	
 	public DirectoryUtilities() {
 		super();

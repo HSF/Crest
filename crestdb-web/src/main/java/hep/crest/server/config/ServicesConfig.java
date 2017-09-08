@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.PropertySource;
 //import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -15,7 +16,8 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 @Configuration
 @ComponentScan("hep.crest.data")
 @EnableAspectJAutoProxy
-@PropertySource("classpath:crest.properties")
+@EnableAsync
+////@PropertySource("classpath:crest.properties")
 public class ServicesConfig {
 
 	
@@ -27,12 +29,4 @@ public class ServicesConfig {
 	    return mapper;
 	}
 	
-//	@Bean(name = "cachingPolicy")
-//	public CachingPolicyService getCachingPolicy(Environment environment) {
-//		Integer iovgroupssnapmaxage = environment.getProperty("cdb.iovsgroups.snapshot.maxage", Integer.class, new Integer(60));
-//		Integer iovssnapmaxage = environment.getProperty("cdb.iovs.snapshot.maxage", Integer.class, new Integer(60));
-//		Integer maxage = environment.getProperty("cdb.iovs.maxage", Integer.class, new Integer(60));
-//		CachingPolicyService cachesvc = new CachingPolicyService(iovgroupssnapmaxage, iovssnapmaxage, maxage);
-//		return cachesvc;
-//	}
 }

@@ -15,6 +15,7 @@ import hep.crest.server.swagger.api.NotFoundException;
 
 import java.io.InputStream;
 
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -61,7 +62,7 @@ public class PayloadsApi  {
     public Response createPayloadMultiForm(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail
-,@ApiParam(value = "Json body for payloaddto", required=true)@FormDataParam("payload")  String payload
+,@ApiParam(value = "Json body for payloaddto", required=true)@FormDataParam("payload")  FormDataBodyPart payload
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.createPayloadMultiForm(fileInputStream, fileDetail,payload,securityContext,info);

@@ -1,0 +1,164 @@
+{
+	"definitions": {
+		"GlobalTagMapDto": {
+			"type": "object",
+			"properties": {
+				"globalTagName": {
+					"type": "string"
+				},
+				"record": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"tagName": {
+					"type": "string"
+				}
+			}
+		},
+		"GlobalTagDto": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"validity": {
+					"type": "number"
+				},
+				"description": {
+					"type": "string"
+				},
+				"release": {
+					"type": "string"
+				},
+				"insertionTime": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"snapshotTime": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"scenario": {
+					"type": "string"
+				},
+				"workflow": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"snapshotTimeMilli": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"insertionTimeMilli": {
+					"type": "integer",
+					"format": "int64"
+				}
+			}
+		},
+		"TagSummaryDto": {
+			"type": "object",
+			"properties": {
+				"tagname": {
+					"type": "string"
+				},
+				"niovs": {
+					"type": "integer",
+					"format": "int64"
+				}
+			}
+		},
+		"GroupDto": {
+			"type": "object",
+			"properties": {
+				"groups": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				}
+			}
+		},
+		"TagDto": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"timeType": {
+					"type": "string"
+				},
+				"objectType": {
+					"type": "string"
+				},
+				"synchronization": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"lastValidatedTime": {
+					"type": "number"
+				},
+				"endOfValidity": {
+					"type": "number"
+				},
+				"insertionTime": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"modificationTime": {
+					"type": "string",
+					"format": "date-time"
+				}
+			}
+		},
+		"IovDto": {
+			"type": "object",
+			"properties": {
+				"tagName": {
+					"type": "string"
+				},
+				"since": {
+					"type": "number"
+				},
+				"insertionTime": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"payloadHash": {
+					"type": "string"
+				}
+			}
+		},
+		"PayloadDto": {
+			"type": "object",
+			"properties": {
+				"hash": {
+					"type": "string"
+				},
+				"version": {
+					"type": "string"
+				},
+				"objectType": {
+					"type": "string"
+				},
+				"data": {
+					"type": "string",
+					"format": "byte"
+				},
+				"streamerInfo": {
+					"type": "string",
+					"format": "byte"
+				},
+				"insertionTime": {
+					"type": "string",
+					"format": "date-time"
+				}
+			}
+		}
+	}
+}
