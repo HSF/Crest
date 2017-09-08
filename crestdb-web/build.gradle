@@ -43,7 +43,8 @@ ext {
 
 dependencies {
 //    compile project(':vhfmgrApi-data')
-	compile "hep.crest.data:crestdb-data:$version"
+	compile project(path: ':crestdb-data')
+//	compile "hep.crest.data:crestdb-data:$version"
 	compile "io.swagger:swagger-core:$swagger_core_version"
 	compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:springboot_version
@@ -133,3 +134,6 @@ task explodedWar(type: Copy) {
 	with war
 }
 
+war {
+	classpath fileTree('../jarlib')
+}

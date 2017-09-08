@@ -92,6 +92,11 @@ task cleanClassesDir(type: Delete) {
       delete fileTree(dir: "build/classes/main")
 }
 
+jar {
+    manifest {
+        attributes("Implementation-Title": "crest-data")
+    }
+}
 // THIS DOES NOT WORK WITH THE GEN DIRECTORY ADDED FOR SOURCES.... BE CAREFUL
 //copyAdjustedClasses.dependsOn compileJava
 //copyAdjustedClasses.dependsOn classes

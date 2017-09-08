@@ -1,6 +1,6 @@
 rootProject.name = 'crestdb'
-include ':crestdb-web'
-include ':crestdb-data'
+include 'crestdb-web'
+include 'crestdb-data'
 
-project(':crestdb-data').projectDir = "$rootDir/crestdb-data" as File
-project(':crestdb-web').projectDir = "$rootDir/crestdb-web" as File
+//project(':crestdb-data').projectDir = "$rootDir/crestdb-data" as File
+//project(':crestdb-web').projectDir = "$rootDir/crestdb-web" as File
