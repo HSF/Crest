@@ -69,4 +69,7 @@ subprojects {
 	    testCompile "junit:junit:$junit_version"    
 	}
 		
+task wrapper(type: Wrapper) {
+   gradleVersion = '4.0.2' //version required
+}
 }
