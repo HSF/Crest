@@ -32,7 +32,7 @@ before_script:
 build:
   stage: build
   script:
-    - ./gradlew -g /cache/.gradle clean assemble
+    - ./gradlew -g /cache/.gradle clean :crestdb-web:assemble
   allow_failure: false
 
 # Use the generated build output to run the tests.
