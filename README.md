@@ -20,7 +20,10 @@ We provide the following commands as examples:
 cd crestdb-web
 $ gradle bootRun "-Dspring.profiles.active=prod" "-Dcrest.db.password=xxx"
 ```
-
+or
+```
+$java -Dspring.profiles.active=prod -Dcrest.db.password=xxx -jar crestdb-web/build/libs/crestdb-web-1.0-SNAPSHOT.war
+```
 ## Swagger
 You can then view the swagger listing here:
 

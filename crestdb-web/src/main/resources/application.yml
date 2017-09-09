@@ -15,6 +15,7 @@ caching:
 
 crest:
   dump_dir: /tmp/crest-dump/
+  schemaname: none
   
 server:
     port: 8090
@@ -52,7 +53,11 @@ spring:
         hibernate.jdbc.fetch_size: 100
         hibernate.hbm2ddl.auto: validate
         hibernate.show_sql: false
+        hibernate.default_schema: ATLAS_PHYS_COND
 server:
     port: 8080 
     tomcat:
       max-connections: 100
+crest:
+  schemaname: ATLAS_PHYS_COND
+  

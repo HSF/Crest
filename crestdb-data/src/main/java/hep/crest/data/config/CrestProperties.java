@@ -1,4 +1,4 @@
-package hep.crest.server.services;
+package hep.crest.data.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -10,6 +10,7 @@ public class CrestProperties {
 
 	
 	private String dump_dir;
+	private String schemaname;
 
 	public String getDump_dir() {
 		System.out.println("property dump_dir has value: "+dump_dir);
@@ -18,6 +19,15 @@ public class CrestProperties {
 
 	public void setDump_dir(String dump_dir) {
 		this.dump_dir = dump_dir;
+	}
+
+	public String getSchemaname() {
+		System.out.println("property schemaname has value: "+schemaname);
+		return schemaname;
+	}
+
+	public void setSchemaname(String schemaname) {
+		this.schemaname = schemaname;
 	}
 	
 }

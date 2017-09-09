@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;

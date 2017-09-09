@@ -43,6 +43,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 
 	private DataSource ds;
 	
+	private String default_tablename=null;
 	
 	public IovGroupsImpl(DataSource ds) {
 		super();
@@ -50,6 +51,23 @@ public class IovGroupsImpl implements IovGroupsCustom {
 	}
 
 
+	public void setDefault_tablename(String default_tablename) {
+		if (this.default_tablename == null)
+			this.default_tablename = default_tablename;
+	}
+
+
+	protected String tablename() {
+		Table ann = Iov.class.getAnnotation(Table.class);
+		String tablename = ann.name();
+		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
+			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
+		} else if (this.default_tablename != null) {
+			tablename = this.default_tablename + "." + tablename;
+		}
+		return tablename;
+	}
+	
 	/* (non-Javadoc)
 	 * @see hep.phycdb.svc.repositories.IovGroupsCustom#selectGroups(java.lang.String, java.lang.Integer)
 	 */
@@ -57,11 +75,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 	public List<BigDecimal> selectGroups(String tagname, Integer groupsize) {
 		log.info("Select Iov Groups for tag " + tagname + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		Table ann = Iov.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
 		Integer groupfreq = 1000;
 		if (groupsize != null && groupsize > 0) {
 			groupfreq = groupsize;
@@ -84,11 +98,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 	public List<BigDecimal> selectSnapshotGroups(String tagname, Date snap, Integer groupsize) {
 		log.info("Select Iov Snapshot Groups for tag " + tagname + " and snapshot time "+snap+" using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		Table ann = Iov.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
 		Integer groupfreq = 1000;
 		if (groupsize != null && groupsize > 0) {
 			groupfreq = groupsize;
@@ -107,11 +117,8 @@ public class IovGroupsImpl implements IovGroupsCustom {
 	public Long getSize(String tagname) {
 		log.info("Select count(TAG_NAME) Iov for tag " + tagname + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		Table ann = Iov.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
+
 		String sql = "select COUNT(TAG_NAME) from "+ tablename +" where TAG_NAME=?";
 		
 		//Long count = jdbcTemplate.queryForLong(sql, BigDecimal.class, new Object[] { tagname, snap, groupfreq, groupfreq });
@@ -124,11 +131,8 @@ public class IovGroupsImpl implements IovGroupsCustom {
 	public Long getSizeBySnapshot(String tagname, Date snap) {
 		log.info("Select count(TAG_NAME) Iov for tag " + tagname + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		Table ann = Iov.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
+
 		String sql = "select COUNT(TAG_NAME) from "+ tablename +" where TAG_NAME=? and INSERTION_TIME<=?";
 		
 		
@@ -148,11 +152,8 @@ public class IovGroupsImpl implements IovGroupsCustom {
 	public List<TagSummaryDto> getTagSummaryInfo(String tagname) {
 		log.info("Select count(TAG_NAME) Iov for tag matching pattern " + tagname + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		Table ann = Iov.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
+
 		String sql = "select TAG_NAME, COUNT(TAG_NAME) as NIOVS from "+ tablename +" where TAG_NAME like ? GROUP BY TAG_NAME";
 		List<TagSummaryDto> dtolist = jdbcTemplate.query(sql, new Object[] { tagname }, (rs, num) -> {
 			final TagSummaryDto entity = new TagSummaryDto();

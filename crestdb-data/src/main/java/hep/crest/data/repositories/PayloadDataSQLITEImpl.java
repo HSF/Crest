@@ -37,6 +37,7 @@ import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.PayloadHandler;
+import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.PayloadDto;
 
@@ -56,21 +57,35 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 	@Autowired
 	private PayloadHandler payloadHandler;
 
-	
+	private String default_tablename=null;
+
 	public PayloadDataSQLITEImpl(DataSource ds) {
 		super();
 		this.ds = ds;
+	}
+
+	public void setDefault_tablename(String default_tablename) {
+		if (this.default_tablename == null)
+			this.default_tablename = default_tablename;
+	}
+	
+	protected String tablename() {
+		Table ann = Payload.class.getAnnotation(Table.class);
+		String tablename = ann.name();
+		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
+			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
+		} else if (this.default_tablename != null) {
+			tablename = this.default_tablename + "." + tablename;
+		}
+		return tablename;
 	}
 
 	@Transactional
 	public Payload find(String id) {
 		log.info("Find payload " + id + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		Table ann = Payload.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
+
 		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO from "+tablename+" where PAYLOAD.HASH=?";
 		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
@@ -133,11 +148,8 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 	@Transactional
 	protected Payload saveBlobAsBytes(PayloadDto entity) throws IOException {
 		
-		Table ann = Payload.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
+
 		String sql = "INSERT INTO "+tablename+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload " + entity.getHash() + " using JDBCTEMPLATE");
@@ -162,11 +174,8 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 	}
 
 	protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws IOException {
-		Table ann = Payload.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
+
 		String sql = "INSERT INTO "+tablename+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload " + entity.getHash() + " using JDBCTEMPLATE");
@@ -206,11 +215,8 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 	public Payload findMetaInfo(String id) {
 		log.info("Find payload " + id + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		Table ann = Payload.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
+
 		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO from "+tablename+" where PAYLOAD.HASH=?";
 		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
@@ -231,11 +237,8 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 	public Payload findData(String id) {
 		log.info("Find payload data only for " + id + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		Table ann = Payload.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		}
+		String tablename = this.tablename();
+
 		String sql = "select DATA from "+tablename+" where PAYLOAD.HASH=?";
 		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import hep.crest.data.repositories.IovDirectoryImplementation;
+import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovGroupsImpl;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataDBImpl;
@@ -20,6 +21,9 @@ import hep.crest.data.repositories.TagDirectoryImplementation;
 @Configuration
 @ComponentScan("hep.crest.data.repositories")
 public class RepositoryConfig {
+	
+	@Autowired
+	private CrestProperties cprops;
 	
     @Bean(name = "fstagrepository")
     public TagDirectoryImplementation tagdirectoryRepository() {
@@ -35,20 +39,32 @@ public class RepositoryConfig {
     }
     
     @Bean(name = "iovgroupsrepo")
-    public IovGroupsImpl iovgroupsRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
-    		return new IovGroupsImpl(mainDataSource);
+    public IovGroupsCustom iovgroupsRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
+    		IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
+    		if (!cprops.getSchemaname().equals("none")) {
+    			bean.setDefault_tablename(cprops.getSchemaname());
+    		}
+    		return bean;
     }
 
     @Profile({"default","prod","h2"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
-    		return new PayloadDataDBImpl(mainDataSource);
+    		PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
+		if (!cprops.getSchemaname().equals("none")) {
+			bean.setDefault_tablename(cprops.getSchemaname());
+		}
+		return bean;
     }
     
     @Profile("sqlite")
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadSqliteRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
-    		return new PayloadDataSQLITEImpl(mainDataSource);
+    		PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
+		if (!cprops.getSchemaname().equals("none")) {
+			bean.setDefault_tablename(cprops.getSchemaname());
+		}
+		return bean;
     }
 
 }
