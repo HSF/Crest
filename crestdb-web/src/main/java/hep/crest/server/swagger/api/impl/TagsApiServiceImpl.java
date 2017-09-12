@@ -2,6 +2,7 @@ package hep.crest.server.swagger.api.impl;
 
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -44,6 +45,7 @@ public class TagsApiServiceImpl extends TagsApiService {
 	TagService tagService;
 	
     @Override
+////    @RolesAllowed("ADMIN")
     public Response createTag(TagDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
    		log.info("TagRestController processing request for creating a tag");
 		try {

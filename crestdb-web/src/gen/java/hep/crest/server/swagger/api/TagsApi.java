@@ -25,6 +25,7 @@ import javax.ws.rs.core.UriInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.*;
+import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.*;
 
 @Path("/tags")
@@ -39,7 +40,6 @@ public class TagsApi  {
 	private TagsApiService delegate;
 
     @POST
-    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a Tag in the database.", notes = "This method allows to insert a Tag.Arguments: TagDto should be provided in the body as a JSON file.", response = TagDto.class, tags={ "tags", })

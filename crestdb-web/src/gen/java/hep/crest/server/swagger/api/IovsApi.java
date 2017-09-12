@@ -1,6 +1,7 @@
 package hep.crest.server.swagger.api;
 
 import hep.crest.swagger.model.*;
+import hep.crest.server.annotations.CacheControlCdb;
 import hep.crest.server.swagger.api.IovsApiService;
 /////import hep.crest.server.swagger.api.factories.IovsApiServiceFactory;
 
@@ -102,7 +103,7 @@ public class IovsApi {
 
 	@GET
 	@Path("/selectGroups")
-
+	@CacheControlCdb
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Select groups for a given tagname.", notes = "This method allows to select a list of groups.Arguments: tagname={a tag name}, snapshot={snapshot time as long}", response = GroupDto.class, tags = {
 			"iovs", })
@@ -118,7 +119,7 @@ public class IovsApi {
 
 	@GET
 	@Path("/selectIovs")
-
+	@CacheControlCdb
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Select iovs for a given tagname and in a given range.", notes = "This method allows to select a list of iovs in a tag, using a given range in time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, until={until time as string}, snapshot={snapshot time as long}", response = IovDto.class, responseContainer = "List", tags = {
 			"iovs", })

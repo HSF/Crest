@@ -48,6 +48,7 @@ dependencies {
 	compile "io.swagger:swagger-core:$swagger_core_version"
 	compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:springboot_version
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version:springboot_version
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version:springboot_version
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version:springboot_version
  
