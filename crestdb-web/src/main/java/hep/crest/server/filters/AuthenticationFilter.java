@@ -26,8 +26,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final String AUTHENTICATION_SCHEME = "Basic";
+	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final Response ACCESS_DENIED = Response.status(Response.Status.UNAUTHORIZED).build();
 	private static final Response ACCESS_FORBIDDEN = Response.status(Response.Status.FORBIDDEN).build();
 	private static final Response SERVER_ERROR = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

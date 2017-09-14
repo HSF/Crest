@@ -2,7 +2,6 @@ package hep.crest.server.swagger.api.impl;
 
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -25,7 +24,6 @@ import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.TagsApiService;
-import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.TagDto;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
@@ -45,7 +43,6 @@ public class TagsApiServiceImpl extends TagsApiService {
 	TagService tagService;
 	
     @Override
-////    @RolesAllowed("ADMIN")
     public Response createTag(TagDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
    		log.info("TagRestController processing request for creating a tag");
 		try {

@@ -10,6 +10,8 @@ import io.swagger.jaxrs.*;
 import hep.crest.swagger.model.TagDto;
 
 import java.util.List;
+
+import hep.crest.server.annotations.AuthorizationControl;
 import hep.crest.server.swagger.api.NotFoundException;
 
 import java.io.InputStream;

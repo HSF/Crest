@@ -11,6 +11,7 @@ public class CrestProperties {
 	
 	private String dump_dir;
 	private String schemaname;
+	private String security;
 
 	public String getDump_dir() {
 		System.out.println("property dump_dir has value: "+dump_dir);
@@ -28,6 +29,14 @@ public class CrestProperties {
 
 	public void setSchemaname(String schemaname) {
 		this.schemaname = schemaname;
+	}
+
+	public String getSecurity() {
+		return security;
+	}
+
+	public void setSecurity(String security) {
+		this.security = security;
 	}
 	
 }

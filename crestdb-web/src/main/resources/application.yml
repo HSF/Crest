@@ -13,14 +13,18 @@ caching:
   timetype_groupsize: 1000
   runtype_groupsize: 1000
 
+# schemaname : ATLAS_PHYS_COND or none
+# security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)
 crest:
   dump_dir: /tmp/crest-dump/
   schemaname: none
-  
+  security: weak
+
 server:
     port: 8090
     servlet-path: /
 spring:
+    security.strategy: MODE_INHERITABLETHREADLOCAL
     jersey:
       application-path: /crestapi
     datasource:
