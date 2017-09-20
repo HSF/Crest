@@ -28,6 +28,7 @@ public class PageRequestHelper {
 	private String QRY_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:|<|>)([a-zA-Z0-9_\\-\\/\\.]+?),";
 	private String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)([ASC|DESC]+?),";
 
+	private static final Integer MAX_PAGE_SIZE = 10000;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public PageRequestHelper() {
@@ -37,6 +38,10 @@ public class PageRequestHelper {
 
 	public PageRequest createPageRequest(Integer page, Integer size, String sort) {
 
+		if (size > MAX_PAGE_SIZE) {
+			log.warn("Requested size exceed maximum page size...change it to "+MAX_PAGE_SIZE);
+			size = MAX_PAGE_SIZE;
+		}
 		Pattern sortpattern = Pattern.compile(SORT_PATTERN);
 		Matcher sortmatcher = sortpattern.matcher(sort + ",");
 		List<Order> orderlist = new ArrayList<>();

@@ -1,5 +1,6 @@
 package hep.crest.server.swagger.api.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.ws.rs.core.GenericEntity;
@@ -24,6 +25,7 @@ import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.TagsApiService;
+import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.TagDto;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
@@ -57,7 +59,50 @@ public class TagsApiServiceImpl extends TagsApiService {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
+    
+    
     @Override
+	public Response updateTag(String name, GenericMap body, SecurityContext securityContext, UriInfo info)
+			throws NotFoundException {
+    	log.info("TagRestController processing request for creating a tag");
+		try {
+			TagDto dto = tagService.findOne(name);
+			if (dto == null) {
+				log.debug("Cannot update null tag...."+name);
+				String message = ("Tag "+name+" not found...");
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			}
+			for (String  key : body.keySet()) {
+				if (key == "description") {
+					dto.setDescription(body.get(key));
+				}
+				if (key == "timeType") {
+					dto.setTimeType(body.get(key));
+				}
+				if (key == "lastValidatedTime") {
+					BigDecimal val = new BigDecimal(body.get(key));
+					dto.setLastValidatedTime(val);
+				}
+				if (key == "endOfValidity") {
+					BigDecimal val = new BigDecimal(body.get(key));
+					dto.setEndOfValidity(val);
+				}
+			}
+			TagDto saved = tagService.insertTag(dto);
+			return Response.created(info.getRequestUri()).entity(saved).build();
+
+		} catch (CdbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+
+
+	@Override
     public Response findTag(String name, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		this.log.info("TagRestController processing request for tag name " + name);
 		try {

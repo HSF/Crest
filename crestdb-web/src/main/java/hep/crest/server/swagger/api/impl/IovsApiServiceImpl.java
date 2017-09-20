@@ -86,6 +86,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 			SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		try {
 			log.debug("Search resource list using tag={}, page={}, size={}, sort={}", tagname, page, size, sort);
+			
 			PageRequest preq = prh.createPageRequest(page, size, sort);
 			List<IovDto> dtolist = null;
 			if (tagname.equals("none")) {

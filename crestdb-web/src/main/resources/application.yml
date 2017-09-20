@@ -18,7 +18,8 @@ caching:
 crest:
   dump_dir: /tmp/crest-dump/
   schemaname: none
-  security: weak
+  security: none
+  synchro: none
 
 server:
     port: 8090

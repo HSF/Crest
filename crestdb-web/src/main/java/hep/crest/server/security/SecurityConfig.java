@@ -43,6 +43,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		} else if (cprops.getSecurity().equals("reco")) {
 			http.authorizeRequests().antMatchers(HttpMethod.POST,"/**").denyAll()
 			.and().httpBasic().and().csrf().disable();
+		} else if (cprops.getSecurity().equals("none")) {
+			log.info("No security enabled for this server....");
+			http.authorizeRequests().antMatchers("/**").permitAll()
+			.and().csrf().disable();
 		}
 	}
 

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovRepository;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.TagRepository;
+import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.TagSummaryDto;
@@ -67,6 +69,22 @@ public class IovService {
 		} catch (Exception e) {
 			log.debug("Exception in retrieving iov list using IdByTagName expression..."+tagname);
 			throw new CdbServiceException("Cannot find iovs by tag name: " + e.getMessage());
+		}
+	}
+	
+	public IovDto latest(String tagname) throws CdbServiceException {
+		try {
+			log.debug("Search for latest iovs by tag name "+tagname+ " using pagination query");
+			PageRequestHelper prh = new PageRequestHelper();
+			PageRequest req = prh.createPageRequest(0, 1, "stime:DESC");
+			List<IovDto> iovlist =  this.findAllIovsByTagName(tagname, req);
+			if (iovlist.size()<=0) {
+				return null;
+			}
+			return iovlist.get(0);
+		} catch (Exception e) {
+			log.debug("Exception in retrieving iov list using IdByTagName expression and pagination..."+tagname);
+			throw new CdbServiceException("Cannot find iovs by tag name and pagination: " + e.getMessage());
 		}
 	}
 	

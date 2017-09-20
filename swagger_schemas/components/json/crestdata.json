@@ -1,5 +1,11 @@
 {
 	"definitions": {
+		"GenericMap" : {
+			"type" : "object",
+			"additionalProperties": {
+  				"type": "string"			
+  			}
+		},
 		"GlobalTagMapDto": {
 			"type": "object",
 			"properties": {

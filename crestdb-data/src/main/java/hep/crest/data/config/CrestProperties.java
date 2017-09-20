@@ -12,6 +12,7 @@ public class CrestProperties {
 	private String dump_dir;
 	private String schemaname;
 	private String security;
+	private String synchro;
 
 	public String getDump_dir() {
 		System.out.println("property dump_dir has value: "+dump_dir);
@@ -37,6 +38,14 @@ public class CrestProperties {
 
 	public void setSecurity(String security) {
 		this.security = security;
+	}
+
+	public String getSynchro() {
+		return synchro;
+	}
+
+	public void setSynchro(String synchro) {
+		this.synchro = synchro;
 	}
 	
 }

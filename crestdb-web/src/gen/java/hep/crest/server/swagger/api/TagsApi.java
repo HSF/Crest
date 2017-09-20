@@ -7,11 +7,10 @@ import hep.crest.server.swagger.api.TagsApiService;
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
+import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.TagDto;
 
 import java.util.List;
-
-import hep.crest.server.annotations.AuthorizationControl;
 import hep.crest.server.swagger.api.NotFoundException;
 
 import java.io.InputStream;
@@ -27,14 +26,13 @@ import javax.ws.rs.core.UriInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.*;
-import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.*;
 
 @Path("/tags")
 
 
 @io.swagger.annotations.Api(description = "the tags API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-20T12:16:15.815+02:00")
 public class TagsApi  {
 //   private final TagsApiService delegate = TagsApiServiceFactory.getTagsApi();
 
@@ -42,6 +40,7 @@ public class TagsApi  {
 	private TagsApiService delegate;
 
     @POST
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a Tag in the database.", notes = "This method allows to insert a Tag.Arguments: TagDto should be provided in the body as a JSON file.", response = TagDto.class, tags={ "tags", })
@@ -78,5 +77,18 @@ public class TagsApi  {
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.listTags(by,page,size,sort,securityContext,info);
+    }
+    @POST
+    @Path("/{name}")
+    
+    @Produces({ "application/json", "application/xml" })
+    @io.swagger.annotations.ApiOperation(value = "Update a TagDto by name", notes = "This method will search for a tag with the given name, and update its content for the provided body fields. Only the following fields can be updated: description, timeType, objectTime, endOfValidity, lastValidatedTime.", response = TagDto.class, tags={ "tags", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = TagDto.class) })
+    public Response updateTag(@ApiParam(value = "name: the tag name",required=true) @PathParam("name") String name
+,@ApiParam(value = "A json string that is used to construct a map of updatable fields: { description: xxx, ... }" ,required=true) GenericMap body
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.updateTag(name,body,securityContext,info);
     }
 }
