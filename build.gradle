@@ -62,7 +62,7 @@ subprojects {
 		//compile group: 'com.github.cloudfoundry-community', name: 'nats-client-spring', version: '0.6.6'
 			  
 	    //compile group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
-	    compile files('jarlib/ojdbc7-12.1.0.2.jar')
+	    compile files('${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar')
 //	    compile group: 'org.xerial', name: 'sqlite-jdbc', version:'3.8.11.2'
 //	    compile group: 'org.hsqldb', name: 'hsqldb', version:'2.3.2'
 //	    compile group: 'com.h2database', name: 'h2', version:'1.4.182'
