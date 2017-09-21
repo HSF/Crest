@@ -69,6 +69,10 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
 			GlobalTagDto dto = globaltagService.findOne(name); 
 			if (dto != null) {
 				log.debug("Found GlobalTag " + name);
+			} else {
+				String message = "Global tag "+name+" not found...";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
 			}
 			return Response.ok().entity(dto).build();
 		} catch (Exception e) {

@@ -93,7 +93,7 @@ public class GlobalTagMapService {
 
 	public GlobalTagMapDto insertGlobalTagMap(GlobalTagMapDto dto) throws CdbServiceException {
 		try {
-			log.debug("Create global tag from dto " + dto);
+			log.debug("Create global tag map from dto " + dto);
 			GlobalTagMap entity = new GlobalTagMap();
 			GlobalTag gt = globalTagRepository.findOne(dto.getGlobalTagName());
 			Tag tg = tagRepository.findOne(dto.getTagName());
@@ -108,7 +108,7 @@ public class GlobalTagMapService {
 			return dtoentity;
 		} catch (Exception e) {
 			log.debug("Exception in storing global tag map " + dto);
-			throw new CdbServiceException("Cannot store global tag : " + e.getMessage());
+			throw new CdbServiceException("Cannot store global tag map: " + e.getMessage());
 		}
 	}
 	
