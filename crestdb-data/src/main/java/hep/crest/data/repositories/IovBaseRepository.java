@@ -28,6 +28,10 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, I
 	List<Iov> findByIdTagName(@Param("name") String name);
 	
 	List<Iov> findByIdTagName(@Param("name") String name, Pageable pageable);
+
+	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.tag tag "
+			+ "WHERE tag.name = (:name) and p.id.since = :since and p.payloadHash = (:hash)")
+	Iov findBySinceAndTagNameAndHash(@Param("name") String name, @Param("since") BigDecimal since, @Param("hash") String hash);
 	
 	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.tag tag "
 			+ "WHERE tag.name = (:name) and p.id.since >= :since AND  p.id.since < :until "

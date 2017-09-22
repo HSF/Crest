@@ -21,6 +21,7 @@ import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.EmptyPojoException;
 import hep.crest.server.services.GlobalTagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
@@ -53,7 +54,8 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
 			}
 			GlobalTagDto saved = globaltagService.insertGlobalTag(body);
 			return Response.created(info.getRequestUri()).entity(saved).build();
-
+		} catch (AlreadyExistsPojoException e) {
+			return Response.status(Response.Status.SEE_OTHER).entity(body).build();
 		} catch (CdbServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

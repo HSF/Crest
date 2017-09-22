@@ -217,6 +217,12 @@ public class IovService {
 		try {
 			log.debug("Create iov from dto " + dto);
 			Iov entity =  mapper.map(dto,Iov.class);
+			log.debug("Verify if the same IOV is already stored with the same hash....");
+			Iov tmpiov = iovRepository.findBySinceAndTagNameAndHash(entity.getId().getTagName(), entity.getId().getSince(), entity.getPayloadHash());
+			if (tmpiov != null) {
+				log.debug("Found iov with the same Id and Hash...skip insertion....");
+				return  mapper.map(tmpiov,IovDto.class);
+			}
 			Tag tg = tagRepository.findOne(dto.getTagName());
 			if (tg == null) {
 				throw new CdbServiceException("insertIov: Cannot find tag "+dto.getTagName()+" in the database...");

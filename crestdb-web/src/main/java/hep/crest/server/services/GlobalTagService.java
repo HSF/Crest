@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.validation.ConstraintViolationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.repositories.GlobalTagRepository;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.EmptyPojoException;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.TagDto;
@@ -155,10 +158,21 @@ public class GlobalTagService {
 		try {
 			log.debug("Create global tag from dto " + dto);
 			GlobalTag entity =  mapper.map(dto,GlobalTag.class);
+			GlobalTag tmpgt = globalTagRepository.findByName(entity.getName());
+			if (tmpgt != null) {
+				log.debug("Cannot store global tag " + dto+" : resource already exists.. ");
+				throw new AlreadyExistsPojoException("Global tag already exists for name "+dto.getName());
+			}
 			GlobalTag saved = globalTagRepository.save(entity);
 			log.debug("Saved entity: " + saved);
 			GlobalTagDto dtoentity = mapper.map(saved,GlobalTagDto.class);
 			return dtoentity;
+		} catch (AlreadyExistsPojoException e) {
+			log.debug("Cannot store global tag " + dto+" : resource already exists.. ");
+			throw e;
+		} catch (ConstraintViolationException e) {
+			log.debug("Cannot store global tag " + dto+" : resource already exists ? ");
+			throw new AlreadyExistsPojoException("Global tag already exists : " + e.getMessage());
 		} catch (Exception e) {
 			log.debug("Exception in storing global tag " + dto);
 			throw new CdbServiceException("Cannot store global tag : " + e.getMessage());

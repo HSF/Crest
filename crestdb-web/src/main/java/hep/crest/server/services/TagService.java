@@ -22,6 +22,7 @@ import com.querydsl.core.types.Predicate;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.TagRepository;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.swagger.model.TagDto;
 import ma.glasnost.orika.MapperFacade;
 
@@ -126,10 +127,18 @@ public class TagService {
 		try {
 			log.debug("Create tag from dto " + dto);
 			Tag entity =  mapper.map(dto,Tag.class);
+			Tag tmpt = tagRepository.findOne(entity.getName());
+			if (tmpt != null) {
+				log.debug("Cannot store tag " + dto+" : resource already exists.. ");
+				throw new AlreadyExistsPojoException("Tag already exists for name "+dto.getName());
+			}
 			Tag saved = tagRepository.save(entity);
 			log.debug("Saved entity: " + saved);
 			TagDto dtoentity = mapper.map(saved,TagDto.class);
 			return dtoentity;
+		} catch (AlreadyExistsPojoException e) {
+			log.debug("Cannot store tag " + dto+" : resource already exists.. ");
+			throw e;
 		} catch (Exception e) {
 			log.debug("Exception in storing tag " + dto);
 			throw new CdbServiceException("Cannot store tag : " + e.getMessage());
