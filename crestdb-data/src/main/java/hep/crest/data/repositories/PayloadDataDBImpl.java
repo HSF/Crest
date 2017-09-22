@@ -209,10 +209,10 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			this.saveBlobAsStream(entity, is);
 			savedentity = findMetaInfo(entity.getHash());
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("IOException during payload insertion: "+e.getMessage());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception during payload insertion: "+e.getMessage());
 		}
 		return savedentity;
 	}
@@ -245,7 +245,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception from SQL during insertion: "+e.getMessage());
 		} finally {
 			try {
 				if (conn != null) {
@@ -253,7 +253,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 				}
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Exception from SQL attempting to close connection: "+e.getMessage());
 			}
 		}
 		return;
