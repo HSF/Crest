@@ -57,7 +57,12 @@ subprojects {
     		compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
     		compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
     		compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
-	  
+// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+		compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
+// https://mvnrepository.com/artifact/javax.activation/activation
+		compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+
+
 		// NATS Messaging:
 		//compile group: 'com.github.cloudfoundry-community', name: 'nats-client-spring', version: '0.6.6'
 			  
