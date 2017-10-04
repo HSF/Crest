@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-
 //@Configuration
 //@EnableAutoConfiguration
 //@ComponentScan
@@ -40,7 +39,22 @@ public class Application extends SpringBootServletInitializer {
 
         };
     }
-    
+	
+/*	@Bean
+	public UndertowEmbeddedServletContainerFactory embeddedServletContainerFactory() {
+	    UndertowEmbeddedServletContainerFactory factory = 
+	      new UndertowEmbeddedServletContainerFactory();
+	     
+	    factory.addBuilderCustomizers(new UndertowBuilderCustomizer() {
+	        @Override
+	        public void customize(io.undertow.Undertow.Builder builder) {
+	            builder.addHttpListener(8080, "0.0.0.0");
+	        }
+	    });
+	     
+	    return factory;
+	}
+*/    
     public static void main(String[] args) {
     	new Application()
 		.configure(new SpringApplicationBuilder(Application.class))

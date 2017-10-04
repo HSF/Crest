@@ -42,19 +42,25 @@ ext {
 }
 
 dependencies {
-//    compile project(':vhfmgrApi-data')
 	compile project(path: ':crestdb-data')
 //	compile "hep.crest.data:crestdb-data:$version"
 	compile "io.swagger:swagger-core:$swagger_core_version"
 	compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:springboot_version
+//	compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:springboot_version
+    compile ("org.springframework.boot:spring-boot-starter-web:$springboot_version") {
+		exclude module: 'spring-boot-starter-tomcat'
+	}
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version:springboot_version
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version:springboot_version
+    compile ("org.springframework.boot:spring-boot-starter-jersey:$springboot_version") {
+		exclude module: 'spring-boot-starter-tomcat'
+	}
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version:springboot_version
  
     compile 'org.springframework:spring-aspects:4.1.8.RELEASE'
     // The following is needed for the javadoc.
     compile 'javax.interceptor:javax.interceptor-api:1.2'
+    compile 'javax.servlet:javax.servlet-api:3.1.0'
+   
 // THIS SHOULD BE LOADED ALREADY BY SPRING ????
 //	compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$jersey2_version"
 	compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey2_version"
@@ -62,12 +68,24 @@ dependencies {
 //	compile "org.glassfish.jersey.core:jersey-server:$jersey2_version"
 
 	compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version"
+// https://mvnrepository.com/artifact/org.glassfish.jersey.containers.glassfish/jersey-gf-cdi
 
+// I tried to add this for an error with the last wildfly. But it seems that the addition of an xml file
+// jboss-deployment-structure excluding all jaxrs libraries is better
+//	compile group: 'org.glassfish.jersey.containers.glassfish', name: 'jersey-gf-cdi', version: '2.7'
+ 
+	
 	if (props.get('server') == "tomcat") {
-    	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+	    	ant.echo(message: 'Using tomcat starter')
+    		providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     } else if (props.get('server') == "undertow") {
+	    	ant.echo(message: 'Using undertow starter')
+		//provided("org.springframework.boot:spring-boot-starter-undertow")
 	  	providedRuntime("org.springframework.boot:spring-boot-starter-undertow")
-	}
+	} 
+	//else if (props.get('server') == 'resteasy') {
+	//  	providedRuntime("com.paypal.springboot:resteasy-spring-boot-starter:2.3.3-RELEASE")
+	//}
 	testCompile("org.springframework.boot:spring-boot-starter-test")    	
 }
 
