@@ -4,6 +4,8 @@
 package hep.crest.server.aspects;
 
 
+import java.util.Arrays;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -25,6 +27,9 @@ public class ProfileAndLogAspect {
 	@Around("@annotation(hep.crest.server.annotations.ProfileAndLog)")
 	public Object profileAndLog(ProceedingJoinPoint joinPoint) throws Throwable {
 		long start = System.currentTimeMillis();
+		Object[] args = joinPoint.getArgs();
+		
+		Arrays.stream(args).forEach(s -> log.debug("Profile method "+joinPoint.toShortString()+" with arguments "+s));
 	    Object proceed = joinPoint.proceed();
 	    long executionTime = System.currentTimeMillis() - start;
 	    log.debug(joinPoint.getSignature() + " executed in " + executionTime + "ms");
