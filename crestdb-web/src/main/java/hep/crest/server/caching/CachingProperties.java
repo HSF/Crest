@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class CachingProperties {
 
 
-	public  final Integer default_cache_time = 60; // number of seconds
+	public final Integer default_cache_time = 60; // number of seconds
 
 	private Integer iovsgroups_maxage; // number of seconds
 	

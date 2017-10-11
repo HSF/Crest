@@ -29,6 +29,7 @@ import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovRepository;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.TagRepository;
+import hep.crest.server.annotations.ProfileAndLog;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
@@ -141,6 +142,7 @@ public class IovService {
 		}
 	}
 	
+	@ProfileAndLog
 	public GroupDto selectGroupDtoByTagNameAndSnapshotTime(String tagname, Date snapshot, Integer groupsize) throws CdbServiceException {
 		try {
 			List<BigDecimal> minsincelist = selectGroupsByTagNameAndSnapshotTime(tagname, snapshot, groupsize);
