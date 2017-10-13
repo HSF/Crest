@@ -125,7 +125,7 @@ public class IovService {
 	}
 
 		
-	public List<BigDecimal> selectGroupsByTagNameAndSnapshotTime(String tagname, Date snapshot, Integer groupsize) throws CdbServiceException {
+	public List<BigDecimal> selectGroupsByTagNameAndSnapshotTime(String tagname, Date snapshot, Long groupsize) throws CdbServiceException {
 		try {
 			log.debug("Search for iovs groups by tag name "+tagname+" and snapshot time "+snapshot);
 			List<BigDecimal> minsincelist = null;
@@ -143,7 +143,7 @@ public class IovService {
 	}
 	
 	@ProfileAndLog
-	public GroupDto selectGroupDtoByTagNameAndSnapshotTime(String tagname, Date snapshot, Integer groupsize) throws CdbServiceException {
+	public GroupDto selectGroupDtoByTagNameAndSnapshotTime(String tagname, Date snapshot, Long groupsize) throws CdbServiceException {
 		try {
 			List<BigDecimal> minsincelist = selectGroupsByTagNameAndSnapshotTime(tagname, snapshot, groupsize);
 			return new GroupDto().groups(minsincelist);

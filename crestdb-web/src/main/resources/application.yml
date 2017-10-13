@@ -10,8 +10,8 @@ caching:
   iovs_maxage: 600
   iovs_snapshot_maxage: 3600
   payloads_maxage: 604800
-  timetype_groupsize: 1000
-  runtype_groupsize: 1000
+  timetype_groupsize: 3600  # expressed in seconds
+  runtype_groupsize: 100    # expressed in run numbers
 
 # schemaname : ATLAS_PHYS_COND or none
 # security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)

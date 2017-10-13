@@ -43,7 +43,7 @@
 	<logger name="io.swagger" level="warn" />
 
 	<logger name="hep.crest" additivity="false">
-		<level value="DEBUG" />
+		<level value="INFO" />
 		<appender-ref ref="fileAppender" />
 		<appender-ref ref="consoleAppender" />
 	</logger>

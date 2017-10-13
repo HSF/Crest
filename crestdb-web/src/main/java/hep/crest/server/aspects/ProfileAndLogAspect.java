@@ -32,7 +32,7 @@ public class ProfileAndLogAspect {
 		Arrays.stream(args).forEach(s -> log.debug("Profile method "+joinPoint.toShortString()+" with arguments "+s));
 	    Object proceed = joinPoint.proceed();
 	    long executionTime = System.currentTimeMillis() - start;
-	    log.debug(joinPoint.getSignature() + " executed in " + executionTime + "ms");
+	    log.info(joinPoint.getSignature() + " executed in " + executionTime + "ms");
 	    return proceed;
 	}
 	

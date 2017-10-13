@@ -69,14 +69,14 @@ public class IovGroupsImpl implements IovGroupsCustom {
 	}
 	
 	/* (non-Javadoc)
-	 * @see hep.phycdb.svc.repositories.IovGroupsCustom#selectGroups(java.lang.String, java.lang.Integer)
+	 * @see hep.phycdb.svc.repositories.IovGroupsCustom#selectGroups(java.lang.String, java.lang.Long)
 	 */
 	@Override
-	public List<BigDecimal> selectGroups(String tagname, Integer groupsize) {
+	public List<BigDecimal> selectGroups(String tagname, Long groupsize) {
 		log.info("Select Iov Groups for tag " + tagname + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
-		Integer groupfreq = 1000;
+		Long groupfreq = 1000L;
 		if (groupsize != null && groupsize > 0) {
 			groupfreq = groupsize;
 		}
@@ -95,11 +95,11 @@ public class IovGroupsImpl implements IovGroupsCustom {
 	 * @see hep.phycdb.svc.repositories.IovGroupsCustom#selectSnapshotGroups(java.lang.String, java.util.Date, java.lang.Integer)
 	 */
 	@Override
-	public List<BigDecimal> selectSnapshotGroups(String tagname, Date snap, Integer groupsize) {
+	public List<BigDecimal> selectSnapshotGroups(String tagname, Date snap, Long groupsize) {
 		log.info("Select Iov Snapshot Groups for tag " + tagname + " and snapshot time "+snap+" using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
-		Integer groupfreq = 1000;
+		Long groupfreq = 1000L;
 		if (groupsize != null && groupsize > 0) {
 			groupfreq = groupsize;
 		}

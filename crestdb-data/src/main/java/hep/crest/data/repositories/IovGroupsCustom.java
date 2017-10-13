@@ -17,9 +17,9 @@ import hep.crest.swagger.model.TagSummaryDto;
  */
 public interface IovGroupsCustom {
 
-	List<BigDecimal> selectGroups(String tagname, Integer groupsize);
+	List<BigDecimal> selectGroups(String tagname, Long groupsize);
 	
-	List<BigDecimal> selectSnapshotGroups(String tagname, Date snap, Integer groupsize);
+	List<BigDecimal> selectSnapshotGroups(String tagname, Date snap, Long groupsize);
 	
 	Long getSize(String tagname);
 

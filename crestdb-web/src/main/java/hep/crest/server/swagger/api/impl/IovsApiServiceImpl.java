@@ -182,12 +182,17 @@ public class IovsApiServiceImpl extends IovsApiService {
 				log.debug("The output data are not modified since " + ifmodsince);
 				return builder.build();
 			}
-			Integer groupsize = null;
+			Long groupsize = null;
 			String timetype = tagentity.getTimeType();
 			if (timetype.equalsIgnoreCase("run")) {
-				groupsize = cprops.getRuntype_groupsize();
+				groupsize = new Long(cprops.getRuntype_groupsize());
+			} else if (timetype.equalsIgnoreCase("run-lumi")) {
+				groupsize = new Long(cprops.getRuntype_groupsize());
+				groupsize = groupsize * 4294967296L; // transform to COOL run-lumi
 			} else {
-				groupsize = cprops.getTimetype_groupsize();
+				// Assume COOL time format...
+				groupsize = new Long(cprops.getTimetype_groupsize());
+				groupsize = groupsize * 1000000000L; // transform to COOL nanosec
 			}
 			// Set caching policy depending on snapshot argument
 			// this is filling a mag-age parameter in the header
