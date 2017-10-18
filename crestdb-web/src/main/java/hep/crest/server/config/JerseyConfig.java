@@ -21,8 +21,8 @@ import io.swagger.jaxrs.config.BeanConfig;
 
 
 
-@Component
-@ApplicationPath("/crestapi")
+//@Component
+//@ApplicationPath("/crestapi")
 public class JerseyConfig extends ResourceConfig {
 
 	public JerseyConfig() {          
@@ -40,7 +40,7 @@ public class JerseyConfig extends ResourceConfig {
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 	}
 	
-	@PostConstruct
+//	@PostConstruct
 	public void init() {
 		 // Register components where DI is needed
 		this.configureSwagger();

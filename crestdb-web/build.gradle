@@ -41,6 +41,7 @@ ext {
 	swagger_core_version = "1.5.13"
 }
 
+
 dependencies {
 	compile project(path: ':crestdb-data')
 //	compile "hep.crest.data:crestdb-data:$version"
@@ -62,18 +63,27 @@ dependencies {
     compile 'javax.servlet:javax.servlet-api:3.1.0'
    
 // THIS SHOULD BE LOADED ALREADY BY SPRING ????
+//	compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey2_version"
+//	compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version"
+
 //	compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$jersey2_version"
-	compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey2_version"
 //	compile('org.apache.tomcat.embed:tomcat-embed-jasper:8.0.30')
 //	compile "org.glassfish.jersey.core:jersey-server:$jersey2_version"
 
-	compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version"
 // https://mvnrepository.com/artifact/org.glassfish.jersey.containers.glassfish/jersey-gf-cdi
 
 // I tried to add this for an error with the last wildfly. But it seems that the addition of an xml file
 // jboss-deployment-structure excluding all jaxrs libraries is better
 //	compile group: 'org.glassfish.jersey.containers.glassfish', name: 'jersey-gf-cdi', version: '2.7'
  
+ 	if (props.get('jaxrs') == 'jersey') {
+		compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey2_version"
+ 		compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version"
+ 	} else if (props.get('jaxrs') == 'resteasy') {
+ 		compile "com.paypal.springboot:resteasy-spring-boot-starter:2.3.3-RELEASE"
+		compile group: 'org.jboss.resteasy', name: 'resteasy-multipart-provider', version: '3.1.4.Final'
+		compile group: 'org.jboss.resteasy', name: 'resteasy-jackson2-provider', version: '3.1.4.Final'
+ 	}
 	
 	if (props.get('server') == "tomcat") {
 	    	ant.echo(message: 'Using tomcat starter')
