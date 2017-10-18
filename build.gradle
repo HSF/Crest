@@ -9,7 +9,7 @@ allprojects  {
 // Load properties for later filtering
 // Functions to get project properties from local file	
 Properties getProjectProperties() {
-	String propertiesfile = "${project.rootDir}/vhf-filter-values.properties"
+	String propertiesfile = "${project.rootDir}/crest-filter-values.properties"
 	File generalPropertiesFile = file(propertiesfile)
 	println 'Loaded properties file: '+generalPropertiesFile.name
 	Properties mprops = new Properties()    
