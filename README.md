@@ -33,3 +33,13 @@ http://localhost:8080/crestapi/swagger.json
 
 Note that if you have configured the `host` to be something other than localhost, the calls through
 swagger-ui will be directed to that host and not localhost!
+
+## Docker
+You can build a container using
+```
+docker build -t crest:1.0 .
+```
+You can run the container using
+```
+docker run --env-file .environment -p 8080:8080 -d crest:1.0
+```
