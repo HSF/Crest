@@ -12,6 +12,7 @@ ENV gradle_version 4.2.1
 ENV TZ GMT
 RUN mkdir -p ${catalina_base}/logs
 RUN mkdir -p /opt/gradle && wget https://services.gradle.org/distributions/gradle-${gradle_version}-bin.zip -O /opt/gradle/gradle-${gradle_version}-bin.zip 
+### ADD gradle-${gradle_version}-bin.zip /opt/gradle/gradle-${gradle_version}-bin.zip
 RUN ls -altr /opt/gradle
 RUN unzip -d /opt/gradle /opt/gradle/gradle-${gradle_version}-bin.zip 
 ENV GRADLE_HOME /opt/gradle/gradle-${gradle_version}/bin 

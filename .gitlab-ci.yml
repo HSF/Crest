@@ -32,7 +32,7 @@ before_script:
 build:
   stage: build
   script:
-    - ./gradlew -g /cache/.gradle clean :crestdb-web:assemble
+    - ./gradlew -g /cache/.gradle clean :crestdb-web:assemble -PwarName=crest.war
   allow_failure: false
 
 # Use the generated build output to run the tests.
@@ -40,3 +40,30 @@ test:
   stage: test
   script:
     - ./gradlew -g /cache/.gradle check
+
+stages:
+ - package_application
+ - build_application_docker_image
+ - redeploy
+
+package_application:
+  stage: package_application
+  image: crest:1.0
+  script: "gradle clean :crestdb-web:build -PwarName=crest.war"
+  artifacts:
+   paths:
+   - crestdb-web/build/libs/crest.war
+
+build_application_docker_image:
+  stage: build_application_docker_image
+  tags:
+   - docker-image-build
+  script: "echo building $CI_REGISTRY_IMAGE:runner" # No empty scripts are allowed    
+  variables:
+   TO: $CI_REGISTRY_IMAGE:runner # Where to push resulting image
+
+redeploy:
+  stage: redeploy
+  image: gitlab-registry.cern.ch/paas-tools/openshift-client:latest
+  script: "oc import-image $IMAGE_NAME  --server=$SERVER --namespace $NAMESPACE --all --token=$IMAGE_IMPORT_TOKEN"
+

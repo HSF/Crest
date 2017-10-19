@@ -1,0 +1,3 @@
+catalina.base=/tmp
+spring.profiles.active=wildfly
+user.timezone=GMT

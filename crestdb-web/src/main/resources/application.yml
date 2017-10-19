@@ -90,4 +90,36 @@ server:
       max-connections: 200
 crest:
   schemaname: ATLAS_PHYS_COND
+---
+spring:
+    profiles: dev
+    jersey:
+      application-path: /crestapi
+    datasource:
+##      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=db-d0002.cern.ch)(PORT=10654))(ENABLE=BROKEN)(CONNECT_DATA=(SERVICE_NAME=intr.cern.ch)))
+      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
+      testWhileIdle: true
+      validationQuery: SELECT 1 FROM DUAL
+      driverClassName: oracle.jdbc.OracleDriver
+      username: ATLAS_PHYS_COND_W
+      password: ${crest.db.password}
+      dbcp2.initial-size: 7
+      dbcp2.max-total: 100
+      dbcp2.pool-prepared-statements: true
+      tomcat.max-wait: 10000
+      tomcat.max-active: 100
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+        hibernate.jdbc.fetch_size: 300
+        hibernate.hbm2ddl.auto: validate
+        hibernate.show_sql: false
+        hibernate.default_schema: ATLAS_PHYS_COND
+server:
+    port: 8080 
+    tomcat:
+      max-connections: 200
+crest:
+  schemaname: ATLAS_PHYS_COND
+  
   
