@@ -5,7 +5,7 @@
 # This is the Gradle build system for JVM applications
 # https://gradle.org/
 # https://github.com/gradle/gradle
-image: java:8
+#image: java:8
 
 # Disable the Gradle daemon for Continuous Integration servers as correctness
 # is usually a priority over speed in CI environments. Using a fresh
@@ -29,17 +29,17 @@ before_script:
 # cleaning removes reminants of any cached builds.
 # The assemble task actually builds the project.
 # If it fails here, the tests can't run.
-build:
-  stage: build
-  script:
-    - ./gradlew -g /cache/.gradle clean :crestdb-web:assemble -PwarName=crest.war
-  allow_failure: false
+#build:
+#  stage: build
+#  script:
+#    - ./gradlew -g /cache/.gradle clean :crestdb-web:assemble -PwarName=crest.war
+#  allow_failure: false
 
 # Use the generated build output to run the tests.
-test:
-  stage: test
-  script:
-    - ./gradlew -g /cache/.gradle check
+#test:
+#  stage: test
+#  script:
+#    - ./gradlew -g /cache/.gradle check
 
 stages:
  - package_application
@@ -48,11 +48,13 @@ stages:
 
 package_application:
   stage: package_application
-  image: crest:1.0
-  script: "gradle clean :crestdb-web:build -PwarName=crest.war"
+  image: java:8
+  script: 
+   - ./gradlew -g /cache/.gradle clean :crestdb-web:assemble -PwarName=crest.war
+  allow_failure: false
   artifacts:
    paths:
-   - crestdb-web/build/libs/crest.war
+   - ./crestdb-web/build/libs/crest.war
 
 build_application_docker_image:
   stage: build_application_docker_image
