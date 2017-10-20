@@ -67,5 +67,5 @@ build_application_docker_image:
 redeploy:
   stage: redeploy
   image: gitlab-registry.cern.ch/paas-tools/openshift-client:latest
-  script: "oc import-image $IMAGE_NAME  --server=$SERVER --namespace $NAMESPACE --all --token=$IMAGE_IMPORT_TOKEN"
+  script: "oc import-image $IMAGE_NAME  --server=$SERVER --namespace $NAMESPACE --token=$IMAGE_IMPORT_TOKEN"
 
