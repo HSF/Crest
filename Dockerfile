@@ -11,7 +11,8 @@ ENV catalina_base /tmp
 ENV gradle_version 4.2.1
 ENV TZ GMT
 RUN mkdir -p ${catalina_base}/logs
-
+RUN ls -altr
+RUN pwd
 RUN ./gradlew clean :crestdb-web:build
 ## This works if using an externally generated war
 ## ADD crestdb-web/build/libs/crest.war crest.war
