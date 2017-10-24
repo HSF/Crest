@@ -21,7 +21,7 @@
 
 	<appender name="fileAppender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${catalina.base}/logs/crestspring.log</file>
+		<file>crestspring.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<FileNamePattern>crestspring.%d{yyyy-MM-dd}.log</FileNamePattern>
 			<maxHistory>30</maxHistory>
@@ -44,12 +44,10 @@
 
 	<logger name="hep.crest" additivity="false">
 		<level value="INFO" />
-		<appender-ref ref="fileAppender" />
 		<appender-ref ref="consoleAppender" />
 	</logger>
 	
 	<root level="INFO">
 		<appender-ref ref="consoleAppender" />
-		<appender-ref ref="fileAppender" />
 	</root>
 </configuration>
