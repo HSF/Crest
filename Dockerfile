@@ -13,12 +13,13 @@ ENV TZ GMT
 RUN mkdir -p ${catalina_base}/logs
 
 RUN ./gradlew clean :crestdb-web:build
-ADD crestdb-web/build/libs/crest.war crest.war
+## This works if using an externally generated war
+## ADD crestdb-web/build/libs/crest.war crest.war
 
-RUN chown -R 1001:0 crest.war
+RUN chown -R 1001:0 ./crestdb-web/build/libs/crest.war
 
 USER 1001
 
 EXPOSE 8080
 
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar crest.war" ]
+ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar ./crestdb-web/build/libs/crest.war" ]
