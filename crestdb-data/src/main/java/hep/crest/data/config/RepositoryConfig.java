@@ -47,7 +47,7 @@ public class RepositoryConfig {
     		return bean;
     }
 
-    @Profile({"default","prod","h2","wildfly"})
+    @Profile({"default","prod","h2","wildfly","dev"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
     		PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
