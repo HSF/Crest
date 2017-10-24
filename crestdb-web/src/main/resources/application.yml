@@ -37,6 +37,24 @@ spring:
       password: root
 ---
 spring:
+    profiles: sqlite
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:sqlite:/tmp/crestsqlite.db
+      testWhileIdle: true
+      validationQuery: SELECT 1
+      driverClassName: org.sqlite.JDBC
+      username: 
+      password:
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.SQLiteDialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: update
+        hibernate.show_sql: false
+---
+spring:
     profiles: wildfly
     jersey:
       application-path: /crestapi

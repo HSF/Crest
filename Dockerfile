@@ -12,6 +12,7 @@ ENV gradle_version 4.2.1
 ENV TZ GMT
 RUN mkdir -p ${catalina_base}/logs
 
+RUN ./gradlew clean :crestdb-web:build
 ADD crestdb-web/build/libs/crest.war crest.war
 
 RUN chown -R 1001:0 crest.war

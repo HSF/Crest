@@ -165,5 +165,5 @@ task explodedWar(type: Copy) {
 
 war {
 	classpath fileTree('../jarlib')
-	archiveName = project.property('warName')
+	archiveName = project.hasProperty('warName') ? project.property('warName') : 'crest.war'
 }
