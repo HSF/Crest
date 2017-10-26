@@ -9,10 +9,13 @@ MAINTAINER Andrea Formica
 ENV crest_version 1.0-SNAPSHOT
 ENV crest_dir /opt/swagger_crest
 ENV catalina_base /tmp
+ENV data_dir /data
 ENV gradle_version 4.2.1
 ENV TZ GMT
 RUN mkdir -p ${catalina_base}/logs
 RUN mkdir -p ${crest_dir}
+RUN mkdir -p ${data_dir}/web
+RUN mkdir -p ${data_dir}/dump
 
 ### This is if you need to create a full war on docker
 #ADD . ${crest_dir}
@@ -20,12 +23,17 @@ RUN mkdir -p ${crest_dir}
 
 ## This works if using an externally generated war, in the local directory
 ADD crestdb-web/build/libs/crest.war ${crest_dir}/crest.war
+ADD web ${data_dir}/web
 
 RUN chown -R 1001:0 ${crest_dir}/crest.war
 RUN chown -R 1001:0 ${catalina_base}
 RUN chown -R 1001:0 ${crest_dir}
+RUN chown -R 1001:0 ${data_dir}
 
 USER 1001
+
+VOLUME "/data/web"
+VOLUME "/data/dump"
 
 EXPOSE 8080
 

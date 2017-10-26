@@ -78,7 +78,7 @@ server:
 crest:
   schemaname: ATLAS_PHYS_COND  
   webstaticdir: ${crest.web.static}
-
+  dump_dir: ${crest.dump.dir}
 ---
 spring:
     profiles: prod
@@ -110,7 +110,7 @@ server:
 crest:
   schemaname: ATLAS_PHYS_COND
   webstaticdir: ${crest.web.static}
-  
+  dump_dir: ${crest.dump.dir}
 ---
 spring:
     profiles: dev
