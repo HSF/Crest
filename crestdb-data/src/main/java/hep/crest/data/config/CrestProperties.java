@@ -13,6 +13,7 @@ public class CrestProperties {
 	private String schemaname;
 	private String security;
 	private String synchro;
+	private String webstaticdir;
 
 	public String getDump_dir() {
 		System.out.println("property dump_dir has value: "+dump_dir);
@@ -46,6 +47,14 @@ public class CrestProperties {
 
 	public void setSynchro(String synchro) {
 		this.synchro = synchro;
+	}
+
+	public String getWebstaticdir() {
+		return webstaticdir;
+	}
+
+	public void setWebstaticdir(String webstaticdir) {
+		this.webstaticdir = webstaticdir;
 	}
 	
 }

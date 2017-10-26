@@ -20,6 +20,7 @@ crest:
   schemaname: none
   security: none
   synchro: none
+  webstaticdir: /tmp
 
 server:
     port: 8090
@@ -59,7 +60,6 @@ spring:
     jersey:
       application-path: /crestapi
     datasource:
-##      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=db-d0002.cern.ch)(PORT=10654))(ENABLE=BROKEN)(CONNECT_DATA=(SERVICE_NAME=intr.cern.ch)))
       url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
       testWhileIdle: true
       validationQuery: SELECT 1 FROM DUAL
@@ -77,13 +77,14 @@ server:
     port: 8080 
 crest:
   schemaname: ATLAS_PHYS_COND  
+  webstaticdir: ${crest.web.static}
+
 ---
 spring:
     profiles: prod
     jersey:
       application-path: /crestapi
     datasource:
-##      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=db-d0002.cern.ch)(PORT=10654))(ENABLE=BROKEN)(CONNECT_DATA=(SERVICE_NAME=intr.cern.ch)))
       url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
       testWhileIdle: true
       validationQuery: SELECT 1 FROM DUAL
@@ -108,6 +109,8 @@ server:
       max-connections: 200
 crest:
   schemaname: ATLAS_PHYS_COND
+  webstaticdir: ${crest.web.static}
+  
 ---
 spring:
     profiles: dev
@@ -139,5 +142,7 @@ server:
       max-connections: 200
 crest:
   schemaname: ATLAS_PHYS_COND
+  webstaticdir: ${crest.web.static}
+  
   
   
