@@ -26,6 +26,7 @@ import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.repositories.GlobalTagRepository;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.EmptyPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.TagDto;
 import ma.glasnost.orika.MapperFacade;
@@ -179,6 +180,31 @@ public class GlobalTagService {
 		}
 	}
 	
+	public GlobalTagDto updateGlobalTag(GlobalTagDto dto) throws CdbServiceException {
+		try {
+			log.debug("Create global tag from dto " + dto);
+			GlobalTag entity =  mapper.map(dto,GlobalTag.class);
+			GlobalTag tmpgt = globalTagRepository.findByName(entity.getName());
+			if (tmpgt == null) {
+				log.debug("Cannot update global tag " + dto+" : resource does not exists.. ");
+				throw new NotExistsPojoException("Global tag does not exists for name "+dto.getName());
+			}
+			GlobalTag saved = globalTagRepository.save(entity);
+			log.debug("Saved entity: " + saved);
+			GlobalTagDto dtoentity = mapper.map(saved,GlobalTagDto.class);
+			return dtoentity;
+		} catch (NotExistsPojoException e) {
+			log.debug("Cannot store global tag " + dto+" : resource does not exists.. ");
+			throw e;
+		} catch (ConstraintViolationException e) {
+			log.debug("Cannot store global tag " + dto+" : resource does not exists ? ");
+			throw new NotExistsPojoException("Global tag does not exists : " + e.getMessage());
+		} catch (Exception e) {
+			log.debug("Exception in storing global tag " + dto);
+			throw new CdbServiceException("Cannot store global tag : " + e.getMessage());
+		}
+	}
+
 	public void removeGlobalTag(String name) throws CdbServiceException {
 		try {
 			log.debug("Remove global tag " + name);

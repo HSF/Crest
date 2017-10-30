@@ -36,6 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (cprops.getSecurity().equals("active")) {
 			http.authorizeRequests().antMatchers(HttpMethod.GET, "/**").permitAll()
 				.antMatchers(HttpMethod.POST, "/**").hasRole("ADMIN")
+				.antMatchers(HttpMethod.DELETE,"/**").hasRole("GURU")
 				.and().httpBasic().and().csrf().disable();
 		} else if (cprops.getSecurity().equals("weak")) {
 			http.authorizeRequests().antMatchers("/**").permitAll()
@@ -45,8 +46,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.and().httpBasic().and().csrf().disable();
 		} else if (cprops.getSecurity().equals("none")) {
 			log.info("No security enabled for this server....");
-			http.authorizeRequests().antMatchers("/**").permitAll()
-			.and().csrf().disable();
+			http.authorizeRequests()
+			.antMatchers(HttpMethod.DELETE,"/**").hasRole("GURU")
+			.antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+			.antMatchers(HttpMethod.HEAD,"/**").permitAll()
+			.antMatchers(HttpMethod.GET,"/**").permitAll()
+			.antMatchers(HttpMethod.POST,"/**").permitAll()
+			.antMatchers(HttpMethod.DELETE, "/admin/**").hasRole("GURU")
+			.antMatchers(HttpMethod.PUT, "/admin/**").hasRole("GURU")
+			.and().httpBasic().and().csrf().disable();
 		}
 	}
 
@@ -54,6 +62,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		log.debug("Configure authentication manager");
 		auth.inMemoryAuthentication().withUser("user").password("password").roles("USER").and().withUser("admin")
-				.password("password").roles("ADMIN", "USER");
+				.password("password").roles("ADMIN", "USER").and().withUser("guru")
+				.password("guru").roles("ADMIN", "USER","GURU");
 	}
 }

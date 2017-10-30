@@ -1,6 +1,7 @@
 package hep.crest.server.swagger.api.impl;
 
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.GlobalTagService;
 import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.*;
@@ -55,7 +56,7 @@ public class AdminApiServiceImpl extends AdminApiService {
 			tagService.removeTag(name);
 			return Response.ok().build();
 		} catch (CdbServiceException e) {
-			String msg = "Error removing tag resource using " + name;
+			String msg = "Error removing tag resource using " + name + " : "+e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
 		}
@@ -63,7 +64,7 @@ public class AdminApiServiceImpl extends AdminApiService {
     
     @Override
     public Response updateGlobalTag(String name, GlobalTagDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-		log.info("AdminRestController processing request for updating a global tag");
+		log.info("AdminRestController processing request for updating a global tag using "+body);
 		try {
 			GlobalTagDto dtoentity = globalTagService.findOne(name);
 			if (dtoentity.getDescription() != body.getDescription()) {
@@ -81,13 +82,17 @@ public class AdminApiServiceImpl extends AdminApiService {
 			if (dtoentity.getType() != body.getType()) {
 				dtoentity.setType(body.getType());
 			}
-			GlobalTagDto saved = globalTagService.insertGlobalTag(dtoentity);
+			GlobalTagDto saved = globalTagService.updateGlobalTag(dtoentity);
 			return Response.ok().entity(saved).build();
 			
-		} catch (Exception e) {
+		} catch (NotExistsPojoException e) {
 			String msg = "Error updating GlobalTag resource using "+body;
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+		} catch (Exception e) {
+			String msg = "Error updating GlobalTag resource using "+body;
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
 }
