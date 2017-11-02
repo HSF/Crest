@@ -82,6 +82,15 @@ or
 $java -Dspring.profiles.active=prod -Dcrest.db.password=xxx -jar crestdb-web/build/libs/crest.war
 ```
 
+For faster start and stop of the service we provide also a script that can be used.
+```
+./crestrun.sh start dbfilename
+```
+and
+```
+./crestrun.sh stop
+```
+For the moment the script is not very well documented, but it should be easy to configure it at your needs.
 
 
 ## Swagger
@@ -118,5 +127,6 @@ If you use `spring.profiles.active=default` you will have an h2 database created
 We gather here some notes on openshift deployment via gitlab-ci. These notes are for usage inside CERN.
 ### Constraints
 For the moment in order for the deployment to work we need to have a public access to the gitlab project.
-
+### Problems
+After committing a tag it seems that the deploy to openshift fails.
 TO BE DONE.
