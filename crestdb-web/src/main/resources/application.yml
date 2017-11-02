@@ -21,7 +21,8 @@ crest:
   security: none
   synchro: none
   webstaticdir: /tmp
-
+  dbfile: /tmp/crestdb
+  
 server:
     port: 8090
     servlet-path: /
@@ -30,19 +31,25 @@ spring:
     jersey:
       application-path: /crestapi
     datasource:
-      url: jdbc:h2:/tmp/cresth2;DB_CLOSE_ON_EXIT=FALSE
+      url: jdbc:h2:${crest.dbfile};DB_CLOSE_ON_EXIT=FALSE
       testWhileIdle: true
       validationQuery: SELECT 1
       driverClassName: org.h2.Driver
       username: root
       password: root
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.H2Dialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: update
+        hibernate.show_sql: false
 ---
 spring:
     profiles: sqlite
     jersey:
       application-path: /crestapi
     datasource:
-      url: jdbc:sqlite:/tmp/crestsqlite.db
+      url: jdbc:sqlite:${crest.dbfile}
       testWhileIdle: true
       validationQuery: SELECT 1
       driverClassName: org.sqlite.JDBC
