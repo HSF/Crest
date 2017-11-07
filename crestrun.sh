@@ -14,7 +14,7 @@ echo "Crest server tool"
 DBFILE=$2
 
 if [ -z $CREST_PROFILE ]; then
-	CREST_PROFILE="defaul"	
+	CREST_PROFILE="default"	
 fi
 
 CREST_OPTS="-Dspring.profiles.active=${CREST_PROFILE} -Dcrest.dbfile=$DBFILE"
