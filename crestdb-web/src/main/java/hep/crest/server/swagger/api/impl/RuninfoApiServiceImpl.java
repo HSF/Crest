@@ -1,5 +1,11 @@
 package hep.crest.server.swagger.api.impl;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.ws.rs.core.GenericEntity;
@@ -19,6 +25,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
+import hep.crest.data.utils.RunIovConverter;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.runinfo.services.RunLumiInfoService;
@@ -102,4 +109,66 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
 	}
+
+	@Override
+	public Response findRunLumiInfo(String from, String to, String format, Integer page, Integer size, String sort,
+			SecurityContext securityContext, UriInfo info) throws NotFoundException {
+		try {
+			log.debug("Search resource list using from={}, to={}, format={}, page={}, size={}, sort={}", from, to,
+					format, page, size, sort);
+			PageRequest preq = prh.createPageRequest(page, size, sort);
+			List<RunLumiInfoDto> dtolist = null;
+			String by = "";
+			if (format.equals("time")) {
+				log.debug("Using from and to as times in yyyymmddhhmiss");
+				DateTimeFormatter locFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+				ZonedDateTime zdtfrom = LocalDateTime.parse(from, locFormatter).atZone(ZoneId.of("Z"));
+				ZonedDateTime zdtto = LocalDateTime.parse(to, locFormatter).atZone(ZoneId.of("Z"));
+				Timestamp tsfrom = new Timestamp(zdtfrom.toInstant().toEpochMilli());
+				Timestamp tsto = new Timestamp(zdtto.toInstant().toEpochMilli());
+				BigDecimal bfrom = new BigDecimal(tsfrom.getTime() * RunIovConverter.TO_NANOSECONDS);
+				BigDecimal bto = new BigDecimal(tsto.getTime() * RunIovConverter.TO_NANOSECONDS);
+				by = "starttime>" + bfrom.toString();
+				by = by + ",starttime<" + bto.toString();
+
+			} else if (format.equals("run-lumi")) {
+				String[] fromarr = from.split("-");
+				String[] toarr = to.split("-");
+				BigDecimal bfrom = RunIovConverter.getCoolRunLumi(new Long(fromarr[0]), new Long(fromarr[1]));
+				BigDecimal bto = RunIovConverter.getCoolRunLumi(new Long(toarr[0]), new Long(toarr[1]));
+				by = "since>" + bfrom.toString();
+				by = by + ",since<" + bto.toString();
+			}
+
+			List<SearchCriteria> params = prh.createMatcherCriteria(by);
+			List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
+			BooleanExpression wherepred = null;
+
+			for (BooleanExpression exp : expressions) {
+				if (wherepred == null) {
+					wherepred = exp;
+				} else {
+					wherepred = wherepred.and(exp);
+				}
+			}
+			dtolist = runlumiService.findAllRunLumiInfo(wherepred, preq);
+
+			if (dtolist == null) {
+				String message = "No resource has been found";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, message);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			}
+			GenericEntity<List<RunLumiInfoDto>> entitylist = new GenericEntity<List<RunLumiInfoDto>>(dtolist) {
+			};
+			return Response.ok().entity(entitylist).build();
+
+		} catch (CdbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+
 }

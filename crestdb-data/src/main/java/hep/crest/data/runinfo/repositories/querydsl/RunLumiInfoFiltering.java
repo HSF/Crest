@@ -44,7 +44,19 @@ public class RunLumiInfoFiltering implements IFilteringCriteria {
 				if (searchCriteria.getKey().equals("run")) {
 					BooleanExpression objtyplike = RunLumiInfoPredicates.hasRun(new BigDecimal(searchCriteria.getValue().toString()));
 					expressions.add(objtyplike);
-				} 
+				}  else if (searchCriteria.getKey().equals("insertionTime")) {
+					BooleanExpression insertionTimexthan = RunLumiInfoPredicates
+							.isInsertionTimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
+					expressions.add(insertionTimexthan);
+				} else if (searchCriteria.getKey().equals("since")) {
+					BooleanExpression isSinceXThan = RunLumiInfoPredicates
+							.isSinceXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
+					expressions.add(isSinceXThan);
+				} else if (searchCriteria.getKey().equals("starttime")) {
+					BooleanExpression isStarttimeXThan = RunLumiInfoPredicates
+							.isStarttimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
+					expressions.add(isStarttimeXThan);
+				}
 			}
 			return expressions;
 		} catch (Exception e) {

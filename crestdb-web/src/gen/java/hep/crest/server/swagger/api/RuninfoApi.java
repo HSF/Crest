@@ -31,7 +31,7 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the runinfo API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-11-07T14:29:18.354+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-11-07T17:56:21.460+01:00")
 public class RuninfoApi  {
 //   private final RuninfoApiService delegate = RuninfoApiServiceFactory.getRuninfoApi();
 
@@ -49,6 +49,23 @@ public class RuninfoApi  {
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.createRunLumiInfo(body,securityContext,info);
+    }
+    @GET
+    @Path("/list")
+    
+    @Produces({ "application/json", "application/xml" })
+    @io.swagger.annotations.ApiOperation(value = "Finds a RunLumiInfoDto lists using parameters.", notes = "This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = RunLumiInfoDto.class, responseContainer = "List", tags={ "runinfo", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = RunLumiInfoDto.class, responseContainer = "List") })
+    public Response findRunLumiInfo(@ApiParam(value = "from: the starting time or run-lumi", defaultValue="none") @DefaultValue("none") @QueryParam("from") String from
+,@ApiParam(value = "to: the ending time or run-lumi", defaultValue="none") @DefaultValue("none") @QueryParam("to") String to
+,@ApiParam(value = "format: the format to digest previous arguments [time] or [run-lumi]. Time = yyyymmddhhmiss, Run-lumi = run-lumi", defaultValue="time") @DefaultValue("time") @QueryParam("format") String format
+,@ApiParam(value = "page: the page number {0}", defaultValue="0") @DefaultValue("0") @QueryParam("page") Integer page
+,@ApiParam(value = "size: the page size {1000}", defaultValue="1000") @DefaultValue("1000") @QueryParam("size") Integer size
+,@ApiParam(value = "sort: the sort pattern {since:ASC}", defaultValue="since:ASC") @DefaultValue("since:ASC") @QueryParam("sort") String sort
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.findRunLumiInfo(from,to,format,page,size,sort,securityContext,info);
     }
     @GET
     

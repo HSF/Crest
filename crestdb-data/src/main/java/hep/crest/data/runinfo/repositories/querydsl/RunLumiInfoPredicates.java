@@ -39,6 +39,35 @@ public class RunLumiInfoPredicates {
 		return pred;
 	}
 
+	public static BooleanExpression isSinceXThan(String oper, String num) {
+		log.debug("isSinceXThan: argument " + num + " operation " + oper);
+		BooleanExpression pred = null;
+
+		if (oper.equals("<")) {
+			pred = QRunLumiInfo.runLumiInfo.since.lt(new BigDecimal(num));
+		} else if (oper.equals(">")) {
+			pred = QRunLumiInfo.runLumiInfo.since.gt(new BigDecimal(num));
+		} else if (oper.equals(":")) {
+			pred = QRunLumiInfo.runLumiInfo.since.eq(new BigDecimal(num));
+		}
+		return pred;
+	}
+
+	
+	public static BooleanExpression isStarttimeXThan(String oper, String num) {
+		log.debug("isStarttimeXThan: argument " + num + " operation " + oper);
+		BooleanExpression pred = null;
+
+		if (oper.equals("<")) {
+			pred = QRunLumiInfo.runLumiInfo.starttime.lt(new BigDecimal(num));
+		} else if (oper.equals(">")) {
+			pred = QRunLumiInfo.runLumiInfo.starttime.gt(new BigDecimal(num));
+		} else if (oper.equals(":")) {
+			pred = QRunLumiInfo.runLumiInfo.starttime.eq(new BigDecimal(num));
+		}
+		return pred;
+	}
+
 	public static BooleanExpression hasSinceBetween(BigDecimal since, BigDecimal until) {
 		log.debug("hasSinceBetween: argument " + since+ " "+until);
 		BooleanExpression pred = QRunLumiInfo.runLumiInfo.since.between(since,until);
