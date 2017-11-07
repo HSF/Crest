@@ -6,6 +6,26 @@
   				"type": "string"			
   			}
 		},
+		"RunLumiInfoDto" : {
+			"type" : "object",
+			"properties": {
+				"since": {
+					"type": "number"
+				},
+				"run": {
+					"type": "number"
+				},
+				"lb": {
+					"type": "number"
+				},
+				"starttime": {
+					"type": "number"
+				},
+				"endtime": {
+					"type": "number"
+				}
+			}
+		},
 		"GlobalTagMapDto": {
 			"type": "object",
 			"properties": {

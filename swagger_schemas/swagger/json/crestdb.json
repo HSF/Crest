@@ -35,6 +35,9 @@
 			"name": "tags"
 		},
 		{
+			"name": "runinfo"
+		},
+		{
 			"name": "fs"
 		}		
 	],
@@ -176,6 +179,101 @@
 					}
 				}
 			}
+		},
+		"/runinfo": {
+			"post": {
+				"tags": [
+					"runinfo"
+				],
+				"summary": "Create an entry for run information.",
+				"description": "Run informations go into a separate table.",
+				"operationId": "createRunLumiInfo",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"text/plain"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a runlumiinfodto object: { run: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/RunLumiInfoDto"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "string"				
+						} 						
+					}
+				}
+			},
+			"get": {
+				"tags": [
+					"runinfo"
+				],
+				"summary": "Finds a RunLumiInfoDto lists.",
+				"description": "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]",
+				"operationId": "listRunLumiInfo",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "by",
+						"in": "query",
+						"description": "by: the search pattern {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "page",
+						"in": "query",
+						"description": "page: the page number {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int32"
+					},
+					{
+						"name": "size",
+						"in": "query",
+						"description": "size: the page size {1000}",
+						"required": false,
+						"type": "integer",
+						"default": 1000,
+						"format": "int32"
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "sort: the sort pattern {since:ASC}",
+						"required": false,
+						"type": "string",
+						"default": "name:ASC"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/RunLumiInfoDto"
+							}
+						}
+					}
+				}
+			}			
 		},
 		"/globaltagmaps": {
 			"post": {

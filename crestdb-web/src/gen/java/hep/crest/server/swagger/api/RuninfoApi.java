@@ -1,0 +1,68 @@
+package hep.crest.server.swagger.api;
+
+import hep.crest.swagger.model.*;
+import hep.crest.server.swagger.api.RuninfoApiService;
+/////import hep.crest.server.swagger.api.factories.RuninfoApiServiceFactory;
+
+import io.swagger.annotations.ApiParam;
+import io.swagger.jaxrs.*;
+
+import hep.crest.swagger.model.RunLumiInfoDto;
+
+import java.util.List;
+import hep.crest.server.swagger.api.NotFoundException;
+
+import java.io.InputStream;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.ws.rs.*;
+import javax.validation.constraints.*;
+
+@Path("/runinfo")
+
+
+@io.swagger.annotations.Api(description = "the runinfo API")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-11-07T14:29:18.354+01:00")
+public class RuninfoApi  {
+//   private final RuninfoApiService delegate = RuninfoApiServiceFactory.getRuninfoApi();
+
+	@Autowired
+	private RuninfoApiService delegate;
+
+    @POST
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json", "text/plain" })
+    @io.swagger.annotations.ApiOperation(value = "Create an entry for run information.", notes = "Run informations go into a separate table.", response = String.class, tags={ "runinfo", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = String.class) })
+    public Response createRunLumiInfo(@ApiParam(value = "A json string that is used to construct a runlumiinfodto object: { run: xxx, ... }" ,required=true) RunLumiInfoDto body
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.createRunLumiInfo(body,securityContext,info);
+    }
+    @GET
+    
+    
+    @Produces({ "application/json", "application/xml" })
+    @io.swagger.annotations.ApiOperation(value = "Finds a RunLumiInfoDto lists.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = RunLumiInfoDto.class, responseContainer = "List", tags={ "runinfo", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = RunLumiInfoDto.class, responseContainer = "List") })
+    public Response listRunLumiInfo(@ApiParam(value = "by: the search pattern {none}", defaultValue="none") @DefaultValue("none") @QueryParam("by") String by
+,@ApiParam(value = "page: the page number {0}", defaultValue="0") @DefaultValue("0") @QueryParam("page") Integer page
+,@ApiParam(value = "size: the page size {1000}", defaultValue="1000") @DefaultValue("1000") @QueryParam("size") Integer size
+,@ApiParam(value = "sort: the sort pattern {since:ASC}", defaultValue="since:ASC") @DefaultValue("since:ASC") @QueryParam("sort") String sort
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.listRunLumiInfo(by,page,size,sort,securityContext,info);
+    }
+}

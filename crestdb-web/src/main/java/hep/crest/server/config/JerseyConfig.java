@@ -16,6 +16,7 @@ import hep.crest.server.swagger.api.GlobaltagmapsApi;
 import hep.crest.server.swagger.api.GlobaltagsApi;
 import hep.crest.server.swagger.api.IovsApi;
 import hep.crest.server.swagger.api.PayloadsApi;
+import hep.crest.server.swagger.api.RuninfoApi;
 import hep.crest.server.swagger.api.TagsApi;
 import io.swagger.jaxrs.config.BeanConfig;
 
@@ -35,6 +36,7 @@ public class JerseyConfig extends ResourceConfig {
 		register(PayloadsApi.class);
 		register(FsApi.class);
 		register(MultiPartFeature.class);
+		register(RuninfoApi.class);
 		////register(AuthenticationFilter.class);
 		register(CacheControlFilter.class);
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
