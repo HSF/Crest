@@ -94,14 +94,18 @@ For the moment the script is not very well documented, but it should be easy to 
 
 
 ## Swagger
-You can then view the swagger listing here:
+You can then view the swagger listing here (hopefully the server will be up!):
 
 ```
-http://localhost:8080/crestapi/swagger.json
+http://crest-undertow.web.cern.ch/crestapi/swagger.json
+```
+and if you want to play with the server using the swagger-ui you can access it here:
+
+```
+http://crest-undertow.web.cern.ch/ext/web/ui/index.html
 ```
 
-Note that if you have configured the `host` to be something other than localhost, the calls through
-swagger-ui will be directed to that host and not localhost!
+Note that in principle you can get the same links working (a part from the hostname) if you run the server locally.
 
 ## Docker
 You can build a container using
