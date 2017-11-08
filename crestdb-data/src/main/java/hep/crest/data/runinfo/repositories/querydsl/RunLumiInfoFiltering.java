@@ -42,8 +42,12 @@ public class RunLumiInfoFiltering implements IFilteringCriteria {
 				log.debug("search criteria " + searchCriteria.getKey() + " " + searchCriteria.getOperation() + " "
 						+ searchCriteria.getValue());
 				if (searchCriteria.getKey().equals("run")) {
-					BooleanExpression objtyplike = RunLumiInfoPredicates.hasRun(new BigDecimal(searchCriteria.getValue().toString()));
-					expressions.add(objtyplike);
+					BooleanExpression runxthan = RunLumiInfoPredicates.isRunXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
+					expressions.add(runxthan);
+				}  else if (searchCriteria.getKey().equals("lb")) {
+					BooleanExpression lbxthan = RunLumiInfoPredicates
+							.isLBXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
+					expressions.add(lbxthan);
 				}  else if (searchCriteria.getKey().equals("insertionTime")) {
 					BooleanExpression insertionTimexthan = RunLumiInfoPredicates
 							.isInsertionTimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
@@ -56,6 +60,10 @@ public class RunLumiInfoFiltering implements IFilteringCriteria {
 					BooleanExpression isStarttimeXThan = RunLumiInfoPredicates
 							.isStarttimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
 					expressions.add(isStarttimeXThan);
+				} else if (searchCriteria.getKey().equals("endtime")) {
+					BooleanExpression isEndtimeXThan = RunLumiInfoPredicates
+							.isEndtimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
+					expressions.add(isEndtimeXThan);
 				}
 			}
 			return expressions;

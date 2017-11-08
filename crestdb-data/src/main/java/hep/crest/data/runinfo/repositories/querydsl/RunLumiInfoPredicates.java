@@ -27,18 +27,34 @@ public class RunLumiInfoPredicates {
 
 	}
 
-	public static BooleanExpression hasRun(BigDecimal run) {
-		log.debug("hasRun: argument " + run);
-		BooleanExpression pred = QRunLumiInfo.runLumiInfo.run.eq(run);
+	public static BooleanExpression isRunXThan(String oper, String num) {
+		log.debug("isRunXThan: argument " + num + " operation " + oper);
+		BooleanExpression pred = null;
+
+		if (oper.equals("<")) {
+			pred = QRunLumiInfo.runLumiInfo.run.lt(new BigDecimal(num));
+		} else if (oper.equals(">")) {
+			pred = QRunLumiInfo.runLumiInfo.run.gt(new BigDecimal(num));
+		} else if (oper.equals(":")) {
+			pred = QRunLumiInfo.runLumiInfo.run.eq(new BigDecimal(num));
+		}
 		return pred;
 	}
 	
-	public static BooleanExpression hasLB(BigDecimal lb) {
-		log.debug("hasLB: argument " + lb);
-		BooleanExpression pred = QRunLumiInfo.runLumiInfo.lb.eq(lb);
+	public static BooleanExpression isLBXThan(String oper, String num) {
+		log.debug("isLBXThan: argument " + num + " operation " + oper);
+		BooleanExpression pred = null;
+
+		if (oper.equals("<")) {
+			pred = QRunLumiInfo.runLumiInfo.lb.lt(new BigDecimal(num));
+		} else if (oper.equals(">")) {
+			pred = QRunLumiInfo.runLumiInfo.lb.gt(new BigDecimal(num));
+		} else if (oper.equals(":")) {
+			pred = QRunLumiInfo.runLumiInfo.lb.eq(new BigDecimal(num));
+		}
 		return pred;
 	}
-
+	
 	public static BooleanExpression isSinceXThan(String oper, String num) {
 		log.debug("isSinceXThan: argument " + num + " operation " + oper);
 		BooleanExpression pred = null;
@@ -64,6 +80,20 @@ public class RunLumiInfoPredicates {
 			pred = QRunLumiInfo.runLumiInfo.starttime.gt(new BigDecimal(num));
 		} else if (oper.equals(":")) {
 			pred = QRunLumiInfo.runLumiInfo.starttime.eq(new BigDecimal(num));
+		}
+		return pred;
+	}
+	
+	public static BooleanExpression isEndtimeXThan(String oper, String num) {
+		log.debug("isEndtimeXThan: argument " + num + " operation " + oper);
+		BooleanExpression pred = null;
+
+		if (oper.equals("<")) {
+			pred = QRunLumiInfo.runLumiInfo.endtime.lt(new BigDecimal(num));
+		} else if (oper.equals(">")) {
+			pred = QRunLumiInfo.runLumiInfo.endtime.gt(new BigDecimal(num));
+		} else if (oper.equals(":")) {
+			pred = QRunLumiInfo.runLumiInfo.endtime.eq(new BigDecimal(num));
 		}
 		return pred;
 	}
