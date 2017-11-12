@@ -150,6 +150,35 @@ server:
 crest:
   schemaname: ATLAS_PHYS_COND
   webstaticdir: ${crest.web.static}
+---
+spring:
+    profiles: postgres
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:postgresql://localhost:6600/crestdb
+      testWhileIdle: true
+      validationQuery: SELECT 1 FROM DUAL
+      driverClassName: org.postgresql.Driver
+      username: admin
+      password: ${crest.db.password}
+      dbcp2.initial-size: 7
+      dbcp2.max-total: 100
+      dbcp2.pool-prepared-statements: true
+      tomcat.max-wait: 10000
+      tomcat.max-active: 100
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+        hibernate.jdbc.fetch_size: 300
+        hibernate.hbm2ddl.auto: create
+        hibernate.show_sql: false
+        hibernate.default_schema:
+server:
+    port: 8080 
+crest:
+  schemaname:
+  webstaticdir: ${crest.web.static}
   
   
   
