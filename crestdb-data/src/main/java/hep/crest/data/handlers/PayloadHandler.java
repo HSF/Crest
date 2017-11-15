@@ -2,6 +2,7 @@ package hep.crest.data.handlers;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -200,6 +201,36 @@ public class PayloadHandler {
 		}
 		return blob;
 	}
+	
+	public Blob createBlobFromByteArr(byte[] data) {
+		Blob blob=null;
+		Connection conn = null;
+		try {
+			conn = ds.getConnection();
+			InputStream is = new ByteArrayInputStream(data);
+			BufferedInputStream fstream = new BufferedInputStream(is);
+			blob = conn.createBlob();
+			BufferedOutputStream bstream = new BufferedOutputStream(blob.setBinaryStream(1));
+			// stream copy runs a high-speed upload across the network
+			StreamUtils.copy(fstream, bstream);
+			return blob;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return blob;
+	}
+
 
     public PayloadDto convertToDto(Payload dataentity) {
     	try {

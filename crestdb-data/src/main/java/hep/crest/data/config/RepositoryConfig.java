@@ -14,6 +14,7 @@ import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovGroupsImpl;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataDBImpl;
+import hep.crest.data.repositories.PayloadDataPostgresImpl;
 import hep.crest.data.repositories.PayloadDataSQLITEImpl;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
@@ -47,10 +48,19 @@ public class RepositoryConfig {
     		return bean;
     }
 
-    @Profile({"default","prod","h2","wildfly","dev","postgres"})
+    @Profile({"default","prod","h2","wildfly","dev"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
     		PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
+		if (!cprops.getSchemaname().equals("none")) {
+			bean.setDefault_tablename(cprops.getSchemaname());
+		}
+		return bean;
+    }
+    @Profile({"postgres"})
+    @Bean(name = "payloaddatadbrepo")
+    public PayloadDataBaseCustom payloadPostgresRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
+    		PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
 			bean.setDefault_tablename(cprops.getSchemaname());
 		}

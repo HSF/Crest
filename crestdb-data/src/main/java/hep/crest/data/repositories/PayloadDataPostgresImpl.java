@@ -17,8 +17,10 @@
  **/
 package hep.crest.data.repositories;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -27,16 +29,21 @@ import java.util.Calendar;
 import javax.persistence.Table;
 import javax.sql.DataSource;
 
+import org.postgresql.PGConnection;
+import org.postgresql.largeobject.LargeObject;
+import org.postgresql.largeobject.LargeObjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.MyDefaultLobHandlerImpl;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.PayloadDto;
@@ -45,21 +52,21 @@ import hep.crest.swagger.model.PayloadDto;
  * @author formica
  *
  */
-public class PayloadDataDBImpl implements PayloadDataBaseCustom {
+public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private DataSource ds;
 
-	@Value("${physconddb.upload.dir:/tmp}")
+	@Value("${crest.upload.dir:/tmp}")
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
 
 	@Autowired
 	private PayloadHandler payloadHandler;
-
+	
 	private String default_tablename=null;
 
-	public PayloadDataDBImpl(DataSource ds) {
+	public PayloadDataPostgresImpl(DataSource ds) {
 		super();
 		this.ds = ds;
 	}
@@ -91,7 +98,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 				+ " where HASH=?";
 		
 		// Be careful, this seems not to work with Postgres: probably getBlob loads an OID and not the byte[] 
-		// Temporarely, try to create a postgresql implementation of this class.
+		// Temporarily, try to create a postgresql implementation of this class.
 		
 		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
@@ -150,11 +157,50 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	public Payload save(PayloadDto entity) throws CdbServiceException {
 		Payload savedentity = null;
 		try {
+			log.info("Saving blob as bytes array....");
 			savedentity = this.saveBlobAsBytes(entity);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return savedentity;
+	}
+	
+	/**
+	 * This method is inspired to the postgres documentation on the JDBC driver. For reasons which are still not clear the select
+	 * methods are working as they are.
+	 * 
+	 * @param conn
+	 * @param is
+	 * @return
+	 */
+	protected long getLargeObjectId(Connection conn, InputStream is) {
+		// Open the large object for writing
+		LargeObjectManager lobj;
+		long oid;
+		try {
+			lobj = conn.unwrap(org.postgresql.PGConnection.class).getLargeObjectAPI();
+			oid = lobj.createLO();
+			LargeObject obj = lobj.open(oid, LargeObjectManager.WRITE);
+
+			// Copy the data from the file to the large object
+			byte buf[] = new byte[2048];
+			int s = 0; 
+			int tl = 0;
+			while ((s = is.read(buf, 0, 2048)) > 0) {
+				obj.write(buf, 0, s);
+			    tl += s;
+			}
+			// Close the large object
+			obj.close();
+			return oid;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return (Long) null;
 	}
 
 	@Transactional
@@ -170,19 +216,28 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
+
+		InputStream is = new ByteArrayInputStream(entity.getData());
+		InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
+		
 		try {
 			conn = ds.getConnection();
+			conn.setAutoCommit(false);
+			long oid = getLargeObjectId(conn, is);
+			long sioid = getLargeObjectId(conn, sis);
+						
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, entity.getHash());
 			ps.setString(2, entity.getObjectType());
 			ps.setString(3, entity.getVersion());
-			ps.setBytes(4, entity.getData());
-			ps.setBytes(5, entity.getStreamerInfo());
+			ps.setLong(4, oid);
+			ps.setLong(5, sioid);
 			ps.setDate(6, inserttime);
 			log.info("Dump preparedstatement " + ps.toString() + " using sql "+sql+" and arguments "+
 					entity.getHash()+" "+entity.getObjectType()+" "+entity.getVersion()+" "+entity.getInsertionTime());
 			ps.execute();
 			ps.close();
+			conn.commit();
 			log.debug("Search for stored payload as a verification, use hash "+entity.getHash());
 			Payload saved = find(entity.getHash());
 			return saved;
@@ -191,6 +246,12 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			e.printStackTrace();
 		} finally {
 			try {
+				if (is != null) {
+					is.close();
+				}
+				if (sis != null) {
+					sis.close();
+				}
 				if (conn != null) {
 					conn.close();
 				}
@@ -209,6 +270,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		try {
 			// savedentity = this.saveMetaInfo(entity);
 			// Blob blob = payloadHandler.createBlobFromStream(is);
+			log.info("Saving blob as stream....");
 			this.saveBlobAsStream(entity, is);
 			savedentity = findMetaInfo(entity.getHash());
 		} catch (IOException e) {
@@ -227,30 +289,42 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload " + entity.getHash() + " using JDBCTEMPLATE");
-		byte[] blob = payloadHandler.getBytesFromInputStream(is);
+		
 		log.debug("Streamer info " + entity.getStreamerInfo());
-		log.debug("Read data blob of length " + blob.length + " and streamer info " + entity.getStreamerInfo().length);
+		//log.debug("Read data blob of length " + blob.length + " and streamer info " + entity.getStreamerInfo().length);
 		Connection conn = null;
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
+		InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
 		try {
 			conn = ds.getConnection();
+			conn.setAutoCommit(false);
+			long oid = getLargeObjectId(conn, is);
+			long sioid = getLargeObjectId(conn, sis);
+			
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, entity.getHash());
 			ps.setString(2, entity.getObjectType());
 			ps.setString(3, entity.getVersion());
-			ps.setBytes(4, blob);
-			ps.setBytes(5, entity.getStreamerInfo());
+			ps.setLong(4, oid);
+			ps.setLong(5, sioid);
 			ps.setDate(6, inserttime);
 			log.debug("Dump preparedstatement " + ps.toString());
-			ps.execute();
+			ps.executeUpdate();
 			ps.close();
+			conn.commit();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			log.error("Exception from SQL during insertion: "+e.getMessage());
 		} finally {
 			try {
+				if (is != null) {
+					is.close();
+				}
+				if (sis != null) {
+					sis.close();
+				}
 				if (conn != null) {
 					conn.close();
 				}

@@ -169,16 +169,18 @@ spring:
       tomcat.max-active: 100
     jpa:
       properties:
-        hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+        hibernate.dialect: org.hibernate.dialect.PostgreSQL9Dialect
         hibernate.jdbc.fetch_size: 300
         hibernate.hbm2ddl.auto: create
         hibernate.show_sql: false
-        hibernate.default_schema:
+        hibernate.jdbc.use_streams_for_binary: false
+        hibernate.connection.autocommit: false
 server:
     port: 8080 
 crest:
-  schemaname:
+  schemaname: none
   webstaticdir: ${crest.web.static}
+  dump_dir: /tmp
   
   
   
