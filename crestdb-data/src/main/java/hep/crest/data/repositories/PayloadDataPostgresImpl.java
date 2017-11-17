@@ -32,7 +32,6 @@ import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.PayloadDto;
 
@@ -57,9 +55,6 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 	@Value("${crest.upload.dir:/tmp}")
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
 
-	@Autowired
-	private PayloadHandler payloadHandler;
-	
 	private String default_tablename=null;
 
 	public PayloadDataPostgresImpl(DataSource ds) {
@@ -367,7 +362,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			} 
 		}
 		return null;
 	}
