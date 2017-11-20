@@ -53,7 +53,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
 	@Override
 	public Response createRunLumiInfo(RunLumiInfoDto body, SecurityContext securityContext, UriInfo info)
 			throws NotFoundException {
-		log.info("RunLumiRestController processing request for creating a run lumi info entry");
+		log.info("RunLumiRestController processing request for creating a run lumi info entry using "+body);
 		try {
 			RunLumiInfoDto saved = runlumiService.insertRunLumiInfo(body);
 			return Response.created(info.getRequestUri()).entity(saved).build();
