@@ -18,7 +18,7 @@
 			<level>TRACE</level>
 		</filter>
 	</appender>
-  <!-- -->
+  <!-- 
 	<appender name="fileAppender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${crest.log.dir}/crestspring.log</file>
@@ -34,6 +34,7 @@
 			<level>TRACE</level>
 		</filter>
 	</appender>
+	-->
 	<!--<logger name="org.hibernate" level="debug"/> -->
 	<!-- Uncomment and add your logger here: <logger name="org.springframework.samples.service.service" 
 		level="debug"/> -->
@@ -44,11 +45,11 @@
 	<logger name="hep.crest" additivity="false">
 		<level value="DEBUG" />
 		<appender-ref ref="consoleAppender" />
-		<appender-ref ref="fileAppender" />
+<!-- 		<appender-ref ref="fileAppender" /> -->
 	</logger>
 	
 	<root level="INFO">
-		<appender-ref ref="fileAppender" />
+<!-- 		<appender-ref ref="fileAppender" /> -->
 		<appender-ref ref="consoleAppender" />
 	</root>
 </configuration>
