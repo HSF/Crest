@@ -79,7 +79,10 @@ public class DirectoryService {
 	public Future<String> dumpTag(String tagname, Date snapshot, String path) {
 		String threadname = Thread.currentThread().getName();
 		log.debug("Running task in asynchronous mode for name "+threadname);
-		DirectoryUtilities du = new DirectoryUtilities(cprops.getDump_dir()+path);
+		String outdir = cprops.getDump_dir()+"/"+path;
+		log.debug("Output directory is "+outdir);
+
+		DirectoryUtilities du = new DirectoryUtilities(outdir);
 		try {
 			fstagrepository.setDirtools(du);
 			fsiovrepository.setDirtools(du);
@@ -93,6 +96,9 @@ public class DirectoryService {
 				PayloadDto pyld = pyldservice.getPayload(iovDto.getPayloadHash());
 				fspayloadrepository.save(pyld);
 			}
+			String tarpath = cprops.getWebstaticdir()+"/"+path;
+			String outtar = du.createTarFile(outdir,tarpath);
+			log.debug("Created output tar file "+outtar);
 			return new AsyncResult<String>("Dump a list of "+iovlist.size()+" iovs into file system...");
 		} catch (CdbServiceException e) {
 			// TODO Auto-generated catch block
@@ -100,4 +106,5 @@ public class DirectoryService {
 		}
 		return null;
 	}
+	
 }
