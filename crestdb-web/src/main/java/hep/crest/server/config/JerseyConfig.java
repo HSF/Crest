@@ -15,6 +15,7 @@ import hep.crest.server.swagger.api.FsApi;
 import hep.crest.server.swagger.api.GlobaltagmapsApi;
 import hep.crest.server.swagger.api.GlobaltagsApi;
 import hep.crest.server.swagger.api.IovsApi;
+import hep.crest.server.swagger.api.MonitoringApi;
 import hep.crest.server.swagger.api.PayloadsApi;
 import hep.crest.server.swagger.api.RuninfoApi;
 import hep.crest.server.swagger.api.TagsApi;
@@ -36,7 +37,6 @@ public class JerseyConfig extends ResourceConfig {
 		register(PayloadsApi.class);
 		register(FsApi.class);
 		register(MultiPartFeature.class);
-		register(RuninfoApi.class);
 		////register(AuthenticationFilter.class);
 		register(CacheControlFilter.class);
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
@@ -48,6 +48,10 @@ public class JerseyConfig extends ResourceConfig {
 		this.configureSwagger();
 	}
 
+	public void jerseyregister(Class<?> clazz) {
+		super.register(clazz);
+		return;
+	}
 	
 	private void configureSwagger() {
 		this.register(io.swagger.jaxrs.listing.ApiListingResource.class);
