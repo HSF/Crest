@@ -235,6 +235,7 @@ public class IovService {
 			Iov saved = iovRepository.save(entity);
 			log.debug("Saved entity: " + saved);
 			IovDto dtoentity = mapper.map(saved,IovDto.class);
+			log.debug("Returning iovDto: " + dtoentity);
 			return dtoentity;
 
 		} catch (Exception e) {
