@@ -104,7 +104,7 @@ public class GlobalTag implements java.io.Serializable {
 		this.description = description;
 	}
 
-	@Column(name = "\"RELEASE\"", nullable = false, length = 100)
+	@Column(name = "RELEASE", nullable = false, length = 100)
 	public String getRelease() {
 		return this.release;
 	}
