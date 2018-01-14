@@ -2,7 +2,6 @@ package {{package}};
 
 import {{modelPackage}}.*;
 import {{package}}.{{classname}}Service;
-/////import {{package}}.factories.{{classname}}ServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
@@ -37,7 +36,6 @@ import javax.validation.constraints.*;
 {{>generatedAnnotation}}
 {{#operations}}
 public class {{classname}}  {
-//   private final {{classname}}Service delegate = {{classname}}ServiceFactory.get{{classname}}();
 
 	@Autowired
 	private {{classname}}Service delegate;
