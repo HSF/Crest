@@ -1,3 +1,7 @@
+plugins {
+  id "org.sonarqube" version "2.5"
+}
+
 allprojects  {
   apply plugin: 'maven'
   group = 'hep.crest'
@@ -72,6 +76,7 @@ subprojects {
 // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
 		compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
 		compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
+		compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
 		//compile group: 'com.impossibl.pgjdbc-ng', name: 'pgjdbc-ng', version: '0.7.1'
 
 

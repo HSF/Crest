@@ -29,7 +29,7 @@ public class IovId implements java.io.Serializable {
 		this.insertionTime = insertionTime;
 	}
 
-	@Column(name = "TAG_NAME", nullable = false, length = 100)
+	@Column(name = "TAG_NAME", nullable = false, length = 255)
 	public String getTagName() {
 		return this.tagName;
 	}

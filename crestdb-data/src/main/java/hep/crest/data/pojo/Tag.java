@@ -65,7 +65,7 @@ public class Tag implements java.io.Serializable {
 
 	@Id
 
-	@Column(name = "NAME", unique = true, nullable = false, length = 256)
+	@Column(name = "NAME", unique = true, nullable = false, length = 255)
 	public String getName() {
 		return this.name;
 	}
@@ -83,7 +83,7 @@ public class Tag implements java.io.Serializable {
 		this.timeType = timeType;
 	}
 
-	@Column(name = "OBJECT_TYPE", nullable = false, length = 256)
+	@Column(name = "OBJECT_TYPE", nullable = false, length = 255)
 	public String getObjectType() {
 		return this.objectType;
 	}

@@ -93,9 +93,14 @@ public class PayloadDirectoryImplementation {
 			}
 			String jsonstr = dirtools.getMapper().writeValueAsString(dto);
 
-			BufferedWriter writer = Files.newBufferedWriter(payloadfilepath, dirtools.getCharset());
-			writer.write(jsonstr);
-			writer.close();
+			//BufferedWriter writer = Files.newBufferedWriter(payloadfilepath, dirtools.getCharset());
+			//writer.write(jsonstr);
+			//writer.close();
+			try (BufferedWriter writer = Files.newBufferedWriter(payloadfilepath, dirtools.getCharset())) {
+				writer.write(jsonstr);
+			} catch (IOException x) {
+				throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
+			}
 
 			return hash;
 		} catch (IOException x) {

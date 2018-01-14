@@ -33,7 +33,7 @@ echo "    Client for API $1 using -i $SCHEMA -c $CLIENT_CONFIG -l java -o $APIRO
 if [ $quite == "yes" ]; then
 	echo " quite execution...not launching server code generation;"
 else
-java -jar ./libs/swagger-codegen-cli-2.2.2.jar generate \
+java -jar ./libs/swagger-codegen-cli-2.2.3.jar generate \
      -i $SCHEMA \
      -c $CLIENT_CONFIG \
      -l java \
@@ -48,7 +48,7 @@ echo "    Server for API $1  using -i $SCHEMA -c $CONFIG -l jaxrs -t ./templates
 if [ $quite == "yes" ]; then
 	echo " quite execution...not launching server code generation;"
 else
- java -jar  ./libs/swagger-codegen-cli-2.2.2.jar generate \
+ java -jar  ./libs/swagger-codegen-cli-2.2.3.jar generate \
      -i $SCHEMA \
      -c $CONFIG \
      -l jaxrs \
@@ -61,7 +61,7 @@ echo "    Doc for API $1"
 if [ $quite == "yes" ]; then
 	echo " quite execution...not launching server code generation;"
 else
- java -jar  ./libs/swagger-codegen-cli-2.2.2.jar generate -i $SCHEMA \
+ java -jar  ./libs/swagger-codegen-cli-2.2.3.jar generate -i $SCHEMA \
      -l html \
      -o $APIROOT/doc
 fi

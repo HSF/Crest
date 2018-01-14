@@ -128,9 +128,13 @@ public class TagDirectoryImplementation {
 					Files.createFile(filepath);
 				}
 				String jsonstr = dirtools.getMapper().writeValueAsString(entity);
-				BufferedWriter writer = Files.newBufferedWriter(filepath, dirtools.getCharset());
-				writer.write(jsonstr);
-				writer.close();
+				
+				try (BufferedWriter writer = Files.newBufferedWriter(filepath, dirtools.getCharset())) {
+					writer.write(jsonstr);
+				} catch (IOException x) {
+					throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
+				}
+
 				return entity;				
 			} else {
 				throw new CdbServiceException("Tag path is null...");

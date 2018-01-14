@@ -56,14 +56,14 @@ public class RepositoryConfig {
     		return bean;
     }
 
-    @Profile({"default","sqlite","h2","dev"})
+    @Profile({"default","sqlite","h2","dev","mysql"})
     @Bean(name = "monitoringrepo")
     public JdbcMonitoringRepository monitoringDefaultRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
     		JdbcMonitoringRepository bean = new JdbcMonitoringRepository(mainDataSource);
     		return bean;
     }
 
-    @Profile({"default","prod","h2","wildfly","dev"})
+    @Profile({"default","prod","h2","wildfly","dev","mysql"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
     		PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);

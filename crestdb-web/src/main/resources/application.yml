@@ -98,11 +98,12 @@ spring:
       driverClassName: oracle.jdbc.OracleDriver
       username: ATLAS_PHYS_COND_W
       password: ${crest.db.password}
-      dbcp2.initial-size: 7
-      dbcp2.max-total: 100
-      dbcp2.pool-prepared-statements: true
-      tomcat.max-wait: 10000
-      tomcat.max-active: 100
+      dbcp2:
+        initial-size: 7
+        max-total: 100
+        pool-prepared-statements: true
+      #tomcat.max-wait: 10000
+      #tomcat.max-active: 100
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
@@ -181,6 +182,36 @@ crest:
   schemaname: none
   webstaticdir: ${crest.web.static}
   dump_dir: /tmp
+---
+spring:
+    profiles: mysql
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:mysql://localhost:3306/crestdb
+      testWhileIdle: true
+      validationQuery: SELECT 1 FROM DUAL
+      driverClassName: com.mysql.jdbc.Driver
+      username: root
+      password: 
+      dbcp2.initial-size: 7
+      dbcp2.max-total: 100
+      dbcp2.pool-prepared-statements: true
+      tomcat.max-wait: 10000
+      tomcat.max-active: 100
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.MySQLDialect
+        hibernate.jdbc.fetch_size: 300
+        hibernate.hbm2ddl.auto: create
+        hibernate.show_sql: false
+        hibernate.default_schema: crestdb
+server:
+    port: 8080 
+crest:
+  schemaname: none
+  webstaticdir: ${crest.web.static}
+  dump_dir: /tmp
   
-  
+ 
   

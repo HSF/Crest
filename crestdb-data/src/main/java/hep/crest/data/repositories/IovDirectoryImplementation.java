@@ -83,9 +83,12 @@ public class IovDirectoryImplementation {
 			// FIXME: this is probably inefficient for large number of iovs...to be checked
 			String jsonstr = dirtools.getMapper().writeValueAsString(iovlist);
 
-			BufferedWriter writer = Files.newBufferedWriter(iovfilepath, dirtools.getCharset());
-			writer.write(jsonstr);
-			writer.close();
+			try (BufferedWriter writer = Files.newBufferedWriter(iovfilepath, dirtools.getCharset())) {
+				writer.write(jsonstr);
+			} catch (IOException x) {
+				throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
+			}
+
 
 			return iovdto;
 		} catch (IOException x) {
@@ -104,10 +107,11 @@ public class IovDirectoryImplementation {
 			// FIXME: this is probably inefficient for large number of iovs...to be checked
 			String jsonstr = dirtools.getMapper().writeValueAsString(iovdtolist);
 
-			BufferedWriter writer = Files.newBufferedWriter(iovfilepath, dirtools.getCharset());
-			writer.write(jsonstr);
-			writer.close();
-
+			try (BufferedWriter writer = Files.newBufferedWriter(iovfilepath, dirtools.getCharset())) {
+				writer.write(jsonstr);
+			} catch (IOException x) {
+				throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
+			}
 			return iovdtolist;
 		} catch (IOException x) {
 			throw new CdbServiceException("IO error " + x.getMessage());
