@@ -17,7 +17,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import javax.validation.constraints.*;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-11-23T12:33:13.914+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
 public abstract class MonitoringApiService {
     public abstract Response listPayloadTagInfo( String tagname,SecurityContext securityContext, UriInfo info) throws NotFoundException;
 }

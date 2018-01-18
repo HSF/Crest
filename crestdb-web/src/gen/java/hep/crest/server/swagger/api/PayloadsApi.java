@@ -2,7 +2,6 @@ package hep.crest.server.swagger.api;
 
 import hep.crest.swagger.model.*;
 import hep.crest.server.swagger.api.PayloadsApiService;
-/////import hep.crest.server.swagger.api.factories.PayloadsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
@@ -33,9 +32,8 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the payloads API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
 public class PayloadsApi  {
-//   private final PayloadsApiService delegate = PayloadsApiServiceFactory.getPayloadsApi();
 
 	@Autowired
 	private PayloadsApiService delegate;

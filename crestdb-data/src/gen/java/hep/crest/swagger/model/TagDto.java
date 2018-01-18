@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
 /**
  * TagDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class TagDto   {
   @JsonProperty("name")
   private String name = null;
@@ -59,10 +59,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get name
    * @return name
-  **/
+   **/
   @JsonProperty("name")
   @ApiModelProperty(value = "")
   public String getName() {
@@ -78,10 +78,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get timeType
    * @return timeType
-  **/
+   **/
   @JsonProperty("timeType")
   @ApiModelProperty(value = "")
   public String getTimeType() {
@@ -97,10 +97,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get objectType
    * @return objectType
-  **/
+   **/
   @JsonProperty("objectType")
   @ApiModelProperty(value = "")
   public String getObjectType() {
@@ -116,10 +116,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get synchronization
    * @return synchronization
-  **/
+   **/
   @JsonProperty("synchronization")
   @ApiModelProperty(value = "")
   public String getSynchronization() {
@@ -135,10 +135,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get description
    * @return description
-  **/
+   **/
   @JsonProperty("description")
   @ApiModelProperty(value = "")
   public String getDescription() {
@@ -154,10 +154,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get lastValidatedTime
    * @return lastValidatedTime
-  **/
+   **/
   @JsonProperty("lastValidatedTime")
   @ApiModelProperty(value = "")
   public BigDecimal getLastValidatedTime() {
@@ -173,10 +173,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get endOfValidity
    * @return endOfValidity
-  **/
+   **/
   @JsonProperty("endOfValidity")
   @ApiModelProperty(value = "")
   public BigDecimal getEndOfValidity() {
@@ -192,10 +192,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get insertionTime
    * @return insertionTime
-  **/
+   **/
   @JsonProperty("insertionTime")
   @ApiModelProperty(value = "")
   public Date getInsertionTime() {
@@ -211,10 +211,10 @@ public class TagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get modificationTime
    * @return modificationTime
-  **/
+   **/
   @JsonProperty("modificationTime")
   @ApiModelProperty(value = "")
   public Date getModificationTime() {

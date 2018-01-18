@@ -26,10 +26,10 @@ import javax.validation.constraints.*;
 /**
  * GroupDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class GroupDto   {
   @JsonProperty("groups")
-  private List<BigDecimal> groups = new ArrayList<BigDecimal>();
+  private List<BigDecimal> groups = null;
 
   public GroupDto groups(List<BigDecimal> groups) {
     this.groups = groups;
@@ -37,14 +37,17 @@ public class GroupDto   {
   }
 
   public GroupDto addGroupsItem(BigDecimal groupsItem) {
+    if (this.groups == null) {
+      this.groups = new ArrayList<BigDecimal>();
+    }
     this.groups.add(groupsItem);
     return this;
   }
 
-   /**
+  /**
    * Get groups
    * @return groups
-  **/
+   **/
   @JsonProperty("groups")
   @ApiModelProperty(value = "")
   public List<BigDecimal> getGroups() {

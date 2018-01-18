@@ -23,7 +23,7 @@ import javax.validation.constraints.*;
 /**
  * PayloadTagInfoDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-11-23T12:27:33.393+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class PayloadTagInfoDto   {
   @JsonProperty("tagname")
   private String tagname = null;
@@ -42,10 +42,10 @@ public class PayloadTagInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get tagname
    * @return tagname
-  **/
+   **/
   @JsonProperty("tagname")
   @ApiModelProperty(value = "")
   public String getTagname() {
@@ -61,10 +61,10 @@ public class PayloadTagInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get niovs
    * @return niovs
-  **/
+   **/
   @JsonProperty("niovs")
   @ApiModelProperty(value = "")
   public Integer getNiovs() {
@@ -80,10 +80,10 @@ public class PayloadTagInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get totvolume
    * @return totvolume
-  **/
+   **/
   @JsonProperty("totvolume")
   @ApiModelProperty(value = "")
   public Float getTotvolume() {
@@ -99,10 +99,10 @@ public class PayloadTagInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get avgvolume
    * @return avgvolume
-  **/
+   **/
   @JsonProperty("avgvolume")
   @ApiModelProperty(value = "")
   public Float getAvgvolume() {

@@ -2,7 +2,6 @@ package hep.crest.server.swagger.api;
 
 import hep.crest.swagger.model.*;
 import hep.crest.server.swagger.api.RuninfoApiService;
-/////import hep.crest.server.swagger.api.factories.RuninfoApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
@@ -31,9 +30,8 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the runinfo API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-11-07T17:56:21.460+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
 public class RuninfoApi  {
-//   private final RuninfoApiService delegate = RuninfoApiServiceFactory.getRuninfoApi();
 
 	@Autowired
 	private RuninfoApiService delegate;

@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
 /**
  * PayloadDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class PayloadDto   {
   @JsonProperty("hash")
   private String hash = null;
@@ -49,10 +49,10 @@ public class PayloadDto   {
     return this;
   }
 
-   /**
+  /**
    * Get hash
    * @return hash
-  **/
+   **/
   @JsonProperty("hash")
   @ApiModelProperty(value = "")
   public String getHash() {
@@ -68,10 +68,10 @@ public class PayloadDto   {
     return this;
   }
 
-   /**
+  /**
    * Get version
    * @return version
-  **/
+   **/
   @JsonProperty("version")
   @ApiModelProperty(value = "")
   public String getVersion() {
@@ -87,10 +87,10 @@ public class PayloadDto   {
     return this;
   }
 
-   /**
+  /**
    * Get objectType
    * @return objectType
-  **/
+   **/
   @JsonProperty("objectType")
   @ApiModelProperty(value = "")
   public String getObjectType() {
@@ -106,13 +106,13 @@ public class PayloadDto   {
     return this;
   }
 
-   /**
+  /**
    * Get data
    * @return data
-  **/
+   **/
   @JsonProperty("data")
   @ApiModelProperty(value = "")
-  public byte[] getData() {
+ @Pattern(regexp="^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$")  public byte[] getData() {
     return data;
   }
 
@@ -125,13 +125,13 @@ public class PayloadDto   {
     return this;
   }
 
-   /**
+  /**
    * Get streamerInfo
    * @return streamerInfo
-  **/
+   **/
   @JsonProperty("streamerInfo")
   @ApiModelProperty(value = "")
-  public byte[] getStreamerInfo() {
+ @Pattern(regexp="^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$")  public byte[] getStreamerInfo() {
     return streamerInfo;
   }
 
@@ -144,10 +144,10 @@ public class PayloadDto   {
     return this;
   }
 
-   /**
+  /**
    * Get insertionTime
    * @return insertionTime
-  **/
+   **/
   @JsonProperty("insertionTime")
   @ApiModelProperty(value = "")
   public Date getInsertionTime() {

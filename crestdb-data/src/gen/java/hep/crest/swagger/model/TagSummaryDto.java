@@ -23,7 +23,7 @@ import javax.validation.constraints.*;
 /**
  * TagSummaryDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class TagSummaryDto   {
   @JsonProperty("tagname")
   private String tagname = null;
@@ -36,10 +36,10 @@ public class TagSummaryDto   {
     return this;
   }
 
-   /**
+  /**
    * Get tagname
    * @return tagname
-  **/
+   **/
   @JsonProperty("tagname")
   @ApiModelProperty(value = "")
   public String getTagname() {
@@ -55,10 +55,10 @@ public class TagSummaryDto   {
     return this;
   }
 
-   /**
+  /**
    * Get niovs
    * @return niovs
-  **/
+   **/
   @JsonProperty("niovs")
   @ApiModelProperty(value = "")
   public Long getNiovs() {

@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
 /**
  * RunLumiInfoDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-11-07T14:29:18.354+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class RunLumiInfoDto   {
   @JsonProperty("since")
   private BigDecimal since = null;
@@ -46,10 +46,10 @@ public class RunLumiInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get since
    * @return since
-  **/
+   **/
   @JsonProperty("since")
   @ApiModelProperty(value = "")
   public BigDecimal getSince() {
@@ -65,10 +65,10 @@ public class RunLumiInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get run
    * @return run
-  **/
+   **/
   @JsonProperty("run")
   @ApiModelProperty(value = "")
   public BigDecimal getRun() {
@@ -84,10 +84,10 @@ public class RunLumiInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get lb
    * @return lb
-  **/
+   **/
   @JsonProperty("lb")
   @ApiModelProperty(value = "")
   public BigDecimal getLb() {
@@ -103,10 +103,10 @@ public class RunLumiInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get starttime
    * @return starttime
-  **/
+   **/
   @JsonProperty("starttime")
   @ApiModelProperty(value = "")
   public BigDecimal getStarttime() {
@@ -122,10 +122,10 @@ public class RunLumiInfoDto   {
     return this;
   }
 
-   /**
+  /**
    * Get endtime
    * @return endtime
-  **/
+   **/
   @JsonProperty("endtime")
   @ApiModelProperty(value = "")
   public BigDecimal getEndtime() {

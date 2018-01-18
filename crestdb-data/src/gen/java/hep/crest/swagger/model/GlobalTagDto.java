@@ -15,8 +15,6 @@ package hep.crest.swagger.model;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,11 +22,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 import javax.validation.constraints.*;
 
-import hep.crest.data.serializers.*;
 /**
  * GlobalTagDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class GlobalTagDto   {
   @JsonProperty("name")
   private String name = null;
@@ -68,10 +65,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get name
    * @return name
-  **/
+   **/
   @JsonProperty("name")
   @ApiModelProperty(value = "")
   public String getName() {
@@ -87,10 +84,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get validity
    * @return validity
-  **/
+   **/
   @JsonProperty("validity")
   @ApiModelProperty(value = "")
   public BigDecimal getValidity() {
@@ -106,10 +103,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get description
    * @return description
-  **/
+   **/
   @JsonProperty("description")
   @ApiModelProperty(value = "")
   public String getDescription() {
@@ -125,10 +122,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get release
    * @return release
-  **/
+   **/
   @JsonProperty("release")
   @ApiModelProperty(value = "")
   public String getRelease() {
@@ -144,10 +141,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get insertionTime
    * @return insertionTime
-  **/
+   **/
   @JsonProperty("insertionTime")
   @ApiModelProperty(value = "")
   public Date getInsertionTime() {
@@ -163,10 +160,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get snapshotTime
    * @return snapshotTime
-  **/
+   **/
   @JsonProperty("snapshotTime")
   @ApiModelProperty(value = "")
   public Date getSnapshotTime() {
@@ -182,10 +179,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get scenario
    * @return scenario
-  **/
+   **/
   @JsonProperty("scenario")
   @ApiModelProperty(value = "")
   public String getScenario() {
@@ -201,10 +198,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get workflow
    * @return workflow
-  **/
+   **/
   @JsonProperty("workflow")
   @ApiModelProperty(value = "")
   public String getWorkflow() {
@@ -220,10 +217,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get type
    * @return type
-  **/
+   **/
   @JsonProperty("type")
   @ApiModelProperty(value = "")
   public String getType() {
@@ -239,10 +236,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get snapshotTimeMilli
    * @return snapshotTimeMilli
-  **/
+   **/
   @JsonProperty("snapshotTimeMilli")
   @ApiModelProperty(value = "")
   public Long getSnapshotTimeMilli() {
@@ -258,10 +255,10 @@ public class GlobalTagDto   {
     return this;
   }
 
-   /**
+  /**
    * Get insertionTimeMilli
    * @return insertionTimeMilli
-  **/
+   **/
   @JsonProperty("insertionTimeMilli")
   @ApiModelProperty(value = "")
   public Long getInsertionTimeMilli() {

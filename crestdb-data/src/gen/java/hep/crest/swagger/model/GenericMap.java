@@ -16,12 +16,13 @@ package hep.crest.swagger.model;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.Map;
+import javax.validation.constraints.*;
 
 /**
  * GenericMap
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2017-09-20T12:16:14.684+02:00")
-public class GenericMap extends HashMap<String, String> {
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
+public class GenericMap extends HashMap<String, String>  {
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -31,7 +32,7 @@ public class GenericMap extends HashMap<String, String> {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    return super.equals(o);
+    return true;
   }
 
   @Override
@@ -59,6 +60,5 @@ public class GenericMap extends HashMap<String, String> {
     }
     return o.toString().replace("\n", "\n    ");
   }
-  
 }
 

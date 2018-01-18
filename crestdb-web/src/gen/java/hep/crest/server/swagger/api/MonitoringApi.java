@@ -2,7 +2,6 @@ package hep.crest.server.swagger.api;
 
 import hep.crest.swagger.model.*;
 import hep.crest.server.swagger.api.MonitoringApiService;
-/////import hep.crest.server.swagger.api.factories.MonitoringApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
@@ -31,9 +30,8 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the monitoring API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-11-23T12:33:13.914+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
 public class MonitoringApi  {
-//   private final MonitoringApiService delegate = MonitoringApiServiceFactory.getMonitoringApi();
 
 	@Autowired
 	private MonitoringApiService delegate;

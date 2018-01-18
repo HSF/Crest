@@ -23,7 +23,7 @@ import javax.validation.constraints.*;
 /**
  * GlobalTagMapDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class GlobalTagMapDto   {
   @JsonProperty("globalTagName")
   private String globalTagName = null;
@@ -42,10 +42,10 @@ public class GlobalTagMapDto   {
     return this;
   }
 
-   /**
+  /**
    * Get globalTagName
    * @return globalTagName
-  **/
+   **/
   @JsonProperty("globalTagName")
   @ApiModelProperty(value = "")
   public String getGlobalTagName() {
@@ -61,10 +61,10 @@ public class GlobalTagMapDto   {
     return this;
   }
 
-   /**
+  /**
    * Get record
    * @return record
-  **/
+   **/
   @JsonProperty("record")
   @ApiModelProperty(value = "")
   public String getRecord() {
@@ -80,10 +80,10 @@ public class GlobalTagMapDto   {
     return this;
   }
 
-   /**
+  /**
    * Get label
    * @return label
-  **/
+   **/
   @JsonProperty("label")
   @ApiModelProperty(value = "")
   public String getLabel() {
@@ -99,10 +99,10 @@ public class GlobalTagMapDto   {
     return this;
   }
 
-   /**
+  /**
    * Get tagName
    * @return tagName
-  **/
+   **/
   @JsonProperty("tagName")
   @ApiModelProperty(value = "")
   public String getTagName() {

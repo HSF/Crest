@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
 /**
  * IovDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-06T09:44:28.040+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
 public class IovDto   {
   @JsonProperty("tagName")
   private String tagName = null;
@@ -44,10 +44,10 @@ public class IovDto   {
     return this;
   }
 
-   /**
+  /**
    * Get tagName
    * @return tagName
-  **/
+   **/
   @JsonProperty("tagName")
   @ApiModelProperty(value = "")
   public String getTagName() {
@@ -63,10 +63,10 @@ public class IovDto   {
     return this;
   }
 
-   /**
+  /**
    * Get since
    * @return since
-  **/
+   **/
   @JsonProperty("since")
   @ApiModelProperty(value = "")
   public BigDecimal getSince() {
@@ -82,10 +82,10 @@ public class IovDto   {
     return this;
   }
 
-   /**
+  /**
    * Get insertionTime
    * @return insertionTime
-  **/
+   **/
   @JsonProperty("insertionTime")
   @ApiModelProperty(value = "")
   public Date getInsertionTime() {
@@ -101,10 +101,10 @@ public class IovDto   {
     return this;
   }
 
-   /**
+  /**
    * Get payloadHash
    * @return payloadHash
-  **/
+   **/
   @JsonProperty("payloadHash")
   @ApiModelProperty(value = "")
   public String getPayloadHash() {
