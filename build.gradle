@@ -1,5 +1,7 @@
 plugins {
   id "org.sonarqube" version "2.5"
+  id 'org.hidetake.swagger.generator' version '2.9.0'
+  
 }
 
 allprojects  {
@@ -7,6 +9,8 @@ allprojects  {
   group = 'hep.crest'
   version = '1.0-SNAPSHOT'
 }
+
+
 
 // SVOM
 // Define a project specific method
@@ -36,6 +40,24 @@ ext {
 }
 /////apply from: 'crest.gradle'
 
+repositories {
+	jcenter()
+}
+dependencies {
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.2.3'
+}
+// Task to generate sources in build output directory
+swaggerSources {
+  crestdb {
+    inputFile = file('swagger_schemas/swagger/json/crestdb.json')
+    code {
+      language = 'jaxrs'
+      templateDir = file('./templates/java/JavaJaxRs')
+      configFile = file('swagger_schemas/swagger/json/crestdb-config.json')
+    }
+  }
+}
+
 subprojects {
     apply plugin: 'java'
     sourceCompatibility = 1.8
@@ -45,6 +67,7 @@ subprojects {
     }
   
 	repositories {
+		jcenter()
 	    mavenLocal()
 	    
 	    maven { url "http://repo.spring.io/milestone" }
@@ -55,6 +78,7 @@ subprojects {
 
   
 	dependencies {
+	
 	    compile "io.swagger:swagger-annotations:$swagger_annotations_version"
 	   	compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
 	   	compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
