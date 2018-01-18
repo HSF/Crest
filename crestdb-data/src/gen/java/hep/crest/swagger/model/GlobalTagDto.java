@@ -15,7 +15,6 @@ package hep.crest.swagger.model;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
