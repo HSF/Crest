@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.monitoring.repositories.JdbcMonitoringRepository;
+import hep.crest.data.monitoring.repositories.IMonitoringRepository;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.data.utils.RunIovConverter;
@@ -51,7 +51,7 @@ public class MonitoringApiServiceImpl extends MonitoringApiService {
 	private IFilteringCriteria filtering;
 
 	@Autowired
-	JdbcMonitoringRepository monitoringrepo;
+	IMonitoringRepository monitoringrepo;
 
 
 	@Override

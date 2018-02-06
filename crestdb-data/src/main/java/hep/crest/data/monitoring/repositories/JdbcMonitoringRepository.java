@@ -20,7 +20,7 @@ import hep.crest.swagger.model.PayloadTagInfoDto;
  * @author formica
  *
  */
-public class JdbcMonitoringRepository {
+public class JdbcMonitoringRepository implements IMonitoringRepository {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -42,11 +42,10 @@ public class JdbcMonitoringRepository {
 		this.ds = ds;
 	}
 	
-	/**
-	 * @param tagpattern
-	 * @return list of monitoring metrics
-	 * @throws Exception
+	/* (non-Javadoc)
+	 * @see hep.crest.data.monitoring.repositories.IMonitoringRepository#selectTagInfo(java.lang.String)
 	 */
+	@Override
 	public List<PayloadTagInfoDto> selectTagInfo(String tagpattern) throws CdbServiceException {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String sql;

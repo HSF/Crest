@@ -161,7 +161,7 @@ spring:
     jersey:
       application-path: /crestapi
     datasource:
-      url: jdbc:postgresql://localhost:6600/crestdb
+      url: jdbc:postgresql://localhost:${crest.db.port}/crestdb
       dbcp2:
         test-while-idle: true
         validation-query: SELECT 1 
@@ -169,7 +169,7 @@ spring:
         max-total: 100
         pool-prepared-statements: true
       driverClassName: org.postgresql.Driver
-      username: admin
+      username: formica
       password: ${crest.db.password}
       tomcat.max-wait: 10000
       tomcat.max-active: 100
@@ -188,6 +188,8 @@ crest:
   schemaname: none
   webstaticdir: ${crest.web.static}
   dump_dir: /tmp
+  db:
+    port: 6600
 ---
 spring:
     profiles: mysql

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import hep.crest.data.monitoring.repositories.IMonitoringRepository;
 import hep.crest.data.monitoring.repositories.JdbcMonitoringRepository;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.IovGroupsCustom;
@@ -51,15 +52,15 @@ public class RepositoryConfig {
 
     @Profile({"prod","wildfly"})
     @Bean(name = "monitoringrepo")
-    public JdbcMonitoringRepository monitoringRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
-    		JdbcMonitoringRepository bean = new JdbcMonitoringRepository(mainDataSource);
+    public IMonitoringRepository monitoringRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
+    		IMonitoringRepository bean = new JdbcMonitoringRepository(mainDataSource);
     		return bean;
     }
 
-    @Profile({"default","sqlite","h2","dev","mysql"})
+    @Profile({"default","sqlite","h2","dev","mysql","postgres"})
     @Bean(name = "monitoringrepo")
-    public JdbcMonitoringRepository monitoringDefaultRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
-    		JdbcMonitoringRepository bean = new JdbcMonitoringRepository(mainDataSource);
+    public IMonitoringRepository monitoringDefaultRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
+    		IMonitoringRepository bean = new JdbcMonitoringRepository(mainDataSource);
     		return bean;
     }
 
