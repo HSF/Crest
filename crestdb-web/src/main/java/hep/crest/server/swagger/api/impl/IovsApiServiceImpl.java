@@ -93,7 +93,8 @@ public class IovsApiServiceImpl extends IovsApiService {
 				dtolist = iovService.findAllIovs(null, preq);
 			} else {
 
-				List<SearchCriteria> params = prh.createMatcherCriteria("tagname:" + tagname);
+//				List<SearchCriteria> params = prh.createMatcherCriteria("tagname:" + tagname);
+				List<SearchCriteria> params = prh.createCriteria("tagname",":",tagname);
 				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
 				BooleanExpression wherepred = null;
 

@@ -84,5 +84,16 @@ public class PageRequestHelper {
 		log.debug("List of search criteria: " + params.size());
 		return params;
 	}
+	
+	/**
+	 * @param by
+	 * @return
+	 */
+	public List<SearchCriteria> createCriteria(String key, String op, String val) {
+
+		List<SearchCriteria> params = new ArrayList<>();
+		params.add(new SearchCriteria(key,op,val));
+		return params;
+	}
 
 }

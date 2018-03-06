@@ -138,8 +138,8 @@ spring:
       driverClassName: oracle.jdbc.OracleDriver
       username: ATLAS_PHYS_COND_W
       password: ${crest.db.password}
-      tomcat.max-wait: 10000
-      tomcat.max-active: 100
+#      tomcat.max-wait: 10000
+#      tomcat.max-active: 100
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
