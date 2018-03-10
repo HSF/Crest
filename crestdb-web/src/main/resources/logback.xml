@@ -48,7 +48,7 @@
 <!-- 		<appender-ref ref="fileAppender" /> -->
 	</logger>
 	
-	<root level="INFO">
+	<root level="DEBUG">
 <!-- 		<appender-ref ref="fileAppender" /> -->
 		<appender-ref ref="consoleAppender" />
 	</root>

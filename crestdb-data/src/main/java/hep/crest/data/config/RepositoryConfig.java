@@ -42,7 +42,7 @@ public class RepositoryConfig {
     }
     
     @Bean(name = "iovgroupsrepo")
-    public IovGroupsCustom iovgroupsRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
+    public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
     		if (!cprops.getSchemaname().equals("none")) {
     			bean.setDefault_tablename(cprops.getSchemaname());
@@ -50,6 +50,7 @@ public class RepositoryConfig {
     		return bean;
     }
 
+    /*
     @Profile({"prod","wildfly"})
     @Bean(name = "monitoringrepo")
     public IMonitoringRepository monitoringRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
@@ -63,10 +64,11 @@ public class RepositoryConfig {
     		IMonitoringRepository bean = new JdbcMonitoringRepository(mainDataSource);
     		return bean;
     }
+    */
 
     @Profile({"default","prod","h2","wildfly","dev","mysql"})
     @Bean(name = "payloaddatadbrepo")
-    public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
+    public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
 			bean.setDefault_tablename(cprops.getSchemaname());
@@ -76,7 +78,7 @@ public class RepositoryConfig {
     
     @Profile({"postgres"})
     @Bean(name = "payloaddatadbrepo")
-    public PayloadDataBaseCustom payloadPostgresRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
+    public PayloadDataBaseCustom payloadPostgresRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
 			bean.setDefault_tablename(cprops.getSchemaname());
@@ -86,7 +88,7 @@ public class RepositoryConfig {
     
     @Profile("sqlite")
     @Bean(name = "payloaddatadbrepo")
-    public PayloadDataBaseCustom payloadSqliteRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
+    public PayloadDataBaseCustom payloadSqliteRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
 			bean.setDefault_tablename(cprops.getSchemaname());

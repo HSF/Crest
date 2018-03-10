@@ -36,7 +36,7 @@ public class PayloadHandler {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	@Qualifier("daoDataSource")
+	@Qualifier("dataSource")
 	private DataSource ds;
 
 	private static Integer MAX_LENGTH = 1024;
