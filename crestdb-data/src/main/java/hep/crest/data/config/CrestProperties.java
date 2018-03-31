@@ -14,6 +14,7 @@ public class CrestProperties {
 	private String security;
 	private String synchro;
 	private String webstaticdir;
+	private String authenticationtype;
 
 	public String getDump_dir() {
 		System.out.println("property dump_dir has value: "+dump_dir);
@@ -55,6 +56,14 @@ public class CrestProperties {
 
 	public void setWebstaticdir(String webstaticdir) {
 		this.webstaticdir = webstaticdir;
+	}
+
+	public String getAuthenticationtype() {
+		return this.authenticationtype;
+	}
+	
+	public void setAuthenticationtype(String authtype) {
+		this.authenticationtype = authtype;
 	}
 	
 }
