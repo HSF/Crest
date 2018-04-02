@@ -18,7 +18,7 @@ caching:
 crest:
   dump_dir: /tmp/crest-dump/
   schemaname: none
-  security: active
+  security: none
   synchro: none
   webstaticdir: /tmp
   dbfile: /tmp/crestdb
@@ -29,6 +29,7 @@ server:
     servlet-path: /
     compression:
       enabled: true
+      
 spring:
     security.strategy: MODE_INHERITABLETHREADLOCAL
     jersey:
@@ -99,7 +100,7 @@ crest:
   dump_dir: ${crest.dump.dir}
 ---
 spring:
-    profiles: prod
+    profiles: prodssl
     jersey:
       application-path: /crestapi
     datasource:
@@ -123,13 +124,23 @@ spring:
         hibernate.show_sql: false
         hibernate.default_schema: ATLAS_PHYS_COND
 server:
-    port: 8080 
-    tomcat:
-      max-connections: 200
+    port: 8443
+    servlet-path: /
+    compression:
+      enabled: true
+    ssl:
+      key-alias: crest_localhost_sslserver
+      key-store: classpath:ssl-crest-server.jks
+      key-store-password: ${store.password}
+      key-password: ${key.password}  
 crest:
   schemaname: ATLAS_PHYS_COND
   webstaticdir: ${crest.web.static}
   dump_dir: ${crest.dump.dir}
+  security: active
+  authenticationtype: none
+  
+  
 ---
 spring:
     profiles: dev

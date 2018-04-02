@@ -52,6 +52,7 @@ dependencies {
 		exclude module: 'spring-boot-starter-tomcat'
 	}
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version:springboot_version
+	compile group: 'org.springframework.security', name: 'spring-security-ldap'
     compile ("org.springframework.boot:spring-boot-starter-jersey:$springboot_version") {
 		exclude module: 'spring-boot-starter-tomcat'
 	}
