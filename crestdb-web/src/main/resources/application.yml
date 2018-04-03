@@ -100,7 +100,7 @@ crest:
   dump_dir: ${crest.dump.dir}
 ---
 spring:
-    profiles: prodssl
+    profiles: prod
     jersey:
       application-path: /crestapi
     datasource:
@@ -139,8 +139,6 @@ crest:
   dump_dir: ${crest.dump.dir}
   security: active
   authenticationtype: none
-  
-  
 ---
 spring:
     profiles: dev

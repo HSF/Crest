@@ -9,6 +9,7 @@ import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.stereotype.Component;
 
 import hep.crest.server.filters.AuthenticationFilter;
+import hep.crest.server.filters.AuthorizationFilter;
 import hep.crest.server.filters.CacheControlFilter;
 import hep.crest.server.swagger.api.AdminApi;
 import hep.crest.server.swagger.api.FsApi;
@@ -39,6 +40,7 @@ public class JerseyConfig extends ResourceConfig {
 		register(MultiPartFeature.class);
 		////register(AuthenticationFilter.class);
 		register(CacheControlFilter.class);
+		register(AuthorizationFilter.class);
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 	}
 	
