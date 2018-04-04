@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import hep.crest.server.annotations.AuthorizationControl;
 
@@ -50,6 +51,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 	@Context 
 	private SecurityContext securityContext;
 	
+//	@Context
+//	Authentication authentication;
+	
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		log.info("Authorization filter operates in context...."+requestContext.getMethod());
@@ -61,7 +65,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 			log.info("Found user "+principal);
 //			HttpServletRequest req = (HttpServletRequest)requestContext.getRequest();
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 			for (GrantedAuthority grantedAuthority : authorities) {
 				log.info("User has authority : "+grantedAuthority);
 			}
