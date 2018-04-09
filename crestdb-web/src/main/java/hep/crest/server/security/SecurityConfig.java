@@ -113,8 +113,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 					.ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
 					.contextSource(context)
 					.userSearchBase(userSearchBase).userDnPatterns(userDnPatterns)
-					.groupSearchBase(groupSearchBase).groupSearchFilter(groupSearchFilter)
-					.groupRoleAttribute(groupRoleAttribute)
 					.rolePrefix("")
 					;
 		} else {
@@ -128,10 +126,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	}
 	
-	@Bean(name="ldapAuthoritiesPopulator")
+////	@Bean(name="ldapAuthoritiesPopulator")
 	public LdapAuthoritiesPopulator authoritiesPopulator(ContextSource context) {
         LdapAuthoritiesPopulator ldp = new DefaultLdapAuthoritiesPopulator(context, groupSearchBase);
         ((DefaultLdapAuthoritiesPopulator)ldp).setSearchSubtree(true);
+        ((DefaultLdapAuthoritiesPopulator)ldp).setGroupRoleAttribute(groupRoleAttribute);
+        ((DefaultLdapAuthoritiesPopulator)ldp).setGroupSearchFilter(groupSearchFilter);
+        ((DefaultLdapAuthoritiesPopulator)ldp).setRolePrefix("");
         return ldp;
 	}
 
