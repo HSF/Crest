@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpMethod;
+import org.springframework.ldap.core.ContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -101,12 +102,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 		} else if (cprops.getAuthenticationtype().equals("ldap")) {
 			// here put LDAP
+	        String ldap_url = url;
+	        DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(ldap_url);
+	        context.setUserDn(managerDn);
+	        context.setPassword(managerPassword);
+	        context.setReferral("follow");
+	        context.afterPropertiesSet();
+	        LdapAuthoritiesPopulator ldapAuthoritiesPopulator = authoritiesPopulator(context);
 			auth.ldapAuthentication()
-					.ldapAuthoritiesPopulator(authoritiesPopulator())
+					.ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
+					.contextSource(context)
 					.userSearchBase(userSearchBase).userDnPatterns(userDnPatterns)
 					.groupSearchBase(groupSearchBase).groupSearchFilter(groupSearchFilter)
 					.groupRoleAttribute(groupRoleAttribute)
-					.rolePrefix("");
+					.rolePrefix("")
+					;
 		} else {
 			auth.inMemoryAuthentication().withUser("userusr").password("password").roles("user").and().withUser("adminusr")
 					.password("password").roles("admin", "user").and().withUser("guru").password("guru")
@@ -119,13 +129,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	
 	@Bean(name="ldapAuthoritiesPopulator")
-	public LdapAuthoritiesPopulator authoritiesPopulator() {
-        String ldap_url = url;
-        DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(ldap_url);
-        context.setUserDn(managerDn);
-        context.setPassword(managerPassword);
-        context.setReferral("follow");
-        context.afterPropertiesSet();
+	public LdapAuthoritiesPopulator authoritiesPopulator(ContextSource context) {
         LdapAuthoritiesPopulator ldp = new DefaultLdapAuthoritiesPopulator(context, groupSearchBase);
         ((DefaultLdapAuthoritiesPopulator)ldp).setSearchSubtree(true);
         return ldp;

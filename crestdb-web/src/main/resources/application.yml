@@ -104,7 +104,8 @@ spring:
     jersey:
       application-path: /crestapi
     datasource:
-      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
+###      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
+      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=intr-s.cern.ch)(PORT=10121))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
       testWhileIdle: true
       validationQuery: SELECT 1 FROM DUAL
       driverClassName: oracle.jdbc.OracleDriver
