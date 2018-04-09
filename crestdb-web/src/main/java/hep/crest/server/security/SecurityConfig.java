@@ -22,6 +22,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
+import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 
 import hep.crest.data.config.CrestProperties;
 
@@ -98,10 +101,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 		} else if (cprops.getAuthenticationtype().equals("ldap")) {
 			// here put LDAP
-			auth.ldapAuthentication().userSearchBase(userSearchBase).userDnPatterns(userDnPatterns)
+			auth.ldapAuthentication()
+					.ldapAuthoritiesPopulator(authoritiesPopulator())
+					.userSearchBase(userSearchBase).userDnPatterns(userDnPatterns)
 					.groupSearchBase(groupSearchBase).groupSearchFilter(groupSearchFilter)
-					.groupRoleAttribute(groupRoleAttribute).contextSource().managerDn(managerDn)
-					.managerPassword(managerPassword).url(url);
+					.groupRoleAttribute(groupRoleAttribute)
+					.rolePrefix("");
 		} else {
 			auth.inMemoryAuthentication().withUser("userusr").password("password").roles("user").and().withUser("adminusr")
 					.password("password").roles("admin", "user").and().withUser("guru").password("guru")
@@ -111,6 +116,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// http://www.programming-free.com/2015/09/spring-security-password-encryption.html?showComment=1502891898256
 		// auth.userDetailsService(accountRepository)
 
+	}
+	
+	@Bean(name="ldapAuthoritiesPopulator")
+	public LdapAuthoritiesPopulator authoritiesPopulator() {
+        String ldap_url = url;
+        DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(ldap_url);
+        context.setUserDn(managerDn);
+        context.setPassword(managerPassword);
+        context.setReferral("follow");
+        context.afterPropertiesSet();
+        LdapAuthoritiesPopulator ldp = new DefaultLdapAuthoritiesPopulator(context, groupSearchBase);
+        ((DefaultLdapAuthoritiesPopulator)ldp).setSearchSubtree(true);
+        return ldp;
 	}
 
 	@Bean(name = "passwordEncoder")
