@@ -50,10 +50,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
 	@Context 
 	private SecurityContext securityContext;
-	
-//	@Context
-//	Authentication authentication;
-	
+		
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		log.info("Authorization filter operates in context...."+requestContext.getMethod());
@@ -62,7 +59,10 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 		// Access allowed for all
 //		if (method.isAnnotationPresent(AuthorizationControl.class)) {
 			Principal principal = securityContext.getUserPrincipal();
-			log.info("Found user "+principal);
+			log.debug("Found user "+principal);
+			if (principal == null) {
+				requestContext.abortWith(ACCESS_DENIED);
+			}
 //			HttpServletRequest req = (HttpServletRequest)requestContext.getRequest();
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();

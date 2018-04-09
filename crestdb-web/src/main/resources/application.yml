@@ -139,7 +139,7 @@ crest:
   webstaticdir: ${crest.web.static}
   dump_dir: ${crest.dump.dir}
   security: active
-  authenticationtype: none
+  authenticationtype: ldap
 ---
 spring:
     profiles: dev
@@ -172,6 +172,8 @@ server:
 crest:
   schemaname: ATLAS_PHYS_COND
   webstaticdir: ${crest.web.static}
+  dump_dir: ${crest.dump.dir}
+  security: none
 ---
 spring:
     profiles: postgres

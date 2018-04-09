@@ -1,5 +1,6 @@
 package hep.crest.server.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
+import hep.crest.data.config.CrestProperties;
+import hep.crest.server.filters.AuthorizationFilter;
 import hep.crest.server.swagger.api.MonitoringApi;
 import hep.crest.server.swagger.api.RuninfoApi;
 
@@ -23,12 +26,18 @@ import hep.crest.server.swagger.api.RuninfoApi;
 ////@PropertySource("classpath:crest.properties")
 public class ServicesConfig {
 
+	@Autowired
+	private CrestProperties cprops;
+	
     @Profile({"prod","wildfly"})
 	@Bean(name = "jerseyConfig")
 	public JerseyConfig getJerseyResource() {
 		JerseyConfig jc = new JerseyConfig();
 		jc.jerseyregister(RuninfoApi.class);
 		jc.jerseyregister(MonitoringApi.class);
+		if (!cprops.getSecurity().equals("none")) {
+			jc.jerseyregister(AuthorizationFilter.class);
+		}
 		jc.init();
 	    return jc;
 	}
@@ -37,6 +46,9 @@ public class ServicesConfig {
 	@Bean(name = "jerseyConfig")
 	public JerseyConfig getJerseyDefaultResource() {
 		JerseyConfig jc = new JerseyConfig();
+		if (!cprops.getSecurity().equals("none")) {
+			jc.jerseyregister(AuthorizationFilter.class);
+		}
 		jc.init();
 	    return jc;
 	}

@@ -32,13 +32,13 @@ public class TagSecurityAspect {
 	@Before("execution(* hep.crest.server.services.TagService.insertTag(*)) && args(dto)")
 	public void checkRole(TagDto dto) {
 		log.debug("Tag insertion should verify the tag name :"+dto.getName());
-		if (cprops.getSecurity().equals("none")) {
+		if (cprops.getSecurity().equals("none") || cprops.getSecurity().equals("weak")) {
 			log.warn("security checks are disabled in this configuration....");
 			return;
 		}
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null) {
-			log.debug("Stop execution....");
+			log.debug("Stop execution....for the moment it only print this message...no action is taken");
 		} else {
 			User user = (User) auth.getPrincipal();
 			log.debug("Tag insertion should verify the role for user :"+((user == null) ? "none" : user.getUsername()));

@@ -40,7 +40,6 @@ public class JerseyConfig extends ResourceConfig {
 		register(MultiPartFeature.class);
 		////register(AuthenticationFilter.class);
 		register(CacheControlFilter.class);
-		register(AuthorizationFilter.class);
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 	}
 	
