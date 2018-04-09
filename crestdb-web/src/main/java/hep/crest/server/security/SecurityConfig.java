@@ -78,7 +78,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		if (cprops.getSecurity().equals("active")) {
 			http.authorizeRequests().antMatchers(HttpMethod.GET, "/**").permitAll().antMatchers(HttpMethod.POST, "/**")
-					.hasRole("ATLAS-CONDITIONS").antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU").and().httpBasic().and()
+					.access("hasRole('ATLAS-CONDITIONS')")
+					.antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU").and().httpBasic().and()
 					.csrf().disable();
 		} else if (cprops.getSecurity().equals("none")) {
 			log.info("No security enabled for this server....");
