@@ -78,7 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		if (cprops.getSecurity().equals("active")) {
 			http.authorizeRequests().antMatchers(HttpMethod.GET, "/**").permitAll().antMatchers(HttpMethod.POST, "/**")
-					.access("hasRole('ATLAS-CONDITIONS')")
+					.access("hasAuthority('ATLAS-CONDITIONS')")
 					.antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU").and().httpBasic().and()
 					.csrf().disable();
 		} else if (cprops.getSecurity().equals("none")) {
@@ -131,7 +131,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	}
 	
-////	@Bean(name="ldapAuthoritiesPopulator")
+	@Bean(name="ldapAuthoritiesPopulator")
 	public LdapAuthoritiesPopulator authoritiesPopulator(ContextSource context) {
         LdapAuthoritiesPopulator ldp = new DefaultLdapAuthoritiesPopulator(context, groupSearchBase);
         ((DefaultLdapAuthoritiesPopulator)ldp).setSearchSubtree(true);

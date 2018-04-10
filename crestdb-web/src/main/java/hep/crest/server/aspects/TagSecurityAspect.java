@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import hep.crest.data.config.CrestProperties;
@@ -40,9 +42,13 @@ public class TagSecurityAspect {
 		if (auth == null) {
 			log.debug("Stop execution....for the moment it only print this message...no action is taken");
 		} else {
-			User user = (User) auth.getPrincipal();
-			log.debug("Tag insertion should verify the role for user :"+((user == null) ? "none" : user.getUsername()));
-			user.getAuthorities().stream().forEach(s -> log.debug("Role is "+s.getAuthority()));
+			UserDetails userDetails = (UserDetails) auth.getPrincipal();
+			log.debug("Tag insertion should verify the role for user :"+((userDetails == null) ? "none" : userDetails.getUsername()));
+			log.debug("For the moment we print all roles and filter on one role as an example...");
+			userDetails.getAuthorities().stream().forEach(s -> log.debug("Role is "+s.getAuthority()));
+			GrantedAuthority[] tagroles = userDetails.getAuthorities().stream().filter(s -> s.getAuthority().startsWith("ATLAS-CONDITIONS")).toArray(GrantedAuthority[]::new);
+			log.debug("Found list of roles of length "+tagroles.length);
+			userDetails.getAuthorities().stream().filter(s -> s.getAuthority().startsWith("ATLAS-CONDITIONS")).forEach(s -> log.debug("Selected role is "+s.getAuthority()));
 		}
 	}
 	
