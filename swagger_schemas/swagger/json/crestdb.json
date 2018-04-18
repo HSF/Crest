@@ -13,6 +13,14 @@
 			"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
 		}
 	},
+	"securityDefinitions": {
+		"basicAuth" : {
+			"type" : "basic"
+		}
+	},
+ 	"security": {
+ 		"basicAuth" : [] 
+ 	},
 	"host": "localhost:8080",
 	"basePath": "/crest",
 	"tags": [

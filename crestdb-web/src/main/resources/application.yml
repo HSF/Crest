@@ -31,7 +31,9 @@ server:
       enabled: true
       
 spring:
-    security.strategy: MODE_INHERITABLETHREADLOCAL
+### ATTENTION: you may need to set this in SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+    security:
+      strategy: MODE_INHERITABLETHREADLOCAL
     jersey:
       application-path: /crestapi
     datasource:
@@ -68,8 +70,6 @@ spring:
       application-path: /crestapi
     datasource:
       url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
-      testWhileIdle: true
-      validationQuery: SELECT 1 FROM DUAL
       driverClassName: oracle.jdbc.OracleDriver
       username: ATLAS_PHYS_COND_W
       password: ${crest.db.password}
@@ -106,8 +106,6 @@ spring:
     datasource:
 ###      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
       url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=intr-s.cern.ch)(PORT=10121))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
-      testWhileIdle: true
-      validationQuery: SELECT 1 FROM DUAL
       driverClassName: oracle.jdbc.OracleDriver
       username: ATLAS_PHYS_COND_W
       password: ${crest.db.password}
