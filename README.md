@@ -120,6 +120,29 @@ curl -k -u user:password -X GET https://localhost:8443/crestapi/globaltags
 ```
 The -k should skip verification on the certificate.
 
+In order to connect to the ldap server we need to have the truststore correctly set and with an alias corresponding to the `cerndc.cern.ch` certificate. Some java properties need to be set for this:
+
+```
+-Djavax.net.ssl.trustStore=/ssl-crest-server.jks -Djavax.net.ssl.trustStorePassword=xxx -Djavax.net.debug=ssl
+```
+Be careful that the properties defined in the `application.yml` do not work for the truststore.
+In order to add certificates to the truststore you can proceed in the following way:
+
+```
+echo -n | openssl s_client -connect cerndc.cern.ch:636 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/examplecert.crt
+openssl x509 -in /tmp/examplecert.crt -text
+```
+This will retrieve the server side certificate of the host you want to connect to for authentication.
+
+```
+keytool -import -trustcacerts -keystore ./crestdb-web/src/main/resources/ssl-crest-server.jks -storepass xxxxx -noprompt -alias cern -file /tmp/examplecert.crt
+```
+This instead will add the certificate to the truststore (which in our case is the same file).
+The truststore has been created using a command like:
+
+```
+keytool -genkey -alias crest_localhost_sslserver -keyalg RSA -keysize 2048 -validity 700 -keypass xxx -storepass xxxx -keystore ssl-crest-server.jks
+```
 
 ## Swagger
 You can view the swagger listing here (hopefully the server will be up!):

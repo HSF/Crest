@@ -105,15 +105,18 @@ spring:
       application-path: /crestapi
     datasource:
 ###      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
-      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=intr-s.cern.ch)(PORT=10121))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
+      jdbc-url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=intr-s.cern.ch)(PORT=10121))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
       driverClassName: oracle.jdbc.OracleDriver
       username: ATLAS_PHYS_COND_W
       password: ${crest.db.password}
       type: com.zaxxer.hikari.HikariDataSource
       hikari:
-        idle-timeout: 10000
+        minimumIdle: 5
+        max-lifetime: 600000
+        idle-timeout: 60000
+        connection-timeout: 600000
         connection-test-query: SELECT 1 FROM DUAL
-        maximum-pool-size: 8
+        maximum-pool-size: 10 
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
@@ -130,8 +133,10 @@ server:
     ssl:
       key-alias: crest_localhost_sslserver
       key-store: classpath:ssl-crest-server.jks
-      key-store-password: ${store.password}
-      key-password: ${key.password}  
+      key-store-password: ${key.password}
+      key-password: ${key.password}
+      trust-store: classpath:ssl-crest-server.jks
+      trust-store-password: ${store.password}      
 crest:
   schemaname: ATLAS_PHYS_COND
   webstaticdir: ${crest.web.static}

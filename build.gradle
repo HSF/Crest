@@ -72,6 +72,10 @@ subprojects {
 	    maven { url "http://repo.maven.apache.org/maven2" }
 	}
 
+	configurations {
+	     compile.exclude module: "tomcat-jdbc"
+	}
+
   
 	dependencies {
 	
