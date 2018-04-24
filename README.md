@@ -125,24 +125,33 @@ The server stub generation is implemented as well as a gradle task:
 
 ## Docker
 You can build a container using
+
 ```
 docker build -t crest:1.0 .
 ```
 You can run the container using
+
 ```
 docker run --env-file .environment -p 8080:8080 -d crest:1.0
 ```
 or
+
 ```
 docker run --env-file .environment -p 8080:8080 -v /mnt/data/dump:/data/dump -v /mnt/data/web:/data/web --net=host -d crest:test
 ```
 In the last example we have been mounting external volumes. These are useful for the swagger-ui and the possibility to dump a tag in a file system based structure. You can use the swagger-ui version that is provided within this project in the directory
+
 ```
 ./web/ui/
 ```
 A special note about the file `.environment` . You need to have this file to set variables which are used at the startup of the server. Some of the variables are already provided in the version in git, but other are not. For example, to access Oracle at CERN (for the moment only integration cluster contains a crest schema) you need to have the variable `crest.db.password=xxxxx` correctly set for a writer account. 
 If you use `spring.profiles.active=default` you will have an h2 database created in `jdbc:h2:/tmp/cresth2;DB_CLOSE_ON_EXIT=FALSE`.
 
+You can connect to a running container using commands like:
+
+```
+docker exec -i -t infallible_stonebraker /bin/bash
+```
 ## Openshift
 We gather here some notes on openshift deployment via gitlab-ci. These notes are for usage inside CERN.
 ### Constraints
