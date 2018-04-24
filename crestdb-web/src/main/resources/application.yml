@@ -32,9 +32,6 @@ spring:
       application-path: /crestapi
     datasource:
       url: jdbc:h2:${crest.dbfile};DB_CLOSE_ON_EXIT=FALSE
-      dbcp2:
-        test-while-idle: true
-        validation-query: SELECT 1
       driverClassName: org.h2.Driver
       username: root
       password: root
@@ -51,9 +48,6 @@ spring:
       application-path: /crestapi
     datasource:
       url: jdbc:sqlite:${crest.dbfile}
-      dbcp2:
-        test-while-idle: true
-        validation-query: SELECT 1
       driverClassName: org.sqlite.JDBC
       username: 
       password:
@@ -70,12 +64,16 @@ spring:
       application-path: /crestapi
     datasource:
       url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
-      dbcp2:
-        test-while-idle: true
-        validation-query:  SELECT 1 FROM DUAL
+      testWhileIdle: true
+      validationQuery: SELECT 1 FROM DUAL
       driverClassName: oracle.jdbc.OracleDriver
       username: ATLAS_PHYS_COND_W
       password: ${crest.db.password}
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        idle-timeout: 10000
+        connection-test-query: SELECT 1 FROM DUAL
+        maximum-pool-size: 8
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
@@ -96,15 +94,16 @@ spring:
       application-path: /crestapi
     datasource:
       url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
-      dbcp2:
-        test-while-idle: true
-        validation-query: SELECT 1 FROM DUAL
-        initial-size: 7
-        max-total: 100
-        pool-prepared-statements: true
+      testWhileIdle: true
+      validationQuery: SELECT 1 FROM DUAL
       driverClassName: oracle.jdbc.OracleDriver
       username: ATLAS_PHYS_COND_W
       password: ${crest.db.password}
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        idle-timeout: 10000
+        connection-test-query: SELECT 1 FROM DUAL
+        maximum-pool-size: 8
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
@@ -129,23 +128,21 @@ spring:
     datasource:
 ##      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=db-d0002.cern.ch)(PORT=10654))(ENABLE=BROKEN)(CONNECT_DATA=(SERVICE_NAME=intr.cern.ch)))
       url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
-      dbcp2:
-        test-while-idle: true
-        validation-query: SELECT 1 FROM DUAL
-        initial-size: 7
-        max-total: 100
-        pool-prepared-statements: true
+      testWhileIdle: true
+      validationQuery: SELECT 1 FROM DUAL
       driverClassName: oracle.jdbc.OracleDriver
       username: ATLAS_PHYS_COND_W
       password: ${crest.db.password}
-#      tomcat.max-wait: 10000
-#      tomcat.max-active: 100
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        idle-timeout: 10000
+        connection-test-query: SELECT 1 FROM DUAL
+        maximum-pool-size: 8
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
-        hibernate.jdbc.fetch_size: 300
-# This should be changed for production to "validate"
-        hibernate.hbm2ddl.auto: validate
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: none
         hibernate.show_sql: false
         hibernate.default_schema: ATLAS_PHYS_COND
 server:

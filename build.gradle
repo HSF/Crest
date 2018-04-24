@@ -87,6 +87,9 @@ subprojects {
 		compile group: 'javax.activation', name: 'activation', version: '1.1.1'
 
 
+		// Connection POOL
+		compile group: 'com.zaxxer', name: 'HikariCP', version: '2.7.4'
+
 		// NATS Messaging:
 		//compile group: 'com.github.cloudfoundry-community', name: 'nats-client-spring', version: '0.6.6'
 			  

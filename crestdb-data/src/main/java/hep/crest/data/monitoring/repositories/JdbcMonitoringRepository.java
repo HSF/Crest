@@ -9,8 +9,10 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.swagger.model.PayloadTagInfoDto;
@@ -20,10 +22,12 @@ import hep.crest.swagger.model.PayloadTagInfoDto;
  * @author formica
  *
  */
+@Component
 public class JdbcMonitoringRepository implements IMonitoringRepository {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	@Autowired
 	private DataSource ds;
 
 
@@ -34,13 +38,6 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
 		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param ds
-	 */
-	public JdbcMonitoringRepository(DataSource ds) {
-		super();
-		this.ds = ds;
-	}
 	
 	/* (non-Javadoc)
 	 * @see hep.crest.data.monitoring.repositories.IMonitoringRepository#selectTagInfo(java.lang.String)
