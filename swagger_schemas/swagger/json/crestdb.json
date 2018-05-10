@@ -13,6 +13,14 @@
 			"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
 		}
 	},
+	"securityDefinitions": {
+		"basicAuth" : {
+			"type" : "basic"
+		}
+	},
+ 	"security": {
+ 		"basicAuth" : [] 
+ 	},
 	"host": "localhost:8080",
 	"basePath": "/crest",
 	"tags": [
@@ -33,6 +41,9 @@
 		},
 		{
 			"name": "tags"
+		},
+		{
+			"name": "folders"
 		},
 		{
 			"name": "runinfo"
@@ -212,6 +223,83 @@
 							"type": "array",
 							"items": {
 								"$ref": "../../components/json/crestdata.json#/definitions/PayloadTagInfoDto"
+							}
+						}
+					}
+				}
+			}			
+		},
+		"/folders": {
+			"post": {
+				"tags": [
+					"folders"
+				],
+				"summary": "Create an entry for folder information.",
+				"description": "Folder informations go into a dedicated table.",
+				"operationId": "createFolder",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"text/plain"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a folderdto object: { node: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/FolderDto"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "string"				
+						} 						
+					}
+				}
+			},
+			"get": {
+				"tags": [
+					"folders"
+				],
+				"summary": "Finds a FolderDto list.",
+				"description": "This method allows to perform search and sorting.Arguments: by=<pattern>, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]",
+				"operationId": "listFolders",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "by",
+						"in": "query",
+						"description": "by: the search pattern {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "sort: the sort pattern {nodeFullpath:ASC}",
+						"required": false,
+						"type": "string",
+						"default": "since:ASC"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/FolderDto"
 							}
 						}
 					}

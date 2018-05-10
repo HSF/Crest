@@ -1,0 +1,12 @@
+version: '3'
+services:
+  web:
+    image: "crestdb-ldap:1.0"
+    env_file:
+    - ./web.env
+    ports:
+    - "8443:8443"
+    volumes:
+    - "/tmp/data/dump:/data/dump"
+    - "/tmp/data/web:/data/web"
+    - "/tmp/data/logs:/data/logs"

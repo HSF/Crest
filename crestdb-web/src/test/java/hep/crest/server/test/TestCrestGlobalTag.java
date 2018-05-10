@@ -29,7 +29,20 @@ public class TestCrestGlobalTag {
     private TestRestTemplate testRestTemplate;
    
     @Test
-    public void testA_storeGlobaltags() {
+    public void testA_getAndRemoveGlobaltags() {
+        ResponseEntity<GlobalTagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/globaltags", GlobalTagDto[].class);
+        GlobalTagDto[] gtaglist = response.getBody();
+        for (GlobalTagDto globalTagDto : gtaglist) {
+        		String url = "/crestapi/admin/globaltags/"+globalTagDto.getName();
+        		System.out.println("Removing global tag "+url);
+            this.testRestTemplate.delete(url);
+		}
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
+    public void testB_storeGlobaltags() {
     		GlobalTagDto dto = new GlobalTagDto().description("test").name("MY_SB_TEST").release("1").scenario("test").type("test").workflow("M").validity(new BigDecimal(0)).snapshotTime(new Date()).insertionTime(new Date());
         System.out.println("Store request: "+dto);
         ResponseEntity<GlobalTagDto> response = this.testRestTemplate.postForEntity("/crestapi/globaltags", dto, GlobalTagDto.class);
@@ -38,7 +51,7 @@ public class TestCrestGlobalTag {
     }
     
     @Test
-    public void testB_getAllGlobaltags() {
+    public void testC_getAllGlobaltags() {
         ResponseEntity<GlobalTagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/globaltags", GlobalTagDto[].class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);

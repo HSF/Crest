@@ -1,0 +1,47 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+spring:
+ profiles:
+  include: default
+spring:
+    profiles: ssl
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=intr.cern.ch)))
+      driverClassName: oracle.jdbc.OracleDriver
+      username: ATLAS_PHYS_COND_W
+      password: ${crest.db.password}
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        connection-test-query: SELECT 1 FROM DUAL
+        maximum-pool-size: 20
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: validate
+        hibernate.show_sql: false
+        hibernate.default_schema: ATLAS_PHYS_COND
+server:
+    port: 8443
+    servlet-path: /
+    compression:
+      enabled: true
+    ssl:
+      key-alias: crest_localhost_sslserver
+      key-store: classpath:ssl-crest-server.jks
+      key-store-password: ${key.password}
+      key-password: ${key.password}
+      trust-store: classpath:ssl-crest-server.jks
+      trust-store-password: ${store.password}      
+crest:
+  schemaname: ATLAS_PHYS_COND
+  webstaticdir: ${crest.web.static}
+  dump_dir: ${crest.dump.dir}
+  security: active
+  authenticationtype: ldap

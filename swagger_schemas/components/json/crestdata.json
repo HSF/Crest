@@ -6,6 +6,29 @@
   				"type": "string"			
   			}
 		},
+		"FolderDto" : {
+			"type" : "object",
+			"properties": {
+				"nodeFullpath": {
+					"type": "string"
+				},
+				"schemaName": {
+					"type": "string"
+				},
+				"nodeName": {
+					"type": "string"
+				},
+				"nodeDescription": {
+					"type": "string"
+				},
+				"tagPattern": {
+					"type": "string"
+				},
+				"groupRole": {
+					"type": "string"
+				}
+			}
+		},
 		"PayloadTagInfoDto" : {
 			"type" : "object",
 			"properties": {

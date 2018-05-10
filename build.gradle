@@ -17,6 +17,10 @@ ext {
     querydsl_version = "4.2.1"
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.0'
 }
@@ -85,7 +89,7 @@ subprojects {
 	}
 
 	configurations {
-	     compile.exclude module: "tomcat-jdbc"	     
+	     compile.exclude module: "tomcat-jdbc"
 	}
 
 	dependencies {

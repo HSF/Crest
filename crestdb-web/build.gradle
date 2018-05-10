@@ -28,6 +28,9 @@ targetCompatibility = 1.8
 
 dependencies {
 	compile project(':crestdb-data')
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-security'
+	compile group: 'org.springframework.security', name: 'spring-security-ldap'
+	
     compile ("org.springframework.boot:spring-boot-starter-web") {
     		exclude module: 'spring-boot-starter-tomcat'
     }

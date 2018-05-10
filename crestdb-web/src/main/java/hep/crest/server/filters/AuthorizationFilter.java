@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,11 +26,17 @@ import javax.ws.rs.ext.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import hep.crest.server.annotations.AuthorizationControl;
 
 @Provider
-@AuthorizationControl
+// FIXME: the name binding seems not to work when annotation is applied at the level of the implementing class
+// It is probably mandatory to bind it with the *Api classes.
+////@AuthorizationControl
 public class AuthorizationFilter implements ContainerRequestFilter {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -43,19 +50,29 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
 	@Context 
 	private SecurityContext securityContext;
-	
+		
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		log.info("Authorization filter operates in context...."+requestContext.getMethod());
 		Method method = resourceInfo.getResourceMethod();
+		log.info("Authorization filter is called on method...."+method.getName()+" "+resourceInfo.getResourceClass().getName());
 		// Access allowed for all
-		if (method.isAnnotationPresent(AuthorizationControl.class)) {
+//		if (method.isAnnotationPresent(AuthorizationControl.class)) {
 			Principal principal = securityContext.getUserPrincipal();
-			HttpServletRequest req = (HttpServletRequest)requestContext.getRequest();
-
+			log.debug("Found user "+principal);
+			if (principal == null) {
+				requestContext.abortWith(ACCESS_DENIED);
+			}
+//			HttpServletRequest req = (HttpServletRequest)requestContext.getRequest();
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+			for (GrantedAuthority grantedAuthority : authorities) {
+				log.info("User has authority : "+grantedAuthority);
+			}
 			if (false) 
 				requestContext.abortWith(ACCESS_FORBIDDEN);
 			return;
-		}
+//		}
 	}
 }

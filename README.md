@@ -93,6 +93,56 @@ and
 ```
 For the moment the script is not very well documented, but it should be easy to configure it at your needs.
 
+### Activate  security
+To activate security you need to build the war file including the key-store. The file should go into <crestdb-web>/src/main/resources together with a complete ldap.properties file in which you need to set the manager password.
+These are not detailed instructions, it is more a reminder.
+
+```
+java -Dstore.password=xxx -Dkey.password=yyy -Dcrest.db.password=ddd -Dcrest.dump.dir=/data/data/dump -Dcrest.web.static=/data/data/web -Dspring.profiles.active=prod -jar crestdb-web/build/libs/crest.war
+```
+The prod profile is using CERN ldap. Here is an example of ldap properties.
+
+```
+USER_SEARCH_BASE="DC=cern,DC=ch"
+USER_DN_PATTERNS="CN={0},OU=Users,DC=cern,DC=ch"
+GROUP_SEARCH_BASE="OU=e-groups,OU=Workgroups,DC=cern,DC=ch"
+GROUP_SEARCH_FILTER="member={0}"
+GROUP_ROLE_ATTRIBUTE=cn
+MANAGER_DN="CN=formica,OU=Users,OU=Organic Units,DC=cern,DC=ch"
+MANAGER_PASSWORD=xxx
+LDAP_AUTHENTICATOR_URL=ldaps://cerndc.cern.ch:636
+ACCESS=hasRole('atlas-database')
+```
+In order to test security you can try to use curl:
+
+```
+curl -k -u user:password -X GET https://localhost:8443/crestapi/globaltags
+```
+The -k should skip verification on the certificate.
+
+In order to connect to the ldap server we need to have the truststore correctly set and with an alias corresponding to the `cerndc.cern.ch` certificate. Some java properties need to be set for this:
+
+```
+-Djavax.net.ssl.trustStore=/ssl-crest-server.jks -Djavax.net.ssl.trustStorePassword=xxx -Djavax.net.debug=ssl
+```
+Be careful that the properties defined in the `application.yml` do not work for the truststore.
+In order to add certificates to the truststore you can proceed in the following way:
+
+```
+echo -n | openssl s_client -connect cerndc.cern.ch:636 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/examplecert.crt
+openssl x509 -in /tmp/examplecert.crt -text
+```
+This will retrieve the server side certificate of the host you want to connect to for authentication.
+
+```
+keytool -import -trustcacerts -keystore ./crestdb-web/src/main/resources/ssl-crest-server.jks -storepass xxxxx -noprompt -alias cern -file /tmp/examplecert.crt
+```
+This instead will add the certificate to the truststore (which in our case is the same file).
+The truststore has been created using a command like:
+
+```
+keytool -genkey -alias crest_localhost_sslserver -keyalg RSA -keysize 2048 -validity 700 -keypass xxx -storepass xxxx -keystore ssl-crest-server.jks
+```
 
 ## Swagger
 You can view the swagger listing here (hopefully the server will be up!):

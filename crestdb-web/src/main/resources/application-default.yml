@@ -22,6 +22,7 @@ crest:
   synchro: none
   webstaticdir: /tmp
   dbfile: /tmp/crestdbh2
+  authenticationtype: none
   
 server:
     port: 8090

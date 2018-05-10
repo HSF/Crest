@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.TagDto;
 
 @RunWith(SpringRunner.class)
@@ -29,7 +30,20 @@ public class TestCrestTag {
     private TestRestTemplate testRestTemplate;
    
     @Test
-    public void testA_storeTags() {
+    public void testA_getAndRemoveTags() {
+        ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
+        TagDto[] taglist = response.getBody();
+        for (TagDto tagDto : taglist) {
+        		String url = "/crestapi/admin/tags/"+tagDto.getName();
+        		System.out.println("Removing tag "+url);
+            this.testRestTemplate.delete(url);
+		}
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
+    }
+
+   @Test
+    public void testB_storeTags() {
     		TagDto dto = new TagDto().description("test").name("SB_TAG").endOfValidity(new BigDecimal(1)).lastValidatedTime(new BigDecimal(1)).objectType("test").synchronization("BLK").timeType("run").modificationTime(new Date()).insertionTime(new Date());
         System.out.println("Store request: "+dto);
         ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
@@ -38,7 +52,7 @@ public class TestCrestTag {
     }
     
     @Test
-    public void testB_getAllTags() {
+    public void testC_getAllTags() {
         ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
