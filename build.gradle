@@ -3,45 +3,22 @@ plugins {
   id 'org.hidetake.swagger.generator' version '2.9.0'
 }
 
-allprojects  {
-  apply plugin: 'maven'
-  group = 'hep.crest'
-  version = '1.0-SNAPSHOT'
-}
-
-// SVOM
-// Define a project specific method
-// Load properties for later filtering
-// Functions to get project properties from local file	
-Properties getProjectProperties() {
-	String propertiesfile = "${project.rootDir}/crest-filter-values.properties"
-	File generalPropertiesFile = file(propertiesfile)
-	println 'Loaded properties file: '+generalPropertiesFile.name
-	Properties mprops = new Properties()    
-    mprops.load(generalPropertiesFile.newDataInputStream())
-	println 'Getting properties from main gradle script...'+mprops
-    return mprops
-}
-
-//SVOM-END
+apply plugin: 'java'
+apply plugin: 'maven'
 
 ext {
-	mprops = getProjectProperties()
     swagger_annotations_version = "1.5.13"
     jackson_version = "2.7.5"
     spring_version = "4.1.4.RELEASE"
-    springboot_version = "1.5.8.RELEASE"
+    springboot_version = "2.0.1.RELEASE"
     junit_version = "4.12"
     oltu_version = "1.0.1"
     orika_version = "1.5.1"
+    querydsl_version = "4.2.1"
 }
-/////apply from: 'crest.gradle'
 
-repositories {
-	jcenter()
-}
 dependencies {
-    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.2.3'
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.0'
 }
 // Task to generate sources in build output directory
 swaggerSources {
@@ -55,44 +32,75 @@ swaggerSources {
   }
 }
 
+configurations.compile.each {
+	println "compile: $it"
+}  
+
+allprojects  {
+  apply plugin: 'maven'
+  group = 'hep.crest'
+  version = '2.0-SNAPSHOT'
+}
+
+// Define a project specific method
+// Load properties for later filtering
+// Functions to get project properties from local file	
+Properties getProjectProperties() {
+	String propertiesfile = "${project.rootDir}/crest-filter-values.properties"
+	File generalPropertiesFile = file(propertiesfile)
+	println 'Loaded properties file: '+generalPropertiesFile.name
+	Properties mprops = new Properties()    
+    mprops.load(generalPropertiesFile.newDataInputStream())
+	println 'Getting properties from main gradle script...'+mprops
+    return mprops
+}
+
 subprojects {
-    apply plugin: 'java'
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
+	ext {
+	    swagger_annotations_version = "1.5.13"
+	    jackson_version = "2.9.4"
+	    springboot_version = "2.0.1.RELEASE"
+	    junit_version = "4.12"
+	    oltu_version = "1.0.1"
+	    orika_version = "1.5.1"
+		jersey2_version = "2.22.2"
+		swagger_core_version = "1.5.13"
+    		querydsl_version = "4.2.1"
+		server= "undertow"
+	}
+
     tasks.withType(JavaCompile) {
   	    options.encoding = 'UTF-8'
     }
-  
+    
 	repositories {
 	    mavenLocal()
-	    
+
 	    maven { url "http://repo.spring.io/milestone" }
 	    maven { url "https://jcenter.bintray.com/" }
 	    maven { url "https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo" }
 	    maven { url "http://repo.maven.apache.org/maven2" }
 	}
 
-  
+	configurations {
+	     compile.exclude module: "tomcat-jdbc"	     
+	}
+
 	dependencies {
-	
-	    compile "io.swagger:swagger-annotations:$swagger_annotations_version"
+		compile "io.swagger:swagger-annotations:$swagger_annotations_version"
+		compile "io.swagger:swagger-core:$swagger_core_version"
+		compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
+	    compile group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
+
+
 	   	compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
 	   	compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
     		compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
     		compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
     		compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
-// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
-		compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
-// https://mvnrepository.com/artifact/javax.activation/activation
-		compile group: 'javax.activation', name: 'activation', version: '1.1.1'
 
-
-		// Connection POOL
-		compile group: 'com.zaxxer', name: 'HikariCP', version: '2.7.4'
-
-		// NATS Messaging:
-		//compile group: 'com.github.cloudfoundry-community', name: 'nats-client-spring', version: '0.6.6'
-			  
 		// DATABASES
 	    //compile group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
 	    compile files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")
@@ -100,14 +108,9 @@ subprojects {
 		compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
 		compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
 		compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
+		compile("com.h2database:h2")
 		//compile group: 'com.impossibl.pgjdbc-ng', name: 'pgjdbc-ng', version: '0.7.1'
 
-
-//	    compile group: 'org.xerial', name: 'sqlite-jdbc', version:'3.8.11.2'
-//	    compile group: 'org.hsqldb', name: 'hsqldb', version:'2.3.2'
-//	    compile group: 'com.h2database', name: 'h2', version:'1.4.182'
-//	    compile group: 'commons-dbcp', name: 'commons-dbcp', version:'1.4'
-	    testCompile "junit:junit:$junit_version"    
 	}
 		
 	task wrapper(type: Wrapper) {

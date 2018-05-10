@@ -6,7 +6,8 @@ package hep.crest.data.repositories;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ import hep.crest.data.pojo.GlobalTag;
  *
  */
 @Transactional(readOnly = true)
-public interface GlobalTagBaseRepository extends CondDBPageAndSortingRepository<GlobalTag, String>, QueryDslPredicateExecutor<GlobalTag> {
+public interface GlobalTagBaseRepository extends PagingAndSortingRepository<GlobalTag, String>, QuerydslPredicateExecutor<GlobalTag> {
 
 	@Query("SELECT distinct p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps JOIN FETCH maps.tag "
 			+ "WHERE maps.id.globalTagName = (:name)")

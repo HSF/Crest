@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -225,18 +227,20 @@ public class IovService {
 				log.debug("Found iov with the same Id and Hash...skip insertion....");
 				return  mapper.map(tmpiov,IovDto.class);
 			}
-			Tag tg = tagRepository.findOne(dto.getTagName());
-			if (tg == null) {
-				throw new CdbServiceException("insertIov: Cannot find tag "+dto.getTagName()+" in the database...");
+			// The IOV is not yet stored. Verify that the tag exists before inserting it.
+			Optional<Tag> tg = tagRepository.findById(dto.getTagName());
+			if (tg.isPresent()) {
+				Tag t = tg.get();
+		    		t.setModificationTime(null);
+				Tag updtag = tagRepository.save(t);
+				entity.setTag(updtag);
+				Iov saved = iovRepository.save(entity);
+				log.debug("Saved entity: " + saved);
+				IovDto dtoentity = mapper.map(saved,IovDto.class);
+				log.debug("Returning iovDto: " + dtoentity);
+				return dtoentity;
 			}
-			tg.setModificationTime(null);
-			Tag updtag = tagRepository.save(tg);
-			entity.setTag(updtag);
-			Iov saved = iovRepository.save(entity);
-			log.debug("Saved entity: " + saved);
-			IovDto dtoentity = mapper.map(saved,IovDto.class);
-			log.debug("Returning iovDto: " + dtoentity);
-			return dtoentity;
+			throw new CdbServiceException("Unkown tag : " +dto.getTagName());
 
 		} catch (Exception e) {
 			log.debug("Exception in storing iov " + dto);

@@ -18,7 +18,7 @@ import hep.crest.data.pojo.Tag;
 public interface TagRepository extends CrudRepository<Tag, String>, TagBaseRepository {
 
     @Override
-    void delete(String id);
+    void deleteById(String id);
 
     @Override
     void delete(Tag entity);

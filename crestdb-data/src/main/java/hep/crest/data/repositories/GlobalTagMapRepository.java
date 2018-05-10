@@ -18,7 +18,7 @@ import hep.crest.data.pojo.GlobalTagMap;
 public interface GlobalTagMapRepository extends CrudRepository<GlobalTagMap, String>, GlobalTagMapBaseRepository {
 
     @Override
-    void delete(String id);
+    void deleteById(String id);
 
     @Override
     void delete(GlobalTagMap entity);

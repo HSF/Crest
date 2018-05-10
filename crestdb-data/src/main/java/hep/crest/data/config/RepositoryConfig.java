@@ -66,7 +66,7 @@ public class RepositoryConfig {
     }
     */
 
-    @Profile({"default","prod","h2","wildfly","dev","mysql"})
+    @Profile({"test","default","prod","h2","wildfly","dev","mysql"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);

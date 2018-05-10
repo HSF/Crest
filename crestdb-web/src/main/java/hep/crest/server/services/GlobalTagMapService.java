@@ -5,8 +5,12 @@ package hep.crest.server.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,17 +95,30 @@ public class GlobalTagMapService {
 		}
 	}
 
+	@Transactional
 	public GlobalTagMapDto insertGlobalTagMap(GlobalTagMapDto dto) throws CdbServiceException {
 		try {
 			log.debug("Create global tag map from dto " + dto);
 			GlobalTagMap entity = new GlobalTagMap();
-			GlobalTag gt = globalTagRepository.findOne(dto.getGlobalTagName());
-			Tag tg = tagRepository.findOne(dto.getTagName());
+			Optional<GlobalTag> gt = globalTagRepository.findById(dto.getGlobalTagName());
+			Optional<Tag> tg = tagRepository.findById(dto.getTagName());
+			
 			GlobalTagMapId id = new GlobalTagMapId(dto.getGlobalTagName(),dto.getRecord(),dto.getLabel());
 			entity.setId(id);
-			globalTagRepository.save(gt); // re-save it because it will change the modification time
-			entity.setGlobalTag(gt);
-			entity.setTag(tg);
+			gt.ifPresent(new Consumer<GlobalTag>() {
+			    @Override
+			    public void accept(GlobalTag agt) {
+			    		globalTagRepository.save(agt); // re-save it because it will change the modification time
+					entity.setGlobalTag(agt);
+			    }
+			});
+			tg.ifPresent(new Consumer<Tag>() {
+			    @Override
+			    public void accept(Tag agt) {
+					entity.setTag(agt);
+			    }
+			});
+			
 			GlobalTagMap saved = globalTagMapRepository.save(entity);
 			log.debug("Saved entity: " + saved);
 			GlobalTagMapDto dtoentity = mapper.map(saved,GlobalTagMapDto.class);

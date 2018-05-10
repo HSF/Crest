@@ -5,10 +5,12 @@ package hep.crest.server.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.transaction.Transactional;
 import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
@@ -155,15 +157,17 @@ public class GlobalTagService {
 
 	}
 
+	@Transactional
 	public GlobalTagDto insertGlobalTag(GlobalTagDto dto) throws CdbServiceException {
 		try {
 			log.debug("Create global tag from dto " + dto);
 			GlobalTag entity =  mapper.map(dto,GlobalTag.class);
-			GlobalTag tmpgt = globalTagRepository.findByName(entity.getName());
-			if (tmpgt != null) {
+			Optional<GlobalTag> tmpgt = globalTagRepository.findById(entity.getName());
+			if (tmpgt.isPresent()) {
 				log.debug("Cannot store global tag " + dto+" : resource already exists.. ");
-				throw new AlreadyExistsPojoException("Global tag already exists for name "+dto.getName());
+				throw new AlreadyExistsPojoException("Global tag already exists for name "+dto.getName());				
 			}
+			log.debug("Saving global tag entity " + entity);
 			GlobalTag saved = globalTagRepository.save(entity);
 			log.debug("Saved entity: " + saved);
 			GlobalTagDto dtoentity = mapper.map(saved,GlobalTagDto.class);
@@ -180,6 +184,7 @@ public class GlobalTagService {
 		}
 	}
 	
+	@Transactional
 	public GlobalTagDto updateGlobalTag(GlobalTagDto dto) throws CdbServiceException {
 		try {
 			log.debug("Create global tag from dto " + dto);
@@ -205,10 +210,11 @@ public class GlobalTagService {
 		}
 	}
 
+	@Transactional
 	public void removeGlobalTag(String name) throws CdbServiceException {
 		try {
 			log.debug("Remove global tag " + name);
-			globalTagRepository.delete(name);
+			globalTagRepository.deleteById(name);
 			log.debug("Removed entity: " + name);
 			return;
 		} catch (Exception e) {

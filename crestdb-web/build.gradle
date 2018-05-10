@@ -1,31 +1,50 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-group = 'hep.crest.server'
-description = 'crestdb-web'
-
+description = 'JAX-RS package with endpoint definitions and related services'
 buildscript {
-    ext {
-        //springBootVersion = '2.0.0.BUILD-SNAPSHOT'
-//        springBootVersion = '1.5.2.RELEASE'
-    }
     repositories {
         mavenCentral()
-    	jcenter()
-        maven { url 'https://repo.spring.io/libs-snapshot' }
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springboot_version}"
-        classpath 'org.akhikhl.gretty:gretty:+'    
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE")
     }
 }
 
 apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'war'
-//////apply plugin: 'org.akhikhl.gretty'
 
-// Load properties for later filtering
-Properties props  = mprops
+bootJar {
+    baseName = 'crestdb-web'
+  	version = '2.0-SNAPSHOT'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+	compile project(':crestdb-data')
+    compile ("org.springframework.boot:spring-boot-starter-web") {
+    		exclude module: 'spring-boot-starter-tomcat'
+    }
+    	compile ("org.springframework.boot:spring-boot-starter-undertow")
+    
+    compile ("org.springframework.boot:spring-boot-starter-jersey") {
+    		exclude module: 'spring-boot-starter-tomcat'
+    }
+    	compile ("org.springframework.boot:spring-boot-starter-security")
+    
+    //// BE CAREFUL when using starter-jersey : the following JARS should be coherent with the jersey version !!!!!!!
+    ////////compile group: 'org.glassfish.jersey.core', name: 'jersey-common', version: '2.27'
+    //////compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey2_version"
+ 	//////compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version" 	
+    
+	testCompile("org.springframework.boot:spring-boot-starter-test") 
+}
 
 sourceSets {
 	main {
@@ -33,137 +52,10 @@ sourceSets {
 		  srcDir 'src/gen/java'
 		}
 	}
-    println main.output.classesDir	
-}
-
-ext {
-	jersey2_version = "2.22.2"
-	swagger_core_version = "1.5.13"
-}
-
-
-dependencies {
-	compile project(path: ':crestdb-data')
-//	compile "hep.crest.data:crestdb-data:$version"
-	compile "io.swagger:swagger-core:$swagger_core_version"
-	compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
-//	compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:springboot_version
-    compile ("org.springframework.boot:spring-boot-starter-web:$springboot_version") {
-		exclude module: 'spring-boot-starter-tomcat'
-	}
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version:springboot_version
-    compile ("org.springframework.boot:spring-boot-starter-jersey:$springboot_version") {
-		exclude module: 'spring-boot-starter-tomcat'
-	}
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version:springboot_version
- 
-    compile 'org.springframework:spring-aspects:4.1.8.RELEASE'
-    // The following is needed for the javadoc.
-    compile 'javax.interceptor:javax.interceptor-api:1.2'
-    compile 'javax.servlet:javax.servlet-api:3.1.0'
-   
-// THIS SHOULD BE LOADED ALREADY BY SPRING ????
-//	compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey2_version"
-//	compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version"
-
-//	compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$jersey2_version"
-//	compile('org.apache.tomcat.embed:tomcat-embed-jasper:8.0.30')
-//	compile "org.glassfish.jersey.core:jersey-server:$jersey2_version"
-
-// https://mvnrepository.com/artifact/org.glassfish.jersey.containers.glassfish/jersey-gf-cdi
-
-// I tried to add this for an error with the last wildfly. But it seems that the addition of an xml file
-// jboss-deployment-structure excluding all jaxrs libraries is better
-//	compile group: 'org.glassfish.jersey.containers.glassfish', name: 'jersey-gf-cdi', version: '2.7'
- 
- 	if (props.get('jaxrs') == 'jersey') {
-		compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey2_version"
- 		compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version"
- 	} else if (props.get('jaxrs') == 'resteasy') {
- 		compile "com.paypal.springboot:resteasy-spring-boot-starter:2.3.3-RELEASE"
-		compile group: 'org.jboss.resteasy', name: 'resteasy-multipart-provider', version: '3.1.4.Final'
-		compile group: 'org.jboss.resteasy', name: 'resteasy-jackson2-provider', version: '3.1.4.Final'
- 	}
-	
-	if (props.get('server') == "tomcat") {
-	    	ant.echo(message: 'Using tomcat starter')
-    		providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
-    } else if (props.get('server') == "undertow") {
-	    	ant.echo(message: 'Using undertow starter')
-		//provided("org.springframework.boot:spring-boot-starter-undertow")
-	  	providedRuntime("org.springframework.boot:spring-boot-starter-undertow")
-	} 
-	//else if (props.get('server') == 'resteasy') {
-	//  	providedRuntime("com.paypal.springboot:resteasy-spring-boot-starter:2.3.3-RELEASE")
-	//}
-	testCompile("org.springframework.boot:spring-boot-starter-test")    	
-}
-
-bootRun {
-	systemProperties System.properties
-}
-
-//def profiles = 'prod'
-
-//bootRun {
-//  args = ["--spring.profiles.active=" + profiles]
-//}
-
-//task setDevProperties(dependsOn: bootRun) << {
-//  doFirst {
-//    System.setProperty('spring.profiles.active', profiles)
-//  }
-//}
-
-task hello {
-    doLast {
-    	String greeting = 'hello from Ant'
-    	ant.echo(message: greeting)
-    }
-}
-
-def tomcatparams = [
-	murl: props.get('tcurl'),
-	muser: props.get('tcuser'),
-	mpasswd: props.get('tcpassword'),
-	ctx: props.get('context'),
-	mwar: ("${project.buildDir}/libs/"+war.archiveName)
-]
-
-println 'URL for tomcat server: '+tomcatparams.murl+' war file: '+tomcatparams.mwar+' context: '+tomcatparams.ctx
-println 'CATALINA_HOME/lib = '+props.get('catalina_home_libs')
-println 'Properties loaded from file: '+props.get('dbpassword')
-
-task (deploy) {
-doLast {
-    ant.taskdef(name:'deploy',classname: 'org.apache.catalina.ant.DeployTask'){
-        classpath {
-            fileset(dir: mprops.get('catalina_home_libs'), includes: '*.jar')
+    generated {
+        java {
+            srcDir "$projectDir/generated/java"
         }
     }
-	println 'Deploying war using: '+tomcatparams.murl+' '+tomcatparams.mwar
-	ant.deploy(url: tomcatparams.murl, username: tomcatparams.muser, password: tomcatparams.mpasswd, path: tomcatparams.ctx, war: tomcatparams.mwar)
-}
-}
-
-task (undeploy) {
- doLast {
-    ant.taskdef(name:'undeploy',classname: 'org.apache.catalina.ant.UndeployTask'){
-        classpath {
-            fileset(dir: mprops.get('catalina_home_libs'), includes: '*.jar')
-        }
-    }
-	println 'Undeploying war using: '+tomcatparams.murl+' '+tomcatparams.ctx
-	ant.undeploy(url: tomcatparams.murl, username: tomcatparams.muser, password: tomcatparams.mpasswd, path: tomcatparams.ctx)
- }
-}
-
-task explodedWar(type: Copy) {
-	into "$buildDir/api"
-	with war
-}
-
-war {
-	classpath fileTree('../jarlib')
-	archiveName = project.hasProperty('warName') ? project.property('warName') : 'crest.war'
+    println main.output.classesDir		
 }

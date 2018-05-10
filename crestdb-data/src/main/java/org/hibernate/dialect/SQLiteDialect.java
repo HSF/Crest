@@ -88,24 +88,24 @@ public class SQLiteDialect extends Dialect {
         }
     } );
   }
+  /*
 
   @Override
   public boolean supportsIdentityColumns() {
     return true;
   }
 
-  /*
   public boolean supportsInsertSelectIdentity() {
     return true; // As specified in NHibernate dialect
   }
-  */
-
+  
   @Override
   public boolean hasDataTypeInIdentityColumn() {
     return false; // As specified in NHibernate dialect
  // original:   return false; // As specified in NHibernate dialect
 
   }
+*/
 
   /*
   public String appendIdentitySelectToInsert(String insertString) {
@@ -115,7 +115,7 @@ public class SQLiteDialect extends Dialect {
       toString();
   }
   */
-
+/*
   @Override
   public String getIdentityColumnString() {
     //return "integer primary key autoincrement";
@@ -126,7 +126,7 @@ public class SQLiteDialect extends Dialect {
   public String getIdentitySelectString() {
     return "select last_insert_rowid()";
   }
-
+*/
   @Override
   public boolean supportsLimit() {
     return true;

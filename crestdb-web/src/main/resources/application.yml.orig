@@ -25,7 +25,7 @@ crest:
   
 server:
     port: 8090
-    servlet-path: /
+    servlet.path: /
 spring:
     security.strategy: MODE_INHERITABLETHREADLOCAL
     jersey:

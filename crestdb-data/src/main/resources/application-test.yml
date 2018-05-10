@@ -4,19 +4,20 @@
 #             ...
 # ===============================
 # Defaults
-
+crest:
+  dump_dir: /tmp/crest-dump/
+  schemaname: none
+  security: none
+  synchro: none
+  webstaticdir: /tmp
+  dbfile: /tmp/crestdb
 spring:
     datasource:
       url: jdbc:h2:/tmp/cresth2;DB_CLOSE_ON_EXIT=FALSE
-      testWhileIdle: true
-      validationQuery: SELECT 1
       driverClassName: org.h2.Driver
       username: root
       password: root
-
----
-spring:
-    profiles: dev
-    datasource:
-      url: jdbc:h2:/tmp/cresth2dev;DB_CLOSE_ON_EXIT=FALSE
+      hikari:
+        connection-test-query: SELECT 1 FROM DUAL
+        maximum-pool-size: 1
       

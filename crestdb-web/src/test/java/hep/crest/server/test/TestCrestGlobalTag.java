@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import hep.crest.swagger.model.GlobalTagDto;
@@ -22,6 +23,7 @@ import hep.crest.swagger.model.GlobalTagDto;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@ActiveProfiles("default") 
 public class TestCrestGlobalTag {
     @Autowired
     private TestRestTemplate testRestTemplate;

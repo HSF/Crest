@@ -5,7 +5,8 @@ package hep.crest.data.repositories;
 
 import java.util.List;
 
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +19,7 @@ import hep.crest.data.pojo.Tag;
  *
  */
 @Transactional(readOnly = true)
-public interface TagBaseRepository extends CondDBPageAndSortingRepository<Tag, String> , QueryDslPredicateExecutor<Tag>{
+public interface TagBaseRepository extends PagingAndSortingRepository<Tag, String> , QuerydslPredicateExecutor<Tag>{
 
 	Tag findByName(@Param("name") String name);
 	

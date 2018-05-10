@@ -18,7 +18,7 @@ import hep.crest.data.pojo.IovId;
 public interface IovRepository extends CrudRepository<Iov, IovId>, IovBaseRepository {
 
     @Override
-    void delete(IovId id);
+    void deleteById(IovId id);
 
     @Override
     void delete(Iov entity);

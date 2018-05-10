@@ -18,12 +18,12 @@ import hep.crest.data.pojo.GlobalTag;
 public interface GlobalTagRepository extends CrudRepository<GlobalTag, String>, GlobalTagBaseRepository {
 
     @Override
-    void delete(String id);
+    void deleteById(String id);
 
     @Override
     void delete(GlobalTag entity);
 
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	@Override
     GlobalTag save(GlobalTag entity);
 

@@ -1,0 +1,47 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+caching:
+  iovsgroups_maxage: 600
+  iovsgroups_snapshot_maxage: 3600
+  iovs_maxage: 600
+  iovs_snapshot_maxage: 3600
+  payloads_maxage: 604800
+  timetype_groupsize: 3600  # expressed in seconds
+  runtype_groupsize: 100    # expressed in run numbers
+
+# schemaname : ATLAS_PHYS_COND or none
+# security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)
+crest:
+  dump_dir: /tmp/crest-dump/
+  schemaname: none
+  security: none
+  synchro: none
+  webstaticdir: /tmp
+  dbfile: /tmp/crestdbh2
+  
+server:
+    port: 8090
+    servlet.path: /
+spring:
+    security.strategy: MODE_INHERITABLETHREADLOCAL
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:h2:${crest.dbfile};DB_CLOSE_ON_EXIT=FALSE
+      driverClassName: org.h2.Driver
+      username: root
+      password: root
+      hikari:
+        connection-test-query: SELECT 1 FROM DUAL
+        maximum-pool-size: 1
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.H2Dialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: update
+        hibernate.show_sql: false
+    

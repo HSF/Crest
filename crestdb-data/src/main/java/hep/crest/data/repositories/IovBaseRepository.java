@@ -9,7 +9,8 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,7 @@ import hep.crest.data.pojo.IovId;
  *
  */
 @Transactional(readOnly = true)
-public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, IovId>,  QueryDslPredicateExecutor<Iov> {
+public interface IovBaseRepository extends PagingAndSortingRepository<Iov, IovId>,  QuerydslPredicateExecutor<Iov> {
 
 	List<Iov> findByIdTagName(@Param("name") String name);
 	
