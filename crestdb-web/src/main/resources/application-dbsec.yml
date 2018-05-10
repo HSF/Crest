@@ -7,6 +7,9 @@
 spring:
  profiles:
   include: default
+crest:
+  dbfile: /tmp/crestdbsqlite
+  authenticationtype: none
 server:
     port: 8090
     servlet-path: /
@@ -25,12 +28,3 @@ spring:
         hibernate.jdbc.fetch_size: 100
         hibernate.hbm2ddl.auto: update
         hibernate.show_sql: false
-crest:
-  security: none
-  dbfile: /tmp/crestdbsqlite
-  authenticationtype: database
-  dump_dir: /tmp/crest-dump/
-  schemaname: none
-  synchro: none
-  webstaticdir: /tmp
-        

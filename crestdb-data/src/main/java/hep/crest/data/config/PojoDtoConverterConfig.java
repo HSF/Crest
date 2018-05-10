@@ -13,6 +13,8 @@ import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.runinfo.pojo.RunLumiInfo;
+import hep.crest.data.security.pojo.CrestFolders;
+import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.IovDto;
@@ -37,6 +39,7 @@ public class PojoDtoConverterConfig {
 		this.initIovMap(mapperFactory);
 		this.initPayloadMap(mapperFactory);
 		this.initRunLumiInfoMap(mapperFactory);
+		this.initFolderMap(mapperFactory);
 		return mapperFactory;
 	}
 
@@ -87,6 +90,11 @@ public class PojoDtoConverterConfig {
 
 	protected void initRunLumiInfoMap(MapperFactory mapperFactory) {
 		mapperFactory.classMap(RunLumiInfo.class, RunLumiInfoDto.class).exclude("insertionTime").byDefault().register();
+		return;
+	}
+
+	protected void initFolderMap(MapperFactory mapperFactory) {
+		mapperFactory.classMap(CrestFolders.class, FolderDto.class).byDefault().register();
 		return;
 	}
 

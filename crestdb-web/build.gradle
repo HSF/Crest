@@ -13,10 +13,15 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'war'
 
 bootJar {
     baseName = 'crestdb-web'
   	version = '2.0-SNAPSHOT'
+}
+bootWar {
+    baseName = 'crest'
+    archiveName = 'crest.war'
 }
 
 repositories {

@@ -83,7 +83,7 @@ public class CrestFolders {
 		this.nodeName = nodeName;
 	}
 
-	@Column(name = "CREST_NODE_DESCRIPTION", unique = true, nullable = false, length = 255)
+	@Column(name = "CREST_NODE_DESCRIPTION", unique = true, nullable = false, length = 2000)
 	public String getNodeDescription() {
 		return nodeDescription;
 	}

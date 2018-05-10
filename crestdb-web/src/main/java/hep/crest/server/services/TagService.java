@@ -148,6 +148,7 @@ public class TagService {
 		}
 	}
 	
+	@Transactional
 	public void removeTag(String name) throws CdbServiceException {
 		try {
 			log.debug("Remove tag " + name);
