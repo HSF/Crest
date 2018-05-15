@@ -36,5 +36,8 @@ VOLUME "/data/dump"
 VOLUME "/data/logs"
 
 EXPOSE 8080
+COPY ./entrypoint.sh /
 
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar ${crest_dir}/crest.war" ]
+ENTRYPOINT  [ "/entrypoint.sh" ]
+
+####ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar ${crest_dir}/crest.war" ]
