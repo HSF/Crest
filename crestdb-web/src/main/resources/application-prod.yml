@@ -8,7 +8,7 @@ spring:
  profiles:
   include: default
 spring:
-    profiles: wildfly
+    profiles: prod
     jersey:
       application-path: /crestapi
     datasource:
