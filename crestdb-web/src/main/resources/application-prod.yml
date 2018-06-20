@@ -33,3 +33,8 @@ crest:
   schemaname: ATLAS_PHYS_COND  
   webstaticdir: ${crest.web.static}
   dump_dir: ${crest.dump.dir}
+  security: none
+  synchro: none
+  authenticationtype: none
+  
+  
