@@ -33,13 +33,13 @@ server:
     compression:
       enabled: true
     ssl:
-      key-alias: crest_localhost_sslserver
-      key-store: classpath:ssl-crest-server.jks
-      key-store-password: ${key.password}
+      enabled: true
+      key-alias: ${key.alias}
+      key-store: ${key.store.path}
+      key-store-password: ${store.password}
       key-password: ${key.password}
-      trust-store: classpath:ssl-crest-server.jks
-      trust-store-password: ${store.password}      
-crest:
+      client-auth: want
+crest:      
   schemaname: ATLAS_PHYS_COND
   webstaticdir: ${crest.web.static}
   dump_dir: ${crest.dump.dir}
