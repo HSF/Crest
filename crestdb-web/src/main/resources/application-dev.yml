@@ -5,10 +5,7 @@
 # ===============================
 # Defaults
 spring:
- profiles:
-  include: default
-spring:
-    profiles: ssl
+    profiles: dev
     jersey:
       application-path: /crestapi
     datasource:
@@ -19,7 +16,7 @@ spring:
       type: com.zaxxer.hikari.HikariDataSource
       hikari:
         connection-test-query: SELECT 1 FROM DUAL
-        maximum-pool-size: 20
+        maximum-pool-size: 2 
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
@@ -28,29 +25,18 @@ spring:
         hibernate.show_sql: false
         hibernate.default_schema: ATLAS_PHYS_COND
 server:
-    port: 8443
-    servlet-path: /
-    compression:
-      enabled: true
-    ssl:
-      enabled: true
-      key-alias: ${key.alias}
-      key-store: ${key.store.path}
-      key-store-password: ${store.password}
-      key-password: ${key.password}
-      client-auth: want
-crest:      
-  schemaname: ATLAS_PHYS_COND
+    port: 8080 
+crest: 
+  security: none
+  authenticationtype: none
+  schemaname: ATLAS_PHYS_COND  
   webstaticdir: ${crest.web.static}
   dump_dir: ${crest.dump.dir}
-  security: active
-  authenticationtype: ldap
   
 info:
   app:
     name: Crest Application
     description: Rest services for conditions data management 
-    profile: ssl
- 
+    profile: dev
     
 

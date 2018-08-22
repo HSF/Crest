@@ -21,7 +21,6 @@ import hep.crest.server.swagger.api.RuninfoApi;
 @ComponentScan("hep.crest.data")
 @EnableAspectJAutoProxy
 @EnableAsync
-////@PropertySource("classpath:crest.properties")
 public class ServicesConfig {
 
 	@Autowired

@@ -46,3 +46,10 @@ spring:
         hibernate.hbm2ddl.auto: update
         hibernate.show_sql: false
     
+info:
+  app:
+    name: Crest Application
+    description: Rest services for conditions data management 
+    profile: default
+    
+    

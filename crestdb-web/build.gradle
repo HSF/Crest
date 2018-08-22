@@ -31,6 +31,15 @@ repositories {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+springBoot {
+    // This statement tells the Gradle Spring Boot plugin
+    // to generate a file 
+    // build/resources/main/META-INF/build-info.properties
+    // that is picked up by Spring Boot to display
+    // via /info endpoint.
+    buildInfo()
+}
+
 dependencies {
 	compile project(':crestdb-data')
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-security'
@@ -39,6 +48,9 @@ dependencies {
     compile ("org.springframework.boot:spring-boot-starter-web") {
     		exclude module: 'spring-boot-starter-tomcat'
     }
+    
+    	compile("org.springframework.boot:spring-boot-starter-actuator")
+    
     	compile ("org.springframework.boot:spring-boot-starter-undertow")
     
     compile ("org.springframework.boot:spring-boot-starter-jersey") {

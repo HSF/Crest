@@ -37,4 +37,10 @@ crest:
   synchro: none
   authenticationtype: none
   
-  
+info:
+  app:
+    name: Crest Application
+    description: Rest services for conditions data management 
+    profile: prod
+    
+
