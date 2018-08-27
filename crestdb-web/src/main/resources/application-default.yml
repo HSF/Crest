@@ -36,9 +36,10 @@ spring:
       driverClassName: org.h2.Driver
       username: root
       password: root
-      hikari:
-        connection-test-query: SELECT 1 FROM DUAL
-        maximum-pool-size: 1
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari: 
+        connection-test-query: SELECT 1 
+        maximum-pool-size: 3
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.H2Dialect

@@ -18,6 +18,6 @@ spring:
       username: root
       password: root
       hikari:
-        connection-test-query: SELECT 1 FROM DUAL
+        connection-test-query: SELECT 1 
         maximum-pool-size: 1
       
