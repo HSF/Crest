@@ -23,7 +23,7 @@ public class AuthenticationProviderConfig {
 	@Autowired
 	private DataSource ds;
 
-	@Bean(name="userDetailsService")
+	@Bean(name="dbUserDetailsService")
 	public UserDetailsService userDetails() {
 		JdbcDaoImpl jdbc = new JdbcDaoImpl();
 		jdbc.setDataSource(ds);

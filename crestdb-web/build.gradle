@@ -42,8 +42,7 @@ springBoot {
 
 dependencies {
 	compile project(':crestdb-data')
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-security'
-	compile group: 'org.springframework.security', name: 'spring-security-ldap'
+	//compile group: 'org.springframework.boot', name: 'spring-boot-starter-security'
 	
     compile ("org.springframework.boot:spring-boot-starter-web") {
     		exclude module: 'spring-boot-starter-tomcat'
@@ -56,7 +55,11 @@ dependencies {
     compile ("org.springframework.boot:spring-boot-starter-jersey") {
     		exclude module: 'spring-boot-starter-tomcat'
     }
-    	compile ("org.springframework.boot:spring-boot-starter-security")
+    compile ("org.springframework.boot:spring-boot-starter-security")
+    compile("org.springframework.ldap:spring-ldap-core")
+    compile("org.springframework.security:spring-security-ldap")
+    compile("org.springframework:spring-tx")
+    compile("com.unboundid:unboundid-ldapsdk")
     
     //// BE CAREFUL when using starter-jersey : the following JARS should be coherent with the jersey version !!!!!!!
     ////////compile group: 'org.glassfish.jersey.core', name: 'jersey-common', version: '2.27'
