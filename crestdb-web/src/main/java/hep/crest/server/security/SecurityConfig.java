@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.ldap.core.ContextSource;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -47,6 +49,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private String userSearchBase;
 	@Value("${USER_DN_PATTERNS}")
 	private String userDnPatterns;
+	@Value("${USER_SEARCH_FILTER}")
+	private String userSearchFilter;
+
 	@Value("${GROUP_SEARCH_BASE}")
 	private String groupSearchBase;
 	@Value("${GROUP_SEARCH_FILTER}")
@@ -103,17 +108,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 		} else if (cprops.getAuthenticationtype().equals("ldap")) {
 			// here put LDAP
-	        String ldap_url = url;
-	        DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(ldap_url);
-	        context.setUserDn(managerDn);
-	        context.setPassword(managerPassword);
-	        context.setReferral("follow");
-	        context.afterPropertiesSet();
-	        LdapAuthoritiesPopulator ldapAuthoritiesPopulator = authoritiesPopulator(context);
+			log.debug("Use ldap authentication: "+url+" "+managerDn+" "+userSearchBase+" "+userDnPatterns);
+	        LdapAuthoritiesPopulator ldapAuthoritiesPopulator = authoritiesPopulator(contextSource());
 			auth.ldapAuthentication()
 					.ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
-					.contextSource(context)
-					.userSearchBase(userSearchBase).userDnPatterns(userDnPatterns)
+					.contextSource(contextSource())
+					.userSearchBase(userSearchBase).userDnPatterns(userDnPatterns).userSearchFilter(userSearchFilter)
 					.rolePrefix("")
 					;
 		} else {
@@ -127,8 +127,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	}
 	
+	@Bean
+	public LdapContextSource contextSource() {
+        String ldap_url = url;
+        DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(ldap_url);
+        context.setUserDn(managerDn);
+        context.setPassword(managerPassword);
+        context.setReferral("follow");
+        context.afterPropertiesSet();
+        return context;
+	}
+	
+	@Bean
+	public LdapTemplate ldapTemplate() {
+	    return new LdapTemplate(contextSource());
+	}
+	
 	@Bean(name="ldapAuthoritiesPopulator")
 	public LdapAuthoritiesPopulator authoritiesPopulator(ContextSource context) {
+		log.debug("Instantiate authorities populator....");
         LdapAuthoritiesPopulator ldp = new DefaultLdapAuthoritiesPopulator(context, groupSearchBase);
         ((DefaultLdapAuthoritiesPopulator)ldp).setSearchSubtree(true);
         ((DefaultLdapAuthoritiesPopulator)ldp).setGroupRoleAttribute(groupRoleAttribute);
@@ -137,7 +154,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return ldp;
 	}
 
-	@Bean(name = "passwordEncoder")
+	@Bean(name = "dbPasswordEncoder")
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
