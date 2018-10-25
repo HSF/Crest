@@ -1,0 +1,9 @@
+{ "description": "A new tag for testing",
+  "endOfValidity": -1.0,
+  "lastValidatedTime": -1.0,
+  "name": "MY_TAG_FOR_TESTING",
+  "objectType": "A fake object type",
+  "synchronization": "any",
+  "timeType": "run-lumi"
+}
+

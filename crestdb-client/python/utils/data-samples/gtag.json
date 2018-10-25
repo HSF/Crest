@@ -1,0 +1,11 @@
+{
+  "name" : "CONDBR2-BLKPA-2017-01-TEST",
+  "validity" : 1,
+  "description" : "Test Global Tag for Tile",
+  "scenario" : "test",
+  "workflow" : "test",
+  "type" : "T",
+  "release" : "test",
+  "snapshotTimeMilli" : 1500000000,
+  "snapshotTime" : "2017-02-14T04:40:00+02:00"
+}
