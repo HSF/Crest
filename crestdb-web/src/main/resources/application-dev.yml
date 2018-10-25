@@ -27,12 +27,12 @@ spring:
 server:
     port: 8080 
 crest: 
-  security: none
-  authenticationtype: none
   schemaname: ATLAS_PHYS_COND  
   webstaticdir: ${crest.web.static}
   dump_dir: ${crest.dump.dir}
-  
+  security: none
+  synchro: none
+  authenticationtype: none  
 info:
   app:
     name: Crest Application
