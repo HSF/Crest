@@ -18,7 +18,7 @@ spring:
       password: 
       type: com.zaxxer.hikari.HikariDataSource
       hikari:
-        connection-test-query: SELECT 1 FROM DUAL
+        connection-test-query: SELECT 1
         maximum-pool-size: 20
     jpa:
       properties:
