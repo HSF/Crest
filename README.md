@@ -47,33 +47,33 @@ This will create a directory `swagger_crestdb` in the location where you run the
 ## Build instructions
 You need to have java >= 8 installed on your machine. If you have also [gradle](https://gradle.org) (version 5) you can build the project using the following command from the root project directory (`swagger_crestdb`):
 ```
-gradle clean :crestdb-web:build -PwarName=crest.war
+gradle clean build
 ```
 This command will generate a war (java web archive) file in  : `crestdb-web/build/libs/crest.war`.
 In case gradle is not installed on your machine, you can run the wrapper delivered with the project:
 ```
-./gradlew clean :crestdb-web:build -PwarName=crest.war
+./gradlew clean build
 ```
 
 ## Run the server
 This section is under maintenance.
 
-To run the server, you can either start an embedded tomcat (or undertow) web server via spring boot, or deploy the generated war file in an existing tomcat instance. The embedded server type is specified in the `crest-filter-values.properties` file:
-```
-server=undertow
-jaxrs=jersey
-```
-or
-```
-server=tomcat
-jaxrs=jersey
-```
+The server will use by default an embedded `undertow` web server.
 
-The server need by definition to have a database connection in order to store the conditions data. The database connections are defined in the file `./crestdb-web/src/main/resources/application.yml`. This file present different set of properties which are chosen by selecting a specific spring profile when running the server. The file should be edited if you are administering the conditions database in order to provide an appropriate set of parameters.
+The server need by definition to have a database connection in order to store the conditions data. The database connections are defined in the files `./crestdb-web/src/main/resources/application-<profile>.yml`. This file present different set of properties which are chosen by selecting a specific spring profile when running the server. The file should be edited if you are administering the conditions database in order to provide an appropriate set of parameters.
 
-If you do not have any remote database available you should use the default spring profile
+If you do not have any remote database available you should use the default spring profile.
 
-We provide the following commands as examples:
+The set of default properties to run the server is defined in `config/application.properties` which will be read by spring when starting the server. The file there will use the `default` spring profile and a local database instance `h2database` where to store the data (it is a sort of `sqlite` file).
+
+To start the server you can simply run:
+
+```
+./entrypoint.sh
+```
+This script is the same that is used by the docker container (when packaging the server via the `Dockerfile`).
+
+We provide the following commands as examples for alternative way (not maintained anymore):
 ```
 cd crestdb-web
 $ gradle bootRun "-Dspring.profiles.active=prod" "-Dcrest.db.password=xxx"
