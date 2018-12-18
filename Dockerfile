@@ -32,10 +32,12 @@ ADD web ${data_dir}/web
 #RUN chown -R 1001:0 ${crest_dir}
 #RUN chown -R 1001:0 ${data_dir}
 
-##USER 1001
+### we do not set the user....
+###USER 1001
 
 #VOLUME "/home/${USR}/data"
 #VOLUME "/data/web"
+### we export only 2 directories....
 VOLUME "/data/dump"
 VOLUME "/data/logs"
 
