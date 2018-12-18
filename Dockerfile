@@ -34,10 +34,10 @@ ADD web ${data_dir}/web
 
 ##USER 1001
 
-VOLUME "/home/${USR}/data"
+#VOLUME "/home/${USR}/data"
 #VOLUME "/data/web"
-#VOLUME "/data/dump"
-#VOLUME "/data/logs"
+VOLUME "/data/dump"
+VOLUME "/data/logs"
 
 EXPOSE 8080
 COPY ./entrypoint.sh /home/${USR}
