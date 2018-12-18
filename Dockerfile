@@ -7,9 +7,12 @@
 FROM anapsix/alpine-java
 MAINTAINER Andrea Formica
 
+ENV USR crest
+
 ENV crest_version 1.0-SNAPSHOT
-ENV crest_dir /opt/swagger_crest
-ENV data_dir /data
+ENV crest_dir /home/${USR}/swagger_crest
+ENV data_dir /home/${USR}/data
+##ENV data_dir /data
 ENV gradle_version 4.2.1
 ENV TZ GMT
 RUN mkdir -p ${data_dir}/logs
@@ -29,16 +32,17 @@ RUN chown -R 1001:0 ${crest_dir}/crest.war
 RUN chown -R 1001:0 ${crest_dir}
 RUN chown -R 1001:0 ${data_dir}
 
-#USER 1001
+USER 1001
 
-VOLUME "/data"
+VOLUME "/home/${USR}/data"
 #VOLUME "/data/web"
 #VOLUME "/data/dump"
 #VOLUME "/data/logs"
 
 EXPOSE 8080
-COPY ./entrypoint.sh /
+COPY ./entrypoint.sh /home/${USR}
+WORKDIR /home/${USR}
 
-ENTRYPOINT  [ "/entrypoint.sh" ]
+ENTRYPOINT  [ "./entrypoint.sh" ]
 
 ####ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar ${crest_dir}/crest.war" ]
