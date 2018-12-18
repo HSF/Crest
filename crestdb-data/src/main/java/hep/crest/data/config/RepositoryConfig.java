@@ -71,7 +71,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
-			bean.setDefault_tablename(cprops.getSchemaname());
+			bean.setDefaultTablename(cprops.getSchemaname());
 		}
 		return bean;
     }

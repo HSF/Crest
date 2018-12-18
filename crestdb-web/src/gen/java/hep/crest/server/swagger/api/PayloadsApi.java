@@ -7,34 +7,38 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
 import java.io.File;
+import hep.crest.swagger.model.HTTPResponse;
 import hep.crest.swagger.model.PayloadDto;
 
+import java.util.Map;
 import java.util.List;
 import hep.crest.server.swagger.api.NotFoundException;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import javax.ws.rs.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.*;
 import javax.validation.constraints.*;
 
 @Path("/payloads")
 
 
 @io.swagger.annotations.Api(description = "the payloads API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-12-17T23:42:37.030+01:00")
 public class PayloadsApi  {
-
 	@Autowired
 	private PayloadsApiService delegate;
 
@@ -80,14 +84,15 @@ public class PayloadsApi  {
     @GET
     @Path("/{hash}")
     
-    @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Finds a payload resource associated to the hash.", notes = "This method retrieves a payload resource.Arguments: hash=<hash> the hash of the payload", response = PayloadDto.class, tags={ "payloads", })
+    @Produces({ "application/octet-stream", "application/json", "application/xml" })
+    @io.swagger.annotations.ApiOperation(value = "Finds a payload resource associated to the hash.", notes = "This method retrieves a payload resource.Arguments: hash=<hash> the hash of the payload", response = String.class, tags={ "payloads", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = PayloadDto.class) })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = String.class) })
     public Response getPayload(@ApiParam(value = "hash:  the hash of the payload",required=true) @PathParam("hash") String hash
+,@ApiParam(value = "The format of the output data: BLOB or DTO in JSON format" , defaultValue="BLOB")@HeaderParam("format") String format
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
-        return delegate.getPayload(hash,securityContext,info);
+        return delegate.getPayload(hash,format,securityContext,info);
     }
     @GET
     @Path("/{hash}/meta")
@@ -100,5 +105,23 @@ public class PayloadsApi  {
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.getPayloadMetaInfo(hash,securityContext,info);
+    }
+    @POST
+    @Path("/store")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Create a Payload in the database, associated to a given iov since and tag name.", notes = "This method allows to insert a Payload and an IOV. Arguments: since,tagname,stream,end time.", response = HTTPResponse.class, tags={ "payloads", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = HTTPResponse.class) })
+    public Response storePayloadWithIovMultiForm(
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetail
+,@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
+,@ApiParam(value = "The since time", required=true)@FormDataParam("since")  BigDecimal since
+,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("format") String format
+,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.storePayloadWithIovMultiForm(fileInputStream, fileDetail,tag,since,format,endtime,securityContext,info);
     }
 }

@@ -18,8 +18,6 @@ import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.TagDto;
-import ma.glasnost.orika.MapperFacade;
 
 
 /**
@@ -93,17 +91,27 @@ public class PayloadService {
 		}
 	}
 
+	public String saveInputStreamGetHash(InputStream is, String file) throws CdbServiceException {
+		try {
+			log.debug("Save inputstream and compute hash");
+			return payloadHandler.saveToFileGetHash(is, file);
+		} catch (Exception e) {
+			log.debug("Exception in copying payload to disk in file {}",file);
+			throw new CdbServiceException("Cannot store payload : " + e.getMessage());
+		}
+	}
+
 	@Transactional
 	public PayloadDto insertPayloadAndInputStream(PayloadDto dto, InputStream is) throws CdbServiceException {
 		try {
-			log.debug("Save payload " + dto+ " creating blob from inputstream...");
+			log.debug("Save payload {} creating blob from inputstream...",dto);
 //			Blob blob = payloadHandler.createBlobFromStream(is);
 			Payload saved = payloaddataRepository.save(dto,is);
-			log.debug("Saved entity: " + saved);
+			log.debug("Saved entity: {}", saved);
 			PayloadDto dtoentity = payloadHandler.convertToDtoNoData(saved);
 			return dtoentity;
 		} catch (Exception e) {
-			log.debug("Exception in storing payload " + dto);
+			log.debug("Exception in storing payload {}",dto);
 			throw new CdbServiceException("Cannot store payload : " + e.getMessage());
 		}
 	}

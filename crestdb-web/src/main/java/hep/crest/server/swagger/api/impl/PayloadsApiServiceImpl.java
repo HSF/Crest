@@ -1,22 +1,12 @@
 package hep.crest.server.swagger.api.impl;
 
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.server.annotations.CacheControlCdb;
-import hep.crest.server.services.PayloadService;
-import hep.crest.server.swagger.api.*;
-import hep.crest.swagger.model.*;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import hep.crest.swagger.model.PayloadDto;
-
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.math.BigDecimal;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -25,10 +15,25 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.*;
+import hep.crest.data.config.CrestProperties;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.server.annotations.CacheControlCdb;
+import hep.crest.server.services.IovService;
+import hep.crest.server.services.PayloadService;
+import hep.crest.server.services.TagService;
+import hep.crest.server.swagger.api.ApiResponseMessage;
+import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.server.swagger.api.PayloadsApiService;
+import hep.crest.swagger.model.HTTPResponse;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.PayloadDto;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class PayloadsApiServiceImpl extends PayloadsApiService {
@@ -37,6 +42,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
 	@Autowired
 	private PayloadService payloadService;
+	@Autowired
+	private IovService iovService;
+	@Autowired
+	TagService tagService;
+
+	@Autowired
+	private CrestProperties cprops;
 
     @Override
     public Response createPayload(PayloadDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
@@ -66,13 +78,89 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
-    
-    @Override
-    public Response getBlob(String hash, SecurityContext securityContext, UriInfo info) throws NotFoundException {
+   
+	@Override
+	@CacheControlCdb("public, max-age=604800")
+	public Response getPayload(String hash, String format, SecurityContext securityContext, UriInfo info)
+			throws NotFoundException {
 		this.log.info("PayloadRestController processing request to download payload " + hash);
 		try {
+			if (format == null || format.equals("BLOB")) {
+				InputStream in = payloadService.getPayloadData(hash);
+				StreamingOutput stream = new StreamingOutput() {
+					@Override
+					public void write(OutputStream os) throws IOException, WebApplicationException {
+						try {
+							int read = 0;
+							byte[] bytes = new byte[2048];
+	
+							while ((read = in.read(bytes)) != -1) {
+								os.write(bytes, 0, read);
+								log.trace("Copying " + read + " bytes into the output...");
+							}
+							os.flush();
+						} catch (Exception e) {
+							throw new WebApplicationException(e);
+						} finally {
+							log.debug("closing streams...");
+							os.close();
+							in.close();
+						}
+					}
+				};
+				log.debug("Send back the stream....");
+				return Response.ok(stream, "application/octet-stream") ///MediaType.APPLICATION_JSON_TYPE)
+						.header("Content-Disposition", "attachment; filename=\"" + hash + ".blob\"")
+						// .header("Content-Length", new
+						// Long(f.length()).toString())
+						.build();
+			} else {
+				PayloadDto entity = payloadService.getPayload(hash);
+				if (entity == null) {
+					String msg = "Cannot find payload corresponding to hash " + hash;
+					ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+					return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+				}		
+				return Response.ok(entity,MediaType.APPLICATION_JSON_TYPE).build();
+			}
+		} catch (CdbServiceException e) {
+			String msg = "Error retrieving payload from hash " + hash;
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+	
+	@Override
+	public Response storePayloadWithIovMultiForm(InputStream fileInputStream, FormDataContentDisposition fileDetail,
+			String tag, BigDecimal since, String format, BigDecimal endtime, SecurityContext securityContext, UriInfo info)
+			throws NotFoundException {
+		this.log.info("PayloadRestController processing request to store payload in tag {} and at since {}",tag,since);
+		try {
+			String filename = cprops.getDump_dir() +"/"+tag+"_"+since+".blob";
+			String hash = payloadService.saveInputStreamGetHash(fileInputStream, filename);
+			PayloadDto payloaddto = new PayloadDto().hash(hash).objectType("JSON").streamerInfo("JSON".getBytes()).version("test");
+			InputStream is = new FileInputStream(new File(filename));
+		    PayloadDto saved = payloadService.insertPayloadAndInputStream(payloaddto,is);
+		    IovDto iovdto = new IovDto().payloadHash(hash).tagName(tag).since(since);
+			IovDto savediov = iovService.insertIov(iovdto);
+			log.debug("Create payload {} and iov {} ",saved,savediov);
+			HTTPResponse resp = new HTTPResponse().action("storePayloadWithIovMultiForm").code(201).id(hash).message("Created new entry in tag "+tag);
+			return Response.created(info.getRequestUri()).entity(resp).build();
+			
+		} catch (CdbServiceException | FileNotFoundException e) {
+			String msg = "Error creating payload resource using " + tag.toString() + " : "+e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+	
+	@Override
+    public Response getBlob(String hash, SecurityContext securityContext, UriInfo info) throws NotFoundException {
+		this.log.info("PayloadRestController processing request to download payload " + hash);
+		StreamingOutput stream = null;
+		try {
 			InputStream in = payloadService.getPayloadData(hash);
-			StreamingOutput stream = new StreamingOutput() {
+			stream = new StreamingOutput() {
 				@Override
 				public void write(OutputStream os) throws IOException, WebApplicationException {
 					try {
@@ -105,28 +193,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
-    
-    @Override
-	@CacheControlCdb("public, max-age=604800")
-    public Response getPayload(String hash, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-		this.log.info("PayloadRestController processing request for payload " + hash);
-		try {
-
-			PayloadDto entity = payloadService.getPayload(hash);
-			if (entity == null) {
-				String msg = "Cannot find payload corresponding to hash " + hash;
-				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-			}
-			return Response.ok().entity(entity).build();
-			
-		} catch (CdbServiceException e) {
-			String msg = "Error retrieving payload from hash " + hash;
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-		}
-    }
-    
+      
     @Override
     public Response getPayloadMetaInfo(String hash, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		this.log.info("PayloadRestController processing request for payload meta information " + hash);

@@ -52,7 +52,7 @@ public class PayloadHandler {
 			buffer.flush();
 			return buffer.toByteArray();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		}
 		return new byte[0];
 	}
@@ -68,7 +68,7 @@ public class PayloadHandler {
 			}
 			out.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		}
 	}
 
@@ -82,13 +82,13 @@ public class PayloadHandler {
 			}
 			out.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		} finally {
 			try {
 				uploadedInputStream.close();
 				out.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("Exception : {}",e.getMessage());
 			}
 		}
 	}
@@ -108,7 +108,7 @@ public class PayloadHandler {
 		try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
 			StreamUtils.copy(uploadedInputStream, out);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		}
 	}
 
@@ -118,7 +118,7 @@ public class PayloadHandler {
 			byte[] data = Files.readAllBytes(path);
 			return data;
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		}
 		return new byte[0];
 
@@ -131,7 +131,7 @@ public class PayloadHandler {
 			Files.size(path);
 			return Files.size(path);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		}
 		return 0;
 	}
@@ -149,18 +149,15 @@ public class PayloadHandler {
 			// stream copy runs a high-speed upload across the network
 			StreamUtils.copy(fstream, bstream);
 			return blob;
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch (IOException | SQLException e) {
+			log.error("Exception : {}",e.getMessage());
 		} finally {
 			try {
 				if (bstream != null) {
 					bstream.close();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Exception : {}",e.getMessage());
 			}
 		}
 		return blob;
@@ -168,38 +165,23 @@ public class PayloadHandler {
 
 	public Blob createBlobFromStream(InputStream is) {
 		Blob blob = null;
-		Connection conn = null;
-		BufferedInputStream fstream = null;
 		BufferedOutputStream bstream = null;
-		try {
-			conn = ds.getConnection();
-			fstream = new BufferedInputStream(is);
+		try (Connection conn = ds.getConnection();
+			 BufferedInputStream fstream = new BufferedInputStream(is);) {
 			blob = conn.createBlob();
 			bstream = new BufferedOutputStream(blob.setBinaryStream(1));
 			// stream copy runs a high-speed upload across the network
 			StreamUtils.copy(fstream, bstream);
 			return blob;
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch (IOException | SQLException e) {
+			log.error("Exception : {}",e.getMessage());
 		} finally {
 			try {
-				if (conn != null) {
-					conn.close();
-				}
-				if (fstream != null) {
-					fstream.close();
-				}
 				if (bstream != null) {
 					bstream.close();
 				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Exception : {}",e.getMessage());
 			}
 		}
 		return blob;
@@ -305,16 +287,14 @@ public class PayloadHandler {
 				dataentity.getStreamerInfo().free();
 
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Exception : {}",e.getMessage());
 			}
-
+			log.info("Retrieved payload: {} {} {} ",dataentity.getHash(),dataentity.getObjectType(),dataentity.getVersion());
 			PayloadDto entitydto = new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
 					.objectType(dataentity.getObjectType()).data(databarr);
 			return entitydto;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception : {} ",e.getMessage());
 		}
 		return null;
 	}

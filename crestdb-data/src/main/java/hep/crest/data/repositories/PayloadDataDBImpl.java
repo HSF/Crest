@@ -57,16 +57,16 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	@Autowired
 	private PayloadHandler payloadHandler;
 
-	private String default_tablename=null;
+	private String defaultTablename=null;
 
 	public PayloadDataDBImpl(DataSource ds) {
 		super();
 		this.ds = ds;
 	}
 	
-	public void setDefault_tablename(String default_tablename) {
-		if (this.default_tablename == null)
-			this.default_tablename = default_tablename;
+	public void setDefaultTablename(String defaultTablename) {
+		if (this.defaultTablename == null)
+			this.defaultTablename = defaultTablename;
 	}
 	
 	protected String tablename() {
@@ -74,8 +74,8 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String tablename = ann.name();
 		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
 			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		} else if (this.default_tablename != null) {
-			tablename = this.default_tablename + "." + tablename;
+		} else if (this.defaultTablename != null) {
+			tablename = this.defaultTablename + "." + tablename;
 		}
 		return tablename;
 	}
@@ -83,7 +83,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
 	@Transactional
 	public Payload find(String id) {
-		log.info("Find payload " + id + " using JDBCTEMPLATE");
+		log.info("Find payload {} using JDBCTEMPLATE",id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
@@ -110,7 +110,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
 	@Transactional
 	public Payload findMetaInfo(String id) throws Exception {
-		log.info("Find payload " + id + " using JDBCTEMPLATE");
+		log.info("Find payload meta info {} using JDBCTEMPLATE",id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
@@ -133,7 +133,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
 	@Transactional
 	public Payload findData(String id) {
-		log.info("Find payload data only for " + id + " using JDBCTEMPLATE");
+		log.info("Find payload data {} using JDBCTEMPLATE",id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
@@ -152,7 +152,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		try {
 			savedentity = this.saveBlobAsBytes(entity);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		}
 		return savedentity;
 	}
@@ -165,39 +165,28 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String sql = "INSERT INTO " + tablename
 				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
 
-		log.info("Insert Payload " + entity.getHash() + " using JDBCTEMPLATE ");
-		Connection conn = null;
+		log.info("Insert Payload {} using JDBCTEMPLATE ",entity.getHash() );
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
-		try {
-			conn = ds.getConnection();
-			PreparedStatement ps = conn.prepareStatement(sql);
+		try (Connection conn = ds.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, entity.getHash());
 			ps.setString(2, entity.getObjectType());
 			ps.setString(3, entity.getVersion());
 			ps.setBytes(4, entity.getData());
 			ps.setBytes(5, entity.getStreamerInfo());
 			ps.setDate(6, inserttime);
-			log.info("Dump preparedstatement " + ps.toString() + " using sql "+sql+" and arguments "+
-					entity.getHash()+" "+entity.getObjectType()+" "+entity.getVersion()+" "+entity.getInsertionTime());
+			log.info("Dump preparedstatement {} using sql {} and arguments : {} {} {} {}",
+					ps, sql, entity.getHash(),entity.getObjectType(),entity.getVersion(),entity.getInsertionTime());
 			ps.execute();
-			ps.close();
-			log.debug("Search for stored payload as a verification, use hash "+entity.getHash());
+			log.debug("Search for stored payload as a verification, use hash {} ",entity.getHash());
 			Payload saved = find(entity.getHash());
 			return saved;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception : {} ",e.getMessage());
 		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}
 		return null;
 	}
@@ -212,10 +201,9 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			this.saveBlobAsStream(entity, is);
 			savedentity = findMetaInfo(entity.getHash());
 		} catch (IOException e) {
-			log.error("IOException during payload insertion: "+e.getMessage());
+			log.error("IOException during payload insertion: {}",e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			log.error("Exception during payload insertion: "+e.getMessage());
+			log.error("Exception during payload insertion: {}",e.getMessage());
 		}
 		return savedentity;
 	}
@@ -226,38 +214,27 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String sql = "INSERT INTO " + tablename
 				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
 
-		log.info("Insert Payload " + entity.getHash() + " using JDBCTEMPLATE");
+		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
 		byte[] blob = payloadHandler.getBytesFromInputStream(is);
-		log.debug("Streamer info " + entity.getStreamerInfo());
-		log.debug("Read data blob of length " + blob.length + " and streamer info " + entity.getStreamerInfo().length);
-		Connection conn = null;
+		log.debug("Streamer info {}", entity.getStreamerInfo());
+		log.debug("Read data blob of length {} and streamer info {}",blob.length, entity.getStreamerInfo().length);
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
-		try {
-			conn = ds.getConnection();
-			PreparedStatement ps = conn.prepareStatement(sql);
+		try (Connection conn = ds.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, entity.getHash());
 			ps.setString(2, entity.getObjectType());
 			ps.setString(3, entity.getVersion());
 			ps.setBytes(4, blob);
 			ps.setBytes(5, entity.getStreamerInfo());
 			ps.setDate(6, inserttime);
-			log.debug("Dump preparedstatement " + ps.toString());
+			log.debug("Dump preparedstatement {}",ps);
 			ps.execute();
-			ps.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			log.error("Exception from SQL during insertion: "+e.getMessage());
+			log.error("Exception from SQL during insertion: {}",e.getMessage());
 		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				log.error("Exception from SQL attempting to close connection: "+e.getMessage());
-			}
 		}
 		return;
 	}
@@ -271,33 +248,23 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?)";
 
 		log.info("Insert Payload Meta Info " + metainfoentity.getHash() + " using JDBCTEMPLATE");
-		Connection conn = null;
-		try {
-			conn = ds.getConnection();
-			PreparedStatement ps = conn.prepareStatement(sql);
+		try (Connection conn = ds.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, metainfoentity.getHash());
 			ps.setString(2, metainfoentity.getObjectType());
 			ps.setString(3, metainfoentity.getVersion());
 			ps.setBytes(4, metainfoentity.getStreamerInfo());
 			// FIXME: be careful to the insertion time...is the one provided correct ?
 			ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
-			log.debug("Dump preparedstatement " + ps.toString());
+			log.debug("Dump preparedstatement {}",ps);
 			ps.execute();
 			ps.close();
 			Payload saved = find(metainfoentity.getHash());
 			return saved;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}
 		return null;
 	}

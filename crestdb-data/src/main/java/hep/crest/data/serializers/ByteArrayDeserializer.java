@@ -47,12 +47,12 @@ public class ByteArrayDeserializer extends JsonDeserializer<byte[]> {
 	public byte[]  deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
 		try {
-			log.debug("Trying to deserialize json parser "+jp);
+			log.debug("Trying to deserialize json parser {}",jp);
 			String blobstr = new String(jp.getTextCharacters());
 			byte[] mblob = Base64.getDecoder().decode(blobstr);
 			return mblob;
 		} catch (Exception ex) {
-			log.error("Failed to deserialize byte array " + jp.getText());
+			log.error("Failed to deserialize byte array {}",jp.getText());
 			throw new JsonParseException(ex.getMessage(), jp.getCurrentLocation());
 		}
 	}

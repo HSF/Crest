@@ -34,11 +34,28 @@ swaggerSources {
       configFile = file('swagger_schemas/swagger/json/crestdb-config.json')
     }
   }
+  crestdb_client {
+    inputFile = file('swagger_schemas/swagger/json/crestdb.json')
+    code {
+      language = 'python'
+      templateDir = file('./templates/2.3.0/python-client/model')
+      configFile = file('swagger_schemas/swagger/json/crestdb-pyclient-config.json')
+    }
+  }
+  crestdb_oldclient {
+    inputFile = file('swagger_schemas/swagger/json/crestdb.json')
+    code {
+      language = 'python'
+      //templateDir = file('./templates/2.3.0/python-client/model')
+      configFile = file('swagger_schemas/swagger/json/crestdb-pyclient-config.json')
+    }
+  }
+
 }
 
 configurations.compile.each {
 	println "compile: $it"
-}  
+}
 
 allprojects  {
   apply plugin: 'maven'
@@ -48,12 +65,12 @@ allprojects  {
 
 // Define a project specific method
 // Load properties for later filtering
-// Functions to get project properties from local file	
+// Functions to get project properties from local file
 Properties getProjectProperties() {
 	String propertiesfile = "${project.rootDir}/crest-filter-values.properties"
 	File generalPropertiesFile = file(propertiesfile)
 	println 'Loaded properties file: '+generalPropertiesFile.name
-	Properties mprops = new Properties()    
+	Properties mprops = new Properties()
     mprops.load(generalPropertiesFile.newDataInputStream())
 	println 'Getting properties from main gradle script...'+mprops
     return mprops
@@ -78,7 +95,7 @@ subprojects {
     tasks.withType(JavaCompile) {
   	    options.encoding = 'UTF-8'
     }
-    
+
 	repositories {
 	    mavenLocal()
 
@@ -116,7 +133,7 @@ subprojects {
 		//compile group: 'com.impossibl.pgjdbc-ng', name: 'pgjdbc-ng', version: '0.7.1'
 
 	}
-		
+
 	task wrapper(type: Wrapper) {
 	   gradleVersion = '4.0.2' //version required
 	}
