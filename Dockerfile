@@ -11,8 +11,8 @@ ENV USR crest
 
 ENV crest_version 1.0-SNAPSHOT
 ENV crest_dir /home/${USR}/swagger_crest
-ENV data_dir /home/${USR}/data
-##ENV data_dir /data
+##ENV data_dir /home/${USR}/data
+ENV data_dir /data
 ENV gradle_version 4.2.1
 ENV TZ GMT
 RUN mkdir -p ${data_dir}/logs
@@ -28,9 +28,9 @@ RUN mkdir -p ${data_dir}/dump
 ADD crestdb-web/build/libs/crest.war ${crest_dir}/crest.war
 ADD web ${data_dir}/web
 
-RUN chown -R 1001:0 ${crest_dir}/crest.war
-RUN chown -R 1001:0 ${crest_dir}
-RUN chown -R 1001:0 ${data_dir}
+#RUN chown -R 1001:0 ${crest_dir}/crest.war
+#RUN chown -R 1001:0 ${crest_dir}
+#RUN chown -R 1001:0 ${data_dir}
 
 ##USER 1001
 
