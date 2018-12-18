@@ -32,7 +32,7 @@ RUN chown -R 1001:0 ${crest_dir}/crest.war
 RUN chown -R 1001:0 ${crest_dir}
 RUN chown -R 1001:0 ${data_dir}
 
-USER 1001
+##USER 1001
 
 VOLUME "/home/${USR}/data"
 #VOLUME "/data/web"
