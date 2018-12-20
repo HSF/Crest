@@ -24,7 +24,10 @@ import hep.crest.data.exceptions.CdbServiceException;
 
 /**
  * @author formica
- *
+ * This file requires a configuration file to be created in src/main/resource:
+ * spring.factories
+ * The content is something like this
+ * org.springframework.boot.env.EnvironmentPostProcessor=hep.crest.server.autoconfig.DockerEnvironmentPostProcessor
  */
 public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
