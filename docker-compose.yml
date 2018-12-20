@@ -1,12 +1,52 @@
-version: '3'
+#_______________________________________________________________________________
+#
+# Andrea Formica - October 2018 
+#
+# Instructions to deploy CREST server (taken from H.Louvin: messaging example)
+#
+# docker stack deploy --with-registry-auth -c docker-compose.yml svom-crest
+#
+#_______________________________________________________________________________
+
+version: '3.3'
+
 services:
-  web:
-    image: "crestdb-ldap:1.0"
-    env_file:
-    - ./web.env
+  crest-http:
+    image: svomtest.svom.fr:5543/crest-service:0.1.1
     ports:
-    - "8443:8443"
+      - "9090:8080"
+    networks:
+      - fscnet
+    configs:
+    - source: crest-conf
+      target: /home/svom/application.properties
+    - source: crest-log
+      target: /home/svom/logback.xml 
+    - source: crest-jopts
+      target: /home/svom/javaopt.properties
+    secrets:
+        - vhfdb_password
+    environment:
+        - svom.service.postgres_db=crestdb
+        - crest.server.port=8080
+        - spring.profiles.active=pgsvom
     volumes:
-    - "/tmp/data/dump:/data/dump"
-    - "/tmp/data/web:/data/web"
-    - "/tmp/data/logs:/data/logs"
+        - "/data/test:/home/svom/data/logs"
+        - "/data/test:/home/svom/data/web"
+        - "/data/test:/home/svom/data/dump"
+networks:
+  fscnet:
+    external: true
+
+configs:
+  crest-conf:
+    external: true
+  crest-log:
+    external: true
+  crest-jopts:
+    external: true
+
+secrets:
+  vhfdb_password:
+    external: true
+#______________________________________________________________________________
