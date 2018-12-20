@@ -39,7 +39,7 @@ public class ServicesConfig {
 	    return jc;
 	}
     
-    @Profile({"test","default","dev","h2","sqlite","postgres","mysql"})
+    @Profile({"test","default","dev","h2","sqlite","postgres","mysql","pgsvom"})
 	@Bean(name = "jerseyConfig")
 	public JerseyConfig getJerseyDefaultResource() {
 		JerseyConfig jc = new JerseyConfig();

@@ -7,7 +7,6 @@
 spring:
  profiles:
   include: default
-
 spring:
     security:
       strategy: MODE_INHERITABLETHREADLOCAL
@@ -39,3 +38,7 @@ crest:
   schemaname: none
   dumpdir: ${crest.dump.dir}
   webstaticdir: ${crest.web.static}
+  security: none
+  synchro: none
+  authenticationtype: none
+  

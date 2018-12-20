@@ -85,7 +85,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO from " + tablename
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,PYLD_SIZE from " + tablename
 				+ " where HASH=?";
 		
 		// Be careful, this seems not to work with Postgres: probably getBlob loads an OID and not the byte[] 
@@ -99,7 +99,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			entity.setData(rs.getBlob("DATA"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
-
+			entity.setSize(rs.getInt("PYLD_SIZE"));
 			return entity;
 		});
 
@@ -112,7 +112,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO from " + tablename
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from " + tablename
 				+ " where HASH=?";
 		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
@@ -122,7 +122,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			// entity.setData(rs.getBlob("DATA"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
-
+			entity.setSize(rs.getInt("PYLD_SIZE"));
 			return entity;
 		});
 
@@ -151,7 +151,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			log.info("Saving blob as bytes array....");
 			savedentity = this.saveBlobAsBytes(entity);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		}
 		return savedentity;
 	}
@@ -184,13 +184,9 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			// Close the large object
 			obj.close();
 			return oid;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (SQLException | IOException e) {
+			log.error("Exception : {}",e.getMessage());
+		} 
 		return (Long) null;
 	}
 
@@ -231,8 +227,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			Payload saved = find(entity.getHash());
 			return saved;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		} finally {
 			try {
 				if (ps != null) {
@@ -242,8 +237,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 				sis.close();
 				if (conn != null) conn.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Exception : {}",e.getMessage());
 			}
 		}
 		return null;
@@ -260,7 +254,6 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		} catch (IOException e) {
 			log.error("IOException during payload insertion: {}",e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			log.error("Exception during payload insertion: {}",e.getMessage());
 		}
 		return savedentity;
@@ -270,7 +263,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
 		
@@ -295,11 +288,11 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setLong(4, oid);
 			ps.setLong(5, sioid);
 			ps.setDate(6, inserttime);
+			ps.setInt(7, entity.getSize());
 			log.debug("Dump preparedstatement {} ",ps.toString());
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			log.error("Exception from SQL during insertion: {}",e.getMessage());
 		} finally {
 			try {
@@ -323,7 +316,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME,PYLD_SIZE) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
 		Connection conn = null;
@@ -337,6 +330,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setBytes(4, metainfoentity.getStreamerInfo());
 			// FIXME: be careful to the insertion time...is the one provided correct ?
 			ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
+			ps.setInt(6, metainfoentity.getSize());
 			log.debug("Dump preparedstatement {}", ps.toString());
 			ps.execute();
 			Payload saved = find(metainfoentity.getHash());
