@@ -76,7 +76,7 @@ public class RepositoryConfig {
 		return bean;
     }
     
-    @Profile({"postgres"})
+    @Profile({"postgres","pgsvom"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadPostgresRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
