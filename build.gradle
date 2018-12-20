@@ -130,7 +130,8 @@ subprojects {
 		compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
 		compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
 		compile("com.h2database:h2")
-		//compile group: 'com.impossibl.pgjdbc-ng', name: 'pgjdbc-ng', version: '0.7.1'
+		compile("commons-io:commons-io:2.6")
+		compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
 
 	}
 

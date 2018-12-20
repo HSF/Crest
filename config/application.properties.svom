@@ -1,0 +1,10 @@
+spring.profiles.active=prod
+user.timezone=GMT
+crest.web.static=/home/svom/data/web
+crest.dump.dir=/home/svom/data/dump
+crest.log.dir=/home/svom/data/logs
+management.endpoint.health.show-details=ALWAYS
+
+svom.service.postgres=postgres-vhfdb
+svom.db.port=5432
+svom.service.postgres_user=svom

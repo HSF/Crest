@@ -1,0 +1,41 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+spring:
+ profiles:
+  include: default
+
+spring:
+    security:
+      strategy: MODE_INHERITABLETHREADLOCAL
+    profiles: pgsvom
+    jersey:
+      application-path: /api
+    datasource:
+      url: jdbc:postgresql://${svom.service.postgres}:${svom.db.port}/${svom.service.postgres_db}
+      driverClassName: org.postgresql.Driver
+      username: ${svom.service.postgres_user}
+      password: ${svom.service.postgres_password}
+#      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        connection-test-query: SELECT 1
+        maximum-pool-size: 5
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.PostgreSQL9Dialect
+        hibernate.jdbc.fetch_size: 300
+# This should be changed for production to "validate"
+        hibernate.hbm2ddl.auto: update
+        hibernate.show_sql: false
+        hibernate.jdbc.use_streams_for_binary: false
+        hibernate.connection.autocommit: false
+        hibernate.jdbc.lob.non_contextual_creation: true
+server:
+    port: ${crest.server.port} 
+crest:
+  schemaname: none
+  dumpdir: ${crest.dump.dir}
+  webstaticdir: ${crest.web.static}

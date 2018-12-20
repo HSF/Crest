@@ -7,19 +7,18 @@
 FROM anapsix/alpine-java
 MAINTAINER Andrea Formica
 
-ENV USR svom
+ENV USR crest
 
-ENV crest_version 1.1-SNAPSHOT
+ENV crest_version 1.0-SNAPSHOT
 ENV crest_dir /home/${USR}/swagger_crest
 ##ENV data_dir /home/${USR}/data
 ENV data_dir /data
 ENV gradle_version 4.2.1
 ENV TZ GMT
-
-RUN  mkdir -p ${crest_dir} \
-  && mkdir -p ${data_dir}/web \
-  && mkdir -p ${data_dir}/dump \
-  && mkdir -p ${data_dir}/logs 
+RUN mkdir -p ${data_dir}/logs
+RUN mkdir -p ${crest_dir}
+RUN mkdir -p ${data_dir}/web
+RUN mkdir -p ${data_dir}/dump
 
 ### This is if you need to create a full war on docker
 #ADD . ${crest_dir}
@@ -28,16 +27,24 @@ RUN  mkdir -p ${crest_dir} \
 ## This works if using an externally generated war, in the local directory
 ADD crestdb-web/build/libs/crest.war ${crest_dir}/crest.war
 ADD web ${data_dir}/web
-ADD logback.xml.crest ${data_dir}/logback.xml
 
-VOLUME "${data_dir}/web"
-VOLUME "${data_dir}/dump"
-VOLUME "${data_dir}/logs"
+#RUN chown -R 1001:0 ${crest_dir}/crest.war
+#RUN chown -R 1001:0 ${crest_dir}
+#RUN chown -R 1001:0 ${data_dir}
+
+### we do not set the user....
+###USER 1001
+
+#VOLUME "/home/${USR}/data"
+#VOLUME "/data/web"
+### we export only 2 directories....
+VOLUME "/data/dump"
+VOLUME "/data/logs"
 
 EXPOSE 8080
-
 COPY ./entrypoint.sh /home/${USR}
-COPY ./create-properties.sh /home/${USR}
 WORKDIR /home/${USR}
 
 ENTRYPOINT  [ "./entrypoint.sh" ]
+
+####ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar ${crest_dir}/crest.war" ]
