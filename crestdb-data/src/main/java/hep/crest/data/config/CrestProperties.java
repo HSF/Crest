@@ -1,5 +1,7 @@
 package hep.crest.data.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -8,25 +10,26 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("crest")
 public class CrestProperties {
 
-	
-	private String dump_dir;
+	private Logger log = LoggerFactory.getLogger(this.getClass()); 
+
+	private String dumpdir;
 	private String schemaname;
 	private String security;
 	private String synchro;
 	private String webstaticdir;
 	private String authenticationtype;
 
-	public String getDump_dir() {
-		System.out.println("property dump_dir has value: "+dump_dir);
-		return dump_dir;
+	public String getDumpdir() {
+		log.info("property dumpdir has value:{}",dumpdir);
+		return dumpdir;
 	}
 
-	public void setDump_dir(String dump_dir) {
-		this.dump_dir = dump_dir;
+	public void setDumpdir(String dumpdir) {
+		this.dumpdir = dumpdir;
 	}
 
 	public String getSchemaname() {
-		System.out.println("property schemaname has value: "+schemaname);
+		log.info("property schemaname has value:{}",schemaname);
 		return schemaname;
 	}
 

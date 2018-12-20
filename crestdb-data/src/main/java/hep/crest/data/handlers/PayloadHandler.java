@@ -216,54 +216,45 @@ public class PayloadHandler {
 		return blob;
 	}
 
+	protected byte[] readLobs(InputStream in) {
+		byte[] databarr = null;
+		try (ByteArrayOutputStream fos = new ByteArrayOutputStream()) {
+			int read = 0;
+			byte[] bytes = new byte[2048];
+
+			while ((read = in.read(bytes)) != -1) {
+				fos.write(bytes, 0, read);
+				log.trace("Copying {} bytes into the output...",read);
+			}
+			fos.flush();
+			databarr = fos.toByteArray();
+			return databarr;
+		} catch (IOException e) {
+			log.error("Exception : {}",e.getMessage());
+		}
+		return null;		
+	}
+	
 	public PayloadDto convertToDto(Payload dataentity) {
 		try {
 			log.debug("Retrieving binary stream from payload entity including the DATA blob");
 			byte[] databarr = null;
 			byte[] strinfobarr = null;
 			InputStream in = dataentity.getData().getBinaryStream();
-			try (ByteArrayOutputStream fos = new ByteArrayOutputStream()) {
-				int read = 0;
-				byte[] bytes = new byte[2048];
+			databarr = readLobs(in);
+			dataentity.getData().free();
 
-				while ((read = in.read(bytes)) != -1) {
-					fos.write(bytes, 0, read);
-					log.trace("Copying {} bytes into the output...",read);
-				}
-				fos.flush();
-				dataentity.getData().free();
-				databarr = fos.toByteArray();
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			// Now get Streamerinfo BLOB.
 			InputStream insi = dataentity.getStreamerInfo().getBinaryStream();
-			try (ByteArrayOutputStream fos = new ByteArrayOutputStream()) {
-				int read = 0;
-				byte[] bytes = new byte[2048];
-
-				while ((read = insi.read(bytes)) != -1) {
-					fos.write(bytes, 0, read);
-					log.trace("Copying {} bytes into the output...",read);
-				}
-				fos.flush();
-				dataentity.getStreamerInfo().free();
-				strinfobarr = fos.toByteArray();
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			strinfobarr = readLobs(insi);
+			dataentity.getStreamerInfo().free();
 
 			PayloadDto entitydto = new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
-					.objectType(dataentity.getObjectType()).data(databarr).streamerInfo(strinfobarr)
+					.objectType(dataentity.getObjectType()).size(dataentity.getSize()).data(databarr).streamerInfo(strinfobarr)
 					.insertionTime(dataentity.getInsertionTime());
 			return entitydto;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception : {}",e.getMessage());
 		}
 		return null;
 	}
@@ -271,27 +262,16 @@ public class PayloadHandler {
 	public PayloadDto convertToDtoNoData(Payload dataentity) {
 		try {
 			log.debug("Retrieving binary stream from payload entity without the DATA blob");
-			byte[] databarr = null;
+			byte[] strinfobarr = null;
 
 			// Now get Streamerinfo BLOB.
 			InputStream insi = dataentity.getStreamerInfo().getBinaryStream();
-			try (ByteArrayOutputStream fos = new ByteArrayOutputStream()) {
-				int read = 0;
-				byte[] bytes = new byte[2048];
+			strinfobarr = readLobs(insi);
+			dataentity.getStreamerInfo().free();
 
-				while ((read = insi.read(bytes)) != -1) {
-					fos.write(bytes, 0, read);
-					log.trace("Copying {} bytes into the output...",read);
-				}
-				fos.flush();
-				dataentity.getStreamerInfo().free();
-
-			} catch (IOException e) {
-				log.error("Exception : {}",e.getMessage());
-			}
 			log.info("Retrieved payload: {} {} {} ",dataentity.getHash(),dataentity.getObjectType(),dataentity.getVersion());
 			PayloadDto entitydto = new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
-					.objectType(dataentity.getObjectType()).data(databarr);
+					.objectType(dataentity.getObjectType()).size(dataentity.getSize()).streamerInfo(strinfobarr);
 			return entitydto;
 		} catch (SQLException e) {
 			log.error("Exception : {} ",e.getMessage());

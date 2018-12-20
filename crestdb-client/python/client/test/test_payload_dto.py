@@ -3,7 +3,7 @@
 """
     CrestDB REST API
 
-    Crest Rest Api to manage data for calibration files.
+    Crest Rest Api to manage data for calibration files.  # noqa: E501
 
     OpenAPI spec version: 2.0
     Contact: andrea.formica@cern.ch
@@ -13,17 +13,15 @@
 
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest
 
 import crestapi
+from crestapi.models.payload_dto import PayloadDto  # noqa: E501
 from crestapi.rest import ApiException
-from crestapi.models.payload_dto import PayloadDto
 
 
 class TestPayloadDto(unittest.TestCase):
-    """ PayloadDto unit test stubs """
+    """PayloadDto unit test stubs"""
 
     def setUp(self):
         pass
@@ -32,10 +30,10 @@ class TestPayloadDto(unittest.TestCase):
         pass
 
     def testPayloadDto(self):
-        """
-        Test PayloadDto
-        """
-        model = crestapi.models.payload_dto.PayloadDto()
+        """Test PayloadDto"""
+        # FIXME: construct object with mandatory attributes with example values
+        # model = crestapi.models.payload_dto.PayloadDto()  # noqa: E501
+        pass
 
 
 if __name__ == '__main__':

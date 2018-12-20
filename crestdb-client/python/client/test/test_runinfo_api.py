@@ -3,7 +3,7 @@
 """
     CrestDB REST API
 
-    Crest Rest Api to manage data for calibration files.
+    Crest Rest Api to manage data for calibration files.  # noqa: E501
 
     OpenAPI spec version: 2.0
     Contact: andrea.formica@cern.ch
@@ -13,37 +13,40 @@
 
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest
 
 import crestapi
+from crestapi.api.runinfo_api import RuninfoApi  # noqa: E501
 from crestapi.rest import ApiException
-from crestapi.apis.runinfo_api import RuninfoApi
 
 
 class TestRuninfoApi(unittest.TestCase):
-    """ RuninfoApi unit test stubs """
+    """RuninfoApi unit test stubs"""
 
     def setUp(self):
-        self.api = crestapi.apis.runinfo_api.RuninfoApi()
+        self.api = crestapi.api.runinfo_api.RuninfoApi()  # noqa: E501
 
     def tearDown(self):
         pass
 
     def test_create_run_lumi_info(self):
-        """
-        Test case for create_run_lumi_info
+        """Test case for create_run_lumi_info
 
-        Create an entry for run information.
+        Create an entry for run information.  # noqa: E501
+        """
+        pass
+
+    def test_find_run_lumi_info(self):
+        """Test case for find_run_lumi_info
+
+        Finds a RunLumiInfoDto lists using parameters.  # noqa: E501
         """
         pass
 
     def test_list_run_lumi_info(self):
-        """
-        Test case for list_run_lumi_info
+        """Test case for list_run_lumi_info
 
-        Finds a RunLumiInfoDto lists.
+        Finds a RunLumiInfoDto lists.  # noqa: E501
         """
         pass
 

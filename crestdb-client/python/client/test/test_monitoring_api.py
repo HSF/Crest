@@ -3,7 +3,7 @@
 """
     CrestDB REST API
 
-    Crest Rest Api to manage data for calibration files.
+    Crest Rest Api to manage data for calibration files.  # noqa: E501
 
     OpenAPI spec version: 2.0
     Contact: andrea.formica@cern.ch
@@ -13,29 +13,26 @@
 
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest
 
 import crestapi
+from crestapi.api.monitoring_api import MonitoringApi  # noqa: E501
 from crestapi.rest import ApiException
-from crestapi.apis.monitoring_api import MonitoringApi
 
 
 class TestMonitoringApi(unittest.TestCase):
-    """ MonitoringApi unit test stubs """
+    """MonitoringApi unit test stubs"""
 
     def setUp(self):
-        self.api = crestapi.apis.monitoring_api.MonitoringApi()
+        self.api = crestapi.api.monitoring_api.MonitoringApi()  # noqa: E501
 
     def tearDown(self):
         pass
 
     def test_list_payload_tag_info(self):
-        """
-        Test case for list_payload_tag_info
+        """Test case for list_payload_tag_info
 
-        Retrieves monitoring information on payload as a list of PayloadTagInfoDtos.
+        Retrieves monitoring information on payload as a list of PayloadTagInfoDtos.  # noqa: E501
         """
         pass
 

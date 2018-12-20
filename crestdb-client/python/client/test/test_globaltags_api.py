@@ -3,7 +3,7 @@
 """
     CrestDB REST API
 
-    Crest Rest Api to manage data for calibration files.
+    Crest Rest Api to manage data for calibration files.  # noqa: E501
 
     OpenAPI spec version: 2.0
     Contact: andrea.formica@cern.ch
@@ -13,53 +13,47 @@
 
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest
 
 import crestapi
+from crestapi.api.globaltags_api import GlobaltagsApi  # noqa: E501
 from crestapi.rest import ApiException
-from crestapi.apis.globaltags_api import GlobaltagsApi
 
 
 class TestGlobaltagsApi(unittest.TestCase):
-    """ GlobaltagsApi unit test stubs """
+    """GlobaltagsApi unit test stubs"""
 
     def setUp(self):
-        self.api = crestapi.apis.globaltags_api.GlobaltagsApi()
+        self.api = crestapi.api.globaltags_api.GlobaltagsApi()  # noqa: E501
 
     def tearDown(self):
         pass
 
     def test_create_global_tag(self):
-        """
-        Test case for create_global_tag
+        """Test case for create_global_tag
 
-        Create a GlobalTag in the database.
+        Create a GlobalTag in the database.  # noqa: E501
         """
         pass
 
     def test_find_global_tag(self):
-        """
-        Test case for find_global_tag
+        """Test case for find_global_tag
 
-        Finds a GlobalTagDto by name
+        Finds a GlobalTagDto by name  # noqa: E501
         """
         pass
 
     def test_find_global_tag_fetch_tags(self):
-        """
-        Test case for find_global_tag_fetch_tags
+        """Test case for find_global_tag_fetch_tags
 
-        Finds a TagDtos lists associated to the global tag name in input.
+        Finds a TagDtos lists associated to the global tag name in input.  # noqa: E501
         """
         pass
 
     def test_list_global_tags(self):
-        """
-        Test case for list_global_tags
+        """Test case for list_global_tags
 
-        Finds a GlobalTagDtos lists.
+        Finds a GlobalTagDtos lists.  # noqa: E501
         """
         pass
 

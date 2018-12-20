@@ -20,9 +20,9 @@ Create a Iov in the database.
 
 This method allows to insert a Iov.Arguments: IovDto should be provided in the body as a JSON file.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -32,7 +32,7 @@ from pprint import pprint
 api_instance = crestapi.IovsApi()
 body = crestapi.IovDto() # IovDto | A json string that is used to construct a iovdto object: { name: xxx, ... }
 
-try: 
+try:
     # Create a Iov in the database.
     api_response = api_instance.create_iov(body)
     pprint(api_response)
@@ -68,9 +68,9 @@ Finds a IovDtos lists.
 
 This method allows to perform search by tagname and sorting.Arguments: tagname={a tag name}, page={ipage}, size={isize},      sort=<pattern>, where pattern is <field>:[DESC|ASC]
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -83,7 +83,7 @@ page = 0 # int | page: the page number {0} (optional) (default to 0)
 size = 10000 # int | size: the page size {10000} (optional) (default to 10000)
 sort = 'id.since:ASC' # str | sort: the sort pattern {id.since:ASC} (optional) (default to id.since:ASC)
 
-try: 
+try:
     # Finds a IovDtos lists.
     api_response = api_instance.find_all_iovs(tagname=tagname, page=page, size=size, sort=sort)
     pprint(api_response)
@@ -122,9 +122,9 @@ Get the number o iovs for the given tag.
 
 This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}, snapshotTime={snapshot time in milliseconds (Long) from epoch}
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -135,7 +135,7 @@ api_instance = crestapi.IovsApi()
 tagname = 'none' # str | tagname: the tag name {none} (default to none)
 snapshot = 0 # int | snapshot: the snapshot time {0} (optional) (default to 0)
 
-try: 
+try:
     # Get the number o iovs for the given tag.
     api_response = api_instance.get_size(tagname, snapshot=snapshot)
     pprint(api_response)
@@ -172,9 +172,9 @@ Get the number o iovs for tags matching pattern.
 
 This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -184,7 +184,7 @@ from pprint import pprint
 api_instance = crestapi.IovsApi()
 tagname = 'none' # str | tagname: the tag name {none} (default to none)
 
-try: 
+try:
     # Get the number o iovs for tags matching pattern.
     api_response = api_instance.get_size_by_tag(tagname)
     pprint(api_response)
@@ -220,9 +220,9 @@ Select groups for a given tagname.
 
 This method allows to select a list of groups.Arguments: tagname={a tag name}, snapshot={snapshot time as long}
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -233,7 +233,7 @@ api_instance = crestapi.IovsApi()
 tagname = 'none' # str | tagname: the tag name {none} (default to none)
 snapshot = 0 # int | snapshot: the snapshot time {0} (optional) (default to 0)
 
-try: 
+try:
     # Select groups for a given tagname.
     api_response = api_instance.select_groups(tagname, snapshot=snapshot)
     pprint(api_response)
@@ -270,9 +270,9 @@ Select iovs for a given tagname and in a given range.
 
 This method allows to select a list of iovs in a tag, using a given range in time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, until={until time as string}, snapshot={snapshot time as long}
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -285,7 +285,7 @@ since = '0' # str | since: the since time as a string {0} (optional) (default to
 until = 'INF' # str | until: the until time as a string {INF} (optional) (default to INF)
 snapshot = 0 # int | snapshot: the snapshot time {0} (optional) (default to 0)
 
-try: 
+try:
     # Select iovs for a given tagname and in a given range.
     api_response = api_instance.select_iovs(tagname=tagname, since=since, until=until, snapshot=snapshot)
     pprint(api_response)
@@ -324,9 +324,9 @@ Select snapshot for a given tagname and insertion time.
 
 This method allows to select a list of all iovs in a tag, using (optionally) a given snapshot time.Arguments: tagname={a tag name}, snapshot={snapshot time as long}
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -337,7 +337,7 @@ api_instance = crestapi.IovsApi()
 tagname = 'none' # str | tagname: the tag name {none} (default to none)
 snapshot = 0 # int | snapshot: the snapshot time {0} (default to 0)
 
-try: 
+try:
     # Select snapshot for a given tagname and insertion time.
     api_response = api_instance.select_snapshot(tagname, snapshot)
     pprint(api_response)

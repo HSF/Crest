@@ -1,9 +1,11 @@
 # coding: utf-8
 
+# flake8: noqa
+
 """
     CrestDB REST API
 
-    Crest Rest Api to manage data for calibration files.
+    Crest Rest Api to manage data for calibration files.  # noqa: E501
 
     OpenAPI spec version: 2.0
     Contact: andrea.formica@cern.ch
@@ -13,32 +15,31 @@
 
 from __future__ import absolute_import
 
-# import models into sdk package
-from .models.generic_map import GenericMap
-from .models.global_tag_dto import GlobalTagDto
-from .models.global_tag_map_dto import GlobalTagMapDto
-from .models.group_dto import GroupDto
-from .models.iov_dto import IovDto
-from .models.payload_dto import PayloadDto
-from .models.payload_tag_info_dto import PayloadTagInfoDto
-from .models.run_lumi_info_dto import RunLumiInfoDto
-from .models.tag_dto import TagDto
-from .models.tag_summary_dto import TagSummaryDto
-
 # import apis into sdk package
-from .apis.admin_api import AdminApi
-from .apis.fs_api import FsApi
-from .apis.globaltagmaps_api import GlobaltagmapsApi
-from .apis.globaltags_api import GlobaltagsApi
-from .apis.iovs_api import IovsApi
-from .apis.monitoring_api import MonitoringApi
-from .apis.payloads_api import PayloadsApi
-from .apis.runinfo_api import RuninfoApi
-from .apis.tags_api import TagsApi
+from crestapi.api.admin_api import AdminApi
+from crestapi.api.folders_api import FoldersApi
+from crestapi.api.fs_api import FsApi
+from crestapi.api.globaltagmaps_api import GlobaltagmapsApi
+from crestapi.api.globaltags_api import GlobaltagsApi
+from crestapi.api.iovs_api import IovsApi
+from crestapi.api.monitoring_api import MonitoringApi
+from crestapi.api.payloads_api import PayloadsApi
+from crestapi.api.runinfo_api import RuninfoApi
+from crestapi.api.tags_api import TagsApi
 
 # import ApiClient
-from .api_client import ApiClient
-
-from .configuration import Configuration
-
-configuration = Configuration()
+from crestapi.api_client import ApiClient
+from crestapi.configuration import Configuration
+# import models into sdk package
+from crestapi.models.folder_dto import FolderDto
+from crestapi.models.generic_map import GenericMap
+from crestapi.models.global_tag_dto import GlobalTagDto
+from crestapi.models.global_tag_map_dto import GlobalTagMapDto
+from crestapi.models.group_dto import GroupDto
+from crestapi.models.http_response import HTTPResponse
+from crestapi.models.iov_dto import IovDto
+from crestapi.models.payload_dto import PayloadDto
+from crestapi.models.payload_tag_info_dto import PayloadTagInfoDto
+from crestapi.models.run_lumi_info_dto import RunLumiInfoDto
+from crestapi.models.tag_dto import TagDto
+from crestapi.models.tag_summary_dto import TagSummaryDto

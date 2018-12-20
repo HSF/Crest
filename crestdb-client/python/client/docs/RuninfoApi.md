@@ -16,9 +16,9 @@ Create an entry for run information.
 
 Run informations go into a separate table.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -28,7 +28,7 @@ from pprint import pprint
 api_instance = crestapi.RuninfoApi()
 body = crestapi.RunLumiInfoDto() # RunLumiInfoDto | A json string that is used to construct a runlumiinfodto object: { run: xxx, ... }
 
-try: 
+try:
     # Create an entry for run information.
     api_response = api_instance.create_run_lumi_info(body)
     pprint(api_response)
@@ -64,9 +64,9 @@ Finds a RunLumiInfoDto lists using parameters.
 
 This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -81,7 +81,7 @@ page = 0 # int | page: the page number {0} (optional) (default to 0)
 size = 1000 # int | size: the page size {1000} (optional) (default to 1000)
 sort = 'since:ASC' # str | sort: the sort pattern {since:ASC} (optional) (default to since:ASC)
 
-try: 
+try:
     # Finds a RunLumiInfoDto lists using parameters.
     api_response = api_instance.find_run_lumi_info(_from=_from, to=to, format=format, page=page, size=size, sort=sort)
     pprint(api_response)
@@ -122,9 +122,9 @@ Finds a RunLumiInfoDto lists.
 
 This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -137,7 +137,7 @@ page = 0 # int | page: the page number {0} (optional) (default to 0)
 size = 1000 # int | size: the page size {1000} (optional) (default to 1000)
 sort = 'since:ASC' # str | sort: the sort pattern {since:ASC} (optional) (default to since:ASC)
 
-try: 
+try:
     # Finds a RunLumiInfoDto lists.
     api_response = api_instance.list_run_lumi_info(by=by, page=page, size=size, sort=sort)
     pprint(api_response)

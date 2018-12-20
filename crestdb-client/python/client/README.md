@@ -71,6 +71,8 @@ Class | Method | HTTP request | Description
 *AdminApi* | [**remove_global_tag**](docs/AdminApi.md#remove_global_tag) | **DELETE** /admin/globaltags/{name} | Remove a GlobalTag from the database.
 *AdminApi* | [**remove_tag**](docs/AdminApi.md#remove_tag) | **DELETE** /admin/tags/{name} | Remove a Tag from the database.
 *AdminApi* | [**update_global_tag**](docs/AdminApi.md#update_global_tag) | **PUT** /admin/globaltags/{name} | Update a GlobalTag in the database.
+*FoldersApi* | [**create_folder**](docs/FoldersApi.md#create_folder) | **POST** /folders | Create an entry for folder information.
+*FoldersApi* | [**list_folders**](docs/FoldersApi.md#list_folders) | **GET** /folders | Finds a FolderDto list.
 *FsApi* | [**build_tar**](docs/FsApi.md#build_tar) | **POST** /fs/tar | Dump a tag into filesystem and retrieve the tar file asynchronously.
 *GlobaltagmapsApi* | [**create_global_tag_map**](docs/GlobaltagmapsApi.md#create_global_tag_map) | **POST** /globaltagmaps | Create a GlobalTagMap in the database.
 *GlobaltagmapsApi* | [**find_global_tag_map**](docs/GlobaltagmapsApi.md#find_global_tag_map) | **GET** /globaltagmaps/{name} | Find GlobalTagMapDto lists.
@@ -91,6 +93,7 @@ Class | Method | HTTP request | Description
 *PayloadsApi* | [**get_blob**](docs/PayloadsApi.md#get_blob) | **GET** /payloads/{hash}/data | Finds payload data by hash; the payload object contains the real BLOB.
 *PayloadsApi* | [**get_payload**](docs/PayloadsApi.md#get_payload) | **GET** /payloads/{hash} | Finds a payload resource associated to the hash.
 *PayloadsApi* | [**get_payload_meta_info**](docs/PayloadsApi.md#get_payload_meta_info) | **GET** /payloads/{hash}/meta | Finds a payload resource associated to the hash.
+*PayloadsApi* | [**store_payload_with_iov_multi_form**](docs/PayloadsApi.md#store_payload_with_iov_multi_form) | **POST** /payloads/store | Create a Payload in the database, associated to a given iov since and tag name.
 *RuninfoApi* | [**create_run_lumi_info**](docs/RuninfoApi.md#create_run_lumi_info) | **POST** /runinfo | Create an entry for run information.
 *RuninfoApi* | [**find_run_lumi_info**](docs/RuninfoApi.md#find_run_lumi_info) | **GET** /runinfo/list | Finds a RunLumiInfoDto lists using parameters.
 *RuninfoApi* | [**list_run_lumi_info**](docs/RuninfoApi.md#list_run_lumi_info) | **GET** /runinfo | Finds a RunLumiInfoDto lists.
@@ -102,10 +105,12 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [FolderDto](docs/FolderDto.md)
  - [GenericMap](docs/GenericMap.md)
  - [GlobalTagDto](docs/GlobalTagDto.md)
  - [GlobalTagMapDto](docs/GlobalTagMapDto.md)
  - [GroupDto](docs/GroupDto.md)
+ - [HTTPResponse](docs/HTTPResponse.md)
  - [IovDto](docs/IovDto.md)
  - [PayloadDto](docs/PayloadDto.md)
  - [PayloadTagInfoDto](docs/PayloadTagInfoDto.md)

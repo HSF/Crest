@@ -29,7 +29,7 @@ crest:
   security: none
   dbfile: /tmp/crestdbsqlite
   authenticationtype: database
-  dump_dir: /tmp/crest-dump/
+  dumpdir: /tmp/crest-dump/
   schemaname: none
   synchro: none
   webstaticdir: /tmp

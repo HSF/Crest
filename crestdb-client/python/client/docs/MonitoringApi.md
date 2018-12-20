@@ -14,9 +14,9 @@ Retrieves monitoring information on payload as a list of PayloadTagInfoDtos.
 
 This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -26,7 +26,7 @@ from pprint import pprint
 api_instance = crestapi.MonitoringApi()
 tagname = 'none' # str | tagname: the search pattern {none} (optional) (default to none)
 
-try: 
+try:
     # Retrieves monitoring information on payload as a list of PayloadTagInfoDtos.
     api_response = api_instance.list_payload_tag_info(tagname=tagname)
     pprint(api_response)

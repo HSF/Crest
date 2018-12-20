@@ -77,6 +77,7 @@ public class PojoDtoConverterConfig {
 					.objectType(a.getObjectType())
 					.data(a.getData().getBytes(1, (int) a.getData().length()))
 					.streamerInfo(a.getStreamerInfo().getBytes(1, (int) a.getStreamerInfo().length()))
+					.size(a.getSize())
 					.insertionTime(a.getInsertionTime());
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block

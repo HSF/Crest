@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
 /**
  * PayloadDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-12-20T10:41:34.044+01:00")
 public class PayloadDto   {
   @JsonProperty("hash")
   private String hash = null;
@@ -34,6 +34,9 @@ public class PayloadDto   {
 
   @JsonProperty("objectType")
   private String objectType = null;
+
+  @JsonProperty("size")
+  private Integer size = null;
 
   @JsonProperty("data")
   private byte[] data = null;
@@ -99,6 +102,25 @@ public class PayloadDto   {
 
   public void setObjectType(String objectType) {
     this.objectType = objectType;
+  }
+
+  public PayloadDto size(Integer size) {
+    this.size = size;
+    return this;
+  }
+
+  /**
+   * Get size
+   * @return size
+   **/
+  @JsonProperty("size")
+  @ApiModelProperty(value = "")
+  public Integer getSize() {
+    return size;
+  }
+
+  public void setSize(Integer size) {
+    this.size = size;
   }
 
   public PayloadDto data(byte[] data) {
@@ -171,6 +193,7 @@ public class PayloadDto   {
     return Objects.equals(this.hash, payloadDto.hash) &&
         Objects.equals(this.version, payloadDto.version) &&
         Objects.equals(this.objectType, payloadDto.objectType) &&
+        Objects.equals(this.size, payloadDto.size) &&
         Objects.equals(this.data, payloadDto.data) &&
         Objects.equals(this.streamerInfo, payloadDto.streamerInfo) &&
         Objects.equals(this.insertionTime, payloadDto.insertionTime);
@@ -178,7 +201,7 @@ public class PayloadDto   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(hash, version, objectType, data, streamerInfo, insertionTime);
+    return Objects.hash(hash, version, objectType, size, data, streamerInfo, insertionTime);
   }
 
 
@@ -190,6 +213,7 @@ public class PayloadDto   {
     sb.append("    hash: ").append(toIndentedString(hash)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    objectType: ").append(toIndentedString(objectType)).append("\n");
+    sb.append("    size: ").append(toIndentedString(size)).append("\n");
     sb.append("    data: ").append(toIndentedString(data)).append("\n");
     sb.append("    streamerInfo: ").append(toIndentedString(streamerInfo)).append("\n");
     sb.append("    insertionTime: ").append(toIndentedString(insertionTime)).append("\n");

@@ -3,7 +3,7 @@
 """
     CrestDB REST API
 
-    Crest Rest Api to manage data for calibration files.
+    Crest Rest Api to manage data for calibration files.  # noqa: E501
 
     OpenAPI spec version: 2.0
     Contact: andrea.formica@cern.ch
@@ -13,45 +13,40 @@
 
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest
 
 import crestapi
+from crestapi.api.admin_api import AdminApi  # noqa: E501
 from crestapi.rest import ApiException
-from crestapi.apis.admin_api import AdminApi
 
 
 class TestAdminApi(unittest.TestCase):
-    """ AdminApi unit test stubs """
+    """AdminApi unit test stubs"""
 
     def setUp(self):
-        self.api = crestapi.apis.admin_api.AdminApi()
+        self.api = crestapi.api.admin_api.AdminApi()  # noqa: E501
 
     def tearDown(self):
         pass
 
     def test_remove_global_tag(self):
-        """
-        Test case for remove_global_tag
+        """Test case for remove_global_tag
 
-        Remove a GlobalTag from the database.
+        Remove a GlobalTag from the database.  # noqa: E501
         """
         pass
 
     def test_remove_tag(self):
-        """
-        Test case for remove_tag
+        """Test case for remove_tag
 
-        Remove a Tag from the database.
+        Remove a Tag from the database.  # noqa: E501
         """
         pass
 
     def test_update_global_tag(self):
-        """
-        Test case for update_global_tag
+        """Test case for update_global_tag
 
-        Update a GlobalTag in the database.
+        Update a GlobalTag in the database.  # noqa: E501
         """
         pass
 

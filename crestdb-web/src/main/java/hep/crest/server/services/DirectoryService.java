@@ -79,7 +79,7 @@ public class DirectoryService {
 	public Future<String> dumpTag(String tagname, Date snapshot, String path) {
 		String threadname = Thread.currentThread().getName();
 		log.debug("Running task in asynchronous mode for name "+threadname);
-		String outdir = cprops.getDump_dir()+"/"+path;
+		String outdir = cprops.getDumpdir()+"/"+path;
 		log.debug("Output directory is "+outdir);
 
 		DirectoryUtilities du = new DirectoryUtilities(outdir);

@@ -15,9 +15,9 @@ Create a GlobalTagMap in the database.
 
 This method allows to insert a GlobalTag.Arguments: GlobalTagMapDto should be provided in the body as a JSON file.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -27,7 +27,7 @@ from pprint import pprint
 api_instance = crestapi.GlobaltagmapsApi()
 body = crestapi.GlobalTagMapDto() # GlobalTagMapDto | A json string that is used to construct a globaltagmapdto object: { globaltagname: xxx, ... }
 
-try: 
+try:
     # Create a GlobalTagMap in the database.
     api_response = api_instance.create_global_tag_map(body)
     pprint(api_response)
@@ -63,9 +63,9 @@ Find GlobalTagMapDto lists.
 
 This method search for mappings using the global tag name.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -75,7 +75,7 @@ from pprint import pprint
 api_instance = crestapi.GlobaltagmapsApi()
 name = 'name_example' # str | 
 
-try: 
+try:
     # Find GlobalTagMapDto lists.
     api_response = api_instance.find_global_tag_map(name)
     pprint(api_response)

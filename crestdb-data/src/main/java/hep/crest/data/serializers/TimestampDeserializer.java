@@ -46,6 +46,7 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 	private DateTimeFormatter locFormatter = null;
 	
 	public TimestampDeserializer(){
+		/*default ctor*/
     }
 	
 

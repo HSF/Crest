@@ -35,8 +35,8 @@ server:
     port: 8080 
 crest:
   schemaname: none
-  dump_dir: ${crest.dump.dir}
+  dumpdir: ${crest.dump.dir}
   webstaticdir: ${crest.web.static}
-  dump_dir: /tmp
   db:
     port: 3306
+  

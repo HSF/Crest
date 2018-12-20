@@ -17,9 +17,9 @@ Create a Tag in the database.
 
 This method allows to insert a Tag.Arguments: TagDto should be provided in the body as a JSON file.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -29,7 +29,7 @@ from pprint import pprint
 api_instance = crestapi.TagsApi()
 body = crestapi.TagDto() # TagDto | A json string that is used to construct a tagdto object: { name: xxx, ... }
 
-try: 
+try:
     # Create a Tag in the database.
     api_response = api_instance.create_tag(body)
     pprint(api_response)
@@ -65,9 +65,9 @@ Finds a TagDto by name
 
 This method will search for a tag with the given name. Only one tag should be returned.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -77,7 +77,7 @@ from pprint import pprint
 api_instance = crestapi.TagsApi()
 name = 'name_example' # str | name: the tag name
 
-try: 
+try:
     # Finds a TagDto by name
     api_response = api_instance.find_tag(name)
     pprint(api_response)
@@ -113,9 +113,9 @@ Finds a TagDtos lists.
 
 This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -128,7 +128,7 @@ page = 0 # int | page: the page number {0} (optional) (default to 0)
 size = 1000 # int | size: the page size {1000} (optional) (default to 1000)
 sort = 'name:ASC' # str | sort: the sort pattern {name:ASC} (optional) (default to name:ASC)
 
-try: 
+try:
     # Finds a TagDtos lists.
     api_response = api_instance.list_tags(by=by, page=page, size=size, sort=sort)
     pprint(api_response)
@@ -167,9 +167,9 @@ Update a TagDto by name
 
 This method will search for a tag with the given name, and update its content for the provided body fields. Only the following fields can be updated: description, timeType, objectTime, endOfValidity, lastValidatedTime.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -180,7 +180,7 @@ api_instance = crestapi.TagsApi()
 name = 'name_example' # str | name: the tag name
 body = crestapi.GenericMap() # GenericMap | A json string that is used to construct a map of updatable fields: { description: xxx, ... }
 
-try: 
+try:
     # Update a TagDto by name
     api_response = api_instance.update_tag(name, body)
     pprint(api_response)

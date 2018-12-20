@@ -31,8 +31,8 @@ class CrestConsole(cmd.Cmd):
     cm = CrestConsole()
     prompt ='(Crest): '
     homehist = os.getenv('CDMS_HISTORY_HOME', os.environ["HOME"])
-    histfile = os.path.join( homehist, historyFile) 
-    
+    histfile = os.path.join( homehist, historyFile)
+
     def init_history(self, histfile):
         readline.parse_and_bind( "tab: complete" )
         readline.set_history_length( 100 )
@@ -101,11 +101,17 @@ class CrestConsole(cmd.Cmd):
         Save the tag specified by the argument line. A part from name param, all others are optional."""
         out = self.cm.savetag(line)
         print (out)
-        
+
     def do_insertiov(self,line):
         """insertiov [name:the tag name,since:the since time, data: filename with data, version:none]
         Save the file specified by the argument line using the given tag and since time. A part from name,since and data parameters, all others are optional."""
         out = self.cm.insertiov(line)
+        print (out)
+
+    def do_insertiovpyld(self,line):
+        """insertiov [name:the tag name,since:the since time, data: filename with data]
+        Save the file specified by the argument line using the given tag and since time. A part from name,since and data parameters, all others are optional."""
+        out = self.cm.insertiovpyld(line)
         print (out)
 
     def do_trace(self, globaltag):
@@ -129,7 +135,7 @@ class CrestConsole(cmd.Cmd):
             page=dargs[0]
         if len(dargs) > 1:
             size=dargs[1]
-            
+
         out = self.cm.lsiovs(page,size)
         print (out)
         print ('number of selected iovs is %s' % (len(out)-1))
@@ -143,7 +149,7 @@ class CrestConsole(cmd.Cmd):
         out = self.cm.tailiovs(niovs)
         print (out)
         print ('number of selected iovs is %s' % (len(out)-1))
-        
+
     def do_select(self, line):
         """select [optional: since=xxx] [optional: until=xxx] [optional: iovbase={time|runlumi}]
         Select iovs in the given range for the selected tag. The optional arguments can be used to limit to the given range.
@@ -181,17 +187,17 @@ class CrestConsole(cmd.Cmd):
                 timearg = '%s %s' % (timearg, ' '.join(runlbuntil))
             else:
                 timearg = '%s %s ' % (timearg, until)
-        
+
         if isrunlumi:
             print('Select run lumi range: %s' % timearg)
             self.cm.userunlumi(timearg)
         else:
             print('Select time range: %s' % timearg)
             self.cm.usetimes(timearg)
-            
+
         out = self.cm.selectiovs()
         print(out)
-        
+
     def do_dump(self, line=None, column='all'):
         """dump [hash] [optional: column=xxx:yyy] [optional: filename=xxx] [optional: format={json}]
         Dump the payload corresponding to hash.
@@ -224,34 +230,34 @@ class CrestConsole(cmd.Cmd):
             print (out)
             print ('Payload output %s' % (len(out)-1))
         except Exception as e:
-            print (e)        
-        
+            print (e)
+
     def do_get(self,mhash):
         """get [hash]
         Dump information on payload metadata. This method does not dump the full payload."""
         out = self.cm.getpayload(mhash)
         print (out)
-        
+
     def do_listchans(self,line):
-        """listchans 
+        """listchans
         Print channels from the last payload selected."""
         out = self.cm.listchans()
         print(out)
-        
+
     def do_pwd(self,line):
-        """pwd 
+        """pwd
         Print selected tag."""
         out = self.cm.pwd()
         print(out)
-        
+
     def do_pws(self,line):
-        """pws 
+        """pws
         Print selected channels and tag."""
         out = self.cm.pws()
         print(out)
-        
+
     def do_reset(self,line):
-        """reset 
+        """reset
         Reset selections on channel and time ranges if any."""
         out = self.cm.reset()
         print ('Reset channel and time selections...')
@@ -262,13 +268,12 @@ class CrestConsole(cmd.Cmd):
         return True
     def emptyline(self):
         pass
-    
+
     def preloop(self):
         self.init_history(self.histfile)
-        
+
     def postloop(self):
         print
 
 if __name__ == '__main__':
     CrestConsole().cmdloop()
-

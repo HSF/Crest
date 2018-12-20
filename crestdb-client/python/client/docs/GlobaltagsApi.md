@@ -17,9 +17,9 @@ Create a GlobalTag in the database.
 
 This method allows to insert a GlobalTag.Arguments: GlobalTagDto should be provided in the body as a JSON file.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -30,7 +30,7 @@ api_instance = crestapi.GlobaltagsApi()
 body = crestapi.GlobalTagDto() # GlobalTagDto | A json string that is used to construct a globaltagdto object: { name: xxx, ... }
 force = 'false' # str | force: tell the server if it should use or not the insertion time provided {default: false} (optional) (default to false)
 
-try: 
+try:
     # Create a GlobalTag in the database.
     api_response = api_instance.create_global_tag(body, force=force)
     pprint(api_response)
@@ -67,9 +67,9 @@ Finds a GlobalTagDto by name
 
 This method will search for a global tag with the given name. Only one global tag should be returned.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -79,7 +79,7 @@ from pprint import pprint
 api_instance = crestapi.GlobaltagsApi()
 name = 'name_example' # str | 
 
-try: 
+try:
     # Finds a GlobalTagDto by name
     api_response = api_instance.find_global_tag(name)
     pprint(api_response)
@@ -115,9 +115,9 @@ Finds a TagDtos lists associated to the global tag name in input.
 
 This method allows to trace a global tag.Arguments: record=<record> filter output by record, label=<label> filter output by label
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -129,7 +129,7 @@ name = 'name_example' # str |
 record = 'record_example' # str | record:  the record string {} (optional)
 label = 'label_example' # str | label:  the label string {} (optional)
 
-try: 
+try:
     # Finds a TagDtos lists associated to the global tag name in input.
     api_response = api_instance.find_global_tag_fetch_tags(name, record=record, label=label)
     pprint(api_response)
@@ -167,9 +167,9 @@ Finds a GlobalTagDtos lists.
 
 This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -182,7 +182,7 @@ page = 0 # int | page: the page number {0} (optional) (default to 0)
 size = 1000 # int | size: the page size {1000} (optional) (default to 1000)
 sort = 'name:ASC' # str | sort: the sort pattern {name:ASC} (optional) (default to name:ASC)
 
-try: 
+try:
     # Finds a GlobalTagDtos lists.
     api_response = api_instance.list_global_tags(by=by, page=page, size=size, sort=sort)
     pprint(api_response)

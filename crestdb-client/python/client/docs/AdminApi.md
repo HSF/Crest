@@ -16,9 +16,9 @@ Remove a GlobalTag from the database.
 
 This method allows to remove a GlobalTag.Arguments: the name has to uniquely identify a global tag.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -28,7 +28,7 @@ from pprint import pprint
 api_instance = crestapi.AdminApi()
 name = 'name_example' # str | 
 
-try: 
+try:
     # Remove a GlobalTag from the database.
     api_instance.remove_global_tag(name)
 except ApiException as e:
@@ -63,9 +63,9 @@ Remove a Tag from the database.
 
 This method allows to remove a Tag.Arguments: the name has to uniquely identify a tag.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -75,7 +75,7 @@ from pprint import pprint
 api_instance = crestapi.AdminApi()
 name = 'name_example' # str | 
 
-try: 
+try:
     # Remove a Tag from the database.
     api_instance.remove_tag(name)
 except ApiException as e:
@@ -110,9 +110,9 @@ Update a GlobalTag in the database.
 
 This method allows to update a GlobalTag.Arguments: the name has to uniquely identify a global tag.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -123,7 +123,7 @@ api_instance = crestapi.AdminApi()
 name = 'name_example' # str | 
 body = crestapi.GlobalTagDto() # GlobalTagDto | A json string that is used to construct a GlobalTagDto object: { name: xxx, ... }
 
-try: 
+try:
     # Update a GlobalTag in the database.
     api_response = api_instance.update_global_tag(name, body)
     pprint(api_response)

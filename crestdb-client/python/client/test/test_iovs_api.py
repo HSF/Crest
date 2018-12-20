@@ -3,7 +3,7 @@
 """
     CrestDB REST API
 
-    Crest Rest Api to manage data for calibration files.
+    Crest Rest Api to manage data for calibration files.  # noqa: E501
 
     OpenAPI spec version: 2.0
     Contact: andrea.formica@cern.ch
@@ -13,77 +13,68 @@
 
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest
 
 import crestapi
+from crestapi.api.iovs_api import IovsApi  # noqa: E501
 from crestapi.rest import ApiException
-from crestapi.apis.iovs_api import IovsApi
 
 
 class TestIovsApi(unittest.TestCase):
-    """ IovsApi unit test stubs """
+    """IovsApi unit test stubs"""
 
     def setUp(self):
-        self.api = crestapi.apis.iovs_api.IovsApi()
+        self.api = crestapi.api.iovs_api.IovsApi()  # noqa: E501
 
     def tearDown(self):
         pass
 
     def test_create_iov(self):
-        """
-        Test case for create_iov
+        """Test case for create_iov
 
-        Create a Iov in the database.
+        Create a Iov in the database.  # noqa: E501
         """
         pass
 
     def test_find_all_iovs(self):
-        """
-        Test case for find_all_iovs
+        """Test case for find_all_iovs
 
-        Finds a IovDtos lists.
+        Finds a IovDtos lists.  # noqa: E501
         """
         pass
 
     def test_get_size(self):
-        """
-        Test case for get_size
+        """Test case for get_size
 
-        Get the number o iovs for the given tag.
+        Get the number o iovs for the given tag.  # noqa: E501
         """
         pass
 
     def test_get_size_by_tag(self):
-        """
-        Test case for get_size_by_tag
+        """Test case for get_size_by_tag
 
-        Get the number o iovs for tags matching pattern.
+        Get the number o iovs for tags matching pattern.  # noqa: E501
         """
         pass
 
     def test_select_groups(self):
-        """
-        Test case for select_groups
+        """Test case for select_groups
 
-        Select groups for a given tagname.
+        Select groups for a given tagname.  # noqa: E501
         """
         pass
 
     def test_select_iovs(self):
-        """
-        Test case for select_iovs
+        """Test case for select_iovs
 
-        Select iovs for a given tagname and in a given range.
+        Select iovs for a given tagname and in a given range.  # noqa: E501
         """
         pass
 
     def test_select_snapshot(self):
-        """
-        Test case for select_snapshot
+        """Test case for select_snapshot
 
-        Select snapshot for a given tagname and insertion time.
+        Select snapshot for a given tagname and insertion time.  # noqa: E501
         """
         pass
 

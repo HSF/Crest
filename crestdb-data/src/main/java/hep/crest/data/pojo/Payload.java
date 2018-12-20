@@ -30,6 +30,7 @@ public class Payload implements java.io.Serializable {
 	private String hash;
 	private String version;
 	private String objectType;
+	private Integer size;
 	private Blob data;
 	private Blob streamerInfo;
 	private Date insertionTime;
@@ -78,6 +79,15 @@ public class Payload implements java.io.Serializable {
 		this.objectType = objectType;
 	}
 
+	@Column(name = "PYLD_SIZE", nullable = true)
+	public Integer getSize() {
+		return size;
+	}
+
+	public void setSize(Integer size) {
+		this.size = size;
+	}
+
 	@Column(name = "DATA", nullable = false)
 	@Lob
 	@Type(type = "org.hibernate.type.BlobType")
@@ -110,13 +120,10 @@ public class Payload implements java.io.Serializable {
 		this.insertionTime = insertionTime;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
-		return "Payload [hash=" + hash + ", version=" + version + ", objectType=" + objectType + ", insertionTime="
-				+ insertionTime + "]";
+		return "Payload [hash=" + hash + ", version=" + version + ", objectType=" + objectType + ", size=" + size
+				+ ", insertionTime=" + insertionTime + "]";
 	}
 
 }

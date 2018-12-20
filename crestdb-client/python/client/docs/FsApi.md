@@ -14,9 +14,9 @@ Dump a tag into filesystem and retrieve the tar file asynchronously.
 
 This method allows to request a tar file from the server using a tag specified in input.
 
-### Example 
+### Example
 ```python
-from __future__ import print_statement
+from __future__ import print_function
 import time
 import crestapi
 from crestapi.rest import ApiException
@@ -27,7 +27,7 @@ api_instance = crestapi.FsApi()
 tagname = 'none' # str | tagname: the tag name {none} (default to none)
 snapshot = 0 # int | snapshot: the snapshot time {0} (default to 0)
 
-try: 
+try:
     # Dump a tag into filesystem and retrieve the tar file asynchronously.
     api_response = api_instance.build_tar(tagname, snapshot)
     pprint(api_response)

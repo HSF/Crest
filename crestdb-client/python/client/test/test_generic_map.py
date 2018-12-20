@@ -3,7 +3,7 @@
 """
     CrestDB REST API
 
-    Crest Rest Api to manage data for calibration files.
+    Crest Rest Api to manage data for calibration files.  # noqa: E501
 
     OpenAPI spec version: 2.0
     Contact: andrea.formica@cern.ch
@@ -13,17 +13,15 @@
 
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest
 
 import crestapi
+from crestapi.models.generic_map import GenericMap  # noqa: E501
 from crestapi.rest import ApiException
-from crestapi.models.generic_map import GenericMap
 
 
 class TestGenericMap(unittest.TestCase):
-    """ GenericMap unit test stubs """
+    """GenericMap unit test stubs"""
 
     def setUp(self):
         pass
@@ -32,10 +30,10 @@ class TestGenericMap(unittest.TestCase):
         pass
 
     def testGenericMap(self):
-        """
-        Test GenericMap
-        """
-        model = crestapi.models.generic_map.GenericMap()
+        """Test GenericMap"""
+        # FIXME: construct object with mandatory attributes with example values
+        # model = crestapi.models.generic_map.GenericMap()  # noqa: E501
+        pass
 
 
 if __name__ == '__main__':

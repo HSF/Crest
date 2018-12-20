@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.nio.channels.FileChannel;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -136,18 +141,24 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			throws NotFoundException {
 		this.log.info("PayloadRestController processing request to store payload in tag {} and at since {}",tag,since);
 		try {
-			String filename = cprops.getDump_dir() +"/"+tag+"_"+since+".blob";
+			String filename = cprops.getDumpdir() +"/"+tag+"_"+since+".blob";
+			File tempfile = new File(filename);
+			Path temppath = Paths.get(filename);
 			String hash = payloadService.saveInputStreamGetHash(fileInputStream, filename);
 			PayloadDto payloaddto = new PayloadDto().hash(hash).objectType("JSON").streamerInfo("JSON".getBytes()).version("test");
-			InputStream is = new FileInputStream(new File(filename));
+			InputStream is = new FileInputStream(tempfile);
+		    FileChannel tempchan = FileChannel.open(temppath);
+		    payloaddto.setSize((int)(tempchan.size()));
 		    PayloadDto saved = payloadService.insertPayloadAndInputStream(payloaddto,is);
 		    IovDto iovdto = new IovDto().payloadHash(hash).tagName(tag).since(since);
 			IovDto savediov = iovService.insertIov(iovdto);
 			log.debug("Create payload {} and iov {} ",saved,savediov);
-			HTTPResponse resp = new HTTPResponse().action("storePayloadWithIovMultiForm").code(201).id(hash).message("Created new entry in tag "+tag);
+			
+			Files.deleteIfExists(temppath);
+			HTTPResponse resp = new HTTPResponse().action("storePayloadWithIovMultiForm").code(Response.Status.CREATED.getStatusCode()).id(hash).message("Created new entry in tag "+tag);
 			return Response.created(info.getRequestUri()).entity(resp).build();
 			
-		} catch (CdbServiceException | FileNotFoundException e) {
+		} catch (CdbServiceException | IOException e) {
 			String msg = "Error creating payload resource using " + tag.toString() + " : "+e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();

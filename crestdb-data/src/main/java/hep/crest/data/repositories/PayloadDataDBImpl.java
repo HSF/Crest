@@ -87,7 +87,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO from " + tablename
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,PYLD_SIZE from " + tablename
 				+ " where HASH=?";
 		
 		// Be careful, this seems not to work with Postgres: probably getBlob loads an OID and not the byte[] 
@@ -101,6 +101,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			entity.setData(rs.getBlob("DATA"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
+			entity.setSize(rs.getInt("PYLD_SIZE"));
 
 			return entity;
 		});
@@ -114,7 +115,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO from " + tablename
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from " + tablename
 				+ " where HASH=?";
 		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
@@ -124,6 +125,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			// entity.setData(rs.getBlob("DATA"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
+			entity.setSize(rs.getInt("PYLD_SIZE"));
 
 			return entity;
 		});
@@ -163,7 +165,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME,PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE ",entity.getHash() );
 		Calendar calendar = Calendar.getInstance();
@@ -177,6 +179,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.setBytes(4, entity.getData());
 			ps.setBytes(5, entity.getStreamerInfo());
 			ps.setDate(6, inserttime);
+			ps.setInt(7, entity.getSize());
 			log.info("Dump preparedstatement {} using sql {} and arguments : {} {} {} {}",
 					ps, sql, entity.getHash(),entity.getObjectType(),entity.getVersion(),entity.getInsertionTime());
 			ps.execute();
@@ -212,7 +215,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
 		byte[] blob = payloadHandler.getBytesFromInputStream(is);
@@ -229,6 +232,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.setBytes(4, blob);
 			ps.setBytes(5, entity.getStreamerInfo());
 			ps.setDate(6, inserttime);
+			ps.setInt(7, entity.getSize());
 			log.debug("Dump preparedstatement {}",ps);
 			ps.execute();
 		} catch (SQLException e) {
@@ -245,7 +249,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME,PYLD_SIZE) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload Meta Info " + metainfoentity.getHash() + " using JDBCTEMPLATE");
 		try (Connection conn = ds.getConnection();
@@ -256,6 +260,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.setBytes(4, metainfoentity.getStreamerInfo());
 			// FIXME: be careful to the insertion time...is the one provided correct ?
 			ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
+			ps.setInt(6, metainfoentity.getSize());
 			log.debug("Dump preparedstatement {}",ps);
 			ps.execute();
 			ps.close();

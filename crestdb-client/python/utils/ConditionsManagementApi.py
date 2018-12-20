@@ -14,10 +14,11 @@ import datetime
 
 sys.path.append(os.path.join(sys.path[0],'..'))
 
-from crestapi.apis import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
+from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
 from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto,PayloadDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
+from crestapi.configuration import Configuration
 
 import cdms_profile
 
@@ -32,6 +33,9 @@ class ConditionManagementAbstract(object):
         pass
         raise NotImplementedError('Method not implemented here')
     def storeObject(self):
+        pass
+        raise NotImplementedError('Method not implemented here')
+    def storeObjectWithIov(self):
         pass
         raise NotImplementedError('Method not implemented here')
     def getTag(self):
@@ -65,7 +69,7 @@ class ConditionManagementAbstract(object):
             3) until : optional, a string containing an until time. Default is INF.
             4) snapshot : optional, a string containing the snapshot time in millisec.
             5) type : optional, can be "time" or "run-lumi". If "run-lumi" then it supposes
-                      that the strings for since and until are expressed like : <arun>,<alumi block> 
+                      that the strings for since and until are expressed like : <arun>,<alumi block>
         '''
         pass
         raise NotImplementedError('Method not implemented here')
@@ -75,7 +79,7 @@ class ConditionManagementAbstract(object):
     def getPayload(self):
         pass
         raise NotImplementedError('Method not implemented here')
-        
+
     def resolveTag(self):
         pass
         raise NotImplementedError('Method not implemented here')
@@ -83,12 +87,12 @@ class ConditionManagementAbstract(object):
     def runlumiToStime(self,run,lumi):
         stime = (int(run) << 32) | int(lumi)
         return stime
-    
+
     def stimeToRunlumi(self,stime):
         run = int(stime) >> 32
         lumi = int(stime) & int('0xffffffff',16)
         return (run,lumi)
-    
+
 
     def getGlobalTagMaps(self):
         '''
@@ -96,12 +100,12 @@ class ConditionManagementAbstract(object):
         '''
         pass
         raise NotImplementedError('Method not implemented here')
-    
+
 
     def takeClosest(self, iovlist, stime):
         """
         Assumes iovlist is sorted. Returns closest value to stime.
-        
+
         If two numbers are equally close, return the smallest number.
         """
         self._logger.debug('Received iov list of length %d and search for time %s' %  (len(iovlist),stime))
@@ -117,13 +121,13 @@ class ConditionManagementAbstract(object):
 #           return after
 #        else:
         return before,after
-    
+
     def gethash(self, data):
-        try: 
+        try:
             import hashlib
         # Select iovs for a given tagname and in a given range.
         #print 'Compute payload hash from binary ',data
-        
+
 ### orig...this one was working?
 ###            bd = bytes(data.encode('utf-8'))
             bd = bytes(data)
@@ -133,7 +137,7 @@ class ConditionManagementAbstract(object):
         except Exception as e:
             print ("Exception when calling gethash: %s\n" % e)
         return "none"
-    
+
     def getCoolJson(self,payload):
         strinfo = ""
         datastr = ""
@@ -174,16 +178,16 @@ class ConditionManagementAbstract(object):
         else:
             print ('Cannot identify this as a COOL payload')
             return None
-                
+
     def getChannelDataColumn(self,channelId,column,cooljson):
         return cooljson.getChannelDataColumn(channelId,column)
-    
+
     def getChannelDataColumnIndex(self,channelId,column,cooljson):
         return cooljson.getChannelDataColumnIndex(channelId,column)
-    
+
     def getChannelData(self,channelId,cooljson):
         return cooljson.getChannelData(channelId)
-    
+
     def activatesocks(self):
         SOCKS5_PROXY_HOST = os.getenv('CDMS_SOCKS_HOST', 'localhost')
         SOCKS5_PROXY_PORT = 3129
@@ -201,7 +205,7 @@ class ConditionManagementAbstract(object):
             print ('Activated socks proxy on %s:%s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
         except:
             print ('Error activating socks...%s %s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
-        
+
 
 class CMFileApi(ConditionManagementAbstract):
 
@@ -214,29 +218,29 @@ class CMFileApi(ConditionManagementAbstract):
         self.__tag = None
         self.__coolpayload = None
         self.__payload = { 'hash' : None, 'payload' : None}
-        
+
         logging.basicConfig(format='%(asctime)s %(message)s')
         self._logger = logging.getLogger('CMApi')
         self._logger.setLevel(logging.DEBUG)
 
-    def sanitizeForSerialization(self,obj):    
+    def sanitizeForSerialization(self,obj):
         api_client = ApiClient()
         obj_dict = api_client.sanitize_for_serialization(obj)
 #        obj_dict = {obj.attribute_map[attr]: getattr(obj, attr)
 #                    for attr, _ in iteritems(obj.swagger_types) if getattr(obj, attr) is not None}
         return obj_dict
 
-    def sanitizeForDeserialization(self,data, klass):    
+    def sanitizeForDeserialization(self,data, klass):
         api_client = ApiClient()
         instance = api_client._ApiClient__deserialize(data, klass)
         return instance
 
-    
+
     def checkdir(self,directory):
         if not os.path.exists(directory):
             os.makedirs(directory)
         return True
-      
+
     def checkpayloaddir(self,tag,blobpath):
         directory = "%s/%s/%s" % (self._basedir,tag,self._payloaddir)
         blobdir =  "%s/%s" % (directory,blobpath)
@@ -250,29 +254,29 @@ class CMFileApi(ConditionManagementAbstract):
 
         if not os.path.exists(blobdir):
             os.makedirs(blobdir)
-            
+
         return blobdir
-      
+
     def findblobdir(self, blobpath):
         self._logger.debug("Search for payload %s" % blobpath)
         for root, dirs, files in os.walk(self._basedir):
             self._logger.debug("findblobdir navigating in %s %s %s" % (root,dirs,files))
             if blobpath in files:
-                return os.path.join(root, blobpath)        
+                return os.path.join(root, blobpath)
         return None
-      
+
     def dtoTojson(self,obj):
 #        if isinstance(obj,(TagDto,IovDto,PayloadDto)):
             #dictobj = obj.to_dict()
         dictobj = self.sanitizeForSerialization(obj)
         jsonobj = json.dumps(dictobj, sort_keys=True,indent=4, separators=(',', ': '))
         return jsonobj
-                
+
     def dumpToFile(self,jsonstr,filenamepath):
         with open(filenamepath,"w") as files:
             files.write(jsonstr)
             files.close()
-                    
+
     def setlevel(self,loglevel):
         if 'DEBUG' == loglevel:
             self._logger.setLevel(logging.DEBUG)
@@ -296,7 +300,7 @@ class CMFileApi(ConditionManagementAbstract):
             params[key] = val
         del params['kwargs']
         tag_params = { 'time_type' : 'time', 'object_type' : 'json', 'synchronization' : 'none', 'description' : 'none', 'last_validated_time' : 0, 'end_of_validity' : 0 }
-       
+
         if 'time_type' in params:
             tag_params['time_type'] = params['time_type']
         if 'object_type' in params:
@@ -309,18 +313,18 @@ class CMFileApi(ConditionManagementAbstract):
             tag_params['last_validated_time'] = params['last_validated_time']
         if 'end_of_validity' in params:
             tag_params['end_of_validity'] = params['end_of_validity']
-   
+
         # check types
         if len(tag_params['object_type']) > MAX_OBJTYPE_LENGTH:
-            raise ApiException('Cannot create tag with object_type length > %s' % MAX_OBJTYPE_LENGTH)         
-        
+            raise ApiException('Cannot create tag with object_type length > %s' % MAX_OBJTYPE_LENGTH)
+
         self._logger.debug('Creating tag dto %s %s ' % (tagname,tag_params))
         tagpath = "%s/%s" % (self._basedir,tagname)
         # If directory does not exists then it creates it
         self.checkdir(tagpath)
-        
+
         try:
-            dto = TagDto(tagname,time_type=tag_params['time_type'], object_type=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity']) 
+            dto = TagDto(tagname,time_type=tag_params['time_type'], object_type=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity'])
             msg = ('Created dto resource %s ' ) % (dto.to_dict())
             self._logger.debug("createTag: %s" % msg)
             # HERE the low level API method
@@ -331,7 +335,7 @@ class CMFileApi(ConditionManagementAbstract):
         except Exception as e:
             print ("Exception when calling FileApi->create_tag: %s\n" % e)
             raise
-    
+
     def getTag(self,tagname):
         try:
             tagpath = "%s/%s" % (self._basedir,tagname)
@@ -346,10 +350,10 @@ class CMFileApi(ConditionManagementAbstract):
 
             self._logger.debug("Loaded json from file %s %s" % (tagfilename,jsonobj))
 #            dtodict = jsonobj
-#            dto = TagDto(dtodict['name'],time_type=dtodict['time_type'], object_type=dtodict['object_type'], synchronization=dtodict['synchronization'], description=dtodict['description'], last_validated_time=dtodict['last_validated_time'], end_of_validity=dtodict['end_of_validity']) 
-            dto = self.sanitizeForDeserialization(jsonobj,'TagDto')                       
+#            dto = TagDto(dtodict['name'],time_type=dtodict['time_type'], object_type=dtodict['object_type'], synchronization=dtodict['synchronization'], description=dtodict['description'], last_validated_time=dtodict['last_validated_time'], end_of_validity=dtodict['end_of_validity'])
+            dto = self.sanitizeForDeserialization(jsonobj,'TagDto')
             return dto
-       
+
         except Exception as e:
             print(e)
         return None
@@ -367,8 +371,8 @@ class CMFileApi(ConditionManagementAbstract):
             print(type(inst))
             print(inst)
         return None
-        
-            
+
+
     def listIovs(self,tagname,**kwargs):
         all_params = [ 'since', 'until', 'snapshot', 'type' ]
 
@@ -395,14 +399,14 @@ class CMFileApi(ConditionManagementAbstract):
                 with open(iovsfilename,"r") as json_data:
                     jsonobj = json.load(json_data)
                     json_data.close()
-            dtolist =  self.sanitizeForDeserialization(jsonobj,'list[IovDto]')                       
+            dtolist =  self.sanitizeForDeserialization(jsonobj,'list[IovDto]')
             self._logger.debug("Return list of iovs...%d" % len(dtolist))
             return dtolist
         except Exception as e:
             print('listiovs got exception %s' % e)
         return None
-    
-   
+
+
 
     @cdms_profile.profile
     def storeObject(self,tagname,since,data,**kwargs):
@@ -421,7 +425,7 @@ class CMFileApi(ConditionManagementAbstract):
         iov_params = { 'since' : since, 'tag_name' : tagname }
         self._logger.debug ('Creating iov dto  %s %s ' % (tagname,iov_params))
         p_params = { 'insertion_time' : instime, 'streamer_info' : 'none'.encode('base64'), 'version' : 'test', 'object_type' : 'json-file'}
-        
+
         if 'streamer_info' in params:
             p_params['streamer_info'] = params['streamer_info'].encode('base64')
         if 'object_type' in params:
@@ -433,18 +437,18 @@ class CMFileApi(ConditionManagementAbstract):
             tagpath = "%s/%s" % (self._basedir,tagname)
             if not os.path.exists(tagpath):
                 return False
-            
+
             iovlist = self.listIovs(tagname)
             self._logger.debug("Loaded list of iovs from json file...%s" % iovlist)
-            
+
             if 'dataflag' not in params:
                 params['dataflag'] = 'inmemory'
-                
+
             datapayload = data
             if params['dataflag'] == 'fromfile':
                 # compute hash from file
                 mhash=None
-    
+
                 with open(data, mode='rb') as file: # b is important -> binary
                     fileContent = file.read()
                     datapayload = fileContent
@@ -461,12 +465,12 @@ class CMFileApi(ConditionManagementAbstract):
                 phash = self.gethash(data)
                 p_params['hash'] = phash
                 iov_params['payload_hash'] = phash
-                
+
             p_params['data'] = data.encode('base64')
 
             pdto = PayloadDto(hash=p_params['hash'], version=p_params['version'], object_type=p_params['object_type'], data=p_params['data'], streamer_info=p_params['streamer_info'], insertion_time=p_params['insertion_time'])
             iovdto = IovDto(tag_name=iov_params['tag_name'], since=iov_params['since'], insertion_time=p_params['insertion_time'], payload_hash=iov_params['payload_hash'])
-                
+
             print ('store payload with hash: %s  and first 10 characters ' % (pdto.hash,pdto.hash[:10]))
             ##filename = "%s/%s/%s.blob" % (self._payloaddir,iov_params['payload_hash'])
 
@@ -486,7 +490,7 @@ class CMFileApi(ConditionManagementAbstract):
 #                    pfile.write(jsonobj)
 #                    pfile.close()
             # Store iov for the created payload
-            
+
             print ("store iov with since %s and append to %s" % (iov_params['since'],iovlist))
             iovlist.append(iovdto)
             print ("Now try to serialize the list in iovs.json")
@@ -499,36 +503,36 @@ class CMFileApi(ConditionManagementAbstract):
             iovsfilename = ("%s/%s") % (tagpath,'iovs.json')
             if os.path.isfile(iovsfilename):
                 os.rename(iovsfilename,"%s.old" % iovsfilename)
-                
+
             self.dumpToFile(iovjsondto, iovsfilename)
-    
+
 #            with open(iovsfilename,"w") as iovfile:
 #                iovfile.write(iovlistjson)
 #                iovfile.close()
-            
+
             print ('stored object using %s %d' % (iov_params,sys.getsizeof(p_params)))
         except Exception as e:
-            print ("Exception when calling storeObject*: %s\n" % e )       
+            print ("Exception when calling storeObject*: %s\n" % e )
 
         return True
-      
+
     @cdms_profile.profile
     def getPayload(self, phash):
         if self.__payload['hash'] == phash:
             return self.__payload['payload']
         #api_instance = PayloadsApi(self.api_client)
-        try: 
+        try:
             blobpath = self.findblobdir("%s.blob" % phash)
             self._logger.debug("Found blob %s" % blobpath)
-            
+
             jsonobj = None
             self._logger.debug("Loading data from payload file %s" % blobpath)
             if os.path.isfile(blobpath):
                 with open(blobpath,"r") as json_data:
                     jsonobj = json.load(json_data)
                     json_data.close()
-            self._logger.debug("Deserialize json %s" % jsonobj)                    
-            payloaddto =  self.sanitizeForDeserialization(jsonobj,'PayloadDto')                       
+            self._logger.debug("Deserialize json %s" % jsonobj)
+            payloaddto =  self.sanitizeForDeserialization(jsonobj,'PayloadDto')
             return payloaddto
         except Exception as e:
             print ("Exception when calling getPayload: %s\n" % e)
@@ -536,12 +540,12 @@ class CMFileApi(ConditionManagementAbstract):
 
 
 class IovDtoWrap():
-    
+
     def __init__(self, iovdto, tagtype):
         #print('Create iov wrapper using %s and tag %s' % (iovdto,tagtype))
         self._iovdto = iovdto
         self._tagtype = tagtype
-        
+
     def stimeToRunlumi(self,stime):
         run = int(stime) >> 32
         lumi = int(stime) & int('0xffffffff',16)
@@ -568,9 +572,9 @@ class IovDtoWrap():
         For `print` and `pprint`
         """
         return self.to_str()
-    
+
 class GlobalTagDtoWrap():
-    
+
     def __init__(self, tdto):
         self._tdto = tdto
 
@@ -585,7 +589,7 @@ class GlobalTagDtoWrap():
         return self.to_str()
 
 class GlobalTagMapDtoWrap():
-    
+
     def __init__(self, tdto):
         self._tdto = tdto
 
@@ -600,7 +604,7 @@ class GlobalTagMapDtoWrap():
         return self.to_str()
 
 class TagDtoWrap():
-    
+
     def __init__(self, tdto):
         self._tdto = tdto
 
@@ -620,7 +624,7 @@ class TagDtoWrap():
         return self.to_str()
 
 class TagInfoWrap():
-    
+
     def __init__(self, tdto,tsum):
         self._tdto = tdto
         self._tsum = tsum
@@ -645,7 +649,7 @@ class TagInfoWrap():
         return self.to_str()
 
 class PayloadDtoWrap():
-    
+
     def __init__(self, pdto):
         self._pdto = pdto
 
@@ -695,9 +699,9 @@ class NormalPayloadWrap():
                     v = val
                 except Exception as e:
                     print ('warning: exception in decoding %s' % e)
-                     
+
             try:
-                val = v.decode('utf-8','ignore') 
+                val = v.decode('utf-8','ignore')
                     #val = v.decode('utf-8','ignore')
                 msg = " - %s = %s " % (k,str(val))
             except Exception as e1:
@@ -705,10 +709,10 @@ class NormalPayloadWrap():
                 msg = " - %s = %s " % (k,v)
 
             msglist.append(msg)
-                 
+
             #msg = '%s = %s ' % (k,val)
             #msglist.append(msg)
-        
+
         return "\n".join(msglist)
 
     def __repr__(self):
@@ -718,7 +722,7 @@ class NormalPayloadWrap():
         return self.to_str()
 
 class CoolPayloadWrap():
-    
+
     def __init__(self, pdto, chanid, colsel):
         self._coolpdto = pdto
         self._chanid = chanid
@@ -728,12 +732,12 @@ class CoolPayloadWrap():
         self._logger = logging.getLogger('CoolPayloadWrap')
         self._logger.setLevel(logging.INFO)
 
-        
+
     def getcol(self,cn):
         crep = [ x.split(':')[1] for x in self._colselection if cn in x ]
         origrep = self._coolpdto.gettype(cn)
         return (crep,origrep)
-    
+
     def unzipcolumn(self,data):
         import zlib
         unzipped = zlib.decompress(data)
@@ -772,15 +776,15 @@ class CoolPayloadWrap():
                     #v = v.decode('base64')
 
                 try:
-                    val = v.decode('utf-8','ignore') 
+                    val = v.decode('utf-8','ignore')
                     #val = v.decode('utf-8','ignore')
                     msg = " - %s = %s " % (k,str(val))
                 except Exception as e1:
-                    self._logger.debug("warn: coolpayload wrap is not encoded: %s " % e1)                    
+                    self._logger.debug("warn: coolpayload wrap is not encoded: %s " % e1)
                     msg = " - %s = %s " % (k,v)
 
                 msglist.append(msg)
-        
+
         return "\n".join(msglist)
 
     def __repr__(self):
@@ -789,7 +793,7 @@ class CoolPayloadWrap():
         """
         return self.to_str()
 
-    
+
 
 class CMApi(ConditionManagementAbstract):
 
@@ -800,17 +804,23 @@ class CMApi(ConditionManagementAbstract):
         if os.getenv('CDMS_SOCKS', False) and not self._sockson:
             self.activatesocks()
             self._sockson = True
-        self.api_client = ApiClient(host=self.urlsvc)
+
+        self._config = Configuration()
+        self._config.host = self.urlsvc
+        self._config.ssl_ca_cert = os.getenv('SSL_CA_CERT', None)
+        self._config.cert_file = os.getenv('SSL_CLIENT_CERT', None)
+        self._config.key_file = os.getenv('SSL_CLIENT_KEY', None)
+        self.api_client = ApiClient(self._config)
         self.__folder = None
         self.__iovlist = []
         self.__tag = None
         self.__coolpayload = None
         self.__payload = { 'hash' : None, 'payload' : None}
-        
+
         logging.basicConfig(format='%(asctime)s %(message)s')
         self._logger = logging.getLogger('CMApi')
         self._logger.setLevel(logging.INFO)
-    
+
     def setlevel(self,loglevel):
         if 'DEBUG' == loglevel:
             self._logger.setLevel(logging.DEBUG)
@@ -822,7 +832,7 @@ class CMApi(ConditionManagementAbstract):
             raise Exception("Cannot use log level %s " % loglevel)
 
     def updateTag(self,tagname,body):
-        
+
         api_instance = TagsApi(self.api_client)
         try:
             api_response = api_instance.update_tag(tagname, body)
@@ -844,7 +854,7 @@ class CMApi(ConditionManagementAbstract):
             params[key] = val
         del params['kwargs']
         tag_params = { 'time_type' : 'time', 'object_type' : 'json', 'synchronization' : 'none', 'description' : 'none', 'last_validated_time' : 0, 'end_of_validity' : 0 }
-       
+
         if 'time_type' in params:
             tag_params['time_type'] = params['time_type']
         if 'object_type' in params:
@@ -860,11 +870,11 @@ class CMApi(ConditionManagementAbstract):
 
         # check types
         if len(tag_params['object_type']) > MAX_OBJTYPE_LENGTH:
-            raise ApiException('Cannot create tag with object_type length > %s' % MAX_OBJTYPE_LENGTH)         
+            raise ApiException('Cannot create tag with object_type length > %s' % MAX_OBJTYPE_LENGTH)
         self._logger.debug('Creating tag dto %s %s ' % (tagname,tag_params))
         api_instance = TagsApi(self.api_client)
         try:
-            dto = TagDto(tagname,time_type=tag_params['time_type'], object_type=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity']) 
+            dto = TagDto(tagname,time_type=tag_params['time_type'], object_type=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity'])
             msg = ('Created dto resource %s ' ) % (dto.to_dict())
             api_response = api_instance.create_tag(dto)
             return api_response
@@ -873,7 +883,7 @@ class CMApi(ConditionManagementAbstract):
             if e.status == 303: # the tag already exists....
                 return e.body
             raise
-    
+
     def getTag(self,tagname):
         api_instance = TagsApi(self.api_client)
         try:
@@ -913,7 +923,7 @@ class CMApi(ConditionManagementAbstract):
             params[key] = val
         del params['kwargs']
         tag_params = { 'validity' : 0, 'release' : 'none', 'description' : 'none', 'snapshot_time' : 0, 'scenario' : 'none', 'workflow' : 'none', 'type' : 'none' }
-       
+
         if 'validity' in params:
             tag_params['validity'] = params['validity']
         if 'release' in params:
@@ -928,7 +938,7 @@ class CMApi(ConditionManagementAbstract):
             tag_params['workflow'] = params['workflow']
         if 'type' in params:
             tag_params['type'] = params['type']
-        
+
         self._logger.debug('Creating global tag dto %s %s ' % (gtagname,tag_params))
         try:
             gtag = self.getGlobalTag(gtagname)
@@ -939,7 +949,7 @@ class CMApi(ConditionManagementAbstract):
 
         api_instance = GlobaltagsApi(self.api_client)
         try:
-            dto = GlobalTagDto(gtagname,validity=tag_params['validity'], release=tag_params['release'], description=tag_params['description'], snapshot_time=tag_params['snapshot_time'], scenario=tag_params['scenario'], workflow=tag_params['workflow'], type=tag_params['type']) 
+            dto = GlobalTagDto(gtagname,validity=tag_params['validity'], release=tag_params['release'], description=tag_params['description'], snapshot_time=tag_params['snapshot_time'], scenario=tag_params['scenario'], workflow=tag_params['workflow'], type=tag_params['type'])
             msg = ('Created dto resource %s ' ) % (dto.to_dict())
             api_response = api_instance.create_global_tag(dto)
             return api_response
@@ -962,17 +972,17 @@ class CMApi(ConditionManagementAbstract):
             params[key] = val
         del params['kwargs']
         tag_params = { 'record' : 'none', 'label' : 'none' }
-       
+
         if 'record' in params:
             tag_params['record'] = params['record']
         if 'label' in params:
             tag_params['label'] = params['label']
-      
+
         self._logger.debug('Creating global tag map dto %s %s %s ' % (gtagname, tagname, tag_params))
-       
+
         api_instance = GlobaltagmapsApi(self.api_client)
         try:
-            dto = GlobalTagMapDto(global_tag_name=gtagname, tag_name=tagname,record=tag_params['record'], label=tag_params['label']) 
+            dto = GlobalTagMapDto(global_tag_name=gtagname, tag_name=tagname,record=tag_params['record'], label=tag_params['label'])
             msg = ('Created dto resource %s ' ) % (dto.to_dict())
             api_response = api_instance.create_global_tag_map(dto)
             return api_response
@@ -1019,7 +1029,7 @@ class CMApi(ConditionManagementAbstract):
 
     def resolveTag(self,globaltagname,**kwargs):
         all_params = [ 'folder' ]
-        
+
         params = locals()
         for key, val in params['kwargs'].items():
             if key not in all_params:
@@ -1037,10 +1047,10 @@ class CMApi(ConditionManagementAbstract):
         if search_params['folder'] is not None:
             tagname = [ x.tag_name for x in maplist if x.label == search_params['folder']]
             return tagname
-            
+
         return None
-        
-            
+
+
     def listIovs(self,tagname,**kwargs):
         all_params = [ 'since', 'until', 'snapshot', 'type' ]
 
@@ -1064,7 +1074,7 @@ class CMApi(ConditionManagementAbstract):
                 (run,lumi) = (run_lumi[0],run_lumi[1])
                 self._logger.debug('Use since from run and lumi %s %s ' % (run,lumi))
                 search_params['since'] = self.runlumiToStime(run,lumi)
-                    
+
         if 'until' in params:
             search_params['until'] = params['until']
             if timetypesearch == 'run-lumi':
@@ -1075,7 +1085,7 @@ class CMApi(ConditionManagementAbstract):
 
         if 'snapshot' in params:
             search_params['snapshot'] = params['snapshot']
-        
+
         api_instance = IovsApi(self.api_client)
         try:
             self._logger.debug('List Iovs using arguments: %s ' % (str(search_params)))
@@ -1089,10 +1099,10 @@ class CMApi(ConditionManagementAbstract):
             print(type(inst))
             print(inst)
         return None
-   
+
     def getSize(self,tagname,**kwargs):
         all_params = [ 'snapshot' ]
-        
+
         params = locals()
         for key, val in params['kwargs'].items():
             if key not in all_params:
@@ -1103,10 +1113,10 @@ class CMApi(ConditionManagementAbstract):
             params[key] = val
         del params['kwargs']
         search_params = { 'tagname' : tagname, 'snapshot' : 0 }
-        
+
         if 'snapshot' in params:
             search_params['snapshot'] = params['snapshot']
-        
+
         api_instance = IovsApi(self.api_client)
         try:
             api_response = api_instance.get_size_by_tag(search_params['tagname'])
@@ -1117,10 +1127,10 @@ class CMApi(ConditionManagementAbstract):
             print(type(inst))
             print(inst)
         return None
-    
+
     def selectGroups(self,tagname,**kwargs):
         all_params = [ 'snapshot' ]
-        
+
         params = locals()
         for key, val in params['kwargs'].items():
             if key not in all_params:
@@ -1131,10 +1141,10 @@ class CMApi(ConditionManagementAbstract):
             params[key] = val
         del params['kwargs']
         search_params = { 'tagname' : tagname, 'snapshot' : 0 }
-        
+
         if 'snapshot' in params:
             search_params['snapshot'] = params['snapshot']
-        
+
         api_instance = IovsApi(self.api_client)
         try:
             api_response = api_instance.select_groups(tagname=search_params['tagname'],
@@ -1146,10 +1156,10 @@ class CMApi(ConditionManagementAbstract):
             print(type(inst))
             print(inst)
         return None
-                
+
     def selectSnapshot(self,tagname,**kwargs):
         all_params = [ 'snapshot' ]
-    
+
         params = locals()
         for key, val in params['kwargs'].items():
             if key not in all_params:
@@ -1158,13 +1168,13 @@ class CMApi(ConditionManagementAbstract):
                                 " to method select_iovs" % key
                                 )
             params[key] = val
-    
+
         del params['kwargs']
         search_params = { 'tagname' : tagname, 'snapshot' : DefaultSnapshot*1000 }
-        
+
         if 'snapshot' in params:
             search_params['snapshot'] = params['snapshot']
-        
+
         api_instance = IovsApi(self.api_client)
         try:
             api_response = api_instance.select_snapshot(tagname=search_params['tagname'],
@@ -1194,12 +1204,12 @@ class CMApi(ConditionManagementAbstract):
         search_params = { 'tagname' : tagname, 'page' : 0, 'size' : niovs, 'sort' : 'id.since:DESC' }
         if 'sort' in params:
             search_params['sort'] = params['sort']
-            
+
         api_instance = IovsApi(self.api_client)
         try:
             api_response = api_instance.find_all_iovs(tagname=search_params['tagname'],
                     page=search_params['page'],size=search_params['size'],sort=search_params['sort'])
-            ###print 'Retrieved list of iovs ',api_response 
+            ###print 'Retrieved list of iovs ',api_response
             return api_response
         except ApiException as e:
             print ("Exception when calling IovsApi->find_all_iovs: %s\n" % e)
@@ -1207,7 +1217,7 @@ class CMApi(ConditionManagementAbstract):
             print(type(inst))
             print(inst)
         return None
-   
+
     def listAllIovs(self,tagname,**kwargs):
         all_params = [ 'page', 'sort', 'size' ]
 
@@ -1227,12 +1237,12 @@ class CMApi(ConditionManagementAbstract):
             search_params['page'] = params['page']
         if 'size' in params:
             search_params['size'] = params['size']
-            
+
         api_instance = IovsApi(self.api_client)
         try:
             api_response = api_instance.find_all_iovs(tagname=search_params['tagname'],
                     page=search_params['page'],size=search_params['size'],sort=search_params['sort'])
-            ###print 'Retrieved list of iovs ',api_response 
+            ###print 'Retrieved list of iovs ',api_response
             return api_response
         except ApiException as e:
             print ("Exception when calling IovsApi->find_all_iovs: %s\n" % e)
@@ -1240,8 +1250,48 @@ class CMApi(ConditionManagementAbstract):
             print(type(inst))
             print(inst)
         return None
-    
-    
+
+    @cdms_profile.profile
+    def storeObjectWithIov(self,tagname,since,data,**kwargs):
+        all_params = ['tag', 'since', 'format', 'endttime' ]
+        self._logger.debug('Store payload in tag %s at time %s using %s ' %  (tagname,since,data))
+
+        params = locals()
+        for key, val in params['kwargs'].items():
+            self._logger.debug('Analyse arg %s = %s' % (key,val))
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method storeObjectWithIov" % key
+                )
+            params[key] = val
+
+        del params['kwargs']
+#        self._logger.debug('setting insertion time to %s' % (time.time()))
+#        instime = int(time.time()*1000) # time in ms
+        p_params = { }
+
+        if 'format' in params:
+            p_params['format'] = params['format']
+        if 'endttime' in params:
+            p_params['endttime'] = params['endttime']
+
+        papi_instance = PayloadsApi(self.api_client)
+        # Check if data is a filename or the real data object
+        try:
+            self._logger.debug('store payload in tag %s @ %s' % (tagname,since))
+            papi_response = None
+            papi_response = papi_instance.store_payload_with_iov_multi_form(data, tagname, since)
+#            print ('CMApi: stored object using %s and returning %s' % (iov_params,iapi_response))
+            return papi_response
+        except ApiException as e:
+            print ("Exception when calling PayloadsApi->store_payload_with_iov_multi_form*: %s\n" % e)
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            print (e)
+
 
     @cdms_profile.profile
     def storeObject(self,tagname,since,data,**kwargs):
@@ -1258,16 +1308,16 @@ class CMApi(ConditionManagementAbstract):
                     " to method select_iovs" % key
                 )
             params[key] = val
-            
+
         del params['kwargs']
         self._logger.debug('setting insertion time to %s' % (time.time()))
         instime = int(time.time()*1000) # time in ms
         iov_params = { 'since' : since, 'tag_name' : tagname }
-        
+
         defstr = base64.b64encode(bytes('none'.encode('utf-8')))
 
         p_params = { 'insertion_time' : instime, 'streamer_info' : defstr.decode('utf-8'), 'version' : 'test', 'object_type' : 'json-file'}
-        
+
         if 'streamer_info' in params:
             defstr = base64.b64encode(bytes(params['streamer_info'].encode('utf-8')))
             p_params['streamer_info'] = defstr.decode('utf-8')
@@ -1275,18 +1325,18 @@ class CMApi(ConditionManagementAbstract):
             p_params['object_type'] = params['object_type']
         if 'version' in params:
             p_params['version'] = params['version']
-            
+
         papi_instance = PayloadsApi(self.api_client)
-        iapi_instance = IovsApi(self.api_client)    
-        # Check if data is a filename or the real data object   
+        iapi_instance = IovsApi(self.api_client)
+        # Check if data is a filename or the real data object
         try:
             if 'dataflag' not in params:
                 params['dataflag'] = 'inmemory'
-                
+
             if params['dataflag'] == 'fromfile':
                 # compute hash from file
                 mhash=None
-    
+
                 with open(data, mode='rb') as file: # b is important -> binary
                     fileContent = file.read()
                     mhash = self.gethash(fileContent)
@@ -1308,14 +1358,14 @@ class CMApi(ConditionManagementAbstract):
                 iov_params['payload_hash'] = phash
 
             pdto = PayloadDto(hash=p_params['hash'], version=p_params['version'], object_type=p_params['object_type'], data=p_params['data'], streamer_info=p_params['streamer_info'], insertion_time=p_params['insertion_time'])
-                
+
             print ('store payload with hash: %s' % pdto.hash)
             papi_response = None
             if params['dataflag'] == 'fromfile':
                 jsondict = { "hash" : pdto.hash, "objectType" : pdto.object_type, "streamerInfo" : pdto.streamer_info,
                            "version" : pdto.version, "insertionTime" : pdto.insertion_time}
                 self._logger.debug('Dump dictionary to json %s' % (jsondict))
-                
+
                 jsonobj = json.dumps(jsondict)
                 self._logger.debug('- use multiform and external file %s %s %s' % (data,jsondict,jsonobj))
                 papi_response = papi_instance.create_payload_multi_form(data,jsonobj)
@@ -1327,7 +1377,7 @@ class CMApi(ConditionManagementAbstract):
             iov = IovDto(tag_name=iov_params['tag_name'], since=iov_params['since'], insertion_time=None, payload_hash=iov_params['payload_hash'])
             self._logger.debug('Store iov with since %s ' % (iov_params['since']))
             iapi_response = iapi_instance.create_iov(iov)
-            
+
 #            print ('CMApi: stored object using %s and returning %s' % (iov_params,iapi_response))
             return iapi_response
         except ApiException as e:
@@ -1338,7 +1388,7 @@ class CMApi(ConditionManagementAbstract):
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
             print (e)
-        
+
     @cdms_profile.profile
     def getPayload(self, phash):
         if self.__payload['hash'] == phash:
@@ -1346,10 +1396,12 @@ class CMApi(ConditionManagementAbstract):
         api_instance = PayloadsApi(self.api_client)
         try:
             #print 'Retrieving payload using hash ',phash
-            api_response = api_instance.get_payload(phash)
+            api_response = api_instance.get_payload(phash,format='DTO',_preload_content=False,_return_http_data_only=True)
             self.__payload['hash'] = phash
             self.__payload['payload'] = api_response
-            return api_response
+            self._logger.debug('Retrieved payload : %s ' % self.__payload)
+            pydto = self.api_client.deserialize(api_response,'PayloadDto')
+            return pydto
         except Exception as e:
             print ("Exception when calling getPayload: %s\n" % e)
         return None
@@ -1384,28 +1436,28 @@ class Info(dict):
     This class extends a dictionary with a format string for its representation.
     It is used as the return value for the inspection commands, such that one
     can both query for the inspected object's information:
-    
+
       res = tool.ls( '/a' )
       print res['name']
-      
+
     as well as obtain a standard printout of the information:
-    
+
       print res
-    
+
     """
     def __init__( self, fmt = None ):
         super( Info, self ).__init__()
         self.format = fmt
-    
+
     def __str__( self ):
         if self.format is None:
             return super( Info, self ).__str__()
         else:
             return self.format % self
-        
+
     def setformat(self,fmt):
         self.format = fmt
-        
+
     def format(self):
         return self.format
 
@@ -1415,7 +1467,7 @@ class InfoList(list):
     """
     def __str__( self ):
         return '\n'.join( [ str(i) for i in self ] )
-        
+
     def __repr__( self ):
         return str( self )
 
@@ -1434,13 +1486,13 @@ class CrestConsole(CMApi):
         logging.basicConfig(format='%(asctime)s %(message)s')
         self._logger = logging.getLogger('CrestConsole')
         self._logger.setLevel(logging.INFO)
-    
+
     def reset(self):
         self._start='0'
         self._end='INF'
         self._chan='all'
         self._lastpyld=None
-        
+
     def lstags(self,pattern):
         res = self.listTags(pattern)
         wrapres = []
@@ -1456,7 +1508,7 @@ class CrestConsole(CMApi):
             wrapit = GlobalTagMapDtoWrap(x)
             wrapres.append(wrapit)
         return InfoList(wrapres)
-        
+
     def savetag(self,arguments):
         args = arguments.split(',')
         tagdic = { 'name' : args[0].split('=')[1] }
@@ -1498,21 +1550,21 @@ class CrestConsole(CMApi):
             tag = self.getTag(iovdic['name'])
             if tag is None:
                 raise Exception('cannot insert iov in not existing tag')
-            
+
             if iovdic['data'] is None:
                 raise Exception('need an input file...')
-            
+
             if 'streamer_info' not in iovdic or iovdic['streamer_info'] is None:
                 iovdic['streamer_info'] = base64.b64encode(bytes('none'.encode('utf-8')))
             else:
                 iovdic['streamer_info'] = base64.b64encode(bytes(iovdic['streamer_info'].encode('utf-8')))
-            
+
             if 'version' not in iovdic or iovdic['version'] is None:
                 iovdic['version'] = 'test'
-            
+
             if 'object_type' not in iovdic or iovdic['object_type'] is None:
                 iovdic['object_type'] = 'file'
-                
+
             self._logger.debug ('Try to store iov...%s' % iovdic)
 
             resiov = self.storeObject(iovdic['name'], iovdic['since'], iovdic['data'], dataflag='fromfile')
@@ -1528,10 +1580,45 @@ class CrestConsole(CMApi):
             ##return Info(idto)
         except:
             self._logger.debug('Error inserting iov %s.....' % iovdic)
-            
+
         return None
 
-        
+    def insertiovpyld(self,arguments):
+        args = arguments.split(',')
+        #print ('Got arguments  %s' % args)
+        iovdic = { }
+        for ar in args:
+            (k,v) = (ar.split('=')[0],ar.split('=')[1])
+            iovdic[k] = v
+            self._logger.debug('Fill dictionary with key=%s and value=%s' % (k,v))
+        #print ('Creating dictionary for insertion %s' % iovdic)
+        resiov = {}
+        try:
+            import base64
+
+            tag = self.getTag(iovdic['name'])
+            if tag is None:
+                raise Exception('cannot insert iov in not existing tag')
+
+            if iovdic['data'] is None:
+                raise Exception('need an input file...')
+
+            self._logger.debug ('Try to store iov...%s' % iovdic)
+
+            resiov = self.storeObjectWithIov(iovdic['name'], iovdic['since'], iovdic['data'])
+            #print('After store object got iov %s' %resiov)
+            print('Inserted iov with hash : %s' % resiov)
+            wrapres = []
+            if resiov:
+                wrapres.append(resiov['id'])
+            return InfoList(wrapres)
+            ##return Info(idto)
+        except:
+            self._logger.debug('Error inserting iov %s.....' % iovdic)
+
+        return None
+
+
     def lsgtags(self,pattern):
         res = self.listGlobalTags(pattern)
         wrapres = []
@@ -1592,7 +1679,7 @@ class CrestConsole(CMApi):
         wrapres = self.tagSummary(res[0])
         wrapreslist = []
         wrapreslist.append(wrapres)
-        
+
         return InfoList(wrapreslist)
 
     def userunlumi(self, arguments):
@@ -1602,16 +1689,16 @@ class CrestConsole(CMApi):
         self._start = self.runlumiToStime(args[0],args[1])
         self._end = 'INF'
         if len(args) > 2:
-            self._end = self.runlumiToStime(args[2],args[3])            
-            
+            self._end = self.runlumiToStime(args[2],args[3])
+
     def usetimes(self, arguments):
         args = arguments.split()
         if len(args) == 1:
             args.append('INF')
-            
+
         self._start = args[0]
         self._end = args[1]
-              
+
     def usechan(self, arguments):
         args = arguments.split()
         if len(args) > 1:
@@ -1630,12 +1717,13 @@ class CrestConsole(CMApi):
     def listchans(self):
         nchans = self._lastpyld.listChannels()
         return InfoList(nchans)
-        
+
     def getpayload(self,thash):
         res = self.getPayload(thash)
+        print(res)
         wrapres = self.payloadInfo(res)
         return InfoList(wrapres)
-                     
+
     def dumppayload(self, mhash, col):
 
         tag = self.getTag(self._seltag)
@@ -1680,7 +1768,7 @@ class CrestConsole(CMApi):
 #                    if int(ch) == int(self._chan):
 #                        wp = CoolPayloadWrap(cp,ch)
 #                        plist.append(wp)
-                        
+
         return InfoList(plist)
 
     def dumppayloadtofile(self, mhash, outf, mode=None):
@@ -1710,16 +1798,16 @@ class CrestConsole(CMApi):
             print ('Found payload  %s' % decoded.hash)
             wp = NormalPayloadWrap(decoded)
             plist.append(wp)
-            
+
         with open(fname,'w') as f:
             for pld in plist:
                 f.write(pld.to_str())
             f.close()
         return "payload stored in {0}".format(fname)
-                
+
     def usetag(self,tag):
         self._seltag = tag
-        return 
+        return
 
     def pwd(self):
         res=InfoList()
@@ -1737,7 +1825,7 @@ class CrestConsole(CMApi):
         taginfo = TagInfoWrap(tag,pdto)
         return taginfo
 
-    def payloadInfo(self,pdto):        
+    def payloadInfo(self,pdto):
         pyldinfo = PayloadDtoWrap(pdto)
         wrapres = []
         wrapres.append(pyldinfo)
@@ -1752,12 +1840,12 @@ class CoolCMApi(CMApi):
         CMApi.__init__(self)
         self._logger.setLevel(logging.DEBUG)
 
-    
+
     def browseObjects(self,since,until,tagname):
         snapshot=DefaultSnapshot*1000
         self.__iovlist = self.listIovs(tagname,since=since, until=until,snapshot=snapshot)
         return self.__iovlist
-    
+
     def getObject(self,iov,channelSel=None):
         pyld = None
         if iov is not None:
@@ -1769,19 +1857,19 @@ class CoolCMApi(CMApi):
             else:
                 return cooljson
         return None
-    
-    
+
+
     def findObject(self,stime,tag=None):
         tagname = None
         timeformat = 'time'
         self._logger.debug('findObject: calling with arguments %s %s ' % (str(stime) , str(tag)))
-        
+
         if tag is not None:
             self.__tag = self.getTag(tag)
         else:
             if self.__tag is None:
                 raise Exception("Cannot load object from None folder or tag")
-        
+
         tagname = self.__tag.name
         timeformat = self.__tag.time_type
         search_params = {}
@@ -1789,7 +1877,7 @@ class CoolCMApi(CMApi):
         snapshot=DefaultSnapshot*1000
         self.__iovlist = self.selectSnapshot(tagname,snapshot=snapshot)
         self._logger.debug('List of iovs has length : %d ' % (len(self.__iovlist)))
-        
+
         search_params['tagname'] = tagname
         self._logger.debug('1 Search parameters are %s' % (search_params))
         if timeformat == 'run-lumi' and isinstance(stime,str):
@@ -1799,34 +1887,34 @@ class CoolCMApi(CMApi):
             search_params['since'] = self.runlumiToStime(run,lumi)
         else:
             search_params['since'] = int(stime)
-        
+
         self._logger.debug('2 Search parameters are %s' % (search_params))
 
         stimelist = [ int(x.since) for x in self.__iovlist ]
         self._logger.debug('List of timestamp to search has length %d ' % (len(stimelist)))
-        
+
         (before,after)=self.takeClosest(stimelist,search_params['since'])
         self._logger.debug('Range in time is %d %d ' % (before,after))
         selobjiov= self.listIovs(tagname,since=before, until=after)
         pyld=None
         if len(selobjiov) > 1:
             raise Exception("Too many iovs loaded by this function....",len(selobjiov))
-        
+
         for aniov in selobjiov:
             self._logger.debug('Loop over selected object list %s ' % str(aniov))
             pyld = self.getPayload(aniov.payload_hash)
             self.__coolpayload = self.getCoolJson(pyld)
             self._logger.debug('Return cool payload object %s ' % self.__coolpayload)
             return self.__coolpayload
-        
+
         return pyld
 
 
 
 if __name__ == '__main__':
-    
+
 #     cmapi = CMFileApi()
-#     cmapi.createTag('LOCAL_TEST',time_type='time',object_type='testobj',synchronization='online',description='file test tag') 
+#     cmapi.createTag('LOCAL_TEST',time_type='time',object_type='testobj',synchronization='online',description='file test tag')
 #     print 'Getting back the tag'
 #     tag = cmapi.getTag('LOCAL_TEST')
 #     print 'Found tag ',tag
@@ -1838,12 +1926,12 @@ if __name__ == '__main__':
 #     pld = cmapi.getPayload('f69bff44070ba35d7169196ba0095425979d96346a31486b507b4a3f77bd356d')
 #     print 'Found payload ',pld
 #     sys.exit()
-    
+
     cm = CMApi()
     res = cm.getSize('MuonAlignMDTEndCapCAlign-RUN2-ECC_ROLLING_2015_03_01-UPD4-02')
     print (res)
     #sys.exit(0)
-    
+
     cmapi = CoolCMApi()
     a = 944214200287232
     (run, lumi) = cmapi.stimeToRunlumi(a)
@@ -1852,7 +1940,7 @@ if __name__ == '__main__':
     cmapi = CoolCMApi()
 
 #### Example of retrieval for Antoine
-    print ('=================== GET TAG ======================')        
+    print ('=================== GET TAG ======================')
     tag = cmapi.getTag('TRIGGER_LUMI_PerBcidDeadtime_SHAUNROE')
     pobj = cmapi.getPayload('5ca1b5fb59df861a0c0eae6433d9c86e8305f6f9d1fdb4e6c44c68b2d1953819')
     print ('Retrieved payload: %s ' % pobj)
@@ -1867,7 +1955,7 @@ if __name__ == '__main__':
         msg = " - %s = %s " % ('CPLX0',str(val))
         print(msg)
     except Exception as e1:
-        print("warn: coolpayload is not encoded: %s " % e1)                    
+        print("warn: coolpayload is not encoded: %s " % e1)
 
 
     sys.exit(0)
@@ -1877,11 +1965,11 @@ if __name__ == '__main__':
     except Exception as e :
         print (e)
     print ('=================== STORE OBJECT ======================')
-    try:     
+    try:
         cmapi.storeObject('TEST',0,'this is a test',version='10')
     except Exception as e :
         print (e)
-    print ('=================== GET TAG ======================')        
+    print ('=================== GET TAG ======================')
     cmapi.getTag('TEST')
 
     print ('=================== STORE OBJECT FROM FILE ======================')
@@ -1895,13 +1983,13 @@ if __name__ == '__main__':
     for iov in iovlist:
         pyld = cmapi.getPayload(iov.payload_hash)
         print ('Retrieved payload %s' % pyld)
-        
+
     print ('=================== LIST TAGS  ======================')
     taglist = cmapi.listTags('Til')
     for tag in taglist:
         name = tag.name
         print ('Found tag %s' % name)
-        
+
     print ('=================== LIST LAST N IOVS =================')
     iovlist = cmapi.listLastNIovs('TileOfl02CalibCisLin-RUN2-UPD4-14',100)
     for iov in iovlist:
