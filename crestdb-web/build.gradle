@@ -22,6 +22,7 @@ bootJar {
 bootWar {
     baseName = 'crest'
     archiveName = 'crest.war'
+    metaInf { from 'src/main/resources/spring.factories' }    
 }
 
 repositories {
