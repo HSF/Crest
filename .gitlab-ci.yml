@@ -47,9 +47,14 @@ stages:
  - redeploy
 
 package_application:
+  only:
+    refs:
+      - master
+    variables:
+      - $REMOTE_NAME == "cern"
   stage: package_application
   image: java:8
-  script: 
+  script:
    - ./gradlew -g /cache/.gradle clean :crestdb-web:assemble -PwarName=crest.war
   allow_failure: false
   artifacts:
@@ -57,15 +62,24 @@ package_application:
    - ./crestdb-web/build/libs/crest.war
 
 build_application_docker_image:
+  only:
+    refs:
+      - master
+    variables:
+      - $REMOTE_NAME == "cern"
   stage: build_application_docker_image
   tags:
    - docker-image-build
-  script: "echo building $CI_REGISTRY_IMAGE:runner" # No empty scripts are allowed    
+  script: "echo building $CI_REGISTRY_IMAGE:runner" # No empty scripts are allowed
   variables:
    TO: $CI_REGISTRY_IMAGE:runner # Where to push resulting image
 
 redeploy:
+  only:
+    refs:
+      - master
+    variables:
+      - $REMOTE_NAME == "cern"
   stage: redeploy
   image: gitlab-registry.cern.ch/paas-tools/openshift-client:latest
   script: "oc import-image $IMAGE_NAME  --server=$SERVER --namespace $NAMESPACE --all --token=$IMAGE_IMPORT_TOKEN"
-
