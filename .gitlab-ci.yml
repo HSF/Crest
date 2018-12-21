@@ -58,8 +58,9 @@ stages:
  - package_application
  - build
  - release
+ - redeploy
 
-package_application:
+package_svom_application:
   stage: package_application
   tags:
     - dc0
@@ -71,20 +72,70 @@ package_application:
     paths:
     - ./crestdb-web/build/libs/crest.war
     expire_in: 1 week
+  only:
+  - svom-dc0
 
-build:
+build_svom_docker_image:
   stage: build
+  environment: dc0
   tags:
     - dc0-shell
   image: java:8
   script:
     - docker info
     - docker build --tag=$CONTAINER_IMAGE .
+  only:
+  - svom-dc0
 
-release:
+registry-push:
   stage: release
+  environment: dc0
   tags:
     - dc0-shell
   script:
     - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
     - docker push $CONTAINER_IMAGE
+  only:
+  - svom-dc0
+
+package_cern_application:
+  stage: package_application
+  environment: cern
+  only:
+    refs:
+      - master
+    variables:
+      - $REMOTE_NAME == "cern"
+  image: java:8
+  script:
+   - ./gradlew -g /cache/.gradle clean assemble -PwarName=crest.war
+  allow_failure: false
+  artifacts:
+   paths:
+   - ./crestdb-web/build/libs/crest.war
+
+
+build_cern_docker_image:
+  stage: build
+  environment: cern
+  only:
+    refs:
+      - master
+    variables:
+      - $REMOTE_NAME == "cern"
+  tags:
+   - docker-image-build
+  script: "echo building $CI_REGISTRY_IMAGE:runner" # No empty scripts are allowed
+  variables:
+   TO: $CI_REGISTRY_IMAGE:runner # Where to push resulting image
+
+redeploy:
+  stage: redeploy
+  environment: cern
+  only:
+    refs:
+      - master
+    variables:
+      - $REMOTE_NAME == "cern"
+  image: gitlab-registry.cern.ch/paas-tools/openshift-client:latest
+  script: "oc import-image $IMAGE_NAME  --server=$SERVER --namespace $NAMESPACE --all --token=$IMAGE_IMPORT_TOKEN"
