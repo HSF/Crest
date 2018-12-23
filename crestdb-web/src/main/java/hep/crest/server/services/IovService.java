@@ -158,7 +158,7 @@ public class IovService {
 	@SuppressWarnings("unchecked")
 	public List<IovDto> selectIovsByTagRangeSnapshot(String tagname, BigDecimal since, BigDecimal until,Date snapshot) throws CdbServiceException {
 		try {
-			log.debug("Search for iovs by tag name "+tagname+" and range time "+since+" -> "+until+" using snapshot "+snapshot);
+			log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",tagname,since,until,snapshot);
 			List<IovDto> dtolist = new ArrayList<>();
 			Iterable<Iov> entities = null;
 			if (snapshot == null) {
@@ -169,7 +169,7 @@ public class IovService {
 			dtolist = StreamSupport.stream(entities.spliterator(), false).map(s -> mapper.map(s,IovDto.class)).collect(Collectors.toList());
 			return dtolist;
 		} catch (Exception e) {
-			log.debug("Exception in retrieving iov groups list using "+tagname);
+			log.debug("Exception in retrieving iov groups list using {}",tagname);
 			throw new CdbServiceException("Cannot find iov size by tag name: " + e.getMessage());
 		}
 	}

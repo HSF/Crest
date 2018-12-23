@@ -1,24 +1,22 @@
 <template>
 <div class="container is-widescreen">
   <div class="notification">
-    This container is <strong>fluid</strong> until widescreen: it will have a 32px gap on either side, on any
-    viewport size.
-    Search for APIDs or other.
-    Access api on {{apiHost}}:{{apiPort}}
-    Selected tag is : {{selectedTag}}
-  </div>
+    Search for Tags.
+    Access api on {{apiHost}}:{{apiPort}}<br>
+    Selected tag is : {{selectedTag}}<br>
   <b-field grouped>
       <b-input v-model="thetag" placeholder="Search..."></b-input>
       <p class="control">
         <button class="button is-primary" v-on:click="loadTags()">Search</button>
       </p>
   </b-field>
-  <GenericTable v-bind:data="rows" v-bind:columns="columns" v-on:select-row="updateTag"/>
+  </div>
+  <GenericTabData v-bind:data="rows" v-bind:columns="columns" v-on:select-row="updateTag"/>
 </div>
 </template>
 
 <script>
-import GenericTable from './GenericTable.vue'
+import GenericTabData from './GenericTabData.vue'
 import axios from 'axios';
 
 export default {
@@ -83,7 +81,7 @@ export default {
         .catch(error => { console.error(error); return Promise.reject(error); });
   },
   components: {
-    GenericTable
+    GenericTabData
   }
 };
 </script>

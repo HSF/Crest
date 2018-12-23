@@ -51,7 +51,7 @@ public class CachingPolicyService {
 
 	public ResponseBuilder verifyLastModified(Request request, TagDto tagentity) throws CdbServiceException {
 		Date lastModified = tagentity.getModificationTime();
-		log.debug("Use tag modification time " + lastModified);
+		log.debug("Use tag modification time {}",lastModified);
 		ResponseBuilder builder = request.evaluatePreconditions(lastModified);
 		if (builder != null) {
 			CacheControl cc = new CacheControl();

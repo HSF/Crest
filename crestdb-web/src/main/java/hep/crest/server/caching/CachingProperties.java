@@ -11,19 +11,19 @@ public class CachingProperties {
 
 	public final Integer default_cache_time = 60; // number of seconds
 
-	private Integer iovsgroups_maxage; // number of seconds
+	private Integer iovsgroups_maxage = 120; // number of seconds
 	
-	private Integer iovsgroups_snapshot_maxage; // number of seconds
+	private Integer iovsgroups_snapshot_maxage = 600; // number of seconds
 	
-	private Integer iovs_maxage; // number of seconds
+	private Integer iovs_maxage = 600; // number of seconds
 
-	private Integer iovs_snapshot_maxage;
+	private Integer iovs_snapshot_maxage = 1200;
 	
-	private Integer payloads_maxage;
+	private Integer payloads_maxage = 1200;
 	
-	private Integer timetype_groupsize;
+	private Integer timetype_groupsize = 1000;
 	
-	private Integer runtype_groupsize;
+	private Integer runtype_groupsize = 10;
 
 	public Integer getIovsgroups_maxage() {
 		System.out.println("property iovsgroups_maxage has value: "+iovsgroups_maxage);

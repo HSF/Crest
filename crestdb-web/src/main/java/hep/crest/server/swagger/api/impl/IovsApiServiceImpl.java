@@ -244,6 +244,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 				runtil = IovPropertyConfigurator.INFINITY;
 			} else {
 				runtil = new BigDecimal(until);
+				log.debug("The end time will be set to : " + runtil);
 			}
 			BigDecimal rsince = new BigDecimal(since);
 			Date snap = null;

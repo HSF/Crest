@@ -4,6 +4,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletProperties;
 
+import hep.crest.server.filters.CORSFilter;
 import hep.crest.server.filters.CacheControlFilter;
 import hep.crest.server.swagger.api.AdminApi;
 import hep.crest.server.swagger.api.FoldersApi;
@@ -34,6 +35,7 @@ public class JerseyConfig extends ResourceConfig {
 		register(MultiPartFeature.class);
 		////register(AuthenticationFilter.class);
 		register(CacheControlFilter.class);
+		register(CORSFilter.class);
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 	}
 	
@@ -45,7 +47,6 @@ public class JerseyConfig extends ResourceConfig {
 
 	public void jerseyregister(Class<?> clazz) {
 		super.register(clazz);
-		return;
 	}
 	
 	private void configureSwagger() {

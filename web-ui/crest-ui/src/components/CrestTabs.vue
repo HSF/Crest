@@ -5,7 +5,10 @@
     <TagsPane v-on:select-tag="updateTag"/>
 </b-tab-item>
 <b-tab-item label="Iovs">
-    <IovsPane v-bind:tagname="selectedtag"/>
+    <IovsPane v-bind:tagname="selectedtag" v-on:select-iov="updateIov"/>
+</b-tab-item>
+<b-tab-item label="Payloads">
+    <PayloadsPane v-bind:tagname="selectedtag" v-bind:selectedIov="selectediov"/>
 </b-tab-item>
 </b-tabs>
 </section>
@@ -13,23 +16,31 @@
 <script>
 import TagsPane from './TagsPane.vue'
 import IovsPane from './IovsPane.vue'
+import PayloadsPane from './PayloadsPane.vue'
 
   export default {
       data : function() {
         return {
-          selected: {},
+        selected: {},
+        activeTab: 0,
+        selectediov: {},
           selectedtag : ''
         }
       },
       methods : {
-        updateTag(tag) {
-          console.log('Change tag selection '+tag)
-          this.selectedtag = tag
-        }
+      updateTag(tag) {
+        console.log('Change tag selection '+tag)
+        this.selectedtag = tag
+      },
+      updateIov(iov) {
+        console.log('Change iov selection '+iov)
+        this.selectediov = iov
+      }
       },
       components: {
         TagsPane,
-        IovsPane
+        IovsPane,
+        PayloadsPane
       }
   }
 </script>
