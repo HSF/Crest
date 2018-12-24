@@ -1,5 +1,8 @@
 <template>
     <section>
+    <b-tabs>
+        <b-tab-item label="Table">
+
         <b-field grouped group-multiline>
             <b-select v-model="defaultSortDirection">
                 <option value="asc">Default sort direction: ASC</option>
@@ -14,6 +17,11 @@
             <div class="control is-flex">
                 <b-switch v-model="isPaginated">Paginated</b-switch>
             </div>
+            <button class="button field is-danger" @click="selected = null"
+                :disabled="!selected">
+                <b-icon icon="close"></b-icon>
+                <span>Clear selected</span>
+            </button>
         </b-field>
 
         <b-table
@@ -26,10 +34,17 @@
             :current-page.sync="currentPage"
             :pagination-simple="isPaginationSimple"
             :default-sort-direction="defaultSortDirection"
-            default-sort="sortcolumn"
+            default-sort="name"
             style="overflow: scroll">
 
         </b-table>
+        </b-tab-item>
+
+        <b-tab-item label="Selected">
+            <pre>{{ selected }}</pre>
+        </b-tab-item>
+    </b-tabs>
+
     </section>
 </template>
 
@@ -39,7 +54,6 @@
     props : {
       data : Array,
       columns : Array,
-      sortcolumn : ''
     },
     data: function() {
             return {
