@@ -49,10 +49,21 @@
   </div>
   <div class="column" v-else>
     <b-field label="Tag Name">
-      <b-input v-model="savedIov.tagname"></b-input>
+      <b-input v-model="savedIov.tag"></b-input>
     </b-field>
     <b-field label="Since">
       <b-input v-model="savedIov.since"></b-input>
+    </b-field>
+    <b-field class="file">
+        <b-upload v-model="savedIov.file">
+            <a class="button is-primary">
+                <b-icon icon="upload"></b-icon>
+                <span>Click to upload</span>
+            </a>
+        </b-upload>
+        <span class="file-name" v-if="savedIov.file">
+            {{ savedIov.file.name }}
+        </span>
     </b-field>
     <b-field>
         <p class="control">
@@ -80,7 +91,7 @@ export default {
     isFullPage : false,
     isLoading : false,
     selectedIov : {},
-    savedIov : { tagname : '', since : 0 },
+    savedIov : { tag : '', since : 0 , file : null, endtime : 0 },
         radioButton : 'Search',
         since : 0,
         until : 'INF',
@@ -113,12 +124,17 @@ export default {
   },
   methods: {
   save() {
-    console.log('saving a iov '+this.savedIov.tagname+' '+this.savedIov.since)
+    console.log('saving a iov '+this.savedIov.tag+' '+this.savedIov.since)
     const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+    const sdata = new FormData();
+    sdata.append("file", this.savedIov.file);
+    sdata.append("tag", this.savedIov.tag);
+    sdata.append("since", this.savedIov.since);
+
       axios({
-        url: `http://${hostname}/crestapi/`,
+        url: `http://${hostname}/crestapi/payloads/store`,
         method: 'post',
-        data: this.savedIov
+        data: sdata
       })
       .then(function (response) {
           // your action after success
