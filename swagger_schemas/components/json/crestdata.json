@@ -1,10 +1,41 @@
 {
 	"definitions": {
+		"HTTPResponse": {
+		    "description": "general response object that can be used for POST and PUT methods",
+			"type": "object",
+			"required": [
+				"message",
+				"action",
+				"code"
+			],
+			"properties": {
+				"message": {
+					"type": "string"
+				},
+				"action": {
+					"type": "string",
+					"description": "Action performed by the server"
+				},
+				"code": {
+					"type": "integer",
+					"description": "Code of the response"
+				},
+				"id": {
+					"type": "string",
+					"description": "Can be used to store the ID of the generated object"
+				}
+			}
+		},
 		"GenericMap" : {
 			"type" : "object",
+			"properties": {
+					"name":{
+						"type":"string"
+					}
+			},
 			"additionalProperties": {
-  				"type": "string"			
-  			}
+  				"type": "string"
+  		}
 		},
 		"FolderDto" : {
 			"type" : "object",
@@ -213,6 +244,10 @@
 				},
 				"objectType": {
 					"type": "string"
+				},
+				"size": {
+					"type": "integer",
+					"format": "int32"
 				},
 				"data": {
 					"type": "string",

@@ -13,14 +13,6 @@
 			"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
 		}
 	},
-	"securityDefinitions": {
-		"basicAuth" : {
-			"type" : "basic"
-		}
-	},
- 	"security": {
- 		"basicAuth" : [] 
- 	},
 	"host": "localhost:8080",
 	"basePath": "/crest",
 	"tags": [
@@ -53,7 +45,7 @@
 		},
 		{
 			"name": "fs"
-		}		
+		}
 	],
 	"schemes": [
 		"http"
@@ -188,8 +180,8 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "string"				
-						} 						
+							"type": "string"
+						}
 					}
 				}
 			}
@@ -227,7 +219,7 @@
 						}
 					}
 				}
-			}			
+			}
 		},
 		"/folders": {
 			"post": {
@@ -259,8 +251,8 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "string"				
-						} 						
+							"type": "string"
+						}
 					}
 				}
 			},
@@ -304,7 +296,7 @@
 						}
 					}
 				}
-			}			
+			}
 		},
 		"/runinfo": {
 			"post": {
@@ -336,8 +328,8 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "string"				
-						} 						
+							"type": "string"
+						}
 					}
 				}
 			},
@@ -399,7 +391,7 @@
 						}
 					}
 				}
-			}			
+			}
 		},
 		"/runinfo/list": {
 			"get": {
@@ -476,7 +468,7 @@
 						}
 					}
 				}
-			}			
+			}
 		},
 		"/globaltagmaps": {
 			"post": {
@@ -1110,6 +1102,67 @@
 				}
 			}
 		},
+		"/payloads/store": {
+			"post": {
+				"tags": [
+					"payloads"
+				],
+				"summary": "Create a Payload in the database, associated to a given iov since and tag name.",
+				"description": "This method allows to insert a Payload and an IOV. Arguments: since,tagname,stream,end time.",
+				"operationId": "storePayloadWithIovMultiForm",
+				"consumes": [
+					"multipart/form-data"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "header",
+						"name": "format",
+						"description": "The format of the input data",
+						"default": "JSON",
+						"type": "string"
+					},
+					{
+						"name": "file",
+						"in": "formData",
+						"description": "The payload file as a stream",
+						"required": true,
+						"type": "file"
+					},
+					{
+						"name": "tag",
+						"in": "formData",
+						"description": "The tag name",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"name": "since",
+						"in": "formData",
+						"description": "The since time",
+						"required": true,
+						"type": "number"
+					},
+					{
+						"name": "endtime",
+						"in": "formData",
+						"description": "The end time to be used for protection at tag level",
+						"required": false,
+						"type": "number"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/HTTPResponse"
+						}
+					}
+				}
+			}
+		},
 		"/payloads/{hash}": {
 			"get": {
 				"tags": [
@@ -1119,10 +1172,18 @@
 				"description": "This method retrieves a payload resource.Arguments: hash=<hash> the hash of the payload",
 				"operationId": "getPayload",
 				"produces": [
+					"application/octet-stream",
 					"application/json",
 					"application/xml"
 				],
 				"parameters": [
+					{
+						"in": "header",
+						"name": "format",
+						"description": "The format of the output data: BLOB or DTO in JSON format",
+						"default": "BLOB",
+						"type": "string"
+					},
 					{
 						"name": "hash",
 						"in": "path",
@@ -1135,7 +1196,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+							"type": "string"
 						}
 					}
 				}
@@ -1325,7 +1386,7 @@
 						}
 					}
 				}
-			},		
+			},
 			"post": {
 				"tags": [
 					"tags"
@@ -1353,7 +1414,7 @@
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/GenericMap"
 						}
-					}					
+					}
 				],
 				"responses": {
 					"200": {
