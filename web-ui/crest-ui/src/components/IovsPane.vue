@@ -1,6 +1,5 @@
 <template>
-<section>
-<div class="container is-fluid"">
+<div class="container">
 <div class="notification">
     Search for Iovs. Use the tag selected on the Tags tab.
     Access api on {{apiHost}}:{{apiPort}}<br>
@@ -11,74 +10,55 @@
         {{ radioButton }}
     </p>
 </div>
-<div class="columns is-mobile">
-  <div class="column is-one-fifth">
-      <b-field>
-        <b-radio-button v-model="radioButton"
-            native-value="Search"
-            type="is-info">
-            <b-icon icon="magnify"></b-icon>
-            <span>Search</span>
-        </b-radio-button>
-        </b-field>
-
-        <b-field>
-        <b-radio-button v-model="radioButton"
-            native-value="Create"
-            type="is-success">
-            <b-icon icon="check"></b-icon>
-            <span>Create</span>
-        </b-radio-button>
-    </b-field>
-  </div>
-  <div class="column" v-if="radioButton === 'Search'">
-      <b-field label="Since">
-        <b-input v-model="since" maxlength="20"></b-input>
-      </b-field>
-      <b-field label="Until">
-        <b-input v-model="until" maxlength="20"></b-input>
-      </b-field>
-      <b-field label="Tag">
-          <b-input v-model="tagname" placeholder="Tag selection on another tab" disabled></b-input>
-      </b-field>
-      <b-field>
-      <p class="control">
-        <button class="button is-primary" v-on:click="loadIovs()">Search</button>
-      </p>
-      </b-field>
-  </div>
-  <div class="column" v-else>
-    <b-field label="Tag Name">
-      <b-input v-model="savedIov.tag"></b-input>
-    </b-field>
-    <b-field label="Since">
-      <b-input v-model="savedIov.since"></b-input>
-    </b-field>
-    <b-field class="file">
-        <b-upload v-model="savedIov.file">
-            <a class="button is-primary">
-                <b-icon icon="upload"></b-icon>
-                <span>Click to upload</span>
-            </a>
-        </b-upload>
-        <span class="file-name" v-if="savedIov.file">
-            {{ savedIov.file.name }}
-        </span>
-    </b-field>
+<div class="columns">
+<div class="column is-one-fifth">
     <b-field>
-        <p class="control">
-          <button class="button is-primary" v-on:click="save()">Save</button>
-        </p>
-    </b-field>
+      <b-radio-button v-model="radioButton"
+          native-value="Search"
+          type="is-info">
+          <b-icon icon="magnify"></b-icon>
+          <span>Search</span>
+      </b-radio-button>
+      </b-field>
+
+      <b-field>
+      <b-radio-button v-model="radioButton"
+          native-value="Create"
+          type="is-success">
+          <b-icon icon="check"></b-icon>
+          <span>Create</span>
+      </b-radio-button>
+  </b-field>
+  <b-field label="Since">
+    <b-input v-model="since" maxlength="20"></b-input>
+  </b-field>
+  <b-field label="Until">
+    <b-input v-model="until" maxlength="20"></b-input>
+  </b-field>
+  <b-field label="Tag">
+      <b-input v-model="tagname" placeholder="Tag selection on another tab" disabled></b-input>
+  </b-field>
+  <b-field>
+  <p class="control">
+    <button class="button is-primary" v-on:click="loadIovs()" :disabled="radioButton !== 'Search'">Search</button>
+  </p>
+  </b-field>
+</div>
+<div class="column is-four-fifths">
+  <div v-if="radioButton === 'Search'">
+    <GenericTable v-bind:data="rows" v-bind:columns="columns" v-bind:sortcolumn="since" v-on:select-row="updateHash"/>
+  </div>
+  <div v-else>
+    <IovForm />
   </div>
 </div>
-  <GenericTable v-bind:data="rows" v-bind:columns="columns" v-bind:sortcolumn="since" v-on:select-row="updateHash"/>
 </div>
-</section>
+</div>
 </template>
 
 <script>
 import GenericTable from './GenericTable.vue'
+import IovForm from './IovForm.vue'
 import axios from 'axios';
 
 export default {
@@ -91,7 +71,6 @@ export default {
     isFullPage : false,
     isLoading : false,
     selectedIov : {},
-    savedIov : { tag : '', since : 0 , file : null, endtime : 0 },
         radioButton : 'Search',
         since : 0,
         until : 'INF',
@@ -123,28 +102,6 @@ export default {
         thehash: ''};
   },
   methods: {
-  save() {
-    console.log('saving a iov '+this.savedIov.tag+' '+this.savedIov.since)
-    const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-    const sdata = new FormData();
-    sdata.append("file", this.savedIov.file);
-    sdata.append("tag", this.savedIov.tag);
-    sdata.append("since", this.savedIov.since);
-
-      axios({
-        url: `http://${hostname}/crestapi/payloads/store`,
-        method: 'post',
-        data: sdata
-      })
-      .then(function (response) {
-          // your action after success
-          console.log(response);
-      })
-      .catch(function (error) {
-         // your action on error success
-          console.log(error);
-      });
-    },
     updateHash(row) {
       this.selectedIov = row
       this.thehash = row.payloadHash
@@ -188,7 +145,8 @@ export default {
         .catch(error => { console.error(error); return Promise.reject(error); });
   },
   components: {
-    GenericTable
+    GenericTable,
+    IovForm
   }
 };
 </script>
