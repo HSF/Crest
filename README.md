@@ -87,8 +87,14 @@ or
 ```
 $java -Dspring.profiles.active=prod -Dcrest.db.password=xxx -jar crestdb-web/build/libs/crest.war
 ```
+<details>
+<summary>Obsolete: click me to collapse/fold.</summary>
+
+These details _will_ remain **hidden** until expanded.
+
 >The next section is obsolete. We leave for the moment the instructions but they should probably be ignored. >Later on we may provide something similar.
->For faster start and stop of the service we provide also a script that can be used.
+
+For faster start and stop of the service we provide also a script that can be used.
 ```
 ./crestrun.sh start dbfilename
 ```
@@ -96,7 +102,10 @@ and
 ```
 ./crestrun.sh stop
 ```
->For the moment the script is not very well documented, but it should be easy to configure it at your needs.
+For the moment the script is not very well documented, but it should be easy to configure it at your needs.
+
+</details>
+
 
 
 ### Activate  security
