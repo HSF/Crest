@@ -87,9 +87,8 @@ or
 ```
 $java -Dspring.profiles.active=prod -Dcrest.db.password=xxx -jar crestdb-web/build/libs/crest.war
 ```
->>>
- The next section is obsolete. We leave for the moment the instructions but they should probably be ignored. Later on we may provide something similar.
-For faster start and stop of the service we provide also a script that can be used.
+>The next section is obsolete. We leave for the moment the instructions but they should probably be ignored. >Later on we may provide something similar.
+>For faster start and stop of the service we provide also a script that can be used.
 ```
 ./crestrun.sh start dbfilename
 ```
@@ -97,8 +96,8 @@ and
 ```
 ./crestrun.sh stop
 ```
-For the moment the script is not very well documented, but it should be easy to configure it at your needs.
->>>
+>For the moment the script is not very well documented, but it should be easy to configure it at your needs.
+
 
 ### Activate  security
 To activate security you need to build the war file including the key-store. The file should go into <crestdb-web>/src/main/resources together with a complete ldap.properties file in which you need to set the manager password.
