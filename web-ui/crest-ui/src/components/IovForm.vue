@@ -31,6 +31,7 @@ import axios from 'axios'
 export default {
   name: 'IovForm',
   props : {
+  selectedserver : Object,
   },
   data: function () {
     return {
@@ -41,7 +42,8 @@ export default {
   methods: {
   save() {
     console.log('saving a iov '+this.savedIov.tag+' '+this.savedIov.since)
-    const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+//    const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+    const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
     const sdata = new FormData();
     sdata.append("file", this.savedIov.file);
     sdata.append("tag", this.savedIov.tag);

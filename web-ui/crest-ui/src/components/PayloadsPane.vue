@@ -3,7 +3,7 @@
 <div class="container is-widescreen"">
   <div class="notification">
     Download or show information on Payload.
-    Access api on {{apiHost}}:{{apiPort}}<br>
+    Access api on {{selectedserver.host}}:{{selectedserver.port}}<br>
     Selected iov is : {{selectedIov}}<br>
     Selected tag is : {{tagname}}<br>
     Selected payload is : {{selectedPayload}}<br>
@@ -39,6 +39,7 @@ export default {
   props : {
   tagname : '',
   selectedIov : Object,
+  selectedserver : Object,
   },
   data: function () {
     return {
@@ -48,7 +49,8 @@ export default {
   },
   computed: {
     "payloadmeta": function loadPayloadmeta() {
-      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       if (typeof this.selectedIov.payloadHash === "undefined") {
         return {};
       } else {
@@ -62,7 +64,8 @@ export default {
   },
   methods: {
     async download() {
-      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios({
         url: `http://${hostname}/crestapi/payloads/`+this.selectedIov.payloadHash,
         method: 'GET',
@@ -77,7 +80,8 @@ export default {
       });
     },
     async loadMetadata() {
-      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios({
         url: `http://${hostname}/crestapi/payloads/`+this.selectedIov.payloadHash+'/meta',
         method: 'GET',

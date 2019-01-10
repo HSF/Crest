@@ -2,7 +2,7 @@
 <div class="container">
 <div class="notification">
     Search for Iovs. Use the tag selected on the Tags tab.
-    Access api on {{apiHost}}:{{apiPort}}<br>
+    Access api on {{selectedserver.host}}:{{selectedserver.port}}<br>
     Selected iov is : {{selectedIov}}<br>
     Selected tag is : {{tagname}}<br>
     <p class="content">
@@ -43,13 +43,18 @@
     <button class="button is-primary" v-on:click="loadIovs()" :disabled="radioButton !== 'Search'">Search</button>
   </p>
   </b-field>
+  <b-field>
+  <p class="control">
+    <button class="button is-info" v-on:click="gotoPayloads()">Payload Info</button>
+  </p>
+  </b-field>
 </div>
 <div class="column is-four-fifths">
   <div v-if="radioButton === 'Search'">
     <GenericTable v-bind:data="rows" v-bind:columns="columns" v-bind:sortcolumn="since" v-on:select-row="updateHash"/>
   </div>
   <div v-else>
-    <IovForm />
+    <IovForm v-bind:selectedserver="selectedserver"/>
   </div>
 </div>
 </div>
@@ -65,6 +70,7 @@ export default {
   name: 'IovsPane',
   props : {
     tagname : '',
+    selectedserver : Object,
   },
   data: function () {
     return {
@@ -76,6 +82,7 @@ export default {
         until : 'INF',
         rows: [],
         snapshot : '0',
+        selactiveTab : 3,
         columns : [
                 {
                     field: 'tagName',
@@ -102,6 +109,10 @@ export default {
         thehash: ''};
   },
   methods: {
+    gotoPayloads() {
+      this.selactiveTab = 3
+      this.$emit('select-tab', this.selactiveTab)
+    },
     updateHash(row) {
       this.selectedIov = row
       this.thehash = row.payloadHash
@@ -117,7 +128,9 @@ export default {
       setTimeout(() => {
           this.isLoading = false
       }, 10 * 1000)
-      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
+
       const params = [
       `tagname=${this.tagname}`,
       `since=${this.since}`,
@@ -133,7 +146,8 @@ export default {
   },
   mounted: function() {
 //      console.log('existing rows '+this.rows);
-      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       const params = [
       `page=0`,
       `size=100`,

@@ -61,7 +61,7 @@
                 isPaginationSimple: false,
                 defaultSortDirection: 'asc',
                 currentPage: 1,
-                perPage: 5,
+                perPage: 15,
                 selected: {}
             }
     },

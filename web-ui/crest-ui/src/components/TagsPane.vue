@@ -2,7 +2,7 @@
 <div class="container">
     <div class="notification">
         Search for Tags.
-        Access api on {{apiHost}}:{{apiPort}}<br>
+        Access api on {{selectedserver.host}}:{{selectedserver.port}}<br>
         Selected tag is : {{selectedTag}}<br>
         <p class="content">
             <b>Selection mode:</b>
@@ -40,9 +40,14 @@
             </b-autocomplete>
         </b-field>
         <b-field>
-        <p class="control">
-          <button class="button is-primary" v-on:click="loadTags()" :disabled="radioButton !== 'Search'">Search</button>
-        </p>
+          <p class="control">
+            <button class="button is-primary" v-on:click="loadTags()" :disabled="radioButton !== 'Search'">Search</button>
+          </p>
+        </b-field>
+        <b-field>
+          <p class="control">
+            <button class="button is-info" v-on:click="gotoIovs()">Search Iovs</button>
+          </p>
         </b-field>
       </div>
       <div class="column is-four-fifths">
@@ -50,7 +55,7 @@
           <GenericTable v-bind:data="rows" v-bind:columns="columns" v-on:select-row="updateTag"/>
         </div>
         <div v-else>
-          <TagForm />
+          <TagForm v-bind:selectedserver="selectedserver"/>
         </div>
       </div>
     </div>
@@ -66,6 +71,7 @@ import axios from 'axios';
 export default {
   name: 'TagsPane',
   props : {
+  selectedserver : Object,
   },
   data: function () {
     return {
@@ -100,6 +106,7 @@ export default {
                 },
             ],
         selected: null,
+        selactiveTab : 2,
         thetag: ''};
   },
   methods: {
@@ -108,13 +115,19 @@ export default {
     this.thetag = stag.name
     this.$emit('select-tag', this.thetag)
   },
+  gotoIovs() {
+    this.selactiveTab = 2
+    this.$emit('select-tab', this.selactiveTab)
+  },
     async printRows() {
       for (var i in this.rows) {
         console.log(this.rows[i]);
       }
     },
     async loadTags() {
-      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      //const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
+
       const params = [
           `by=name:${this.thetag}`,
       ].join('&')
@@ -127,7 +140,8 @@ export default {
   },
   mounted: function() {
 //      console.log('existing rows '+this.rows);
-      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios
         .get(`http://${hostname}/crestapi/tags`)
         .then(response => (this.rows = response.data))

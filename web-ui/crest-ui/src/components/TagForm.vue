@@ -59,6 +59,7 @@ import axios from 'axios'
 export default {
   name: 'ApidForm',
   props : {
+  selectedserver : Object,
   },
   data: function () {
     return {
@@ -73,7 +74,8 @@ export default {
   },
   methods: {
     save() {
-      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
         axios({
           url: `http://${hostname}/crestapi/tags`,
           method: 'post',
