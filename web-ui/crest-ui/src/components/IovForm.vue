@@ -54,11 +54,19 @@ export default {
       })
       .then(function (response) {
           // your action after success
-          console.log(response);
+          this.$toast.open({
+                   message: 'Saved Iov successfully!',
+                   type: 'is-success'
+          })
+          //console.log(response);
       })
       .catch(function (error) {
          // your action on error success
           console.log(error);
+          this.$toast.open({
+                   message: 'Error in saving Iov '+error,
+                   type: 'is-danger'
+          })
       });
     },
   },
