@@ -90,9 +90,7 @@ $java -Dspring.profiles.active=prod -Dcrest.db.password=xxx -jar crestdb-web/bui
 <details>
 <summary>Obsolete: click me to collapse/fold.</summary>
 
-These details _will_ remain **hidden** until expanded.
-
->The next section is obsolete. We leave for the moment the instructions but they should probably be ignored. >Later on we may provide something similar.
+>The next section is obsolete. We leave for the moment the instructions but they should probably be ignored. >Later on we may provide something similar for a quick database definition.
 
 For faster start and stop of the service we provide also a script that can be used.
 ```
