@@ -42,6 +42,11 @@ Download the project from gitlab (example below is using `https`):
 ```
 git clone https://gitlab.cern.ch/formica/swagger_crestdb.git
 ```
+or
+```
+git clone https://github.com/HSF/Crest.git
+```
+if you are taking the github version.
 This will create a directory `swagger_crestdb` in the location where you run the git command.
 
 ## Build instructions
@@ -82,7 +87,8 @@ or
 ```
 $java -Dspring.profiles.active=prod -Dcrest.db.password=xxx -jar crestdb-web/build/libs/crest.war
 ```
-
+>>>
+ The next section is obsolete. We leave for the moment the instructions but they should probably be ignored. Later on we may provide something similar.
 For faster start and stop of the service we provide also a script that can be used.
 ```
 ./crestrun.sh start dbfilename
@@ -92,6 +98,7 @@ and
 ./crestrun.sh stop
 ```
 For the moment the script is not very well documented, but it should be easy to configure it at your needs.
+>>>
 
 ### Activate  security
 To activate security you need to build the war file including the key-store. The file should go into <crestdb-web>/src/main/resources together with a complete ldap.properties file in which you need to set the manager password.
