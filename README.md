@@ -1,5 +1,6 @@
 #### Author: A.Formica, R.Sipos
-##### Date of last development period: 2017/10/01 
+##### Date of last development period: 2019/01/13
+##### Recent additions: new api methods for uploads of iov+payload, a web-ui in vuejs.  
 ```
    Copyright (C) 2016  A.Formica, R.Sipos
 
@@ -24,6 +25,7 @@
 5. [Swagger](#swagger)
 6. [Docker](#docker)
 7. [Openshift](#openshift)
+8. [Clients](#clients)
 
 
 ## Description
@@ -222,3 +224,19 @@ For the moment in order for the deployment to work we need to have a public acce
 ### Problems
 After committing a tag it seems that the deploy to openshift fails.
 TO BE DONE.
+
+## Clients
+We have been merging our clients in this repository with the contribution of some colleagues from *Juno* collaboration. We have now work in progress in the following areas (available code can be seen in *crestdb-client* repository). 
+> This is work in progress...documentation needs to be improved....
+
+### Python
+Client is generated via swagger. (complete here)
+### C++
+Ask Juno colleagues.
+### gatling
+Generated via swagger. Used for testing REST API.
+### qt5cpp
+Generated via swagger. This is just a demo.
+
+In addition we have recently added a Web GUI in *VueJS*. The project can be found in *web-ui/crest-ui*.
+In order to run it one can simply follow the readme file. It can use for development purpose *npm* and *node*.
