@@ -3,6 +3,7 @@ variables:
     VERSION: 0.1.1
     REGISTRY: 'svomtest.svom.fr:5543'
     CONTAINER_IMAGE: $REGISTRY/$IMAGE:$VERSION
+    WEB_CONTAINER_IMAGE: $REGISTRY/crest-ui:$VERSION
     GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     GIT_SSL_NO_VERIFY: "true"
   # When using dind service we need to instruct docker, to talk with the
@@ -57,6 +58,7 @@ before_script:
 stages:
  - package_application
  - build
+ - webui
  - release
  - redeploy
 
@@ -87,6 +89,16 @@ build_svom_docker_image:
   only:
   - svom-dc0
 
+webui:
+  stage: webui
+  tags:
+    - dc0-shell
+  script:
+    - docker info
+    - docker build --tag=$WEB_CONTAINER_IMAGE ./web-ui/crest-ui/
+  only:
+  - svom-dc0
+
 registry-push:
   stage: release
   environment: dc0
@@ -95,6 +107,7 @@ registry-push:
   script:
     - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
     - docker push $CONTAINER_IMAGE
+    - docker push $WEB_CONTAINER_IMAGE    
   only:
   - svom-dc0
 
