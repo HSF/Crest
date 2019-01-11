@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 
 # build app for production with minification
-RUN npm run build
+RUN npm run svom-build
 
 # production stage
 FROM nginx:1.13.12-alpine as production-stage

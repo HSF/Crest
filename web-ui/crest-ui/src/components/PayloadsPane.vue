@@ -55,7 +55,7 @@ export default {
         return {};
       } else {
       axios({
-        url: `http://${hostname}/crestapi/payloads/`+this.selectedIov.payloadHash+'/meta',
+        url: `http://${hostname}/${this.apiName}/payloads/`+this.selectedIov.payloadHash+'/meta',
         method: 'GET',
       }).then((response) => {
         (this.selectedPayload = response.data); return response.data;
@@ -67,7 +67,7 @@ export default {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
       const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios({
-        url: `http://${hostname}/crestapi/payloads/`+this.selectedIov.payloadHash,
+        url: `http://${hostname}/${this.apiName}/payloads/`+this.selectedIov.payloadHash,
         method: 'GET',
         responseType: 'blob', // important
       }).then((response) => {
@@ -83,7 +83,7 @@ export default {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
       const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios({
-        url: `http://${hostname}/crestapi/payloads/`+this.selectedIov.payloadHash+'/meta',
+        url: `http://${hostname}/${this.apiName}/payloads/`+this.selectedIov.payloadHash+'/meta',
         method: 'GET',
       }).then((response) => {
         (this.selectedPayload = response.data)

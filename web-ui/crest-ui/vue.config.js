@@ -1,5 +1,5 @@
 module.exports = {
   baseUrl: process.env.NODE_ENV === 'production'
-    ? '/crestui'
+    ? process.env.VUE_APP_BASEURL
     : '/crestui'
 }

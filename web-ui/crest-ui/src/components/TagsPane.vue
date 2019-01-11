@@ -133,7 +133,7 @@ export default {
       ].join('&')
 
       axios
-        .get(`http://${hostname}/crestapi/tags?${params}`)
+        .get(`http://${hostname}/${this.apiName}/tags?${params}`)
         .then(response => (this.rows = response.data))
         .catch(error => { console.error(error); return Promise.reject(error); });
     }
@@ -143,7 +143,7 @@ export default {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
       const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios
-        .get(`http://${hostname}/crestapi/tags`)
+        .get(`http://${hostname}/${this.apiName}/tags`)
         .then(response => (this.rows = response.data))
         .catch(error => { console.error(error); return Promise.reject(error); });
   },

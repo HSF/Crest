@@ -9,8 +9,9 @@ import App from './App.vue'
 Vue.config.productionTip = false
 //Vue.prototype.apiHost = "localhost"
 //Vue.prototype.apiPort = "8080"
-Vue.prototype.apiHost = "crest-undertow.web.cern.ch"
-Vue.prototype.apiPort = "80"
+Vue.prototype.apiHost = process.env.VUE_APP_REST_API
+Vue.prototype.apiPort = process.env.VUE_APP_REST_PORT
+Vue.prototype.apiName = process.env.VUE_APP_API_NAME
 Vue.use(Buefy)
 
 new Vue({

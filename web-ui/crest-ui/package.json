@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "svom-serve": "vue-cli-service serve --mode svom",
     "build": "vue-cli-service build",
+    "svom-build": "vue-cli-service build --mode svom",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

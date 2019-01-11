@@ -50,7 +50,7 @@ export default {
     sdata.append("since", this.savedIov.since);
 
       axios({
-        url: `http://${hostname}/crestapi/payloads/store`,
+        url: `http://${hostname}/${this.apiName}/payloads/store`,
         method: 'post',
         data: sdata
       })

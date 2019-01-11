@@ -77,7 +77,7 @@ export default {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
       const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
         axios({
-          url: `http://${hostname}/crestapi/tags`,
+          url: `http://${hostname}/${this.apiName}/tags`,
           method: 'post',
           data: this.savedTag
         })

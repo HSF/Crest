@@ -139,7 +139,7 @@ export default {
       ].join('&')
 
       axios
-        .get(`http://${hostname}/crestapi/iovs/selectIovs?${params}`)
+        .get(`http://${hostname}/${this.apiName}/iovs/selectIovs?${params}`)
         .then(response => (this.rows = response.data))
         .catch(error => { console.error(error); return Promise.reject(error); });
     }
@@ -154,7 +154,7 @@ export default {
       `sort=id.since:DESC`,
       ].join('&')
       axios
-        .get(`http://${hostname}/crestapi/iovs?${params}`)
+        .get(`http://${hostname}/${this.apiName}/iovs?${params}`)
         .then(response => (this.rows = response.data))
         .catch(error => { console.error(error); return Promise.reject(error); });
   },
