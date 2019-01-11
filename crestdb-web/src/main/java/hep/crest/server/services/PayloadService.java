@@ -81,6 +81,9 @@ public class PayloadService {
 	public PayloadDto insertPayload(PayloadDto dto) throws CdbServiceException {
 		try {
 			log.debug("Save payload " + dto);
+			if (dto.getSize() == null) {
+				dto.setSize(dto.getData().length);
+			}
 			Payload saved = payloaddataRepository.save(dto);
 			log.debug("Saved entity: " + saved);
 			PayloadDto dtoentity = payloadHandler.convertToDtoNoData(saved);

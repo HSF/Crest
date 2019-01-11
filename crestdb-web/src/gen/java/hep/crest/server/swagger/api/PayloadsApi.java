@@ -6,6 +6,7 @@ import hep.crest.server.swagger.api.PayloadsApiService;
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
+import java.math.BigDecimal;
 import java.io.File;
 import hep.crest.swagger.model.HTTPResponse;
 import hep.crest.swagger.model.PayloadDto;
@@ -15,7 +16,6 @@ import java.util.List;
 import hep.crest.server.swagger.api.NotFoundException;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
 
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -37,7 +37,7 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the payloads API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-12-17T23:42:37.030+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-01-11T13:34:58.643+01:00")
 public class PayloadsApi  {
 	@Autowired
 	private PayloadsApiService delegate;
@@ -89,10 +89,10 @@ public class PayloadsApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = String.class) })
     public Response getPayload(@ApiParam(value = "hash:  the hash of the payload",required=true) @PathParam("hash") String hash
-,@ApiParam(value = "The format of the output data: BLOB or DTO in JSON format" , defaultValue="BLOB")@HeaderParam("format") String format
+,@ApiParam(value = "The format of the output data. The header parameter X-Crest-PayloadFormat can be : BLOB (default) or DTO (in JSON format)." , defaultValue="BLOB")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
-        return delegate.getPayload(hash,format,securityContext,info);
+        return delegate.getPayload(hash,xCrestPayloadFormat,securityContext,info);
     }
     @GET
     @Path("/{hash}/meta")
@@ -110,7 +110,7 @@ public class PayloadsApi  {
     @Path("/store")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Create a Payload in the database, associated to a given iov since and tag name.", notes = "This method allows to insert a Payload and an IOV. Arguments: since,tagname,stream,end time.", response = HTTPResponse.class, tags={ "payloads", })
+    @io.swagger.annotations.ApiOperation(value = "Create a Payload in the database, associated to a given iov since and tag name.", notes = "This method allows to insert a Payload and an IOV. Arguments: since,tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB", response = HTTPResponse.class, tags={ "payloads", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = HTTPResponse.class) })
     public Response storePayloadWithIovMultiForm(
@@ -118,10 +118,10 @@ public class PayloadsApi  {
             @FormDataParam("file") FormDataContentDisposition fileDetail
 ,@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
 ,@ApiParam(value = "The since time", required=true)@FormDataParam("since")  BigDecimal since
-,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("format") String format
+,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
 ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
-        return delegate.storePayloadWithIovMultiForm(fileInputStream, fileDetail,tag,since,format,endtime,securityContext,info);
+        return delegate.storePayloadWithIovMultiForm(fileInputStream, fileDetail,tag,since,xCrestPayloadFormat,endtime,securityContext,info);
     }
 }

@@ -108,7 +108,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
 	@Transactional
 	public Payload findMetaInfo(String id) throws Exception {
-		log.info("Find payload data only for {} using JDBCTEMPLATE",id);
+		log.info("Find payload meta data only for {} using JDBCTEMPLATE",id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
@@ -164,7 +164,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 	 * @param is
 	 * @return
 	 */
-	protected long getLargeObjectId(Connection conn, InputStream is) {
+	protected long getLargeObjectId(Connection conn, InputStream is, PayloadDto entity) {
 		// Open the large object for writing
 		LargeObjectManager lobj;
 		long oid;
@@ -180,6 +180,9 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			while ((s = is.read(buf, 0, 2048)) > 0) {
 				obj.write(buf, 0, s);
 			    tl += s;
+			}
+			if (entity != null) {
+				entity.setSize(tl);
 			}
 			// Close the large object
 			obj.close();
@@ -210,8 +213,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		try {
 			conn = ds.getConnection();
 			conn.setAutoCommit(false);
-			long oid = getLargeObjectId(conn, is);
-			long sioid = getLargeObjectId(conn, sis);
+			long oid = getLargeObjectId(conn, is, entity);
+			long sioid = getLargeObjectId(conn, sis, null);
 						
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, entity.getHash());
@@ -278,8 +281,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		try {
 			conn = ds.getConnection();
 			conn.setAutoCommit(false);
-			long oid = getLargeObjectId(conn, is);
-			long sioid = getLargeObjectId(conn, sis);
+			long oid = getLargeObjectId(conn, is, entity);
+			long sioid = getLargeObjectId(conn, sis, null);
 			
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, entity.getHash());

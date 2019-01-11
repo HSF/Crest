@@ -59,8 +59,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     public Response createPayload(PayloadDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		try {
 			PayloadDto saved = payloadService.insertPayload(body);
+			log.debug("Saved PayloadDto {}",saved);
 			return Response.created(info.getRequestUri()).entity(saved).build();
 		} catch (CdbServiceException e) {
+			log.error("Error saving PayloadDto {}",body);
 			String msg = "Error creating payload resource using " + body.toString();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -88,7 +90,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 	@CacheControlCdb("public, max-age=604800")
 	public Response getPayload(String hash, String format, SecurityContext securityContext, UriInfo info)
 			throws NotFoundException {
-		this.log.info("PayloadRestController processing request to download payload " + hash);
+		this.log.info("PayloadRestController processing request to download payload {} using format {}",hash,format);
 		try {
 			if (format == null || format.equals("BLOB")) {
 				InputStream in = payloadService.getPayloadData(hash);
@@ -145,7 +147,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			File tempfile = new File(filename);
 			Path temppath = Paths.get(filename);
 			String hash = payloadService.saveInputStreamGetHash(fileInputStream, filename);
-			PayloadDto payloaddto = new PayloadDto().hash(hash).objectType("JSON").streamerInfo("JSON".getBytes()).version("test");
+			PayloadDto payloaddto = new PayloadDto().hash(hash).objectType(format).streamerInfo(format.getBytes()).version("test");
 			InputStream is = new FileInputStream(tempfile);
 		    FileChannel tempchan = FileChannel.open(temppath);
 		    payloaddto.setSize((int)(tempchan.size()));
@@ -167,7 +169,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 	
 	@Override
     public Response getBlob(String hash, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-		this.log.info("PayloadRestController processing request to download payload " + hash);
+		this.log.info("PayloadRestController processing request to download blob {}",hash);
 		StreamingOutput stream = null;
 		try {
 			InputStream in = payloadService.getPayloadData(hash);
@@ -180,7 +182,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
 						while ((read = in.read(bytes)) != -1) {
 							os.write(bytes, 0, read);
-							log.trace("Copying " + read + " bytes into the output...");
+							log.trace("Copying {} bytes into the output...",read);
 						}
 						os.flush();
 					} catch (Exception e) {
@@ -207,7 +209,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
       
     @Override
     public Response getPayloadMetaInfo(String hash, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-		this.log.info("PayloadRestController processing request for payload meta information " + hash);
+		this.log.info("PayloadRestController processing request for payload meta information for {}",hash);
 		try {
 
 			PayloadDto entity = payloadService.getPayloadMetaInfo(hash);

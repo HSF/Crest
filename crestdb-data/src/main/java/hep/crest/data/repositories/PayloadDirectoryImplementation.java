@@ -96,11 +96,7 @@ public class PayloadDirectoryImplementation {
 			//BufferedWriter writer = Files.newBufferedWriter(payloadfilepath, dirtools.getCharset());
 			//writer.write(jsonstr);
 			//writer.close();
-			try (BufferedWriter writer = Files.newBufferedWriter(payloadfilepath, dirtools.getCharset())) {
-				writer.write(jsonstr);
-			} catch (IOException x) {
-				throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
-			}
+			this.writeBuffer(jsonstr, payloadfilepath);
 
 			return hash;
 		} catch (IOException x) {
@@ -108,4 +104,12 @@ public class PayloadDirectoryImplementation {
 		}
 	}
 
+	protected void writeBuffer(String jsonstr, Path payloadfilepath) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(payloadfilepath, dirtools.getCharset())) {
+			writer.write(jsonstr);
+		} catch (IOException x) {
+			log.error("Cannot write string {} in {}",jsonstr,payloadfilepath.toString());
+			throw x;
+		}		
+	}
 }

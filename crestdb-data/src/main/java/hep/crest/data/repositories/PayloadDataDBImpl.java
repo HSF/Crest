@@ -219,6 +219,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
 		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
 		byte[] blob = payloadHandler.getBytesFromInputStream(is);
+		entity.setSize(blob.length);
 		log.debug("Streamer info {}", entity.getStreamerInfo());
 		log.debug("Read data blob of length {} and streamer info {}",blob.length, entity.getStreamerInfo().length);
 		Calendar calendar = Calendar.getInstance();
@@ -236,22 +237,20 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			log.debug("Dump preparedstatement {}",ps);
 			ps.execute();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			log.error("Exception from SQL during insertion: {}",e.getMessage());
 		} finally {
+			log.debug("Nothing to do here ?");
 		}
-		return;
 	}
 
-	@Transactional
 	protected Payload saveMetaInfo(PayloadDto metainfoentity) throws IOException {
 
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME,PYLD_SIZE) VALUES (?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?)";
 
-		log.info("Insert Payload Meta Info " + metainfoentity.getHash() + " using JDBCTEMPLATE");
+		log.info("Insert Payload Meta Info {} using JDBCTEMPLATE",metainfoentity.getHash());
 		try (Connection conn = ds.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, metainfoentity.getHash());
@@ -260,16 +259,14 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.setBytes(4, metainfoentity.getStreamerInfo());
 			// FIXME: be careful to the insertion time...is the one provided correct ?
 			ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
-			ps.setInt(6, metainfoentity.getSize());
 			log.debug("Dump preparedstatement {}",ps);
 			ps.execute();
 			ps.close();
-			Payload saved = find(metainfoentity.getHash());
-			return saved;
+			return find(metainfoentity.getHash());
 		} catch (SQLException e) {
 			log.error("Exception : {}",e.getMessage());
 		} finally {
-			
+			log.debug("Nothing to do here ?");
 		}
 		return null;
 	}
