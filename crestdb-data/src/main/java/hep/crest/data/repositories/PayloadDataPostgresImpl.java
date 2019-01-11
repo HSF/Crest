@@ -78,8 +78,6 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		return tablename;
 	}
 
-
-	@Transactional
 	public Payload find(String id) {
 		log.info("Find payload {} using JDBCTEMPLATE",id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
@@ -129,7 +127,6 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		return dataentity;
 	}
 
-	@Transactional
 	public Payload findData(String id) {
 		log.info("Find payload data only for {} using JDBCTEMPLATE",id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);

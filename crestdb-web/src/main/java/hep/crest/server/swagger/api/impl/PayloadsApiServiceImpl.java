@@ -93,8 +93,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		this.log.info("PayloadRestController processing request to download payload {} using format {}",hash,format);
 		try {
 			if (format == null || format.equals("BLOB")) {
-				InputStream in = payloadService.getPayloadData(hash);
-				StreamingOutput stream = new StreamingOutput() {
+				//InputStream in = payloadService.getPayloadData(hash);
+				StreamingOutput stream = payloadService.getPayloadDataStream(hash);
+						/*
+						new StreamingOutput() {
 					@Override
 					public void write(OutputStream os) throws IOException, WebApplicationException {
 						try {
@@ -117,6 +119,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 						}
 					}
 				};
+				*/
 				log.debug("Send back the stream....");
 				return Response.ok(stream, "application/octet-stream") ///MediaType.APPLICATION_JSON_TYPE)
 						.header("Content-Disposition", "attachment; filename=\"" + hash + ".blob\"")

@@ -4,7 +4,12 @@
 package hep.crest.server.services;
 
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +77,42 @@ public class PayloadService {
 				throw new CdbServiceException("Cannot find payload data for hash " + hash);
 			}
 			return pyld.getData().getBinaryStream();
+		} catch (Exception e) {
+			throw new CdbServiceException(e.getMessage());
+		}
+	}
+
+	@Transactional
+	public StreamingOutput getPayloadDataStream(String hash) throws CdbServiceException {
+		try {
+			Payload pyld = payloaddataRepository.findData(hash);
+			if (pyld == null) {
+				throw new CdbServiceException("Cannot find payload data for hash " + hash);
+			}
+			InputStream in = pyld.getData().getBinaryStream();
+			
+			return new StreamingOutput() {
+				@Override
+				public void write(OutputStream os) throws IOException, WebApplicationException {
+					try {
+						int read = 0;
+						byte[] bytes = new byte[2048];
+
+						while ((read = in.read(bytes)) != -1) {
+							os.write(bytes, 0, read);
+							log.trace("Copying {} bytes into the output...",read);
+						}
+						os.flush();
+					} catch (Exception e) {
+						throw new WebApplicationException(e);
+					} finally {
+						log.debug("closing streams...");
+						if (os != null)
+							os.close();
+						in.close();
+					}
+				}
+			};
 		} catch (Exception e) {
 			throw new CdbServiceException(e.getMessage());
 		}
