@@ -37,7 +37,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 		secretsMap = new HashMap<>();
 		secretsMap.put("/run/secrets/vhfdb_password", "svom.service.postgres_password");
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -51,8 +51,9 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 		System.out.println("POSTPROCESS ENV is configuring " + PROPERTY_SOURCE_NAME);
 		Map<String, Object> map = new HashMap<>();
 		try {
-			for (String respath : secretsMap.keySet()) {
-				String springkey = secretsMap.get(respath);
+			for (Map.Entry<String, String> entry : secretsMap.entrySet()) {
+				String springkey = entry.getValue();
+				String respath = entry.getKey();
 				loadSecret(respath, springkey, environment, map);
 			}
 		} catch (CdbServiceException e) {
@@ -109,9 +110,10 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 			PropertySource<?> source = propertySources.get(PROPERTY_SOURCE_NAME);
 			if (source instanceof MapPropertySource) {
 				target = (MapPropertySource) source;
-				for (String key : map.keySet()) {
+				for (Map.Entry<String, Object> entry : map.entrySet()) {
+					String key = entry.getKey();
 					if (!target.containsProperty(key)) {
-						target.getSource().put(key, map.get(key));
+						target.getSource().put(key, entry.getValue());
 					} else {
 						System.out.println("Key " + key + " is already in " + target.getName());
 					}
@@ -146,3 +148,4 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 		}
 	}
 }
+
