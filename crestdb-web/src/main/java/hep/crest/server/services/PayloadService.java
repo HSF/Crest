@@ -109,7 +109,7 @@ public class PayloadService {
 						log.debug("closing streams...");
 						if (os != null)
 							os.close();
-						in.close();
+						//in.close();
 					}
 				}
 			};
