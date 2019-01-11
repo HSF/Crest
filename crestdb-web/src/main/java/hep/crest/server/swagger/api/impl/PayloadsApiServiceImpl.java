@@ -110,8 +110,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 							throw new WebApplicationException(e);
 						} finally {
 							log.debug("closing streams...");
-							os.close();
-							in.close();
+							if (os != null)
+								os.close();
+							if (in != null)
+								in.close();
 						}
 					}
 				};
