@@ -1108,7 +1108,7 @@
 					"payloads"
 				],
 				"summary": "Create a Payload in the database, associated to a given iov since and tag name.",
-				"description": "This method allows to insert a Payload and an IOV. Arguments: since,tagname,stream,end time.",
+				"description": "This method allows to insert a Payload and an IOV. Arguments: since,tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB",
 				"operationId": "storePayloadWithIovMultiForm",
 				"consumes": [
 					"multipart/form-data"
@@ -1119,7 +1119,7 @@
 				"parameters": [
 					{
 						"in": "header",
-						"name": "format",
+						"name": "X-Crest-PayloadFormat",
 						"description": "The format of the input data",
 						"default": "JSON",
 						"type": "string"
@@ -1179,8 +1179,8 @@
 				"parameters": [
 					{
 						"in": "header",
-						"name": "format",
-						"description": "The format of the output data: BLOB or DTO in JSON format",
+						"name": "X-Crest-PayloadFormat",
+						"description": "The format of the output data. The header parameter X-Crest-PayloadFormat can be : BLOB (default) or DTO (in JSON format).",
 						"default": "BLOB",
 						"type": "string"
 					},

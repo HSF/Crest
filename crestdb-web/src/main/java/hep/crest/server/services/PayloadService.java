@@ -4,6 +4,7 @@
 package hep.crest.server.services;
 
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,28 +70,49 @@ public class PayloadService {
 		}
 	}
 	
+//	public InputStream getPayloadData(String hash) throws CdbServiceException {
+//		try {
+//			Payload pyld = payloaddataRepository.findData(hash);
+//			if (pyld == null) {
+//				throw new CdbServiceException("Cannot find payload data for hash " + hash);
+//			}
+//			return pyld.getData().getBinaryStream();
+//		} catch (Exception e) {
+//			throw new CdbServiceException(e.getMessage());
+//		}
+//	}
+
 	@Transactional
 	public InputStream getPayloadData(String hash) throws CdbServiceException {
 		try {
 			Payload pyld = payloaddataRepository.findData(hash);
 			if (pyld == null) {
 				throw new CdbServiceException("Cannot find payload data for hash " + hash);
-			}
-			return pyld.getData().getBinaryStream();
+			}			
+			byte[] bindata = payloadHandler.convertToByteArray(pyld);
+			log.debug("Converted pojo in byte array of length {}",bindata.length);
+			return new ByteArrayInputStream(bindata);
 		} catch (Exception e) {
 			throw new CdbServiceException(e.getMessage());
 		}
 	}
 
-	@Transactional
 	public StreamingOutput getPayloadDataStream(String hash) throws CdbServiceException {
 		try {
 			Payload pyld = payloaddataRepository.findData(hash);
 			if (pyld == null) {
 				throw new CdbServiceException("Cannot find payload data for hash " + hash);
 			}
-			InputStream in = pyld.getData().getBinaryStream();
+			// Here we should distinguish between Oracle, h2, or postgres
+			// Payload handling in postgres requires a more complex way of reading: the whole LOB
+			// should be read beforehand. For the moment we use this method with any DB, but later on
+			// we may try to do better for non-postgres db.
 			
+			// Oracle and others
+			//InputStream in = pyld.getData().getBinaryStream();
+			log.debug("Read data from Blob...{} length {}",pyld.getData(),pyld.getData().length());
+			byte[] data = payloadHandler.getBytesFromInputStream(pyld.getData().getBinaryStream());
+			InputStream in = new ByteArrayInputStream(data);
 			return new StreamingOutput() {
 				@Override
 				public void write(OutputStream os) throws IOException, WebApplicationException {

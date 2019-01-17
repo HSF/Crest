@@ -52,6 +52,7 @@ export default {
       axios({
         url: `http://${hostname}/${this.apiName}/payloads/store`,
         method: 'post',
+        header: 'X-Crest-PayloadFormat: JSON',
         data: sdata
       })
       .then(function (response) {

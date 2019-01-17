@@ -48,6 +48,7 @@ public class PayloadHandler {
 
 			while ((nRead = is.read(data, 0, data.length)) != -1) {
 				buffer.write(data, 0, nRead);
+				log.debug("Reading data from stream {} ",nRead);
 			}
 			buffer.flush();
 			return buffer.toByteArray();
@@ -235,6 +236,20 @@ public class PayloadHandler {
 		return null;		
 	}
 	
+	public byte[] convertToByteArray(Payload dataentity) {
+		try {
+			log.debug("Retrieving binary stream from payload entity with the DATA blob alone");
+			byte[] databarr = null;
+			InputStream in = dataentity.getData().getBinaryStream();
+			databarr = readLobs(in);
+			dataentity.getData().free();
+			return databarr;
+		} catch (SQLException e) {
+			log.error("Exception : {}",e.getMessage());
+		}
+		return null;
+	}
+
 	public PayloadDto convertToDto(Payload dataentity) {
 		try {
 			log.debug("Retrieving binary stream from payload entity including the DATA blob");

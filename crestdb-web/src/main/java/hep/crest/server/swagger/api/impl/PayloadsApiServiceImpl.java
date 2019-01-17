@@ -93,9 +93,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		this.log.info("PayloadRestController processing request to download payload {} using format {}",hash,format);
 		try {
 			if (format == null || format.equals("BLOB")) {
-				//InputStream in = payloadService.getPayloadData(hash);
-				StreamingOutput stream = payloadService.getPayloadDataStream(hash);
-						/*
+				InputStream in = payloadService.getPayloadData(hash);
+				StreamingOutput stream = 
 						new StreamingOutput() {
 					@Override
 					public void write(OutputStream os) throws IOException, WebApplicationException {
@@ -119,7 +118,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 						}
 					}
 				};
-				*/
 				log.debug("Send back the stream....");
 				return Response.ok(stream, "application/octet-stream") ///MediaType.APPLICATION_JSON_TYPE)
 						.header("Content-Disposition", "attachment; filename=\"" + hash + ".blob\"")
@@ -127,6 +125,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 						// Long(f.length()).toString())
 						.build();
 			} else {
+				log.debug("Retrieve the full pojo with hash {}",hash);
 				PayloadDto entity = payloadService.getPayload(hash);
 				if (entity == null) {
 					String msg = "Cannot find payload corresponding to hash " + hash;
@@ -152,6 +151,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			File tempfile = new File(filename);
 			Path temppath = Paths.get(filename);
 			String hash = payloadService.saveInputStreamGetHash(fileInputStream, filename);
+			if (format == null) {
+				format = "JSON";
+			}
+			log.debug("Create dto with hash {},  format {}, ...",hash,format);
 			PayloadDto payloaddto = new PayloadDto().hash(hash).objectType(format).streamerInfo(format.getBytes()).version("test");
 			InputStream is = new FileInputStream(tempfile);
 		    FileChannel tempchan = FileChannel.open(temppath);

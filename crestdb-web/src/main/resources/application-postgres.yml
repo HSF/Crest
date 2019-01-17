@@ -18,7 +18,7 @@ spring:
       password: ${crest.db.password}
       type: com.zaxxer.hikari.HikariDataSource
       hikari:
-        connection-test-query: SELECT 1 FROM DUAL
+        connection-test-query: SELECT 1
         maximum-pool-size: 20
     jpa:
       properties:
@@ -35,5 +35,8 @@ crest:
   schemaname: none
   dumpdir: ${crest.dump.dir}
   webstaticdir: ${crest.web.static}
+  security: none
+  synchro: none
+  authenticationtype: none
   db:
-    port: 6600
+    port: 5432
