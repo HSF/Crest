@@ -148,13 +148,6 @@ public class Tag implements java.io.Serializable {
 		this.modificationTime = modificationTime;
 	}
 
-	/*
-	 * @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="tag")
-	 * public Set<Iov> getIovs() { return this.iovs; }
-	 * 
-	 * public void setIovs(Set<Iov> iovs) { this.iovs = iovs; }
-	 */
-
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "tag")
 	public Set<GlobalTagMap> getGlobalTagMaps() {
 		return this.globalTagMaps;
@@ -176,7 +169,6 @@ public class Tag implements java.io.Serializable {
 	@PreUpdate
 	public void preUpdate() {
 		if (this.modificationTime == null) {
-			//System.out.println("TAG entity: Calling pre update method...");
 			Timestamp now = new Timestamp(new Date().getTime());
 			this.modificationTime = now;			
 		}

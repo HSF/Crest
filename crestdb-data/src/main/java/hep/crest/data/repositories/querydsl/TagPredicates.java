@@ -26,26 +26,40 @@ public class TagPredicates {
 
 	}
 
+	/**
+	 * @param name
+	 * @return
+	 */
 	public static BooleanExpression hasNameLike(String name) {
-		log.debug("hasNameLike: argument " + name);
-		BooleanExpression pred = QTag.tag.name.like("%" + name + "%");
-		return pred;
+		log.debug("hasNameLike: argument {}",name);
+		return QTag.tag.name.like("%" + name + "%");
 	}
 	
+	/**
+	 * @param ttype
+	 * @return
+	 */
 	public static BooleanExpression hasTimeTypeLike(String ttype) {
-		log.debug("hasTimeTypeLike: argument " + ttype);
-		BooleanExpression pred = QTag.tag.timeType.like("%" + ttype + "%");
-		return pred;
+		log.debug("hasTimeTypeLike: argument {}",ttype);
+		return QTag.tag.timeType.like("%" + ttype + "%");
 	}
 
+	/**
+	 * @param objtype
+	 * @return
+	 */
 	public static BooleanExpression hasObjectTypeLike(String objtype) {
-		log.debug("hasObjectTypeLike: argument " + objtype);
-		BooleanExpression pred = QTag.tag.objectType.like("%"+objtype+"%");
-		return pred;
+		log.debug("hasObjectTypeLike: argument {}",objtype);
+		return QTag.tag.objectType.like("%"+objtype+"%");
 	}
 	
+	/**
+	 * @param oper
+	 * @param num
+	 * @return
+	 */
 	public static BooleanExpression isInsertionTimeXThan(String oper, String num) {
-		log.debug("isInsertionTimeXThan: argument " + num + " operation " + oper);
+		log.debug("isInsertionTimeXThan: argument {} operation {}",num,oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -57,8 +71,13 @@ public class TagPredicates {
 		}
 		return pred;
 	}
+	/**
+	 * @param oper
+	 * @param num
+	 * @return
+	 */
 	public static BooleanExpression isModificationTimeXThan(String oper, String num) {
-		log.debug("isModificationTimeXThan: argument " + num + " operation " + oper);
+		log.debug("isModificationTimeXThan: argument {} operation {}",num,oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -72,7 +91,6 @@ public class TagPredicates {
 	}
 
 	public static Predicate where(BooleanExpression exp) {
-		Predicate pred = exp;
-		return pred;
+		return exp;
 	}
 }
