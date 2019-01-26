@@ -54,7 +54,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 	private DataSource ds;
 
 	@Value("${crest.upload.dir:/tmp}")
-	private String SERVER_UPLOAD_LOCATION_FOLDER;
+	private String serverUploadLocationFolder;
 
 	private String defaultTablename = null;
 
@@ -213,7 +213,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			LargeObject obj = lobj.open(oid, LargeObjectManager.WRITE);
 
 			// Copy the data from the file to the large object
-			byte buf[] = new byte[2048];
+			byte[] buf = new byte[2048];
 			int s = 0;
 			int tl = 0;
 			while ((s = is.read(buf, 0, 2048)) > 0) {
@@ -259,7 +259,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setLong(4, oid);
 			ps.setLong(5, sioid);
 			ps.setDate(6, inserttime);
-			log.info("Dump preparedstatement {} using sql {} and args {} {} {} {}", ps.toString(), sql,
+			log.info("Dump preparedstatement {} using sql {} and args {} {} {} {}", ps, sql,
 					entity.getHash(), entity.getObjectType(), entity.getVersion(), entity.getInsertionTime());
 			ps.execute();
 			conn.commit();

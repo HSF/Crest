@@ -39,7 +39,7 @@ public class PayloadHandler {
 	@Qualifier("dataSource")
 	private DataSource ds;
 
-	private static Integer MAX_LENGTH = 1024;
+	private static final Integer MAX_LENGTH = 1024;
 
 	public byte[] getBytesFromInputStream(InputStream is) {
 		try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
@@ -48,16 +48,20 @@ public class PayloadHandler {
 
 			while ((nRead = is.read(data, 0, data.length)) != -1) {
 				buffer.write(data, 0, nRead);
-				log.debug("Reading data from stream {} ",nRead);
+				log.debug("Reading data from stream {} ", nRead);
 			}
 			buffer.flush();
 			return buffer.toByteArray();
 		} catch (IOException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception getting bytes from stream : {}", e.getMessage());
 		}
 		return new byte[0];
 	}
 
+	/**
+	 * @param uploadedInputStream
+	 * @param uploadedFileLocation
+	 */
 	public void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
 
 		try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
@@ -69,10 +73,14 @@ public class PayloadHandler {
 			}
 			out.flush();
 		} catch (IOException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		}
 	}
 
+	/**
+	 * @param uploadedInputStream
+	 * @param out
+	 */
 	public void saveToOutStream(InputStream uploadedInputStream, OutputStream out) {
 
 		try {
@@ -83,17 +91,23 @@ public class PayloadHandler {
 			}
 			out.flush();
 		} catch (IOException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		} finally {
 			try {
 				uploadedInputStream.close();
 				out.close();
 			} catch (IOException e) {
-				log.error("Exception : {}",e.getMessage());
+				log.error("Exception : {}", e.getMessage());
 			}
 		}
 	}
 
+	/**
+	 * @param uploadedInputStream
+	 * @param uploadedFileLocation
+	 * @return
+	 * @throws PayloadEncodingException
+	 */
 	public String saveToFileGetHash(InputStream uploadedInputStream, String uploadedFileLocation)
 			throws PayloadEncodingException {
 
@@ -104,27 +118,38 @@ public class PayloadHandler {
 		}
 	}
 
+	/**
+	 * @param uploadedInputStream
+	 * @param uploadedFileLocation
+	 */
 	public void saveStreamToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
 
 		try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
 			StreamUtils.copy(uploadedInputStream, out);
 		} catch (IOException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		}
 	}
 
+	/**
+	 * @param uploadedFileLocation
+	 * @return
+	 */
 	public byte[] readFromFile(String uploadedFileLocation) {
 		try {
 			java.nio.file.Path path = Paths.get(uploadedFileLocation);
-			byte[] data = Files.readAllBytes(path);
-			return data;
+			return Files.readAllBytes(path);
 		} catch (IOException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		}
 		return new byte[0];
 
 	}
 
+	/**
+	 * @param uploadedFileLocation
+	 * @return
+	 */
 	public long lengthOfFile(String uploadedFileLocation) {
 
 		try {
@@ -132,91 +157,103 @@ public class PayloadHandler {
 			Files.size(path);
 			return Files.size(path);
 		} catch (IOException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		}
 		return 0;
 	}
 
+	/**
+	 * @param filelocation
+	 * @return
+	 */
 	public Blob createBlobFromFile(String filelocation) {
 		Blob blob = null;
 		BufferedOutputStream bstream = null;
 		File f = new File(filelocation);
 		try (Connection conn = ds.getConnection();
-			 BufferedInputStream fstream = new BufferedInputStream(new FileInputStream(f));
-				) {
-			
+				BufferedInputStream fstream = new BufferedInputStream(new FileInputStream(f));) {
+
 			blob = conn.createBlob();
 			bstream = new BufferedOutputStream(blob.setBinaryStream(1));
 			// stream copy runs a high-speed upload across the network
 			StreamUtils.copy(fstream, bstream);
 			return blob;
 		} catch (IOException | SQLException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		} finally {
 			try {
 				if (bstream != null) {
 					bstream.close();
 				}
 			} catch (IOException e) {
-				log.error("Exception : {}",e.getMessage());
+				log.error("Exception : {}", e.getMessage());
 			}
 		}
 		return blob;
 	}
 
+	/**
+	 * @param is
+	 * @return
+	 */
 	public Blob createBlobFromStream(InputStream is) {
 		Blob blob = null;
 		BufferedOutputStream bstream = null;
-		try (Connection conn = ds.getConnection();
-			 BufferedInputStream fstream = new BufferedInputStream(is);) {
+		try (Connection conn = ds.getConnection(); BufferedInputStream fstream = new BufferedInputStream(is);) {
 			blob = conn.createBlob();
 			bstream = new BufferedOutputStream(blob.setBinaryStream(1));
 			// stream copy runs a high-speed upload across the network
 			StreamUtils.copy(fstream, bstream);
 			return blob;
 		} catch (IOException | SQLException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		} finally {
 			try {
 				if (bstream != null) {
 					bstream.close();
 				}
 			} catch (IOException e) {
-				log.error("Exception : {}",e.getMessage());
+				log.error("Exception : {}", e.getMessage());
 			}
 		}
 		return blob;
 	}
 
+	/**
+	 * @param data
+	 * @return
+	 */
 	public Blob createBlobFromByteArr(byte[] data) {
 		Blob blob = null;
-		Connection conn = null;
-		try {
-			conn = ds.getConnection();
-			InputStream is = new ByteArrayInputStream(data);
-			BufferedInputStream fstream = new BufferedInputStream(is);
+		BufferedOutputStream bstream = null;
+		try (Connection conn = ds.getConnection();
+				InputStream is = new ByteArrayInputStream(data);
+				BufferedInputStream fstream = new BufferedInputStream(is);) {
 			blob = conn.createBlob();
-			BufferedOutputStream bstream = new BufferedOutputStream(blob.setBinaryStream(1));
+			bstream = new BufferedOutputStream(blob.setBinaryStream(1));
 			// stream copy runs a high-speed upload across the network
 			StreamUtils.copy(fstream, bstream);
 			return blob;
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("IO Error creating blob from bytes : {}", e.getMessage());
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.error("SQL Error creating blob from bytes : {}", e.getMessage());
 		} finally {
 			try {
-				if (conn != null) {
-					conn.close();
+				if (bstream != null) {
+					bstream.close();
 				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (IOException e) {
+				log.error("Error closing stream...{}", e.getMessage());
 			}
 		}
 		return blob;
 	}
 
+	/**
+	 * @param in
+	 * @return
+	 */
 	protected byte[] readLobs(InputStream in) {
 		byte[] databarr = null;
 		try (ByteArrayOutputStream fos = new ByteArrayOutputStream()) {
@@ -225,17 +262,21 @@ public class PayloadHandler {
 
 			while ((read = in.read(bytes)) != -1) {
 				fos.write(bytes, 0, read);
-				log.trace("Copying {} bytes into the output...",read);
+				log.trace("Copying {} bytes into the output...", read);
 			}
 			fos.flush();
 			databarr = fos.toByteArray();
 			return databarr;
 		} catch (IOException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		}
-		return null;		
+		return new byte[0];
 	}
-	
+
+	/**
+	 * @param dataentity
+	 * @return
+	 */
 	public byte[] convertToByteArray(Payload dataentity) {
 		try {
 			log.debug("Retrieving binary stream from payload entity with the DATA blob alone");
@@ -245,11 +286,15 @@ public class PayloadHandler {
 			dataentity.getData().free();
 			return databarr;
 		} catch (SQLException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		}
-		return null;
+		return new byte[0];
 	}
 
+	/**
+	 * @param dataentity
+	 * @return
+	 */
 	public PayloadDto convertToDto(Payload dataentity) {
 		try {
 			log.debug("Retrieving binary stream from payload entity including the DATA blob");
@@ -264,12 +309,11 @@ public class PayloadHandler {
 			strinfobarr = readLobs(insi);
 			dataentity.getStreamerInfo().free();
 
-			PayloadDto entitydto = new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
-					.objectType(dataentity.getObjectType()).size(dataentity.getSize()).data(databarr).streamerInfo(strinfobarr)
-					.insertionTime(dataentity.getInsertionTime());
-			return entitydto;
+			return new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
+					.objectType(dataentity.getObjectType()).size(dataentity.getSize()).data(databarr)
+					.streamerInfo(strinfobarr).insertionTime(dataentity.getInsertionTime());
 		} catch (SQLException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		}
 		return null;
 	}
@@ -284,12 +328,13 @@ public class PayloadHandler {
 			strinfobarr = readLobs(insi);
 			dataentity.getStreamerInfo().free();
 
-			log.info("Retrieved payload: {} {} {} ",dataentity.getHash(),dataentity.getObjectType(),dataentity.getVersion());
+			log.info("Retrieved payload: {} {} {} ", dataentity.getHash(), dataentity.getObjectType(),
+					dataentity.getVersion());
 			PayloadDto entitydto = new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
 					.objectType(dataentity.getObjectType()).size(dataentity.getSize()).streamerInfo(strinfobarr);
 			return entitydto;
 		} catch (SQLException e) {
-			log.error("Exception : {} ",e.getMessage());
+			log.error("Exception : {} ", e.getMessage());
 		}
 		return null;
 	}

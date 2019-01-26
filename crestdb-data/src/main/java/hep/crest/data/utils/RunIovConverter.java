@@ -14,47 +14,47 @@ public final class RunIovConverter {
 		 * Date().getTime() * TO_NANOSECONDS
 		 * 
 		 */
-		public static long TO_NANOSECONDS = 1000000L;
+		public static final long TO_NANOSECONDS = 1000000L;
 
 		/**
 		 * Use this for conversion of seconds to milliseconds.
 		 */
-		public static long TO_MILLISECONDS = 1000L;
+		public static final long TO_MILLISECONDS = 1000L;
 
 
-		public static float COOL_TO_MILLISECONDS = new Float(1./1000000L);
+		public static final float COOL_TO_MILLISECONDS = (float) (1./1000000L);
 
 		/**
 		 * The cool max date in milliseconds.
 		 */
-		public static long COOL_MAX_DATE_MILLISECONDS = 9223372036854L;
+		public static final long COOL_MAX_DATE_MILLISECONDS = 9223372036854L;
 
 		/**
 		 * Cool Max data in COOL format.
 		 */
-		public static long COOL_MAX_DATE = 9223372036854775807L;
+		public static final long COOL_MAX_DATE = 9223372036854775807L;
 		/**
 		 * Cool Max run in COOL format.
 		 */
-		public static long COOL_MAX_RUN = 2147483647L;
+		public static final long COOL_MAX_RUN = 2147483647L;
 		/**
 		 * Cool Max lumi block in COOL format.
 		 */
-		public static long COOL_MAX_LUMIBLOCK = 4294967295L;
+		public static final long COOL_MAX_LUMIBLOCK = 4294967295L;
 
 		/**
 		 * 
 		 */
-		private static int cooliov_run_mask = 32;
+		private static final int COOLIOV_RUN_MASK = 32;
 
 		/**
 		 * 
 		 */
-		public static BigInteger lumimask = new BigInteger("00000000FFFFFFFF", 16);
+		public static final BigInteger COOL_IOV_LUMI_MASK = new BigInteger("00000000FFFFFFFF", 16);
 		/**
 		 * 
 		 */
-		public static BigDecimal toNanoSeconds = new BigDecimal(1000000L);
+		public static final BigDecimal TO_NANOSECOND = new BigDecimal(1000000L);
 
 		
 		
@@ -71,7 +71,7 @@ public final class RunIovConverter {
 					|| atime.longValue() == COOL_MAX_RUN) {
 				return COOL_MAX_DATE;
 			}
-			final BigInteger run = atime.shiftRight(cooliov_run_mask);
+			final BigInteger run = atime.shiftRight(COOLIOV_RUN_MASK);
 			return run.longValue();
 		}
 
@@ -101,7 +101,7 @@ public final class RunIovConverter {
 				return new BigDecimal(COOL_MAX_DATE);
 			}
 			final BigInteger coolrun = new BigInteger(arun);
-			final BigInteger run = coolrun.shiftLeft(cooliov_run_mask);
+			final BigInteger run = coolrun.shiftLeft(COOLIOV_RUN_MASK);
 			return new BigDecimal(run);
 		}
 
@@ -117,7 +117,7 @@ public final class RunIovConverter {
 			if (atime.longValue() == COOL_MAX_DATE) {
 				return 0L;
 			}
-			final BigInteger lumi = atime.and(lumimask);
+			final BigInteger lumi = atime.and(COOL_IOV_LUMI_MASK);
 			return lumi.longValue();
 		}
 
@@ -168,7 +168,6 @@ public final class RunIovConverter {
 		public static BigDecimal getCoolRunLumi(final Long arun, final Long lb) {
 			BigInteger irun = null;
 			BigInteger ilb = null;
-			// System.out.println("Received "+arun+" "+lb);
 			BigInteger runlumi = null;
 			BigInteger run = null;
 			if (arun == null) {
@@ -180,7 +179,7 @@ public final class RunIovConverter {
 				} else {
 					ilb = new BigDecimal(lb).toBigIntegerExact();
 				}
-				run = irun.shiftLeft(cooliov_run_mask);
+				run = irun.shiftLeft(COOLIOV_RUN_MASK);
 				runlumi = run.or(ilb);
 			}
 			return new BigDecimal(runlumi);
@@ -198,7 +197,7 @@ public final class RunIovConverter {
 			if (atime.longValue() == COOL_MAX_DATE) {
 				return COOL_MAX_DATE;
 			}
-			final BigInteger timeInMilliSec = atime.divide(toNanoSeconds
+			final BigInteger timeInMilliSec = atime.divide(TO_NANOSECOND
 					.toBigInteger());
 			return timeInMilliSec.longValue();
 		}
@@ -304,7 +303,6 @@ public final class RunIovConverter {
 		}
 		
 		public static void main(String args[]) {
-			System.out.println("Hello converter");
 			// 1236624163445580, 1236628458412875
 			// 1234296291171690, 1234300586138985
 			BigInteger since = new BigInteger("1234296291171690");
@@ -312,6 +310,5 @@ public final class RunIovConverter {
 			Long runs = RunIovConverter.getRun(since);
 			Long runu = RunIovConverter.getRun(until);
 			System.out.println("Hello converter : run is "+runs+" "+runu);
-
 		}
 	}

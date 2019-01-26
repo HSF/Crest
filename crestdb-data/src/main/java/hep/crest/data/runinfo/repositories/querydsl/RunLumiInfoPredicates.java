@@ -27,8 +27,13 @@ public class RunLumiInfoPredicates {
 
 	}
 
+	/**
+	 * @param oper
+	 * @param num
+	 * @return
+	 */
 	public static BooleanExpression isRunXThan(String oper, String num) {
-		log.debug("isRunXThan: argument " + num + " operation " + oper);
+		log.debug("isRunXThan: argument {}  operation {} ",num,oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -41,8 +46,13 @@ public class RunLumiInfoPredicates {
 		return pred;
 	}
 	
+	/**
+	 * @param oper
+	 * @param num
+	 * @return
+	 */
 	public static BooleanExpression isLBXThan(String oper, String num) {
-		log.debug("isLBXThan: argument " + num + " operation " + oper);
+		log.debug("isLBXThan: argument {}  operation {} ",num,oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -55,8 +65,13 @@ public class RunLumiInfoPredicates {
 		return pred;
 	}
 	
+	/**
+	 * @param oper
+	 * @param num
+	 * @return
+	 */
 	public static BooleanExpression isSinceXThan(String oper, String num) {
-		log.debug("isSinceXThan: argument " + num + " operation " + oper);
+		log.debug("isSinceXThan: argument {}  operation {} ",num,oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -70,8 +85,13 @@ public class RunLumiInfoPredicates {
 	}
 
 	
+	/**
+	 * @param oper
+	 * @param num
+	 * @return
+	 */
 	public static BooleanExpression isStarttimeXThan(String oper, String num) {
-		log.debug("isStarttimeXThan: argument " + num + " operation " + oper);
+		log.debug("isStarttimeXThan: argument {}  operation {} ",num,oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -84,8 +104,13 @@ public class RunLumiInfoPredicates {
 		return pred;
 	}
 	
+	/**
+	 * @param oper
+	 * @param num
+	 * @return
+	 */
 	public static BooleanExpression isEndtimeXThan(String oper, String num) {
-		log.debug("isEndtimeXThan: argument " + num + " operation " + oper);
+		log.debug("isEndtimeXThan: argument {}  operation {} ",num,oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -98,26 +123,43 @@ public class RunLumiInfoPredicates {
 		return pred;
 	}
 
+	/**
+	 * @param since
+	 * @param until
+	 * @return
+	 */
 	public static BooleanExpression hasSinceBetween(BigDecimal since, BigDecimal until) {
-		log.debug("hasSinceBetween: argument " + since+ " "+until);
-		BooleanExpression pred = QRunLumiInfo.runLumiInfo.since.between(since,until);
-		return pred;
+		log.debug("hasSinceBetween: argument {} {} ",since,until);
+		return QRunLumiInfo.runLumiInfo.since.between(since,until);
 	}
 	
+	/**
+	 * @param since
+	 * @param until
+	 * @return
+	 */
 	public static BooleanExpression hasStarttimeBetween(BigDecimal since, BigDecimal until) {
-		log.debug("hasStarttimeBetween: argument " + since+ " "+until);
-		BooleanExpression pred = QRunLumiInfo.runLumiInfo.starttime.between(since,until);
-		return pred;
+		log.debug("hasStarttimeBetween: argument {} {} ",since,until);
+		return QRunLumiInfo.runLumiInfo.starttime.between(since,until);
 	}
 	
+	/**
+	 * @param since
+	 * @param until
+	 * @return
+	 */
 	public static BooleanExpression hasEndtimeBetween(BigDecimal since, BigDecimal until) {
-		log.debug("hasEndtimeBetween: argument " + since+ " "+until);
-		BooleanExpression pred = QRunLumiInfo.runLumiInfo.endtime.between(since,until);
-		return pred;
+		log.debug("hasEndtimeBetween: argument {} {} ",since,until);
+		return QRunLumiInfo.runLumiInfo.endtime.between(since,until);
 	}
 	
+	/**
+	 * @param oper
+	 * @param num
+	 * @return
+	 */
 	public static BooleanExpression isInsertionTimeXThan(String oper, String num) {
-		log.debug("isInsertionTimeXThan: argument " + num + " operation " + oper);
+		log.debug("isInsertionTimeXThan: argument {}  operation {} ",num,oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -130,8 +172,11 @@ public class RunLumiInfoPredicates {
 		return pred;
 	}
 
+	/**
+	 * @param exp
+	 * @return
+	 */
 	public static Predicate where(BooleanExpression exp) {
-		Predicate pred = exp;
-		return pred;
+		return exp;
 	}
 }

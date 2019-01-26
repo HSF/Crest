@@ -201,7 +201,6 @@ public class SQLiteDialect extends Dialect {
     
 	@Override
 	protected String doExtractConstraintName(SQLException sqle) throws NumberFormatException {
-		// TODO Auto-generated method stub
 	      return extractUsingTemplate( "constraint ", " failed", sqle.getMessage() );
 	}
   };

@@ -90,7 +90,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadSqliteRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
-			bean.setDefault_tablename(cprops.getSchemaname());
+			bean.setDefaultTablename(cprops.getSchemaname());
 		}
 		return bean;
     }

@@ -2,6 +2,8 @@ package hep.crest.data.config;
 
 import java.sql.SQLException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +32,8 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 @Configuration
 public class PojoDtoConverterConfig {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
 	@Bean(name = "mapperFactory")
 	public MapperFactory createOrikaMapperFactory() {
 		MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
@@ -45,24 +49,20 @@ public class PojoDtoConverterConfig {
 
 	protected void initGlobalTagMap(MapperFactory mapperFactory) {
 		mapperFactory.classMap(GlobalTag.class, GlobalTagDto.class).exclude("globalTagMaps").byDefault().register();
-		return;
 	}
 
 	protected void initGlobalTagMapsMap(MapperFactory mapperFactory) {
 		mapperFactory.classMap(GlobalTagMap.class, GlobalTagMapDto.class).field("id.globalTagName", "globalTagName")
 				.field("id.record", "record").field("id.label", "label").field("tag.name", "tagName").register();
-		return;
 	}
 
 	protected void initTagMap(MapperFactory mapperFactory) {
 		mapperFactory.classMap(Tag.class, TagDto.class).exclude("globalTagMaps").byDefault().register();
-		return;
 	}
 
 	protected void initIovMap(MapperFactory mapperFactory) {
 		mapperFactory.classMap(Iov.class, IovDto.class).field("id.tagName", "tagName").field("id.since", "since")
 				.field("id.insertionTime", "insertionTime").field("payloadHash", "payloadHash").register();
-		return;
 	}
 
 	protected void initPayloadMap(MapperFactory mapperFactory) {
@@ -80,29 +80,24 @@ public class PojoDtoConverterConfig {
 					.size(a.getSize())
 					.insertionTime(a.getInsertionTime());
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("SQL exception in mapping pojo and dto for payload...: {}",e.getMessage());
 				}
 			}	
 		})
 		.register();
-		return;
 	}
 
 	protected void initRunLumiInfoMap(MapperFactory mapperFactory) {
 		mapperFactory.classMap(RunLumiInfo.class, RunLumiInfoDto.class).exclude("insertionTime").byDefault().register();
-		return;
 	}
 
 	protected void initFolderMap(MapperFactory mapperFactory) {
 		mapperFactory.classMap(CrestFolders.class, FolderDto.class).byDefault().register();
-		return;
 	}
 
 	@Bean(name = "mapper")
 	@Autowired
 	public MapperFacade createMapperFacade(@Qualifier("mapperFactory") MapperFactory mapperFactory) {
-		MapperFacade mapper = mapperFactory.getMapperFacade();
-		return mapper;
+		return mapperFactory.getMapperFacade();
 	}
 }
