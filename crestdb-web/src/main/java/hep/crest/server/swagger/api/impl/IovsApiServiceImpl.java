@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 
-import hep.creat.data.test.tools.IovPropertyConfigurator;
+import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
@@ -65,22 +65,27 @@ public class IovsApiServiceImpl extends IovsApiService {
 	@Autowired
 	private CachingProperties cprops;
 
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.IovsApiService#createIov(hep.crest.swagger.model.IovDto, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
 	@Override
 	public Response createIov(IovDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
-		log.info("IovRestController processing request for creating a tag");
+		log.info("IovRestController processing request for creating an iov");
 		try {
 			IovDto saved = iovService.insertIov(body);
 			return Response.created(info.getRequestUri()).entity(saved).build();
 
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception in creating iov : {}",e.getMessage());
 			String message = e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.IovsApiService#findAllIovs(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
 	@Override
 	public Response findAllIovs(String tagname, Integer page, Integer size, String sort,
 			SecurityContext securityContext, UriInfo info) throws NotFoundException {
@@ -93,7 +98,6 @@ public class IovsApiServiceImpl extends IovsApiService {
 				dtolist = iovService.findAllIovs(null, preq);
 			} else {
 
-//				List<SearchCriteria> params = prh.createMatcherCriteria("tagname:" + tagname);
 				List<SearchCriteria> params = prh.createCriteria("tagname",":",tagname);
 				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
 				BooleanExpression wherepred = null;
@@ -125,6 +129,9 @@ public class IovsApiServiceImpl extends IovsApiService {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.IovsApiService#getSize(java.lang.String, java.lang.Long, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
 	@Override
 	public Response getSize(@NotNull String tagname, Long snapshot, SecurityContext securityContext, UriInfo info)
 			throws NotFoundException {
@@ -167,14 +174,14 @@ public class IovsApiServiceImpl extends IovsApiService {
 	@Override
 	public Response selectGroups(@NotNull String tagname, Long snapshot, SecurityContext securityContext, UriInfo info,
 			Request request, HttpHeaders headers) throws NotFoundException {
-		this.log.info("IovRestController processing request for iovs groups using tag name " + tagname);
+		this.log.info("IovRestController processing request for iovs groups using tag name {}",tagname);
 		try {
 			GroupDto groups = null;
 			// Integer maxage = 60;
 			// Search for tag in order to load the time type:
 			TagDto tagentity = tagService.findOne(tagname);
 			if (tagentity == null) {
-				throw new CdbServiceException("Cannot find tag for name " + tagname);
+				throw new CdbServiceException("Cannot find tag for name "+tagname);
 			}
 			ResponseBuilder builder = cachesvc.verifyLastModified(request, tagentity);
 			if (builder != null) {
@@ -208,7 +215,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 
 		} catch (Exception e) {
 			String msg = "Error in selectGroups : " + tagname + ", " + snapshot;
-			log.error("Exception catched by REST controller for " + msg + " : " + e.getMessage());
+			log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
 			String message = msg + " -- " + e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -219,8 +226,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 	@Override
 	public Response selectIovs(String tagname, String since, String until, Long snapshot,
 			SecurityContext securityContext, UriInfo info,Request request, HttpHeaders headers) throws NotFoundException {
-		this.log.info("IovRestController processing request for iovs using tag name " + tagname + " and range " + since
-				+ " - " + until);
+		log.info("IovRestController processing request for iovs using tag name {} and range {} - {} ",tagname,since,until);
 		try {
 			List<IovDto> dtolist = null;
 			// Retrieve all iovs 
@@ -237,11 +243,11 @@ public class IovsApiServiceImpl extends IovsApiService {
 				return builder.build();
 			}
 
-			log.debug("Setting iov range to : " + since + "," + until);
+			log.debug("Setting iov range to : {}, {}",since, until);
 			BigDecimal runtil = null;
 			if (until.equals("INF")) {
-				log.debug("The end time will be set to : " + IovPropertyConfigurator.INFINITY);
-				runtil = IovPropertyConfigurator.INFINITY;
+				log.debug("The end time will be set to : {}", CrestProperties.INFINITY);
+				runtil = CrestProperties.INFINITY;
 			} else {
 				runtil = new BigDecimal(until);
 				log.debug("The end time will be set to : " + runtil);
@@ -259,13 +265,16 @@ public class IovsApiServiceImpl extends IovsApiService {
 			return Response.ok().entity(dtolist).cacheControl(cc).build();
 		} catch (Exception e) {
 			String msg = "Error in selectIovs : " + tagname + ", " + snapshot;
-			log.error("Exception catched by REST controller for " + msg + " : " + e.getMessage());
+			log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
 			String message = msg + " -- " + e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.IovsApiService#selectSnapshot(java.lang.String, java.lang.Long, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
 	@Override
 	public Response selectSnapshot(@NotNull String tagname, @NotNull Long snapshot, SecurityContext securityContext,
 			UriInfo info) throws NotFoundException {
@@ -278,7 +287,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 			return Response.ok().entity(entitylist).build();
 		} catch (Exception e) {
 			String msg = "Error in selectSnapshot : " + tagname + ", " + snapshot;
-			log.error("Exception catched by REST controller for " + msg + " : " + e.getMessage());
+			log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
 			String message = msg + " -- " + e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
