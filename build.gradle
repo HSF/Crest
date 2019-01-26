@@ -76,6 +76,15 @@ Properties getProjectProperties() {
     return mprops
 }
 
+// An example for sonarqube configuration: to run the code on a local sonarqube instance you should
+// use commands like : ./gradlew sonarqube   -Dsonar.host.url=http://localhost:9000   -Dsonar.login=180fe2ea3c768359eb5fa680f7bbe6667ceeb238
+sonarqube { 
+	properties{ 
+		property 'sonar.coverage.exclusions', "**/hep/crest/swagger/model/*"
+        property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
+	} 
+}
+
 subprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
