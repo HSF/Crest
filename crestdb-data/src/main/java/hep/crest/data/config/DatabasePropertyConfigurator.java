@@ -10,8 +10,15 @@ package hep.crest.data.config;
  */
 public class DatabasePropertyConfigurator {
 	
-//	public static final String SCHEMA_NAME = "CMS_CONDITIONS_002";
-//	public static final String SCHEMA_NAME = "ATLAS_PHYS_COND";
-//	public static final String SCHEMA_NAME = "@SCHEMA_NAME@";
+	//	Possible options here:  CMS_CONDITIONS_002, ATLAS_PHYS_COND.
+	//  The value @SCHEMA_NAME@ could be used, but requires valid gradle code for substitution.
 	public static final String SCHEMA_NAME = "";
+
+	/**
+	 * 
+	 */
+	private DatabasePropertyConfigurator() {
+		// Used to hide the constructor
+	}
+	
 }

@@ -13,23 +13,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @ComponentScan("hep.crest.data.repositories")
 public class DataSourceConfig {
  
-	@Autowired
-	private CrestProperties cprops;
-
-	@Autowired
-	private DataSource ds;
-
 	@Bean(name = "jdbcMainTemplate")
-	  public JdbcTemplate getMainTemplate() {
+	  public JdbcTemplate getMainTemplate(@Autowired DataSource ds) {
 			return new JdbcTemplate(ds);
-	}
-
-//	@Primary
-//	@ConfigurationProperties(prefix="spring.datasource")
-//    @Bean(name = "daoDataSource")
-//    public DataSource createMainDataSource() {
-//	    return DataSourceBuilder.create().build();
-//    }
-	
+	}	
     
 }

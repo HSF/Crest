@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
@@ -39,21 +38,16 @@ public class ByteArrayDeserializer extends JsonDeserializer<byte[]> {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass()); 
 
-	public ByteArrayDeserializer(){
-    }
-	
-
 	@Override
 	public byte[]  deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+			throws IOException {
 		try {
 			log.debug("Trying to deserialize json parser {}",jp);
 			String blobstr = new String(jp.getTextCharacters());
-			byte[] mblob = Base64.getDecoder().decode(blobstr);
-			return mblob;
+			return Base64.getDecoder().decode(blobstr);
 		} catch (Exception ex) {
 			log.error("Failed to deserialize byte array {}",jp.getText());
-			throw new JsonParseException(ex.getMessage(), jp.getCurrentLocation());
+			throw new JsonParseException(jp,ex.getMessage());
 		}
 	}
 }
