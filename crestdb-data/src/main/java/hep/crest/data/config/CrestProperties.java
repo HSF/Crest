@@ -1,5 +1,7 @@
 package hep.crest.data.config;
 
+import java.math.BigDecimal;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,6 +20,8 @@ public class CrestProperties {
 	private String synchro;
 	private String webstaticdir;
 	private String authenticationtype;
+
+	public static final BigDecimal INFINITY = new BigDecimal("253402297199000000000");
 
 	public String getDumpdir() {
 		log.info("property dumpdir has value:{}",dumpdir);
@@ -68,5 +72,4 @@ public class CrestProperties {
 	public void setAuthenticationtype(String authtype) {
 		this.authenticationtype = authtype;
 	}
-	
 }

@@ -12,8 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import hep.crest.data.config.IovPropertyConfigurator;
-import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.config.CrestProperties;
 import hep.crest.swagger.model.TagDto;
 
 
@@ -25,7 +24,7 @@ public class CachingPolicyService {
 	@Autowired
 	private CachingProperties cprops;
 
-	public CacheControl getGroupsCacheControl(Long snapshot) throws CdbServiceException {
+	public CacheControl getGroupsCacheControl(Long snapshot) {
 		Integer maxage = cprops.default_cache_time;
 		if (snapshot != 0L) {
 			maxage = cprops.getIovsgroups_snapshot_maxage();
@@ -35,9 +34,9 @@ public class CachingPolicyService {
 		return cc;
 	}
 
-	public CacheControl getIovsCacheControlForUntil(Long snapshot, BigDecimal until) throws CdbServiceException {
+	public CacheControl getIovsCacheControlForUntil(Long snapshot, BigDecimal until) {
 		Integer maxage = cprops.default_cache_time;
-		if (!until.equals(IovPropertyConfigurator.INFINITY)) {
+		if (!until.equals(CrestProperties.INFINITY)) {
 			if (snapshot != 0L) {
 				maxage = cprops.getIovs_snapshot_maxage();
 			} else {
@@ -49,14 +48,14 @@ public class CachingPolicyService {
 		return cc;
 	}
 
-	public ResponseBuilder verifyLastModified(Request request, TagDto tagentity) throws CdbServiceException {
+	public ResponseBuilder verifyLastModified(Request request, TagDto tagentity) {
 		Date lastModified = tagentity.getModificationTime();
 		log.debug("Use tag modification time {}",lastModified);
 		ResponseBuilder builder = request.evaluatePreconditions(lastModified);
 		if (builder != null) {
 			CacheControl cc = new CacheControl();
 			builder.cacheControl(cc).header("Last-Modified", lastModified); // add
-																		  // metadata
+																		    // metadata
 		}
 		return builder;
 	}
