@@ -52,7 +52,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	private DataSource ds;
 
 	@Value("${physconddb.upload.dir:/tmp}")
-	private String SERVER_UPLOAD_LOCATION_FOLDER;
+	private String serverUploadLocationFolder;
 
 	@Autowired
 	private PayloadHandler payloadHandler;
@@ -69,6 +69,9 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			this.defaultTablename = defaultTablename;
 	}
 	
+	/**
+	 * @return
+	 */
 	protected String tablename() {
 		Table ann = Payload.class.getAnnotation(Table.class);
 		String tablename = ann.name();
@@ -81,6 +84,9 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	}
 
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#find(java.lang.String)
+	 */
 	@Transactional
 	public Payload find(String id) {
 		log.info("Find payload {} using JDBCTEMPLATE",id);
@@ -93,7 +99,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		// Be careful, this seems not to work with Postgres: probably getBlob loads an OID and not the byte[] 
 		// Temporarely, try to create a postgresql implementation of this class.
 		
-		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setHash(rs.getString("HASH"));
 			entity.setObjectType(rs.getString("OBJECT_TYPE"));
@@ -105,34 +111,36 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
 			return entity;
 		});
-
-		return dataentity;
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#findMetaInfo(java.lang.String)
+	 */
 	@Transactional
-	public Payload findMetaInfo(String id) throws Exception {
+	public Payload findMetaInfo(String id) {
 		log.info("Find payload meta info {} using JDBCTEMPLATE",id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
 		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from " + tablename
 				+ " where HASH=?";
-		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setHash(rs.getString("HASH"));
 			entity.setObjectType(rs.getString("OBJECT_TYPE"));
 			entity.setVersion(rs.getString("VERSION"));
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-			// entity.setData(rs.getBlob("DATA"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
 			entity.setSize(rs.getInt("PYLD_SIZE"));
 
 			return entity;
 		});
 
-		return dataentity;
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
+	 */
 	@Transactional
 	public Payload findData(String id) {
 		log.info("Find payload data {} using JDBCTEMPLATE",id);
@@ -140,15 +148,18 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "select DATA from " + tablename + " where HASH=?";
-		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setData(rs.getBlob("DATA"));
 			return entity;
 		});
-		return dataentity;
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.model.PayloadDto)
+	 */
 	@Override
+	@Transactional
 	public Payload save(PayloadDto entity) throws CdbServiceException {
 		Payload savedentity = null;
 		try {
@@ -159,7 +170,6 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		return savedentity;
 	}
 
-	@Transactional
 	protected Payload saveBlobAsBytes(PayloadDto entity) throws IOException {
 
 		String tablename = this.tablename();
@@ -184,33 +194,36 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 					ps, sql, entity.getHash(),entity.getObjectType(),entity.getVersion(),entity.getInsertionTime());
 			ps.execute();
 			log.debug("Search for stored payload as a verification, use hash {} ",entity.getHash());
-			Payload saved = find(entity.getHash());
-			return saved;
+			return find(entity.getHash());
 		} catch (SQLException e) {
-			log.error("Exception : {} ",e.getMessage());
-		} finally {
-			
-		}
+			log.error("Exception when savinf payload as bytes: {} ",e.getMessage());
+		} 
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.model.PayloadDto, java.io.InputStream)
+	 */
 	@Override
 	@Transactional
 	public Payload save(PayloadDto entity, InputStream is) throws CdbServiceException {
 		Payload savedentity = null;
 		try {
-			// savedentity = this.saveMetaInfo(entity);
-			// Blob blob = payloadHandler.createBlobFromStream(is);
 			this.saveBlobAsStream(entity, is);
 			savedentity = findMetaInfo(entity.getHash());
 		} catch (IOException e) {
-			log.error("IOException during payload insertion: {}",e.getMessage());
+			log.error("IOException during payload dto insertion: {}",e.getMessage());
 		} catch (Exception e) {
-			log.error("Exception during payload insertion: {}",e.getMessage());
+			log.error("Exception during payload dto insertion: {}",e.getMessage());
 		}
 		return savedentity;
 	}
 
+	/**
+	 * @param entity
+	 * @param is
+	 * @throws IOException
+	 */
 	protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws IOException {
 		String tablename = this.tablename();
 
@@ -243,6 +256,11 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		}
 	}
 
+	/**
+	 * @param metainfoentity
+	 * @return
+	 * @throws IOException
+	 */
 	protected Payload saveMetaInfo(PayloadDto metainfoentity) throws IOException {
 
 		String tablename = this.tablename();
@@ -261,7 +279,6 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
 			log.debug("Dump preparedstatement {}",ps);
 			ps.execute();
-			ps.close();
 			return find(metainfoentity.getHash());
 		} catch (SQLException e) {
 			log.error("Exception : {}",e.getMessage());
@@ -278,16 +295,16 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	 */
 	@Override
 	public Payload saveNull() throws IOException, PayloadEncodingException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	//FIXME: THIS METHOD is FOR OLD SCHEMA....Should be updated...
 	@Override
 	@Transactional
-	//FIXME: THIS METHOD is FOR OLD SCHEMA....Should be updated...
 	public void delete(String id) {
-		String sql = "DELETE FROM PAYLOAD_DATA " + " WHERE HASH=(?)";
-		log.info("Remove payload with hash " + id + " using JDBCTEMPLATE");
+		String tablename = this.tablename();
+		String sql = "DELETE FROM "+ tablename + " WHERE HASH=(?)";
+		log.info("Remove payload with hash {} using JDBCTEMPLATE",id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		jdbcTemplate.update(sql, new Object[] { id });
 		log.debug("Entity removal done...");

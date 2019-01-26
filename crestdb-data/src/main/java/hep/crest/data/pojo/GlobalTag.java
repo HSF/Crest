@@ -40,7 +40,7 @@ public class GlobalTag implements java.io.Serializable {
 	private String scenario;
 	private String workflow;
 	private char type;
-	private Set<GlobalTagMap> globalTagMaps = new HashSet<GlobalTagMap>(0);
+	private Set<GlobalTagMap> globalTagMaps = new HashSet<>(0);
 
 	public GlobalTag() {
 	}

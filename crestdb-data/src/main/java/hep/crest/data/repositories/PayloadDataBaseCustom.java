@@ -33,7 +33,7 @@ import hep.crest.swagger.model.PayloadDto;
 public interface PayloadDataBaseCustom {
 	Payload find(String id);
 	Payload findData(String id);
-	Payload findMetaInfo(String id) throws Exception;
+	Payload findMetaInfo(String id);
 	Payload save(PayloadDto entity) throws CdbServiceException;
 	Payload save(PayloadDto entity, InputStream is) throws CdbServiceException;
 	Payload saveNull() throws IOException, PayloadEncodingException;

@@ -9,8 +9,6 @@ import java.util.List;
 
 import hep.crest.swagger.model.TagSummaryDto;
 
-
-
 /**
  * @author aformic
  *
@@ -27,6 +25,4 @@ public interface IovGroupsCustom {
 	
 	List<TagSummaryDto> getTagSummaryInfo(String tagname);
 	
-	// Try to implement this one in the Repository
-//	List<Iov> selectLatestByGroup(String tagname, Date since, Date until);
 }

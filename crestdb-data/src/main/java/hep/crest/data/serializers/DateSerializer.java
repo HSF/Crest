@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
@@ -46,30 +45,25 @@ public class DateSerializer extends JsonSerializer<Date> {
 
 	private DateTimeFormatter locFormatter = null;
 	
-	public DateSerializer() {
-	}
 	
 	@Override
 	public void serialize(Date ts, JsonGenerator jg,
-			SerializerProvider sp) throws IOException,
-			JsonProcessingException {
+			SerializerProvider sp) throws IOException {
 		try {
-			log.debug("Use private version of serializer...."+getLocformatter().toString());
+			log.debug("Use private version of serializer....{}",getLocformatter());
 			jg.writeString(this.format(ts));
 		} catch (Exception ex) {
-			log.error("Failed to serialize using format "+getLocformatter().toString());
-			ex.printStackTrace();
+			log.error("Failed to serialize using format {}",getLocformatter());
 		}
 	}
 
-	protected String format(Date ts) throws Exception {
+	protected String format(Date ts)  {
 		Instant fromEpochMilli = Instant.ofEpochMilli(ts.getTime());
-//		ZonedDateTime zdt = fromEpochMilli.atZone(ZoneId.of("Europe/Paris"));
 		ZonedDateTime zdt = fromEpochMilli.atZone(ZoneId.of("Z"));
 		return zdt.format(getLocformatter());
 	}
 	
-	protected DateTimeFormatter getLocformatter() throws IllegalArgumentException {
+	protected DateTimeFormatter getLocformatter() {
 		if(this.locFormatter != null)
 			return locFormatter;
 		if(pattern.equals("ISO_OFFSET_DATE_TIME")){

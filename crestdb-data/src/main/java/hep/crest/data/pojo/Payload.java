@@ -46,10 +46,6 @@ public class Payload implements java.io.Serializable {
 		this.insertionTime = insertionTime;
 	}
 
-	/*
-	 * @Override public PayloadDto createDto() { return PayloadHandler. }
-	 */
-
 	@Id
 	@Column(name = "HASH", unique = true, nullable = false, length = 64)
 	public String getHash() {

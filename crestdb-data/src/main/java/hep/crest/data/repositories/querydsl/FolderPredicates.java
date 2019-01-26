@@ -23,24 +23,37 @@ public class FolderPredicates {
 
 	}
 
+	/**
+	 * @param nfp
+	 * @return
+	 */
 	public static BooleanExpression hasNodeFullpathLike(String nfp) {
-		log.debug("hasNodeFullpathLike: argument " + nfp);
-		BooleanExpression pred = QCrestFolders.crestFolders.nodeFullpath.like("%" + nfp + "%");
-		return pred;
+		log.debug("hasNodeFullpathLike: argument {}",nfp);
+		return QCrestFolders.crestFolders.nodeFullpath.like("%" + nfp + "%");
 	}
+	/**
+	 * @param tagpt
+	 * @return
+	 */
 	public static BooleanExpression hasTagPatternLike(String tagpt) {
-		log.debug("hasTagPatternLike: argument " + tagpt);
-		BooleanExpression pred = QCrestFolders.crestFolders.tagPattern.like("%" + tagpt + "%");
-		return pred;
+		log.debug("hasTagPatternLike: argument {}",tagpt);
+		return QCrestFolders.crestFolders.tagPattern.like("%" + tagpt + "%");
 	}
+	
+	/**
+	 * @param gr
+	 * @return
+	 */
 	public static BooleanExpression hasGroupRoleLike(String gr) {
-		log.debug("hasGroupRoleLike: argument " + gr);
-		BooleanExpression pred = QCrestFolders.crestFolders.groupRole.like("%" + gr + "%");
-		return pred;
+		log.debug("hasGroupRoleLike: argument {}",gr);
+		return QCrestFolders.crestFolders.groupRole.like("%" + gr + "%");
 	}
 
+	/**
+	 * @param exp
+	 * @return
+	 */
 	public static Predicate where(BooleanExpression exp) {
-		Predicate pred = exp;
-		return pred;
+		return exp;
 	}
 }

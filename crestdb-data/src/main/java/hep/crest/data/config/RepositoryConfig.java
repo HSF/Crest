@@ -9,8 +9,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import hep.crest.data.monitoring.repositories.IMonitoringRepository;
-import hep.crest.data.monitoring.repositories.JdbcMonitoringRepository;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovGroupsImpl;
@@ -45,12 +43,13 @@ public class RepositoryConfig {
     public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
     		if (!cprops.getSchemaname().equals("none")) {
-    			bean.setDefault_tablename(cprops.getSchemaname());
+    			bean.setDefaultTablename(cprops.getSchemaname());
     		}
     		return bean;
     }
 
     /*
+     * This block is for the moment here because I need to check how to include it only on demand
     @Profile({"prod","wildfly"})
     @Bean(name = "monitoringrepo")
     public IMonitoringRepository monitoringRepository(@Qualifier("daoDataSource") DataSource mainDataSource) {
@@ -81,7 +80,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadPostgresRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     		PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
-			bean.setDefault_tablename(cprops.getSchemaname());
+			bean.setDefaultTablename(cprops.getSchemaname());
 		}
 		return bean;
     }

@@ -22,6 +22,14 @@ public class HashGenerator {
 	
 	private static Logger log = LoggerFactory.getLogger("HashGenerator");
 
+	private static final String MD5 = "MD5";
+	private static final String SHA = "SHA-256";
+	/**
+	 * 
+	 */
+	private HashGenerator() {
+		// Hide the default ctor.
+	}
 
 	/**
 	 * Java program to generate MD5 hash or digest for String. In this example  *
@@ -56,7 +64,7 @@ public class HashGenerator {
 	public static String md5Java(byte[] message) throws PayloadEncodingException {
 		String digest = null;
 		try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
+			MessageDigest md = MessageDigest.getInstance(MD5);
 			byte[] hash = md.digest(message);
 			// converting byte array to Hexadecimal String
 			StringBuilder sb = new StringBuilder(2 * hash.length);
@@ -81,7 +89,7 @@ public class HashGenerator {
 	public static String shaJava(byte[] message) throws PayloadEncodingException {
 		String digest = null;
 		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			MessageDigest md = MessageDigest.getInstance(SHA);
 			byte[] hash = md.digest(message);
 			// converting byte array to Hexadecimal String
 			StringBuilder sb = new StringBuilder(2 * hash.length);
@@ -113,8 +121,7 @@ public class HashGenerator {
 		try {
 			return DigestUtils.md5DigestAsHex(text.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error in digesting the payload with md5");
 			throw new PayloadEncodingException(e);
 		}
 	}
@@ -128,10 +135,16 @@ public class HashGenerator {
 		return DigestUtils.md5DigestAsHex(text);
 	}
 	
+	/**
+	 * @param in
+	 * @return
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 */
 	public static String hash(BufferedInputStream in) throws IOException, NoSuchAlgorithmException {
 
-		String digest_hash;
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		String digestHash;
+		MessageDigest digest = MessageDigest.getInstance(SHA);
 		byte [] buffer = new byte[1024];
 	    int sizeRead = -1;
 	    while ((sizeRead = in.read(buffer)) != -1) {
@@ -140,21 +153,28 @@ public class HashGenerator {
 	    in.close();
 
 	    byte [] hash = null;
-	    hash = new byte[digest.getDigestLength()];
 	    hash = digest.digest();
+	    
 	 // converting byte array to Hexadecimal String
 	 	StringBuilder sb = new StringBuilder(2 * hash.length);
 	 	for (byte b : hash) {
 	 		sb.append(String.format("%02x", b & 0xff));
 	 	}
-	 	digest_hash = sb.toString();
-	    return digest_hash;
+	 	digestHash = sb.toString();
+	    return digestHash;
 	}
 
+	/**
+	 * @param in
+	 * @param os
+	 * @return
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 */
 	public static String hashoutstream(InputStream in, OutputStream os) throws IOException, NoSuchAlgorithmException {
 
-		String digest_hash;
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		String digestHash;
+		MessageDigest digest = MessageDigest.getInstance(SHA);
 		byte [] buffer = new byte[1024];
 	    int sizeRead = -1;
 	    int loop = 0;
@@ -171,41 +191,15 @@ public class HashGenerator {
 	    in.close();
 
 	    byte [] hash = null;
-	    hash = new byte[digest.getDigestLength()];
 	    hash = digest.digest();
 	 // converting byte array to Hexadecimal String
 	 	StringBuilder sb = new StringBuilder(2 * hash.length);
 	 	for (byte b : hash) {
 	 		sb.append(String.format("%02x", b & 0xff));
 	 	}
-	 	digest_hash = sb.toString();
-	    return digest_hash;
+	 	digestHash = sb.toString();
+	    return digestHash;
 	}
-
-//	public static IStreamHash hashstream(BufferedInputStream in) throws IOException, NoSuchAlgorithmException {
-//
-//		String digest_hash;
-//		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-//		byte [] buffer = new byte[2048];
-//	    int sizeRead = -1;
-//	    int length = 0;
-//	    while ((sizeRead = in.read(buffer)) != -1) {
-//	        digest.update(buffer, 0, sizeRead);
-//	        length += sizeRead;
-//	    }
-//	    in.close();
-//	    byte [] hash = null;
-//	    hash = new byte[digest.getDigestLength()];
-//	    hash = digest.digest();
-//	 // converting byte array to Hexadecimal String
-//	 	StringBuilder sb = new StringBuilder(2 * hash.length);
-//	 	for (byte b : hash) {
-//	 		sb.append(String.format("%02x", b & 0xff));
-//	 	}
-//	 	digest_hash = sb.toString();
-//	 	IStreamHash ishash = new IStreamHash(digest_hash,length);
-//	    return ishash;
-//	}
 
 }
 

@@ -56,16 +56,16 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 	@Value("${crest.upload.dir:/tmp}")
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
 
-	private String default_tablename = null;
+	private String defaultTablename = null;
 
 	public PayloadDataPostgresImpl(DataSource ds) {
 		super();
 		this.ds = ds;
 	}
 
-	public void setDefault_tablename(String default_tablename) {
-		if (this.default_tablename == null)
-			this.default_tablename = default_tablename;
+	public void setDefaultTablename(String defaultTablename) {
+		if (this.defaultTablename == null)
+			this.defaultTablename = defaultTablename;
 	}
 
 	protected String tablename() {
@@ -73,12 +73,15 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = ann.name();
 		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
 			tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
-		} else if (this.default_tablename != null) {
-			tablename = this.default_tablename + "." + tablename;
+		} else if (this.defaultTablename != null) {
+			tablename = this.defaultTablename + "." + tablename;
 		}
 		return tablename;
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#find(java.lang.String)
+	 */
 	public Payload find(String id) {
 		log.info("Find payload {} using JDBCTEMPLATE", id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
@@ -91,7 +94,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		// OID and not the byte[]
 		// Temporarily, try to create a postgresql implementation of this class.
 
-		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setHash(rs.getString("HASH"));
 			entity.setObjectType(rs.getString("OBJECT_TYPE"));
@@ -102,48 +105,53 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			entity.setSize(rs.getInt("PYLD_SIZE"));
 			return entity;
 		});
-
-		return dataentity;
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#findMetaInfo(java.lang.String)
+	 */
 	@Transactional
-	public Payload findMetaInfo(String id) throws Exception {
+	public Payload findMetaInfo(String id) {
 		log.info("Find payload meta data only for {} using JDBCTEMPLATE", id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
 		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from " + tablename
 				+ " where HASH=?";
-		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setHash(rs.getString("HASH"));
 			entity.setObjectType(rs.getString("OBJECT_TYPE"));
 			entity.setVersion(rs.getString("VERSION"));
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-			// entity.setData(rs.getBlob("DATA"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
 			entity.setSize(rs.getInt("PYLD_SIZE"));
 			return entity;
 		});
 
-		return dataentity;
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
+	 */
 	public Payload findData(String id) {
 		log.info("Find payload data only for {} using JDBCTEMPLATE", id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
 		String sql = "select HASH,DATA from " + tablename + " where HASH=?";
-		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setHash(rs.getString("HASH"));
 			entity.setData(rs.getBlob("DATA"));
 			return entity;
 		});
-		return dataentity;
 	}
 
+	/**
+	 * @param id
+	 * @return
+	 */
 	protected LargeObject readBlobAsStream(String id) {
 		String tablename = this.tablename();
 
@@ -166,7 +174,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			log.error("SQL exception occurred in retrieving payload data for {}", id);
 		} finally {
 			try {
-				rs.close();
+				if (rs != null)
+					rs.close();
 			} catch (SQLException | NullPointerException e) {
 				log.error("Error in closing result set : {}",e.getMessage());
 			}
@@ -181,7 +190,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			log.info("Saving blob as bytes array....");
 			savedentity = this.saveBlobAsBytes(entity);
 		} catch (IOException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Exception in saving payload dto: {}", e.getMessage());
 		}
 		return savedentity;
 	}
@@ -218,7 +227,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			obj.close();
 			return oid;
 		} catch (SQLException | IOException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Exception in getting large object id: {}", e.getMessage());
 		}
 		return (Long) null;
 	}
@@ -231,8 +240,6 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
-		Connection conn = null;
-		PreparedStatement ps = null;
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
@@ -240,44 +247,36 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		InputStream is = new ByteArrayInputStream(entity.getData());
 		InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
 
-		try {
-			conn = ds.getConnection();
+		try (Connection conn = ds.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql);) {
 			conn.setAutoCommit(false);
 			long oid = getLargeObjectId(conn, is, entity);
 			long sioid = getLargeObjectId(conn, sis, null);
 
-			ps = conn.prepareStatement(sql);
 			ps.setString(1, entity.getHash());
 			ps.setString(2, entity.getObjectType());
 			ps.setString(3, entity.getVersion());
 			ps.setLong(4, oid);
 			ps.setLong(5, sioid);
 			ps.setDate(6, inserttime);
-			log.info("Dump preparedstatement {1} using sql {2} and args {3} {4} {5} {6}", ps.toString(), sql,
+			log.info("Dump preparedstatement {} using sql {} and args {} {} {} {}", ps.toString(), sql,
 					entity.getHash(), entity.getObjectType(), entity.getVersion(), entity.getInsertionTime());
 			ps.execute();
 			conn.commit();
 			log.debug("Search for stored payload as a verification, use hash {}", entity.getHash());
-			Payload saved = find(entity.getHash());
-			return saved;
+			return find(entity.getHash());
 		} catch (SQLException e) {
 			log.error("Exception : {}", e.getMessage());
 		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				is.close();
-				sis.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				log.error("Exception : {}", e.getMessage());
-			}
+			is.close();
+			sis.close();
 		}
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.model.PayloadDto, java.io.InputStream)
+	 */
 	@Override
 	@Transactional
 	public Payload save(PayloadDto entity, InputStream is) throws CdbServiceException {
@@ -294,6 +293,11 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		return savedentity;
 	}
 
+	/**
+	 * @param entity
+	 * @param is
+	 * @throws IOException
+	 */
 	protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws IOException {
 		String tablename = this.tablename();
 
@@ -303,21 +307,18 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
 
 		log.debug("Streamer info {} ", entity.getStreamerInfo());
-		// log.debug("Read data blob of length " + blob.length + " and streamer info " +
-		// entity.getStreamerInfo().length);
-		Connection conn = null;
-		PreparedStatement ps = null;
+
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
+
 		InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
-		try {
-			conn = ds.getConnection();
+		try (Connection conn = ds.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql);) {
 			conn.setAutoCommit(false);
 			long oid = getLargeObjectId(conn, is, entity);
 			long sioid = getLargeObjectId(conn, sis, null);
 
-			ps = conn.prepareStatement(sql);
 			ps.setString(1, entity.getHash());
 			ps.setString(2, entity.getObjectType());
 			ps.setString(3, entity.getVersion());
@@ -325,29 +326,22 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setLong(5, sioid);
 			ps.setDate(6, inserttime);
 			ps.setInt(7, entity.getSize());
-			log.debug("Dump preparedstatement {} ", ps.toString());
+			log.debug("Dump preparedstatement {} ", ps);
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException e) {
 			log.error("Exception from SQL during insertion: {}", e.getMessage());
 		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				is.close();
-				sis.close();
-				if (conn != null)
-					conn.close();
-
-			} catch (SQLException e) {
-				log.error("Exception from SQL attempting to close connection: {}", e.getMessage());
-			}
+			is.close();
+			sis.close();
 		}
 	}
 
-	@Transactional
-	protected Payload saveMetaInfo(PayloadDto metainfoentity) throws IOException {
+	/**
+	 * @param metainfoentity
+	 * @return
+	 */
+	protected Payload saveMetaInfo(PayloadDto metainfoentity) {
 
 		String tablename = this.tablename();
 
@@ -355,11 +349,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME,PYLD_SIZE) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
-		Connection conn = null;
-		PreparedStatement ps = null;
-		try {
-			conn = ds.getConnection();
-			ps = conn.prepareStatement(sql);
+		try (Connection conn = ds.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, metainfoentity.getHash());
 			ps.setString(2, metainfoentity.getObjectType());
 			ps.setString(3, metainfoentity.getVersion());
@@ -367,24 +358,12 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			// FIXME: be careful to the insertion time...is the one provided correct ?
 			ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
 			ps.setInt(6, metainfoentity.getSize());
-			log.debug("Dump preparedstatement {}", ps.toString());
+			log.debug("Dump preparedstatement {}", ps);
 			ps.execute();
-			Payload saved = find(metainfoentity.getHash());
-			return saved;
+			return find(metainfoentity.getHash());
 		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (conn != null)
-					conn.close();
-
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
+			log.error("Sql Exception when saving meta info : {}",e.getMessage());
+		} 
 		return null;
 	}
 
@@ -398,11 +377,12 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		return null;
 	}
 
+	// FIXME: THIS METHOD is FOR OLD SCHEMA....Should be updated...
 	@Override
 	@Transactional
-	// FIXME: THIS METHOD is FOR OLD SCHEMA....Should be updated...
 	public void delete(String id) {
-		String sql = "DELETE FROM PAYLOAD_DATA " + " WHERE HASH=(?)";
+		String tablename = this.tablename();
+		String sql = "DELETE FROM "+ tablename + " WHERE HASH=(?)";
 		log.info("Remove payload with hash {} using JDBCTEMPLATE", id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		jdbcTemplate.update(sql, new Object[] { id });

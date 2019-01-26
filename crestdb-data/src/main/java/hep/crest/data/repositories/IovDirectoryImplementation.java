@@ -34,7 +34,6 @@ public class IovDirectoryImplementation {
 	
 	public IovDirectoryImplementation() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public IovDirectoryImplementation(DirectoryUtilities dutils) {
@@ -42,13 +41,21 @@ public class IovDirectoryImplementation {
 		this.dirtools = dutils;
 	}
 
+	/**
+	 * @param du
+	 */
 	public void setDirtools(DirectoryUtilities du) {
 		this.dirtools = du;
 	}
 	
+	/**
+	 * @param tagname
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	public List<IovDto> findByTagName(String tagname) throws CdbServiceException {
 		Path iovfilepath = dirtools.getIovFilePath(tagname);
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		try (BufferedReader reader = Files.newBufferedReader(iovfilepath, dirtools.getCharset())) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
@@ -57,16 +64,20 @@ public class IovDirectoryImplementation {
 			}
 			String jsonstring = buf.toString();
 			if (jsonstring.isEmpty()) {
-				return null;
+				return new ArrayList<>();
 			}
-			List<IovDto> readValue = dirtools.getMapper().readValue(jsonstring, new TypeReference<List<IovDto>>() {
+			return dirtools.getMapper().readValue(jsonstring, new TypeReference<List<IovDto>>() {
 			});
-			return readValue;
 		} catch (IOException x) {
 			throw new CdbServiceException("Cannot find iov list for tag " + tagname);
 		}
 	}
 
+	/**
+	 * @param iovdto
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	public IovDto save(IovDto iovdto) throws CdbServiceException {
 
 		try {
@@ -82,13 +93,7 @@ public class IovDirectoryImplementation {
 
 			// FIXME: this is probably inefficient for large number of iovs...to be checked
 			String jsonstr = dirtools.getMapper().writeValueAsString(iovlist);
-
-			try (BufferedWriter writer = Files.newBufferedWriter(iovfilepath, dirtools.getCharset())) {
-				writer.write(jsonstr);
-			} catch (IOException x) {
-				throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
-			}
-
+			writeIovFile(jsonstr, iovfilepath);
 
 			return iovdto;
 		} catch (IOException x) {
@@ -96,6 +101,25 @@ public class IovDirectoryImplementation {
 		}
 	}
 
+	/**
+	 * @param jsonstr
+	 * @param iovfilepath
+	 * @throws CdbServiceException
+	 */
+	protected void writeIovFile(String jsonstr, Path iovfilepath) throws CdbServiceException {
+		try (BufferedWriter writer = Files.newBufferedWriter(iovfilepath, dirtools.getCharset())) {
+			writer.write(jsonstr);
+		} catch (IOException x) {
+			throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
+		}
+	}
+	
+	/**
+	 * @param tagname
+	 * @param iovdtolist
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	public List<IovDto> saveAll(String tagname, List<IovDto> iovdtolist) throws CdbServiceException {
 
 		try {
@@ -106,12 +130,7 @@ public class IovDirectoryImplementation {
 			
 			// FIXME: this is probably inefficient for large number of iovs...to be checked
 			String jsonstr = dirtools.getMapper().writeValueAsString(iovdtolist);
-
-			try (BufferedWriter writer = Files.newBufferedWriter(iovfilepath, dirtools.getCharset())) {
-				writer.write(jsonstr);
-			} catch (IOException x) {
-				throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
-			}
+			writeIovFile(jsonstr, iovfilepath);
 			return iovdtolist;
 		} catch (IOException x) {
 			throw new CdbServiceException("IO error " + x.getMessage());

@@ -27,31 +27,27 @@ public class GlobalTagPredicates {
 	}
 
 	public static BooleanExpression hasReleaseLike(String release) {
-		log.debug("hasReleaseLike: argument " + release);
-		BooleanExpression pred = QGlobalTag.globalTag.release.like("%" + release + "%");
-		return pred;
+		log.debug("hasReleaseLike: argument {} ",release);
+		return QGlobalTag.globalTag.release.like("%" + release + "%");
 	}
 
 	public static BooleanExpression hasWorkflowLike(String wf) {
-		log.debug("hasWorkflowLike: argument " + wf);
-		BooleanExpression pred = QGlobalTag.globalTag.workflow.like("%" + wf + "%");
-		return pred;
+		log.debug("hasWorkflowLike: argument {} ",wf);
+		return QGlobalTag.globalTag.workflow.like("%" + wf + "%");
 	}
 
 	public static BooleanExpression hasNameLike(String name) {
-		log.debug("hasNameLike: argument " + name);
-		BooleanExpression pred = QGlobalTag.globalTag.name.like("%" + name + "%");
-		return pred;
+		log.debug("hasNameLike: argument {} ",name);
+		return QGlobalTag.globalTag.name.like("%" + name + "%");
 	}
 	
 	public static BooleanExpression hasScenarioLike(String scenario) {
-		log.debug("hasScenarioLike: argument " + scenario);
-		BooleanExpression pred = QGlobalTag.globalTag.scenario.like("%" + scenario + "%");
-		return pred;
+		log.debug("hasScenarioLike: argument {} ",scenario);
+		return QGlobalTag.globalTag.scenario.like("%" + scenario + "%");
 	}
 
 	public static BooleanExpression isValidityXThan(String oper, String num) {
-		log.debug("isValidity: argument " + num + " operation " + oper);
+		log.debug("isValidity: argument {}  operation {}",num, oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -65,7 +61,7 @@ public class GlobalTagPredicates {
 	}
 	
 	public static BooleanExpression isInsertionTimeXThan(String oper, String num) {
-		log.debug("isInsertionTimeXThan: argument " + num + " operation " + oper);
+		log.debug("isInsertionTimeXThan: argument {} operation {}",num, oper);
 		BooleanExpression pred = null;
 
 		if (oper.equals("<")) {
@@ -79,15 +75,14 @@ public class GlobalTagPredicates {
 	}
 
 	public static BooleanExpression isType(String typestr) {
-		log.debug("isType: argument " + typestr );
-		Character type = new Character(typestr.charAt(0));
+		log.debug("isType: argument {} ",typestr );
+		Character type = typestr.charAt(0);
 		BooleanExpression pred = null;
 		pred = QGlobalTag.globalTag.type.eq(type);
 		return pred;
 	}
 
 	public static Predicate where(BooleanExpression exp) {
-		Predicate pred = exp;
-		return pred;
+		return exp;
 	}
 }

@@ -28,23 +28,33 @@ public class TagDirectoryImplementation {
 	private static final Logger log = LoggerFactory.getLogger(TagDirectoryImplementation.class);
 
 	private DirectoryUtilities dirtools = null;
-
 	
-	
+	/**
+	 * 
+	 */
 	public TagDirectoryImplementation() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * @param dutils
+	 */
 	public TagDirectoryImplementation(DirectoryUtilities dutils) {
 		super();
 		this.dirtools = dutils;
 	}
 
+	/**
+	 * @param du
+	 */
 	public void setDirtools(DirectoryUtilities du) {
 		this.dirtools = du;
 	}
 	
+	/**
+	 * @param id
+	 * @return
+	 */
 	public boolean exists(String id) {
 		try {
 			dirtools.getTagPath(id);
@@ -54,93 +64,109 @@ public class TagDirectoryImplementation {
 		}
 	}
 
+	/**
+	 * @param id
+	 * @return
+	 */
 	public TagDto findOne(String id) {
 		
 		Path tagfilepath;
 		try {
 			tagfilepath = dirtools.getTagFilePath(id);
-			StringBuffer buf = new StringBuffer();
-			try (BufferedReader reader = Files.newBufferedReader(tagfilepath, dirtools.getCharset())) {
-			    String line = null;
-			    while ((line = reader.readLine()) != null) {
-			        System.out.println(line);
-			        buf.append(line);
-			    }
-			    String jsonstring = buf.toString();
-				TagDto readValue = dirtools.getMapper().readValue(jsonstring, TagDto.class);
-				log.debug("Parsed json to get tag object " + readValue + " with field " + readValue.getName()
-						+ " and description " + readValue.getDescription());
-			    return readValue;
-			    
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			return readTagFile(tagfilepath);
 		} catch (CdbServiceException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("Cannot find file with id {} ",id);
 		}
-		
 		return null;
 	}
 
+	/**
+	 * @param tagfilepath
+	 * @return
+	 */
+	protected TagDto readTagFile(Path tagfilepath) {
+		StringBuilder buf = new StringBuilder();
+		try (BufferedReader reader = Files.newBufferedReader(tagfilepath, dirtools.getCharset())) {
+		    String line = null;
+		    while ((line = reader.readLine()) != null) {
+		        log.debug("Reading line from file {}",line);
+		        buf.append(line);
+		    }
+		    String jsonstring = buf.toString();
+			TagDto readValue = dirtools.getMapper().readValue(jsonstring, TagDto.class);
+			log.debug("Parsed json to get tag object {} with field {} "
+					+ " and description {}",readValue,readValue.getName(),readValue.getDescription());
+		    return readValue;
+		} catch (IOException e) {
+			log.error("Error in reading tag file from path {}",tagfilepath);
+		}
+		return null;
+	}
 	
+	/**
+	 * @return
+	 */
 	public List<TagDto> findAll() {
 		List<String> tagnames;
-		try {
-			tagnames = dirtools.getTagDirectories();
-			List<TagDto> dtolist = tagnames.stream().map(x -> this.findOne(x)).collect(Collectors.toList());
-			return dtolist;
-		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		tagnames = dirtools.getTagDirectories();
+		return tagnames.stream().map(x -> this.findOne(x)).collect(Collectors.toList());
 	}
 
+	/**
+	 * @return
+	 */
 	public long count() {
 		List<TagDto> dtolist = this.findAll();
 		return dtolist.size();
 	}
 
+	/**
+	 * @param name
+	 * @return
+	 */
 	public List<TagDto> findByNameLike(String name) {
 		List<String> filteredByNameList;
-		try {
-			filteredByNameList = dirtools.getTagDirectories().stream().filter(x -> x.matches(name)).collect(Collectors.toList());
-			List<TagDto> dtolist = filteredByNameList.stream().map(x -> this.findOne(x)).collect(Collectors.toList());
-			return dtolist;
-		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		filteredByNameList = dirtools.getTagDirectories().stream().filter(x -> x.matches(name)).collect(Collectors.toList());
+		return filteredByNameList.stream().map(x -> this.findOne(x)).collect(Collectors.toList());
 	}
 
 	
+	/**
+	 * @param entity
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	public TagDto save(TagDto entity) throws CdbServiceException {
-		// TODO Auto-generated method stub
 		String tagname = entity.getName();
 		try {
 			Path tagpath = dirtools.createIfNotexistsTag(tagname);
 			if (tagpath != null) {
 				Path filepath = Paths.get(tagpath.toString(), dirtools.getTagfile());
 				Files.deleteIfExists(filepath);
-				if (Files.notExists(filepath)) {
+				if (!filepath.toFile().exists()) {
 					Files.createFile(filepath);
 				}
 				String jsonstr = dirtools.getMapper().writeValueAsString(entity);
-				
-				try (BufferedWriter writer = Files.newBufferedWriter(filepath, dirtools.getCharset())) {
-					writer.write(jsonstr);
-				} catch (IOException x) {
-					throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
-				}
-
+				writeTagFile(jsonstr, filepath);
 				return entity;				
 			} else {
 				throw new CdbServiceException("Tag path is null...");
 			}
 		} catch (IOException x) {
 			throw new CdbServiceException(x.getMessage());
+		}
+	}
+	
+	/**
+	 * @param jsonstr
+	 * @param filepath
+	 * @throws CdbServiceException
+	 */
+	protected void writeTagFile(String jsonstr, Path filepath) throws CdbServiceException {
+		try (BufferedWriter writer = Files.newBufferedWriter(filepath, dirtools.getCharset())) {
+			writer.write(jsonstr);
+		} catch (IOException x) {
+			throw new CdbServiceException("Cannot write " + jsonstr+ " in JSON file");
 		}
 	}
 
