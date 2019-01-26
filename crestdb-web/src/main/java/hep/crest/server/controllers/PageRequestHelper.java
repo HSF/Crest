@@ -25,21 +25,26 @@ import hep.crest.data.repositories.querydsl.SearchCriteria;
 @Component
 public class PageRequestHelper {
 
-	private String QRY_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:|<|>)([a-zA-Z0-9_\\-\\/\\.]+?),";
-	private String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)([ASC|DESC]+?),";
+	private static final String QRY_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:|<|>)([a-zA-Z0-9_\\-\\/\\.]+?),";
+	private static final String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)([ASC|DESC]+?),";
 
 	private static final Integer MAX_PAGE_SIZE = 10000;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public PageRequestHelper() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * @param page
+	 * @param size
+	 * @param sort
+	 * @return
+	 */
 	public PageRequest createPageRequest(Integer page, Integer size, String sort) {
 
 		if (size > MAX_PAGE_SIZE) {
-			log.warn("Requested size exceed maximum page size...change it to "+MAX_PAGE_SIZE);
+			log.warn("Requested size exceed maximum page size...change it to {}",MAX_PAGE_SIZE);
 			size = MAX_PAGE_SIZE;
 		}
 		Pattern sortpattern = Pattern.compile(SORT_PATTERN);
@@ -51,20 +56,18 @@ public class PageRequestHelper {
 				direc = Direction.DESC;
 			}
 			String field = sortmatcher.group(1);
-			log.debug("Creating new order: " + direc + " " + field);
+			log.debug("Creating new order: {} {}", direc, field);
 			orderlist.add(new Order(direc, field));
 		}
-		log.debug("Created list of sorting orders of size " + orderlist.size());
+		log.debug("Created list of sorting orders of size {}", orderlist.size());
 		Order orders[] = new Order[orderlist.size()];
 		int i = 0;
 		for (Order order : orderlist) {
-			log.debug("Order @ " + i + " = " + order);
+			log.debug("Order @ {} = {} ", i, order);
 			orders[i++] = order;
 		}
-		Sort msort = new Sort(orders);
-		PageRequest preq = new PageRequest(page, size, msort);
-
-		return preq;
+		Sort msort = Sort.by(orders);
+		return PageRequest.of(page, size, msort);
 	}
 
 	/**
@@ -75,18 +78,20 @@ public class PageRequestHelper {
 
 		Pattern pattern = Pattern.compile(QRY_PATTERN);
 		Matcher matcher = pattern.matcher(by + ",");
-		log.debug("Pattern is " + pattern);
-		log.debug("Matcher is " + matcher);
+		log.debug("Pattern is {}",pattern);
+		log.debug("Matcher is {}",matcher);
 		List<SearchCriteria> params = new ArrayList<>();
 		while (matcher.find()) {
 			params.add(new SearchCriteria(matcher.group(1), matcher.group(2), matcher.group(3)));
 		}
-		log.debug("List of search criteria: " + params.size());
+		log.debug("List of search criteria: {}",params.size());
 		return params;
 	}
 	
 	/**
-	 * @param by
+	 * @param key
+	 * @param op
+	 * @param val
 	 * @return
 	 */
 	public List<SearchCriteria> createCriteria(String key, String op, String val) {

@@ -17,13 +17,9 @@ import hep.crest.server.swagger.api.TagsApi;
 import io.swagger.jaxrs.config.BeanConfig;
 
 
-
-//@Component
-//@ApplicationPath("/crestapi")
 public class JerseyConfig extends ResourceConfig {
 
 	public JerseyConfig() {          
-		//packages("hep.crest.server");
 		register(AdminApi.class);
 		register(GlobaltagsApi.class);
 		register(TagsApi.class);
@@ -33,7 +29,6 @@ public class JerseyConfig extends ResourceConfig {
 		register(FsApi.class);
 		register(FoldersApi.class);
 		register(MultiPartFeature.class);
-		////register(AuthenticationFilter.class);
 		register(CacheControlFilter.class);
 		register(CORSFilter.class);
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
@@ -56,7 +51,6 @@ public class JerseyConfig extends ResourceConfig {
 		BeanConfig beanConfig = new BeanConfig();
 		beanConfig.setVersion("1.0");
 		beanConfig.setSchemes(new String[]{"http"});
-		//beanConfig.setHost("localhost:8090");
 		beanConfig.setBasePath("/crestapi");
 		beanConfig.setResourcePackage("hep.crest.server.swagger.api");
 		beanConfig.setScan(true);

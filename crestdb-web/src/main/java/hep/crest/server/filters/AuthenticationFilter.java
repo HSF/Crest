@@ -37,7 +37,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
-		log.info("Authentication filter operates in context...."+requestContext.getMethod());
+		log.info("Authentication filter operates in context....{}",requestContext.getMethod());
 		Method method = resourceInfo.getResourceMethod();
 		// Access allowed for all
 		if (!method.isAnnotationPresent(PermitAll.class)) {
@@ -49,7 +49,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 			// Get request headers
 			final MultivaluedMap<String, String> headers = requestContext.getHeaders();
-			headers.forEach((k,v) -> log.debug("key "+k+" = "+v));
+			headers.forEach((k,v) -> log.debug("key {} = {} ",k,v));
 			
 			// Fetch authorization header
 			final List<String> authorization = headers.get(AUTHORIZATION_PROPERTY);
@@ -63,7 +63,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 			// Get encoded username and password
 			final String encodedUserPassword = authorization.get(0).replaceFirst(AUTHENTICATION_SCHEME + " ", "");
-			log.debug("found user and password: "+encodedUserPassword);
+			log.debug("found user and password: {}", encodedUserPassword);
 			// Decode username and password
 			String usernameAndPassword = null;
 			try {
@@ -94,7 +94,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 				// Is user valid?
 				if (!isUserAllowed(username, password, rolesSet)) {
 					requestContext.abortWith(ACCESS_DENIED);
-					return;
 				}
 			}
 		}

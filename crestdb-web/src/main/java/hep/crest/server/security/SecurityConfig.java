@@ -3,8 +3,6 @@
  */
 package hep.crest.server.security;
 
-import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +35,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private DataSource ds;
-
-	@Autowired
 	private CrestProperties cprops;
 
 	@Autowired
@@ -67,26 +62,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Value("${ACCESS}")
 	private String access;
 
-	// @Override
-	// protected void configure(HttpSecurity http) throws Exception {
-	// http.csrf().disable().authorizeRequests().antMatchers("/ui/**").access(access).and().httpBasic();
-	// }
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		log.debug("Configure http security rules");
-		// SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
 
 		if (cprops.getSecurity().equals("active")) {
 			http.authorizeRequests().antMatchers(HttpMethod.GET, "/**").permitAll().antMatchers(HttpMethod.POST, "/**")
 					.access("hasAuthority('ATLAS-CONDITIONS')")
 					.antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU").and().httpBasic().and()
-					.csrf().disable();
-//			http
-//			.authorizeRequests()
-//				.anyRequest().fullyAuthenticated().and().httpBasic().and()
-//				.csrf().disable();
-			
+					.csrf().disable();			
 			
 		} else if (cprops.getSecurity().equals("none")) {
 			log.info("No security enabled for this server....");
@@ -107,6 +91,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 	}
 
+	/**
+	 * @param auth
+	 * @throws Exception
+	 */
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		log.debug("Configure authentication manager");
@@ -114,7 +102,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 		} else if (cprops.getAuthenticationtype().equals("ldap")) {
 			// here put LDAP
-			log.debug("Use ldap authentication: "+url+" "+managerDn+" "+userSearchBase+" "+userDnPatterns);
+			log.debug("Use ldap authentication: {} {} {} {} ",url,managerDn,userSearchBase,userDnPatterns);
 	        LdapAuthoritiesPopulator ldapAuthoritiesPopulator = authoritiesPopulator(contextSource());
 			auth.ldapAuthentication()
 					.ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
@@ -133,10 +121,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	}
 	
+	/**
+	 * @return
+	 */
 	@Bean
 	public LdapContextSource contextSource() {
-        String ldap_url = url;
-        DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(ldap_url);
+        String ldapurl = url;
+        DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(ldapurl);
         context.setUserDn(managerDn);
         context.setPassword(managerPassword);
         context.setReferral("follow");
@@ -144,11 +135,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return context;
 	}
 	
+	/**
+	 * @return
+	 */
 	@Bean
 	public LdapTemplate ldapTemplate() {
 	    return new LdapTemplate(contextSource());
 	}
 	
+	/**
+	 * @param context
+	 * @return
+	 */
 	@Bean(name="ldapAuthoritiesPopulator")
 	public LdapAuthoritiesPopulator authoritiesPopulator(ContextSource context) {
 		log.debug("Instantiate authorities populator....");
@@ -160,6 +158,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return ldp;
 	}
 
+	/**
+	 * @return
+	 */
 	@Bean(name = "dbPasswordEncoder")
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();

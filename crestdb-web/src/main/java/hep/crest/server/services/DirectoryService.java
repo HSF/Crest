@@ -3,6 +3,8 @@
  */
 package hep.crest.server.services;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -20,7 +22,6 @@ import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.utils.DirectoryUtilities;
-import hep.crest.server.caching.CachingProperties;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
@@ -51,36 +52,52 @@ public class DirectoryService {
 	@Autowired
 	private CrestProperties cprops;
 
+	/**
+	 * @param tagname
+	 * @return
+	 */
 	public TagDto getTag(String tagname) {
 		return fstagrepository.findOne(tagname);
 	}
 	
+	/**
+	 * @param tagname
+	 * @return
+	 */
 	public List<IovDto> listIovs(String tagname) {
 		try {
 			return fsiovrepository.findByTagName(tagname);
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Cannot find iov list for tag {}: {}",tagname,e.getMessage());
 		}
-		return null;
+		return new ArrayList<>();
 	}
 	
+	/**
+	 * @param hash
+	 * @return
+	 */
 	public PayloadDto getPayload(String hash) {
 		try {
 			return fspayloadrepository.find(hash);
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Cannot find payload for hash {} : {}",hash,e.getMessage());
 		}
 		return null;
 	}
 	
+	/**
+	 * @param tagname
+	 * @param snapshot
+	 * @param path
+	 * @return
+	 */
 	@Async
 	public Future<String> dumpTag(String tagname, Date snapshot, String path) {
 		String threadname = Thread.currentThread().getName();
-		log.debug("Running task in asynchronous mode for name "+threadname);
-		String outdir = cprops.getDumpdir()+"/"+path;
-		log.debug("Output directory is "+outdir);
+		log.debug("Running task in asynchronous mode for name {}",threadname);
+		String outdir = cprops.getDumpdir()+File.separator+path;
+		log.debug("Output directory is {}",outdir);
 
 		DirectoryUtilities du = new DirectoryUtilities(outdir);
 		try {
@@ -96,13 +113,12 @@ public class DirectoryService {
 				PayloadDto pyld = pyldservice.getPayload(iovDto.getPayloadHash());
 				fspayloadrepository.save(pyld);
 			}
-			String tarpath = cprops.getWebstaticdir()+"/"+path;
+			String tarpath = cprops.getWebstaticdir()+File.separator+path;
 			String outtar = du.createTarFile(outdir,tarpath);
-			log.debug("Created output tar file "+outtar);
-			return new AsyncResult<String>("Dump a list of "+iovlist.size()+" iovs into file system...");
+			log.debug("Created output tar file {}",outtar);
+			return new AsyncResult<>("Dump a list of "+iovlist.size()+" iovs into file system...");
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Cannot dump tag {} in path {} : {}",tagname,path,e.getMessage());
 		}
 		return null;
 	}

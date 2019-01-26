@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -33,6 +35,9 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 
 	private static final String PROPERTY_SOURCE_NAME = "crestpassProperties";
 	private static final Map<String, String> secretsMap;
+	
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
 	static {
 		secretsMap = new HashMap<>();
 		secretsMap.put("/run/secrets/vhfdb_password", "svom.service.postgres_password");
@@ -48,7 +53,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 	 */
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-		System.out.println("POSTPROCESS ENV is configuring " + PROPERTY_SOURCE_NAME);
+		log.info("POSTPROCESS ENV is configuring {}",PROPERTY_SOURCE_NAME);
 		Map<String, Object> map = new HashMap<>();
 		try {
 			for (Map.Entry<String, String> entry : secretsMap.entrySet()) {
@@ -57,7 +62,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 				loadSecret(respath, springkey, environment, map);
 			}
 		} catch (CdbServiceException e) {
-			System.err.println("POSTPROCESS ENV Exception "+e.getMessage());
+			log.error("POSTPROCESS ENV Exception {}",e.getMessage());
 		}
 	}
 
@@ -82,7 +87,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 				}
 				addOrReplace(environment.getPropertySources(), map);
 			} else {
-				System.out.println("CANNOT FIND secret in " + secpath + " for " + PROPERTY_SOURCE_NAME);
+				log.warn("CANNOT FIND secret in {} for {} ",secpath,PROPERTY_SOURCE_NAME);
 			}
 		} catch (IOException e) {
 			throw new CdbServiceException(e.getMessage());
@@ -115,7 +120,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 					if (!target.containsProperty(key)) {
 						target.getSource().put(key, entry.getValue());
 					} else {
-						System.out.println("Key " + key + " is already in " + target.getName());
+						log.debug("Key {} is already in {}",key ,target.getName());
 					}
 				}
 			}
@@ -133,16 +138,16 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 	 * 
 	 * @param propertySources
 	 */
+	@SuppressWarnings("unused")
 	private void dumpAll(PropertySources propertySources) {
 		for (PropertySource<?> propertySource : propertySources) {
-			System.out
-					.println("Found property source: " + propertySource.getName() + " : " + propertySource.toString());
+			log.info("Found property source: {} : {}",propertySource.getName(), propertySource);
 			if (propertySource instanceof MapPropertySource) {
 				String keys[] = ((MapPropertySource) propertySource).getPropertyNames();
 				for (int i = 0; i < keys.length; i++) {
 					String key = keys[i];
 					Object val = ((MapPropertySource) propertySource).getProperty(key);
-					System.out.println("   contains property: " + key + " : " + val);
+					log.info("   contains property: {} : {} ",key,val);
 				}
 			}
 		}

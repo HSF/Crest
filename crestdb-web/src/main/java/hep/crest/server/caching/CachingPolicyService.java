@@ -24,23 +24,32 @@ public class CachingPolicyService {
 	@Autowired
 	private CachingProperties cprops;
 
+	/**
+	 * @param snapshot
+	 * @return
+	 */
 	public CacheControl getGroupsCacheControl(Long snapshot) {
-		Integer maxage = cprops.default_cache_time;
+		Integer maxage = CachingProperties.DEFAULT_CACHE_TIME;
 		if (snapshot != 0L) {
-			maxage = cprops.getIovsgroups_snapshot_maxage();
+			maxage = cprops.getIovsgroupsSnapshotMaxage();
 		}
 		CacheControl cc = new CacheControl();
 		cc.setMaxAge(maxage);
 		return cc;
 	}
 
+	/**
+	 * @param snapshot
+	 * @param until
+	 * @return
+	 */
 	public CacheControl getIovsCacheControlForUntil(Long snapshot, BigDecimal until) {
-		Integer maxage = cprops.default_cache_time;
+		Integer maxage = CachingProperties.DEFAULT_CACHE_TIME;
 		if (!until.equals(CrestProperties.INFINITY)) {
 			if (snapshot != 0L) {
-				maxage = cprops.getIovs_snapshot_maxage();
+				maxage = cprops.getIovsSnapshotMaxage();
 			} else {
-				maxage = cprops.getIovs_maxage();
+				maxage = cprops.getIovsMaxage();
 			}
 		}
 		CacheControl cc = new CacheControl();
@@ -48,6 +57,11 @@ public class CachingPolicyService {
 		return cc;
 	}
 
+	/**
+	 * @param request
+	 * @param tagentity
+	 * @return
+	 */
 	public ResponseBuilder verifyLastModified(Request request, TagDto tagentity) {
 		Date lastModified = tagentity.getModificationTime();
 		log.debug("Use tag modification time {}",lastModified);

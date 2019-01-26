@@ -3,10 +3,8 @@
  */
 package hep.crest.server.security;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -23,17 +21,10 @@ import org.springframework.stereotype.Service;
 import com.querydsl.core.types.Predicate;
 
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.pojo.GlobalTag;
-import hep.crest.data.pojo.GlobalTagMap;
-import hep.crest.data.repositories.GlobalTagRepository;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.data.security.pojo.FolderRepository;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.exceptions.EmptyPojoException;
-import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.FolderDto;
-import hep.crest.swagger.model.GlobalTagDto;
-import hep.crest.swagger.model.TagDto;
 import ma.glasnost.orika.MapperFacade;
 
 
@@ -59,18 +50,15 @@ public class FolderService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@SuppressWarnings("unchecked")
 	public List<FolderDto> findAllFolders(Predicate qry, Pageable req) throws CdbServiceException {
 		try {
-			List<FolderDto> dtolist = new ArrayList<>();
 			Iterable<CrestFolders> entitylist = null;
 			if (qry == null) {
 				entitylist = folderRepository.findAll(req);
 			} else {
 				entitylist = folderRepository.findAll(qry, req);
 			}
-			dtolist = StreamSupport.stream(entitylist.spliterator(), false).map(s -> mapper.map(s,FolderDto.class)).collect(Collectors.toList());
-			return dtolist;
+			return StreamSupport.stream(entitylist.spliterator(), false).map(s -> mapper.map(s,FolderDto.class)).collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new CdbServiceException("Cannot find folder list " + e.getMessage());
 		}
@@ -78,29 +66,33 @@ public class FolderService {
 
 
 
+	/**
+	 * @param dto
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public FolderDto insertFolder(FolderDto dto) throws CdbServiceException {
 		try {
-			log.debug("Create global tag from dto " + dto);
+			log.debug("Create global tag from dto {}", dto);
 			CrestFolders entity =  mapper.map(dto,CrestFolders.class);
 			Optional<CrestFolders> tmpgt = folderRepository.findById(entity.getNodeFullpath());
 			if (tmpgt.isPresent()) {
-				log.debug("Cannot store folder " + dto+" : resource already exists.. ");
+				log.debug("Cannot store folder {}  : resource already exists.. ",dto);
 				throw new AlreadyExistsPojoException("Folder already exists for name "+dto.getNodeFullpath());				
 			}
-			log.debug("Saving folder entity " + entity);
+			log.debug("Saving folder entity {}",entity);
 			CrestFolders saved = folderRepository.save(entity);
-			log.debug("Saved entity: " + saved);
-			FolderDto dtoentity = mapper.map(saved,FolderDto.class);
-			return dtoentity;
+			log.trace("Saved entity: {}",saved);
+			return mapper.map(saved,FolderDto.class);
 		} catch (AlreadyExistsPojoException e) {
-			log.debug("Cannot store folder " + dto+" : resource already exists.. ");
+			log.error("Cannot store folder {}  : resource already exists.. ",dto);
 			throw e;
 		} catch (ConstraintViolationException e) {
-			log.debug("Cannot store folder " + dto+" : resource already exists ? ");
+			log.error("Cannot store folder {}  : may be the resource already exists.. ",dto);
 			throw new AlreadyExistsPojoException("Folder already exists : " + e.getMessage());
 		} catch (Exception e) {
-			log.debug("Exception in storing folder " + dto);
+			log.error("Exception in storing folder {}",dto);
 			throw new CdbServiceException("Cannot store folder : " + e.getMessage());
 		}
 	}

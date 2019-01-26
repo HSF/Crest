@@ -24,15 +24,20 @@ import org.springframework.stereotype.Component;
 public class ProfileAndLogAspect {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	/**
+	 * @param joinPoint
+	 * @return
+	 * @throws Throwable
+	 */
 	@Around("@annotation(hep.crest.server.annotations.ProfileAndLog)")
 	public Object profileAndLog(ProceedingJoinPoint joinPoint) throws Throwable {
 		long start = System.currentTimeMillis();
 		Object[] args = joinPoint.getArgs();
 		
-		Arrays.stream(args).forEach(s -> log.debug("Profile method "+joinPoint.toShortString()+" with arguments "+s));
+		Arrays.stream(args).forEach(s -> log.debug("Profile method {} with argument: {}",joinPoint.toShortString(),s));
 	    Object proceed = joinPoint.proceed();
 	    long executionTime = System.currentTimeMillis() - start;
-	    log.info(joinPoint.getSignature() + " executed in " + executionTime + "ms");
+	    log.info("{} executed in {} ms",joinPoint.getSignature(),executionTime);
 	    return proceed;
 	}
 	

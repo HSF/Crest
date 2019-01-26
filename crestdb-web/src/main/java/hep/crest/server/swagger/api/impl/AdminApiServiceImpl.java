@@ -1,29 +1,23 @@
 package hep.crest.server.swagger.api.impl;
 
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.server.services.GlobalTagService;
-import hep.crest.server.services.TagService;
-import hep.crest.server.swagger.api.*;
-import hep.crest.swagger.model.*;
-
-import hep.crest.swagger.model.GlobalTagDto;
-
-import java.util.List;
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.*;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.server.services.GlobalTagService;
+import hep.crest.server.services.TagService;
+import hep.crest.server.swagger.api.AdminApiService;
+import hep.crest.server.swagger.api.ApiResponseMessage;
+import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.swagger.model.GlobalTagDto;
+
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class AdminApiServiceImpl extends AdminApiService {

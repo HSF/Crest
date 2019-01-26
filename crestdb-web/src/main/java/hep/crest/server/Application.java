@@ -6,6 +6,8 @@ package hep.crest.server;
 
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -30,16 +32,18 @@ import io.undertow.servlet.api.WebResourceCollection;
 @ComponentScan("hep.crest")
 public class Application extends SpringBootServletInitializer {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
 	@Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
 
-            System.out.println("Let's inspect the beans provided by Spring Boot:");
+            log.debug("Let's inspect the beans provided by Spring Boot:");
 
             String[] beanNames = ctx.getBeanDefinitionNames();
             Arrays.sort(beanNames);
             for (String beanName : beanNames) {
-                System.out.println(beanName);
+                log.debug(beanName);
             }
 
         };
@@ -70,22 +74,7 @@ public class Application extends SpringBootServletInitializer {
         }
 
     }
-	
-/*	@Bean
-	public UndertowEmbeddedServletContainerFactory embeddedServletContainerFactory() {
-	    UndertowEmbeddedServletContainerFactory factory = 
-	      new UndertowEmbeddedServletContainerFactory();
-	     
-	    factory.addBuilderCustomizers(new UndertowBuilderCustomizer() {
-	        @Override
-	        public void customize(io.undertow.Undertow.Builder builder) {
-	            builder.addHttpListener(8080, "0.0.0.0");
-	        }
-	    });
-	     
-	    return factory;
-	}
-*/    
+
     public static void main(String[] args) {
     	new Application()
 		.configure(new SpringApplicationBuilder(Application.class))

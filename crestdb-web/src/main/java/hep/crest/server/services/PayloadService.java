@@ -42,46 +42,47 @@ public class PayloadService {
 	@Autowired
 	private PayloadHandler payloadHandler;
 	
+	/**
+	 * @param hash
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public PayloadDto getPayload(String hash) throws CdbServiceException {
 		try {
 			Payload pyld = payloaddataRepository.find(hash);
 			if (pyld == null) {
-				throw new CdbServiceException("Cannot find payload data for hash " + hash);
+				throw new CdbServiceException("Cannot find payload dto for hash " + hash);
 			}
-			PayloadDto dtoentity = payloadHandler.convertToDto(pyld);
-			return dtoentity;
+			return payloadHandler.convertToDto(pyld);
 		} catch (Exception e) {
 			throw new CdbServiceException(e.getMessage());
 		}
 	}
 	
+	/**
+	 * @param hash
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public PayloadDto getPayloadMetaInfo(String hash) throws CdbServiceException {
 		try {
 			Payload pyld = payloaddataRepository.findMetaInfo(hash);
 			if (pyld == null) {
-				throw new CdbServiceException("Cannot find payload data for hash " + hash);
+				throw new CdbServiceException("Cannot find payload meta data for hash " + hash);
 			}
-			PayloadDto dtoentity = payloadHandler.convertToDtoNoData(pyld);
-			return dtoentity;
+			return payloadHandler.convertToDtoNoData(pyld);
 		} catch (Exception e) {
 			throw new CdbServiceException(e.getMessage());
 		}
 	}
-	
-//	public InputStream getPayloadData(String hash) throws CdbServiceException {
-//		try {
-//			Payload pyld = payloaddataRepository.findData(hash);
-//			if (pyld == null) {
-//				throw new CdbServiceException("Cannot find payload data for hash " + hash);
-//			}
-//			return pyld.getData().getBinaryStream();
-//		} catch (Exception e) {
-//			throw new CdbServiceException(e.getMessage());
-//		}
-//	}
 
+	/**
+	 * @param hash
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public InputStream getPayloadData(String hash) throws CdbServiceException {
 		try {
@@ -97,6 +98,11 @@ public class PayloadService {
 		}
 	}
 
+	/**
+	 * @param hash
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	public StreamingOutput getPayloadDataStream(String hash) throws CdbServiceException {
 		try {
 			Payload pyld = payloaddataRepository.findData(hash);
@@ -109,7 +115,7 @@ public class PayloadService {
 			// we may try to do better for non-postgres db.
 			
 			// Oracle and others
-			//InputStream in = pyld.getData().getBinaryStream();
+			// code example: InputStream in = pyld.getData().getBinaryStream();
 			log.debug("Read data from Blob...{} length {}",pyld.getData(),pyld.getData().length());
 			byte[] data = payloadHandler.getBytesFromInputStream(pyld.getData().getBinaryStream());
 			InputStream in = new ByteArrayInputStream(data);
@@ -131,7 +137,6 @@ public class PayloadService {
 						log.debug("closing streams...");
 						if (os != null)
 							os.close();
-						//in.close();
 					}
 				}
 			};
@@ -140,42 +145,56 @@ public class PayloadService {
 		}
 	}
 
+	/**
+	 * @param dto
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public PayloadDto insertPayload(PayloadDto dto) throws CdbServiceException {
 		try {
-			log.debug("Save payload " + dto);
+			log.debug("Save payload {}", dto);
 			if (dto.getSize() == null) {
 				dto.setSize(dto.getData().length);
 			}
 			Payload saved = payloaddataRepository.save(dto);
-			log.debug("Saved entity: " + saved);
-			PayloadDto dtoentity = payloadHandler.convertToDtoNoData(saved);
-			return dtoentity;
+			log.debug("Saved entity: {}", saved);
+			return payloadHandler.convertToDtoNoData(saved);
 		} catch (Exception e) {
-			log.debug("Exception in storing payload " + dto);
-			throw new CdbServiceException("Cannot store payload : " + e.getMessage());
+			log.error("Exception in storing payload {}", dto);
+			throw new CdbServiceException("Cannot store payload dto : " + e.getMessage());
 		}
 	}
 
+	/**
+	 * @param is
+	 * @param file
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	public String saveInputStreamGetHash(InputStream is, String file) throws CdbServiceException {
 		try {
 			log.debug("Save inputstream and compute hash");
 			return payloadHandler.saveToFileGetHash(is, file);
 		} catch (Exception e) {
-			log.debug("Exception in copying payload to disk in file {}",file);
+			log.error("Exception in copying payload to disk in file {}",file);
 			throw new CdbServiceException("Cannot store payload : " + e.getMessage());
 		}
 	}
 
+	/**
+	 * @param dto
+	 * @param is
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public PayloadDto insertPayloadAndInputStream(PayloadDto dto, InputStream is) throws CdbServiceException {
 		try {
 			log.debug("Save payload {} creating blob from inputstream...",dto);
-//			Blob blob = payloadHandler.createBlobFromStream(is);
 			Payload saved = payloaddataRepository.save(dto,is);
 			log.debug("Saved entity: {}", saved);
-			PayloadDto dtoentity = payloadHandler.convertToDtoNoData(saved);
-			return dtoentity;
+			return payloadHandler.convertToDtoNoData(saved);
 		} catch (Exception e) {
 			log.debug("Exception in storing payload {}",dto);
 			throw new CdbServiceException("Cannot store payload : " + e.getMessage());

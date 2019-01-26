@@ -30,28 +30,31 @@ public class FrontierCacheControlFilter implements ContainerResponseFilter {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	private static String frontier_cache_header_control = "X-Frontier-Control";
+	private static final String FRONTIER_HEADER_CACHE_CONTROL = "X-Frontier-Control";
 	
 	
+    /* (non-Javadoc)
+     * @see javax.ws.rs.container.ContainerResponseFilter#filter(javax.ws.rs.container.ContainerRequestContext, javax.ws.rs.container.ContainerResponseContext)
+     */
     @Override
     public void filter(ContainerRequestContext pRequestContext, ContainerResponseContext pResponseContext)
             throws IOException {
         for (Annotation a : pResponseContext.getEntityAnnotations()) {
             if (a.annotationType() == CacheControlFrontier.class) {
                 String value = ((CacheControlFrontier) a).value();
-                log.debug("CacheControl for Frontier has default set to "+value);
+                log.debug("CacheControl for Frontier has default set to {}",value);
                 List<Object> cachecontrollist = pResponseContext.getHeaders().get(HttpHeaders.CACHE_CONTROL);
                 if (cachecontrollist == null) {
                 	return;
                 }
                 for (Object object : cachecontrollist) {
-					log.debug("found obj "+object.toString());
+					log.debug("found obj {}",object);
 					String val = object.toString();
 					if (val.contains("max-age")) {
 		                String fc = setFrontierCaching(val);
 
-		                log.debug(frontier_cache_header_control+" will be set to "+fc);
-		                pResponseContext.getHeaders().putSingle(frontier_cache_header_control, fc);
+		                log.debug("{} will be set to {}",FRONTIER_HEADER_CACHE_CONTROL,fc);
+		                pResponseContext.getHeaders().putSingle(FRONTIER_HEADER_CACHE_CONTROL, fc);
 		                break;
 					}
 				}             
@@ -60,8 +63,12 @@ public class FrontierCacheControlFilter implements ContainerResponseFilter {
         }
     }
 
+    /**
+     * @param value
+     * @return
+     */
     protected String setFrontierCaching(String value) {
-    	String frontier_cache = "short";
+    	String frontiercache = "short";
         String[] params = value.split(",");
         // From Dave Dykstra:  X-Frontier-Control: ttl=<value>
         // where <value> is short, long, or forever.
@@ -70,20 +77,20 @@ public class FrontierCacheControlFilter implements ContainerResponseFilter {
         //							  if ma > 3600*5 then set to forever
         for (int i=0; i<params.length; i++) {
         	String val = params[i].trim();
-        	log.debug("Examine control cache parameter "+val);
+        	log.debug("Examine control cache parameter {}",val);
         	if (val.startsWith("max-age")) {
         		String maval = val.split("=")[1];
         		Integer maxAge = new Integer(maval);
         		if (maxAge<=600) {
-        			frontier_cache = "short";
+        			frontiercache = "short";
         		} else if (maxAge<=(3600*5)) {
-        			frontier_cache = "long";
+        			frontiercache = "long";
         		} else {
-        			frontier_cache = "forever";
+        			frontiercache = "forever";
         		}
                 break;
         	}
         }
-        return "ttl="+frontier_cache;
+        return "ttl="+frontiercache;
     }
 }

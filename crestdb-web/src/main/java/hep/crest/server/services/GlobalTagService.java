@@ -58,22 +58,22 @@ public class GlobalTagService {
 		return globalTagRepository;
 	}
 
+	
 	/**
+	 * @param qry
+	 * @param req
 	 * @return
-	 * @throws ConddbServiceException
+	 * @throws CdbServiceException
 	 */
-	@SuppressWarnings("unchecked")
 	public List<GlobalTagDto> findAllGlobalTags(Predicate qry, Pageable req) throws CdbServiceException {
 		try {
-			List<GlobalTagDto> dtolist = new ArrayList<>();
 			Iterable<GlobalTag> entitylist = null;
 			if (qry == null) {
 				entitylist = globalTagRepository.findAll(req);
 			} else {
 				entitylist = globalTagRepository.findAll(qry, req);
 			}
-			dtolist = StreamSupport.stream(entitylist.spliterator(), false).map(s -> mapper.map(s,GlobalTagDto.class)).collect(Collectors.toList());
-			return dtolist;
+			return StreamSupport.stream(entitylist.spliterator(), false).map(s -> mapper.map(s,GlobalTagDto.class)).collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new CdbServiceException("Cannot find global tag list " + e.getMessage());
 		}
@@ -87,15 +87,20 @@ public class GlobalTagService {
 	 */
 	public GlobalTagDto findOne(String globaltagname) throws CdbServiceException {
 		try {
-			log.debug("Search for global tag by name " + globaltagname);
+			log.debug("Search for global tag by name {}", globaltagname);
 			GlobalTag entity = globalTagRepository.findByName(globaltagname);
 			return mapper.map(entity,GlobalTagDto.class);
 		} catch (Exception e) {
-			log.debug("Exception in retrieving global tag list using ByName expression..." + globaltagname);
+			log.debug("Exception in retrieving global tag list using ByName expression...{}",globaltagname);
 			throw new CdbServiceException("Cannot find global tag by name: " + e.getMessage());
 		}
 	}
 
+	/**
+	 * @param gt
+	 * @return
+	 * @throws EmptyPojoException
+	 */
 	private List<TagDto> getTagsFromGT(GlobalTag gt) throws EmptyPojoException {
 		if (gt == null) {
 			throw new EmptyPojoException("Cannot load tags from a null global tag...");
@@ -108,39 +113,18 @@ public class GlobalTagService {
 		return tagDtos;
 	}
 
-//	/**
-//	 * @param globaltagname
-//	 * @return the list of TagDtos
-//	 * @throws CdbServiceException
-//	 */
-//	public List<TagDto> getGlobalTagByNameFetchTags(String globaltagname) throws CdbServiceException {
-//		try {
-//			log.debug("Search for tag list for GT: " + globaltagname);
-//			return getTagsFromGT(globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname));
-//		} catch (Exception e) {
-//			if (e instanceof EmptyPojoException)
-//				throw e;
-//			log.debug("Exception in retrieving specified tag list for GT: " + globaltagname);
-//			throw new CdbServiceException("Cannot find specified tag list for GT: " + e.getMessage());
-//		}
-//	}
-//
-//	public List<TagDto> getGlobalTagByNameFetchTags(String globaltagname, String record) throws CdbServiceException {
-//		try {
-//			log.debug("Search for (record) specified tag list for GT: " + globaltagname);
-//			return getTagsFromGT(globalTagRepository.findByNameAndFetchRecordTagsEagerly(globaltagname, record));
-//		} catch (Exception e) {
-//			log.debug("Exception in retrieving specified tag list with record for GT: " + globaltagname);
-//			throw new CdbServiceException("Cannot find specified tag list for GT: " + e.getMessage());
-//		}
-//
-//	}
-
+	/**
+	 * @param globaltagname
+	 * @param record
+	 * @param label
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	public List<TagDto> getGlobalTagByNameFetchTags(String globaltagname, String record, String label)
 			throws CdbServiceException {
 		try {
 			GlobalTag entity = null;
-			log.debug("Search for (record, label) specified tag list for GT: " + globaltagname);
+			log.debug("Search for (record, label) specified tag list for GT: {}",globaltagname);
 			if (record.equals("") && label.equals("")) {
 				entity = globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname);
 			} else if (label.equals("")) {
@@ -151,74 +135,85 @@ public class GlobalTagService {
 			
 			return getTagsFromGT(entity);
 		} catch (Exception e) {
-			log.debug("Exception in retrieving specified tag list with record and label for GT: " + globaltagname);
+			log.debug("Exception in retrieving specified tag list with record and label for GT: {}", globaltagname);
 			throw new CdbServiceException("Cannot find specified tag list for GT: " + e.getMessage());
 		}
 
 	}
 
+	/**
+	 * @param dto
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public GlobalTagDto insertGlobalTag(GlobalTagDto dto) throws CdbServiceException {
 		try {
-			log.debug("Create global tag from dto " + dto);
+			log.debug("Create global tag from dto {}", dto);
 			GlobalTag entity =  mapper.map(dto,GlobalTag.class);
 			Optional<GlobalTag> tmpgt = globalTagRepository.findById(entity.getName());
 			if (tmpgt.isPresent()) {
-				log.debug("Cannot store global tag " + dto+" : resource already exists.. ");
+				log.error("global tag {} already exists..",tmpgt.get());
 				throw new AlreadyExistsPojoException("Global tag already exists for name "+dto.getName());				
 			}
-			log.debug("Saving global tag entity " + entity);
+			log.debug("Saving global tag entity {}", entity);
 			GlobalTag saved = globalTagRepository.save(entity);
-			log.debug("Saved entity: " + saved);
-			GlobalTagDto dtoentity = mapper.map(saved,GlobalTagDto.class);
-			return dtoentity;
+			log.debug("Saved entity: {}", saved);
+			return mapper.map(saved,GlobalTagDto.class);
 		} catch (AlreadyExistsPojoException e) {
-			log.debug("Cannot store global tag " + dto+" : resource already exists.. ");
+			log.error("Cannot store global tag {} : resource already exists.. ",dto);
 			throw e;
 		} catch (ConstraintViolationException e) {
-			log.debug("Cannot store global tag " + dto+" : resource already exists ? ");
+			log.error("Cannot store global tag {} : may be the resource already exists..",dto);
 			throw new AlreadyExistsPojoException("Global tag already exists : " + e.getMessage());
 		} catch (Exception e) {
-			log.debug("Exception in storing global tag " + dto);
+			log.error("Cannot store global tag {} : resource already exists.. ",dto);
 			throw new CdbServiceException("Cannot store global tag : " + e.getMessage());
 		}
 	}
 	
+	/**
+	 * @param dto
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public GlobalTagDto updateGlobalTag(GlobalTagDto dto) throws CdbServiceException {
 		try {
-			log.debug("Create global tag from dto " + dto);
+			log.debug("Create global tag from dto {}",dto);
 			GlobalTag entity =  mapper.map(dto,GlobalTag.class);
 			GlobalTag tmpgt = globalTagRepository.findByName(entity.getName());
 			if (tmpgt == null) {
-				log.debug("Cannot update global tag " + dto+" : resource does not exists.. ");
+				log.debug("Cannot update global tag {} : resource does not exists.. ",dto);
 				throw new NotExistsPojoException("Global tag does not exists for name "+dto.getName());
 			}
 			GlobalTag saved = globalTagRepository.save(entity);
-			log.debug("Saved entity: " + saved);
-			GlobalTagDto dtoentity = mapper.map(saved,GlobalTagDto.class);
-			return dtoentity;
+			log.debug("Saved entity: {}",saved);
+			return mapper.map(saved,GlobalTagDto.class);
 		} catch (NotExistsPojoException e) {
-			log.debug("Cannot store global tag " + dto+" : resource does not exists.. ");
+			log.error("Cannot store global tag {} : resource does not exists.. ",dto);
 			throw e;
 		} catch (ConstraintViolationException e) {
-			log.debug("Cannot store global tag " + dto+" : resource does not exists ? ");
+			log.error("Cannot store global tag {} : resource does not exists ? ",dto);
 			throw new NotExistsPojoException("Global tag does not exists : " + e.getMessage());
 		} catch (Exception e) {
-			log.debug("Exception in storing global tag " + dto);
+			log.error("Exception in storing global tag {}", dto);
 			throw new CdbServiceException("Cannot store global tag : " + e.getMessage());
 		}
 	}
 
+	/**
+	 * @param name
+	 * @throws CdbServiceException
+	 */
 	@Transactional
 	public void removeGlobalTag(String name) throws CdbServiceException {
 		try {
-			log.debug("Remove global tag " + name);
+			log.debug("Remove global tag {}", name);
 			globalTagRepository.deleteById(name);
-			log.debug("Removed entity: " + name);
-			return;
+			log.debug("Removed entity: {}", name);
 		} catch (Exception e) {
-			log.debug("Exception in removing global tag " + name);
+			log.error("Exception in removing global tag {}", name);
 			throw new CdbServiceException("Cannot remove global tag : " + e.getMessage());
 		}
 	}

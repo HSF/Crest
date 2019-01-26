@@ -8,9 +8,6 @@ import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import hep.crest.data.config.CrestProperties;
@@ -38,9 +35,12 @@ public class IovSynchroAspect {
 	@Autowired
 	private IovService iovService;
 
+	/**
+	 * @param dto
+	 */
 	@Before("execution(* hep.crest.server.services.IovService.insertIov(*)) && args(dto)")
 	public void checkSynchro(IovDto dto) {
-		log.debug("Iov insertion should verify the tag synchronization type :"+dto.getTagName());
+		log.debug("Iov insertion should verify the tag synchronization type : {}", dto.getTagName());
 		
 		if (cprops.getSynchro().equals("none")) {
 			log.warn("synchronization checks are disabled in this configuration....");
@@ -50,8 +50,7 @@ public class IovSynchroAspect {
 		try {
 			tagdto = tagService.findOne(dto.getTagName());
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error checking synchronization : {}",e.getMessage());
 		}
 		if (tagdto == null) {
 			log.debug("Cannot find synchro for null tag");
@@ -64,8 +63,7 @@ public class IovSynchroAspect {
 			try {
 				latest = iovService.latest(tagdto.getName());
 			} catch (CdbServiceException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Error checking SV synchronization : {}",e.getMessage());
 			}
 			if (latest == null) {
 				log.info("No iov could be retrieved");
