@@ -102,7 +102,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 	
 							while ((read = in.read(bytes)) != -1) {
 								os.write(bytes, 0, read);
-								log.trace("Copying " + read + " bytes into the output...");
+								log.trace("Copying {} bytes into the output...",read);
 							}
 							os.flush();
 						} catch (Exception e) {
@@ -213,6 +213,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		}
     }
       
+    /* (non-Javadoc)
+     * @see hep.crest.server.swagger.api.PayloadsApiService#getPayloadMetaInfo(java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     */
     @Override
     public Response getPayloadMetaInfo(String hash, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		this.log.info("PayloadRestController processing request for payload meta information for {}",hash);

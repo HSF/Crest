@@ -177,7 +177,7 @@ public class PayloadService {
 			log.debug("Save inputstream and compute hash");
 			return payloadHandler.saveToFileGetHash(is, file);
 		} catch (Exception e) {
-			log.error("Exception in copying payload to disk in file {}",file);
+			log.error("Exception in copying payload to disk in file {}: {}",file,e.getMessage());
 			throw new CdbServiceException("Cannot store payload : " + e.getMessage());
 		}
 	}

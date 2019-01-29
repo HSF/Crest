@@ -1513,9 +1513,15 @@ class CrestConsole(CMApi):
         args = arguments.split(',')
         tagdic = { 'name' : args[0].split('=')[1] }
         try:
-            tag = self.getTag(tagdic['name'])
+            try:
+                self._logger.debug('Look if tag %s exists' % tagdic['name'])
+                tag = self.getTag(tagdic['name'])
+                self._logger.debug('Tag was found for name %s' % tagdic['name'])
+            except Exception as x:
+                print(x)
+                self._logger.debug('Tag search failed...try to create %s' % tagdic['name'])
             if tag is not None:
-                self._logger.debug('Tag with name: %s already exists...updating it...' % tagdic['name'])
+                self._logger.debug('updating %s...' % tagdic['name'])
                 for ar in args:
                     (k,v) = (ar.split('=')[0],ar.split('=')[1])
                     tagdic[k] = v
