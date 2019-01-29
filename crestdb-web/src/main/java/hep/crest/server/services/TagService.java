@@ -80,16 +80,16 @@ public class TagService {
 	 */
 	public TagDto findOne(String id) throws CdbServiceException {
 		try {
-			log.debug("Search for tag by Id...");
+			log.debug("Search for tag by Id...{}",id);
 			Optional<Tag> entity = tagRepository.findById(id);
 			if (entity.isPresent()) {
 				return mapper.map(entity.get(),TagDto.class);
 			}
-			throw new CdbServiceException("Entity for tag "+id+" not present...");
 		} catch (Exception e) {
 			log.error("Exception in retrieving tag by id...");
 			throw new CdbServiceException("Cannot retreive tag by id: " + e.getMessage());
 		}
+		return null; // This will trigger a response 404
 	}
 	
 	
