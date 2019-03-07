@@ -33,7 +33,7 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the folders API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-05-10T14:57:11.305+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-07T17:03:27.462+01:00")
 public class FoldersApi  {
 	@Autowired
 	private FoldersApiService delegate;
@@ -58,7 +58,7 @@ public class FoldersApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = FolderDto.class, responseContainer = "List") })
     public Response listFolders(@ApiParam(value = "by: the search pattern {none}", defaultValue="none") @DefaultValue("none") @QueryParam("by") String by
-,@ApiParam(value = "sort: the sort pattern {nodeFullpath:ASC}", defaultValue="since:ASC") @DefaultValue("since:ASC") @QueryParam("sort") String sort
+,@ApiParam(value = "sort: the sort pattern {nodeFullpath:ASC}", defaultValue="nodeFullpath:ASC") @DefaultValue("nodeFullpath:ASC") @QueryParam("sort") String sort
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.listFolders(by,sort,securityContext,info);
