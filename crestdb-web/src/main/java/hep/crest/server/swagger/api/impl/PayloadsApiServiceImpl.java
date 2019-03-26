@@ -163,6 +163,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			log.debug("Create payload {} and iov {} ",saved,savediov);
 			
 			Files.deleteIfExists(temppath);
+			log.debug("Removed temporary file");
 			HTTPResponse resp = new HTTPResponse().action("storePayloadWithIovMultiForm").code(Response.Status.CREATED.getStatusCode()).id(hash).message("Created new entry in tag "+tag);
 			return Response.created(info.getRequestUri()).entity(resp).build();
 			
