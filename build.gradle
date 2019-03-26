@@ -97,7 +97,7 @@ subprojects {
 	    orika_version = "1.5.1"
 		jersey2_version = "2.22.2"
 		swagger_core_version = "1.5.13"
-    		querydsl_version = "4.2.1"
+    	querydsl_version = "4.2.1"
 		server= "undertow"
 	}
 
@@ -127,9 +127,9 @@ subprojects {
 
 	   	compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
 	   	compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
-    		compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
-    		compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
-    		compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
+    	compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
+    	compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+    	compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
 
 		// DATABASES
 	    //compile group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'

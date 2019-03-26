@@ -49,9 +49,8 @@ dependencies {
     		exclude module: 'spring-boot-starter-tomcat'
     }
     
-    	compile("org.springframework.boot:spring-boot-starter-actuator")
-    
-    	compile ("org.springframework.boot:spring-boot-starter-undertow")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile ("org.springframework.boot:spring-boot-starter-undertow")
     
     compile ("org.springframework.boot:spring-boot-starter-jersey") {
     		exclude module: 'spring-boot-starter-tomcat'
@@ -81,5 +80,4 @@ sourceSets {
             srcDir "$projectDir/generated/java"
         }
     }
-    println main.output.classesDir		
 }

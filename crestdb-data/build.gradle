@@ -1,5 +1,3 @@
-description = 'JPA package for persistency'
-
 buildscript {
     repositories {
         mavenCentral()
@@ -8,9 +6,15 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE")
     }
 }
+plugins {
+    id 'net.ltgt.apt' version '0.18'
+    id 'net.ltgt.apt-eclipse' version '0.18'     
+}
+description = 'JPA package for persistency'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -29,10 +33,12 @@ targetCompatibility = 1.8
 
 dependencies {
 ////   	compile files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")   
+    annotationProcessor     'com.querydsl:querydsl-apt:4.2.1:jpa'
+    annotationProcessor     'org.springframework.boot:spring-boot-starter-data-jpa' // needed because the query dsl annotation processor doesn't recognize javax.persistence.Entity
+    compile                 group: 'com.querydsl', name: 'querydsl-jpa', version: querydsl_version
+
     compile ("org.springframework.boot:spring-boot-starter-data-jpa") 	
     compile group: 'org.apache.commons', name: 'commons-compress', version: '1.15'
-	compile group: 'com.querydsl', name: 'querydsl-jpa', version: querydsl_version
-    compile "com.querydsl:querydsl-apt:${querydsl_version}:jpa" // Magic happens here   
     compile group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
     
 	testCompile("org.springframework.boot:spring-boot-starter-test") 
@@ -52,7 +58,6 @@ sourceSets {
             srcDir "$projectDir/generated/java"
         }
     }
-    println main.output.classesDir		
 }
 
 compileJava {

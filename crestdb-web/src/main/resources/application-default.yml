@@ -26,7 +26,8 @@ crest:
   
 server:
     port: 8090
-    servlet.path: /
+    servlet.path: /    
+    connection-timeout: 60s
 spring:
     security.strategy: MODE_INHERITABLETHREADLOCAL
     jersey:

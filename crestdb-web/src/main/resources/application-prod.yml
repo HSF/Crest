@@ -28,7 +28,8 @@ spring:
         hibernate.show_sql: false
         hibernate.default_schema: ATLAS_PHYS_COND
 server:
-    port: 8080 
+    port: 8080
+    connection-timeout: 300s
 crest:
   schemaname: ATLAS_PHYS_COND  
   webstaticdir: ${crest.web.static}
