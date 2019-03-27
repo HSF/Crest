@@ -157,6 +157,39 @@ public class TagService {
 	}
 	
 	/**
+	 * Update an existing tag
+	 * @param dto
+	 * @return
+	 * 		TagDto of the updated entity.
+	 * @throws CdbServiceException
+	 */
+	@Transactional
+	public TagDto updateTag(TagDto dto) throws CdbServiceException {
+		try {
+			log.debug("Update tag from dto {}", dto);
+			Tag entity =  mapper.map(dto,Tag.class);
+			Optional<Tag> tmpt = tagRepository.findById(entity.getName());
+			if (!tmpt.isPresent()) {
+				log.debug("Cannot update tag {} : resource does not exists.. ",dto);
+				throw new CdbServiceException("Tag does not exists for name "+dto.getName());
+			}
+			Tag toupd = tmpt.get();
+			toupd.setDescription(dto.getDescription());
+			toupd.setObjectType(dto.getObjectType());
+			toupd.setSynchronization(dto.getSynchronization());
+			toupd.setEndOfValidity(dto.getEndOfValidity());
+			toupd.setLastValidatedTime(dto.getLastValidatedTime());
+			toupd.setTimeType(dto.getTimeType());
+			Tag saved = tagRepository.save(toupd);
+			log.debug("Updated entity: {}", saved);
+			return mapper.map(saved,TagDto.class);
+		} catch (Exception e) {
+			log.error("Exception in storing tag {}",dto);
+			throw new CdbServiceException("Cannot store tag : " + e.getMessage());
+		}
+	}
+
+	/**
 	 * @param name
 	 * @throws CdbServiceException
 	 */

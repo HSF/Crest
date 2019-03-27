@@ -95,7 +95,7 @@ public class TagsApiServiceImpl extends TagsApiService {
 					dto.setObjectType(body.get(key));
 				}
 			}
-			TagDto saved = tagService.insertTag(dto);
+			TagDto saved = tagService.updateTag(dto);
 			return Response.created(info.getRequestUri()).entity(saved).build();
 
 		} catch (CdbServiceException e) {
