@@ -29,10 +29,11 @@ from datetime import datetime
 
 sys.path.append(os.path.join(sys.path[0],'..'))
 
-from crestapi.apis import GlobaltagsApi, TagsApi, IovsApi, PayloadsApi
+from crestapi.api import GlobaltagsApi, TagsApi, IovsApi, PayloadsApi
 from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
+from crestapi.configuration import Configuration
 from pprint import pprint
 
 try:
@@ -63,7 +64,7 @@ class PhysDBDriver():
             self.outfilename=''
             self.api_client=None
             self.phtools=None
-            self.urlsvc=os.getenv('CDMS_HOST', 'http://localhost:8080/crestapi')
+            self.urlsvc=os.getenv('CREST_HOST', 'http://crest-undertow.web.cern.ch/crestapi')
             longopts=['help','socks','out=','jsondump','t0=','tMax=','snap=','url=','debug','trace=','by=','page=','pagesize=','iovspan=','user=','pass=','sort=']
             opts,args=getopt.getopt(sys.argv[1:],'',longopts)
             print ('Options %s, args %s' % (opts, args))
@@ -75,7 +76,9 @@ class PhysDBDriver():
 
         if self.useSocks:
             self.activatesocks()
-        self.api_client = ApiClient(host=self.urlsvc)
+        self._config = Configuration()
+        self._config.host = self.urlsvc
+        self.api_client = ApiClient(self._config)
         self.execute()
 
     def usage(self):
@@ -104,7 +107,7 @@ class PhysDBDriver():
         print ("  --sort : comma separated list of conditions for sorting the output of a query (e.g.: sort=name:DESC,id:ASC). DEFAULT=%s" % self.sort)
         print ("  --page [0,...N]: page number to retrieve; use it in combination with page size. DEFAULT=%s" % self.page)
         print ("  --pagesize [1000,30,...]: page size; use it in combination with page. DEFAULT=%s" % self.pagesize)
-        print ("  --url [localhost:8080/physconddb]: use a specific server ")
+        print ("  --url [localhost:8080/crestapi]: use a specific server ")
         print ("  --t0={t0 for iovs}. DEFAULT=%s" % self.t0)
         print ("  --tMax={tMax for iovs}. DEFAULT=%s" % self.tMax)
         print ("  --snap={snapshot time in milli seconds since EPOCH}. DEFAULT=%s" % self.snap)
@@ -156,7 +159,7 @@ class PhysDBDriver():
                 self.passwd=a
             if (o=='--iovspan'):
                 self.iovspan=a
-                
+
         if (len(args)<2):
             raise getopt.GetoptError("Insufficient arguments - need at least 3, or try --help")
         self.action=args[0].upper()
@@ -165,15 +168,15 @@ class PhysDBDriver():
     def execute(self):
         msg = ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
         self.printmsg(msg,'cyan')
-            
+
         start = datetime.now()
-        
+
         if self.dump:
             outfile = open(self.outfilename,"w")
         _dict = {}
         params = {}
-        
-        
+
+
         if (self.action=='LS'):
             try:
                 print ('Action LS is used to retrieve object from the DB')
@@ -185,8 +188,8 @@ class PhysDBDriver():
                 else:
                     msg = ('LS: cannot apply command to object %s ') % (object)
                     self.printmsg(msg,'red')
-                    return -1        
-                
+                    return -1
+
                 resp = self.ls(object)
                 if self.dump:
 #                    json.dump(resp, outfile)
@@ -194,7 +197,7 @@ class PhysDBDriver():
                         outfile.write(el['name'])
                         outfile.write('\n')
                     outfile.close()
-                    
+
 
             except Exception as e:
                 sys.exit("failed on action LS: %s" % (str(e)))
@@ -205,7 +208,7 @@ class PhysDBDriver():
                 print ('Found N arguments %s' % len(self.args))
                 object=self.args[0]
                 msg = ('TRACE: selected global tag is %s ') % (object)
-                self.printmsg(msg,'cyan')       
+                self.printmsg(msg,'cyan')
                 resp = self.tracetags(object)
                 if self.dump:
                     json.dump(resp, outfile)
@@ -214,14 +217,14 @@ class PhysDBDriver():
             except Exception as e:
                 sys.exit("failed on action TRACE: %s" % (str(e)))
                 raise
-                
+
         elif (self.action=='IOVS'):
             try:
                 print ('Action IOVS is used to retrieve IOVS associated to a given tag')
                 print ('Found N arguments %s' % len(self.args))
                 object=self.args[0]
                 msg = ('IOVS: selected tag is %s ') % (object)
-                self.printmsg(msg,'cyan')       
+                self.printmsg(msg,'cyan')
                 resp = self.selectiovs(object)
                 if self.dump:
                     json.dump(resp, outfile)
@@ -230,14 +233,14 @@ class PhysDBDriver():
             except Exception as e:
                 sys.exit("failed on action IOVS: %s" % (str(e)))
                 raise
-                
+
         elif (self.action=='GROUPS'):
             try:
                 print ('Action GROUPS is used to retrieve GROUPS associated to a given tag')
                 print ('Found N arguments %s' % len(self.args))
                 object=self.args[0]
                 msg = ('GROUPS: selected tag is %s ') % (object)
-                self.printmsg(msg,'cyan')    
+                self.printmsg(msg,'cyan')
                 resp=None
                 if '%' in object:
                     if object == '%':
@@ -264,9 +267,9 @@ class PhysDBDriver():
 
                     outfile.close()
                     sys.exit(0)
-                else:   
+                else:
                     resp = self.selectgroups(object)
-                    
+
                 if self.dump:
                     json.dump(resp, outfile)
                     outfile.close()
@@ -274,14 +277,14 @@ class PhysDBDriver():
             except Exception as e:
                 sys.exit("failed on action GROUPS: %s" % (str(e)))
                 raise
-                
+
         elif (self.action=='PAYLOAD'):
             try:
                 print ('Action PAYLOAD is used to retrieve PAYLOAD associated to a given hash')
                 print ('Found N arguments %s' % len(self.args))
                 object=self.args[0]
                 msg = ('PAYLOAD: selected hash is %s ') % (object)
-                self.printmsg(msg,'cyan')       
+                self.printmsg(msg,'cyan')
                 resp = self.getpayload(object)
                 if self.dump:
                     json.dump(resp, outfile)
@@ -320,7 +323,7 @@ class PhysDBDriver():
 
         except:
             print (msg)
-        
+
 
     def activatesocks(self):
         try:
@@ -339,11 +342,11 @@ class PhysDBDriver():
             print ('Activated socks proxy on %s : %s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
         except:
             print ('Error in socks activation')
-        
+
     def ls(self,objtype):
         by = self.by # str | by: the search pattern {none} (optional) (default to none)
         page = self.page # int | page: the page number {0} (optional) (default to 0)
-        size = self.pagesize # int | size: the page size {1000} (optional) (default to 1000)            
+        size = self.pagesize # int | size: the page size {1000} (optional) (default to 1000)
         sort = self.sort # str | sort: the sort pattern {name:ASC} (optional) (default to name:ASC)
         if sort == 'none':
             sort = 'name:DESC'
@@ -351,7 +354,7 @@ class PhysDBDriver():
             print ('Retrieve list of global tags from DB')
         # create an instance of the API class
             api_instance = GlobaltagsApi(self.api_client)
-            try: 
+            try:
             # Finds a GlobalTagDtos lists.
                 api_response = api_instance.list_global_tags(by=by, page=page, size=size, sort=sort)
                 dictresp = self.api_client.sanitize_for_serialization(api_response)
@@ -359,11 +362,11 @@ class PhysDBDriver():
                 return dictresp
             except ApiException as e:
                 print ("Exception when calling GlobaltagsApi->list_global_tags: %s\n" % e)
-                
+
         elif objtype == 'tags':
             print ('Retrieve list of tags from DB')
             api_instance = TagsApi(self.api_client)
-            try: 
+            try:
             # Finds a TagDtos lists.
                 api_response = api_instance.list_tags(by=by, page=page, size=size, sort=sort)
                 dictresp = self.api_client.sanitize_for_serialization(api_response)
@@ -371,7 +374,7 @@ class PhysDBDriver():
                 return dictresp
 
             except ApiException as e:
-                print ("Exception when calling TagsApi->list_tags: %s\n" % e)         
+                print ("Exception when calling TagsApi->list_tags: %s\n" % e)
         else:
             print ('Cannot use resource %s ' % objtype )
         return
@@ -379,7 +382,7 @@ class PhysDBDriver():
     def tracetags(self,globaltagname,record='',label=''):
         print ('Trace global tag %s ' % globaltagname)
         api_instance = GlobaltagsApi(self.api_client)
-        try: 
+        try:
         # Finds a TagDtos lists associated to the global tag name in input.
             api_response = api_instance.find_global_tag_fetch_tags(globaltagname, record=record, label=label)
             dictresp = self.api_client.sanitize_for_serialization(api_response)
@@ -389,7 +392,7 @@ class PhysDBDriver():
         except ApiException as e:
             print ("Exception when calling GlobaltagsApi->find_global_tag_fetch_tags: %s\n" % e)
         return
-    
+
     def selectiovs(self,tagname):
         # create an instance of the API class
         api_instance = IovsApi(self.api_client)
@@ -397,7 +400,7 @@ class PhysDBDriver():
         until = self.tMax # str | until: the until time as a string {INF} (optional) (default to INF)
         snapshot = self.snap # int | snapshot: the snapshot time {0} (optional) (default to 0)
 
-        try: 
+        try:
         # Select iovs for a given tagname and in a given range.
             api_response = api_instance.select_iovs(tagname=tagname, since=since, until=until, snapshot=snapshot)
             dictresp = self.api_client.sanitize_for_serialization(api_response)
@@ -408,13 +411,13 @@ class PhysDBDriver():
         except ApiException as e:
             print ("Exception when calling IovsApi->select_iovs: %s\n" % e)
         return
-    
+
     def selectgroups(self,tagname):
         # create an instance of the API class
         api_instance = IovsApi(self.api_client)
         snapshot = self.snap # int | snapshot: the snapshot time {0} (optional) (default to 0)
 
-        try: 
+        try:
         # Select iovs for a given tagname and in a given range.
             api_response = api_instance.select_groups(tagname=tagname, snapshot=snapshot)
             dictresp = self.api_client.sanitize_for_serialization(api_response)
@@ -425,11 +428,11 @@ class PhysDBDriver():
         except ApiException as e:
             print ("Exception when calling IovsApi->select_groups: %s\n" % e)
         return
-    
+
     def getpayload(self,pyldhash):
         # create an instance of the API class
         api_instance = PayloadsApi(self.api_client)
-        try: 
+        try:
         # Select iovs for a given tagname and in a given range.
             print ('Selecting payload using hash %s' % pyldhash)
             api_response = api_instance.get_blob(pyldhash)
@@ -442,7 +445,6 @@ class PhysDBDriver():
         except ApiException as e:
             print ("Exception when calling PayloadsApi->get_payload: %s\n" % e)
         return
-    
+
 if __name__ == '__main__':
     PhysDBDriver()
-

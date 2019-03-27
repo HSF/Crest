@@ -29,10 +29,11 @@ from datetime import datetime
 
 sys.path.append(os.path.join(sys.path[0],'..'))
 
-from crestapi.apis import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
+from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
 from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto,PayloadDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
+from crestapi.configuration import Configuration
 from pprint import pprint
 
 try:
@@ -63,7 +64,7 @@ class PhysDBDriver():
             self.outfilename=''
             self.api_client=None
             self.phtools=None
-            self.urlsvc=os.getenv('CDMS_HOST', 'http://localhost:8080/crestapi')
+            self.urlsvc=os.getenv('CREST_HOST', 'http://crest-undertow.web.cern.ch/crestapi')
             longopts=['help','socks','out=','jsondump','t0=','tMax=','snap=','url=','debug','trace=','by=','page=','pagesize=','iovspan=','user=','pass=','sort=']
             opts,args=getopt.getopt(sys.argv[1:],'',longopts)
             print ('%s, %s' % (opts, args))
@@ -72,10 +73,13 @@ class PhysDBDriver():
             print (e)
             self.usage()
             sys.exit(-1)
-            
+
         if self.useSocks:
             self.activatesocks()
-        self.api_client = ApiClient(host=self.urlsvc)
+        self._config = Configuration()
+        self._config.host = self.urlsvc
+        self.api_client = ApiClient(self._config)
+
         self.execute()
 
     def usage(self):
@@ -105,7 +109,7 @@ class PhysDBDriver():
         print ("  --sort : comma separated list of conditions for sorting the output of a query (e.g.: sort=name:DESC,id:ASC). DEFAULT=%s" % self.sort)
         print ("  --page [0,...N]: page number to retrieve; use it in combination with page size. DEFAULT=%s" % self.page)
         print ("  --pagesize [1000,30,...]: page size; use it in combination with page. DEFAULT=%s" % self.pagesize)
-        print ("  --url [localhost:8080/physconddb]: use a specific server ")
+        print ("  --url [localhost:8080/crestapi]: use a specific server ")
         print ("  --t0={t0 for iovs}. DEFAULT=%s" % self.t0)
         print ("  --tMax={tMax for iovs}. DEFAULT=%s" % self.tMax)
         print ("  --snap={snapshot time in milli seconds since EPOCH}. DEFAULT=%s" % self.snap)
@@ -157,7 +161,7 @@ class PhysDBDriver():
                 self.passwd=a
             if (o=='--iovspan'):
                 self.iovspan=a
-                
+
         if (len(args)<2):
             raise getopt.GetoptError("Insufficient arguments - need at least 3, or try --help")
         self.action=args[0].upper()
@@ -166,15 +170,15 @@ class PhysDBDriver():
     def execute(self):
         msg = ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
         self.printmsg(msg,'cyan')
-            
+
         start = datetime.now()
-        
+
         if self.dump:
             outfile = open(self.outfilename,"w")
         _dict = {}
         params = {}
-        
-        
+
+
         if (self.action=='ADD'):
             try:
                 print ('Action ADD is used to add a resource in the DB')
@@ -189,27 +193,28 @@ class PhysDBDriver():
                 else:
                     msg = ('ADD: cannot apply command to object %s ') % (object)
                     self.printmsg(msg,'red')
-                    return -1        
-                
+                    return -1
+
                 filename = self.args[1]
                 self.add(object,filename)
 
             except Exception as e:
                 sys.exit("failed on action ADD: %s" % (str(e)))
                 raise
-            
+
         elif (self.action=='INSERT'):
             try:
                 print ('Action INSERT is used to add a payload resource in the DB, with a since and a tagname')
                 print ('Found N arguments %s' % len(self.args))
-                if len(self.args)<4:
+                if len(self.args)<3:
                     sys.exit("Number of arguments is wrong...may be you forgot ID?")
                     raise
                 tagname=self.args[0]
-                since=self.args[1]    
+                since=self.args[1]
                 filename = self.args[2]
-                payload = self.args[3]
-                self.insertiov(tagname,since,filename,payload)
+                #payload = self.args[3]
+#                self.insertiov(tagname,since,filename,payload)
+                self.insert_iov_payload(tagname,since,filename)
 
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -252,14 +257,14 @@ class PhysDBDriver():
                     raise
                 object=self.args[0]
                 msg = ('RM: selected type is %s ') % (object)
-                self.printmsg(msg,'cyan')       
+                self.printmsg(msg,'cyan')
                 if object in [ 'globaltags', 'tags' ]:
                     self.printmsg(msg,'cyan')
                 else:
                     msg = ('RM: cannot apply command to object %s ') % (object)
                     self.printmsg(msg,'red')
-                    return -1       
-                
+                    return -1
+
                 resourceid = self.args[1]
                 self.rm(object,resourceid)
 
@@ -279,7 +284,7 @@ class PhysDBDriver():
 
 
         tend=datetime.now()
-        print 
+        print
         print ('Time spent (ms): %s ' % (tend-start))
 
     def printmsg(self,msg,color):
@@ -296,7 +301,7 @@ class PhysDBDriver():
 
         except:
             print (msg)
-    
+
     def activatesocks(self):
         try:
             import socket
@@ -315,6 +320,14 @@ class PhysDBDriver():
         except:
             print ('Error in socks activation')
 
+    def insert_iov_payload(self,tag,since,pyldf):
+        papi_instance = PayloadsApi(self.api_client)
+        try:
+            papi_response = papi_instance.store_payload_with_iov_multi_form(pyldf,tag,since)
+            print('Stored payload %s' % papi_response)
+        except ApiException as e:
+            print ("Exception when calling PayloadsApi->store_payload_with_iov_multi_form: %s\n" % e)
+
     def insertiov(self,tag,since,pyldf,payload):
         # pyldf is the BLOB
         # payload is the PayloadDto file
@@ -329,14 +342,14 @@ class PhysDBDriver():
                 data=myfile.read().replace('\n', '')  # Why does it need to replace \n ????
                 #data=myfile.read()
                 dtodict = json.loads(data)
-            
+
             print ("loaded payload dto %s with hash %s !" % (data,dtodict['hash']))
             if dtodict['hash'] == '' or dtodict['hash'] == 'none':
                 dtodict['hash'] = mhash
             tojsondto = json.dumps(dtodict)
             print ('Store dto %s and file %s' % (tojsondto,pyldf))
             papi_response = papi_instance.create_payload_multi_form(pyldf,tojsondto)
-## Api response should be payloaddto            
+## Api response should be payloaddto
             #pprint(api_response)
             print ('Stored payload for hash %s' % papi_response)
             payloadhash = papi_response.hash
@@ -348,9 +361,9 @@ class PhysDBDriver():
         except ApiException as e:
             print ("Exception when calling PayloadsApi->create_payload_multi_form: %s\n" % e)
             print ("Exception when calling IovsApi->create_iov: %s\n" % e)
-            
+
     def rm(self,objtype, resid):
-        
+
         api_instance = AdminApi(self.api_client)
         if objtype == 'globaltags':
             try:
@@ -367,7 +380,7 @@ class PhysDBDriver():
         else:
             print ('Cannot use resource %s' % objtype)
         return
-            
+
     def add(self,objtype,filename):
         if objtype == 'globaltags':
             api_instance = GlobaltagsApi(self.api_client)
@@ -381,8 +394,8 @@ class PhysDBDriver():
                 dto = GlobalTagDto(dtodict['name'],dtodict['validity'],dtodict['description'],dtodict['release'],
                                    None,snapttz,
                                    dtodict['scenario'],dtodict['workflow'],dtodict['type'],
-                                   None,None) 
-                
+                                   None,None)
+
                 forcemode = False
                 msg = ('Created dto resource %s ' ) % (dto.to_dict())
                 pprint(msg)
@@ -400,8 +413,8 @@ class PhysDBDriver():
                 print ('Create dto dictionary from json %s ' % dtodict)
                 dto = TagDto(dtodict['name'],dtodict['timeType'],dtodict['objectType'],dtodict['synchronization'],
                                    dtodict['description'],dtodict['lastValidatedTime'],dtodict['endOfValidity'],
-                                   None,None) 
-                
+                                   None,None)
+
                 forcemode = False
                 msg = ('Created dto resource %s ' ) % (dto.to_dict())
                 pprint(msg)
@@ -409,14 +422,14 @@ class PhysDBDriver():
                 pprint(api_response)
             except ApiException as e:
                 print ("Exception when calling TagsApi->create_tag: %s\n" % e)
-                
+
         elif objtype == 'maps':
             api_instance = GlobaltagmapsApi(self.api_client)
             try:
                 f = open(filename, 'r')
                 jsondtodict = f.read()
                 dtodict = json.loads(jsondtodict)
-                dto = GlobalTagMapDto(dtodict['globalTagName'],dtodict['record'],dtodict['label'],dtodict['tagName'])                 
+                dto = GlobalTagMapDto(dtodict['globalTagName'],dtodict['record'],dtodict['label'],dtodict['tagName'])
                 msg = ('Created dto resource %s ' ) % (dto.to_dict())
                 pprint(msg)
                 api_response = api_instance.create_global_tag_map(dto)
@@ -426,33 +439,33 @@ class PhysDBDriver():
         else:
             print ('Cannot use resource %s' % objtype)
         return
- 
+
 
     def ls(self,objtype):
         by = self.by # str | by: the search pattern {none} (optional) (default to none)
         page = self.page # int | page: the page number {0} (optional) (default to 0)
-        size = self.pagesize # int | size: the page size {1000} (optional) (default to 1000)            
+        size = self.pagesize # int | size: the page size {1000} (optional) (default to 1000)
         sort = self.sort # str | sort: the sort pattern {name:ASC} (optional) (default to name:ASC)
         if sort == 'none':
             sort = 'name:DESC'
         if objtype == 'globaltags':
         # create an instance of the API class
             api_instance = GlobaltagsApi(self.api_client)
-            try: 
+            try:
             # Finds a GlobalTagDtos lists.
                 api_response = api_instance.list_global_tags(by=by, page=page, size=size, sort=sort)
                 pprint(api_response)
             except ApiException as e:
                 print ("Exception when calling GlobaltagsApi->list_global_tags: %s\n" % e)
-                
+
         elif objtype == 'tags':
             api_instance = TagsApi(self.api_client)
-            try: 
+            try:
             # Finds a TagDtos lists.
                 api_response = api_instance.list_tags(by=by, page=page, size=size, sort=sort)
                 pprint(api_response)
             except ApiException as e:
-                print ("Exception when calling TagsApi->list_tags: %s\n" % e )          
+                print ("Exception when calling TagsApi->list_tags: %s\n" % e )
         else:
             print ('Cannot use resource %s' % objtype)
         return
@@ -460,14 +473,14 @@ class PhysDBDriver():
     def tracetags(self,globaltagname,record='',label=''):
         print ('Trace global tag %s ' % globaltagname)
         api_instance = GlobaltagsApi(self.api_client)
-        try: 
+        try:
         # Finds a TagDtos lists associated to the global tag name in input.
             api_response = api_instance.find_global_tag_fetch_tags(globaltagname, record=record, label=label)
             pprint(api_response)
         except ApiException as e:
             print ("Exception when calling GlobaltagsApi->find_global_tag_fetch_tags: %s\n" % e)
         return
-    
+
     def selectiovs(self,tagname):
         # create an instance of the API class
         api_instance = IovsApi(self.api_client)
@@ -475,18 +488,18 @@ class PhysDBDriver():
         until = self.tMax # str | until: the until time as a string {INF} (optional) (default to INF)
         snapshot = self.snap # int | snapshot: the snapshot time {0} (optional) (default to 0)
 
-        try: 
+        try:
         # Select iovs for a given tagname and in a given range.
             api_response = api_instance.select_iovs(tagname=tagname, since=since, until=until, snapshot=snapshot)
             pprint(api_response)
         except ApiException as e:
             print ("Exception when calling IovsApi->select_iovs: %s\n" % e)
         return
-    
+
     def getpayload(self,pyldhash):
         # create an instance of the API class
         api_instance = PayloadsApi(self.api_client)
-        try: 
+        try:
         # Select iovs for a given tagname and in a given range.
             print ('Selecting payload using hash %s' % pyldhash)
             api_response = api_instance.get_payload(pyldhash)
@@ -494,9 +507,9 @@ class PhysDBDriver():
         except ApiException as e:
             print ("Exception when calling PayloadsApi->get_payload: %s\n" % e)
         return
-    
+
     def gethashfromfile(self,datafile):
-        try: 
+        try:
             import hashlib
         # Select iovs for a given tagname and in a given range.
             print ('Compute payload hash from file %s' % datafile)
@@ -508,8 +521,7 @@ class PhysDBDriver():
         except Exception as e:
             print ("Exception when calling gethashfromfile: %s\n" % e)
         return "none"
-        
-    
+
+
 if __name__ == '__main__':
     PhysDBDriver()
-
