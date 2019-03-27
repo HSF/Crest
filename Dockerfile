@@ -13,7 +13,7 @@ ENV crest_version 1.1-SNAPSHOT
 ENV crest_dir /home/${USR}/swagger_crest
 ##ENV data_dir /home/${USR}/data
 ENV data_dir /data
-ENV gradle_version 4.2.1
+ENV gradle_version 5.2.1
 ENV TZ GMT
 
 RUN  mkdir -p ${crest_dir} \
