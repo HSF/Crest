@@ -18,7 +18,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import javax.validation.constraints.*;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-27T13:10:49.872+01:00")
 public abstract class TagsApiService {
     public abstract Response createTag(TagDto body,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response findTag(String name,SecurityContext securityContext, UriInfo info) throws NotFoundException;

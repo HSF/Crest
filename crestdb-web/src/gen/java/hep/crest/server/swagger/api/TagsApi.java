@@ -9,6 +9,7 @@ import io.swagger.jaxrs.*;
 import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.TagDto;
 
+import java.util.Map;
 import java.util.List;
 import hep.crest.server.swagger.api.NotFoundException;
 
@@ -17,23 +18,24 @@ import java.io.InputStream;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import javax.ws.rs.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.*;
 import javax.validation.constraints.*;
 
 @Path("/tags")
 
 
 @io.swagger.annotations.Api(description = "the tags API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-27T13:10:49.872+01:00")
 public class TagsApi  {
-
 	@Autowired
 	private TagsApiService delegate;
 
@@ -76,7 +78,7 @@ public class TagsApi  {
     throws NotFoundException {
         return delegate.listTags(by,page,size,sort,securityContext,info);
     }
-    @POST
+    @PUT
     @Path("/{name}")
     
     @Produces({ "application/json", "application/xml" })
