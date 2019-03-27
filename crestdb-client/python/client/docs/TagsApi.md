@@ -7,7 +7,7 @@ Method | HTTP request | Description
 [**create_tag**](TagsApi.md#create_tag) | **POST** /tags | Create a Tag in the database.
 [**find_tag**](TagsApi.md#find_tag) | **GET** /tags/{name} | Finds a TagDto by name
 [**list_tags**](TagsApi.md#list_tags) | **GET** /tags | Finds a TagDtos lists.
-[**update_tag**](TagsApi.md#update_tag) | **POST** /tags/{name} | Update a TagDto by name
+[**update_tag**](TagsApi.md#update_tag) | **PUT** /tags/{name} | Update a TagDto by name
 
 
 # **create_tag**

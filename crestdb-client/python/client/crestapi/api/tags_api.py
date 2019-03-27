@@ -418,7 +418,7 @@ class TagsApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/tags/{name}', 'POST',
+            '/tags/{name}', 'PUT',
             path_params,
             query_params,
             header_params,
