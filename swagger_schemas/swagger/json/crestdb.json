@@ -1163,6 +1163,62 @@
 				}
 			}
 		},
+		"/payloads/storebatch": {
+			"post": {
+				"tags": [
+					"payloads"
+				],
+				"summary": "Create many Payloads in the database, associated to a given iov since list and tag name.",
+				"description": "This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB",
+				"operationId": "storePayloadBatchWithIovMultiForm",
+				"consumes": [
+					"multipart/form-data"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "header",
+						"name": "X-Crest-PayloadFormat",
+						"description": "The format of the input data",
+						"default": "JSON",
+						"type": "string"
+					},
+					{
+						"name": "files",
+						"in": "formData",
+						"description": "The files to upload",
+						"required": true,
+						"type": "file"
+					},
+					{
+						"name": "iovsetupload",
+						"in": "formData",
+						"required": true,
+						"type" : "string"
+					},
+					{
+						"name": "endtime",
+						"in": "formData",
+						"description": "The end time to be used for protection at tag level",
+						"required": false,
+						"type": "number"
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "successful operation",
+						"schema": {
+							"type": "object",
+							"items": {
+								"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/payloads/{hash}": {
 			"get": {
 				"tags": [

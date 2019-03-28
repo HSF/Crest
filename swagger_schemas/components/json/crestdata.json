@@ -1,7 +1,7 @@
 {
 	"definitions": {
 		"HTTPResponse": {
-		    "description": "general response object that can be used for POST and PUT methods",
+			"description": "general response object that can be used for POST and PUT methods",
 			"type": "object",
 			"required": [
 				"message",
@@ -26,19 +26,19 @@
 				}
 			}
 		},
-		"GenericMap" : {
-			"type" : "object",
+		"GenericMap": {
+			"type": "object",
 			"properties": {
-					"name":{
-						"type":"string"
-					}
+				"name": {
+					"type": "string"
+				}
 			},
 			"additionalProperties": {
-  				"type": "string"
-  		}
+				"type": "string"
+			}
 		},
-		"FolderDto" : {
-			"type" : "object",
+		"FolderDto": {
+			"type": "object",
 			"properties": {
 				"nodeFullpath": {
 					"type": "string"
@@ -60,8 +60,8 @@
 				}
 			}
 		},
-		"PayloadTagInfoDto" : {
-			"type" : "object",
+		"PayloadTagInfoDto": {
+			"type": "object",
 			"properties": {
 				"tagname": {
 					"type": "string"
@@ -79,8 +79,8 @@
 				}
 			}
 		},
-		"RunLumiInfoDto" : {
-			"type" : "object",
+		"RunLumiInfoDto": {
+			"type": "object",
 			"properties": {
 				"since": {
 					"type": "number"
@@ -230,6 +230,21 @@
 				},
 				"payloadHash": {
 					"type": "string"
+				}
+			}
+		},
+		"IovSetDto": {
+			"type": "object",
+			"properties": {
+				"niovs": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"iovsList": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/IovDto"
+					}
 				}
 			}
 		},
