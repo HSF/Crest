@@ -16,7 +16,7 @@ import re  # noqa: F401
 
 import six
 
-from crestapi.models.iov_dto import IovDto  # noqa: F401,E501
+from crestapi.models.iov_payload_dto import IovPayloadDto  # noqa: F401,E501
 
 
 class IovSetDto(object):
@@ -35,7 +35,7 @@ class IovSetDto(object):
     swagger_types = {
         'niovs': 'int',
         'format': 'str',
-        'iovs_list': 'list[IovDto]'
+        'iovs_list': 'list[IovPayloadDto]'
     }
 
     attribute_map = {
@@ -44,20 +44,22 @@ class IovSetDto(object):
         'iovs_list': 'iovsList'
     }
 
+    discriminator_value_class_map = {
+        
+    }
+
     def __init__(self, niovs=None, format=None, iovs_list=None):  # noqa: E501
         """IovSetDto - a model defined in Swagger"""  # noqa: E501
 
         self._niovs = None
         self._format = None
         self._iovs_list = None
-        self.discriminator = None
+        self.discriminator = 'format'
 
         if niovs is not None:
             self.niovs = niovs
-        if format is not None:
-            self.format = format
-        if iovs_list is not None:
-            self.iovs_list = iovs_list
+        self.format = format
+        self.iovs_list = iovs_list
 
     @property
     def niovs(self):
@@ -98,6 +100,8 @@ class IovSetDto(object):
         :param format: The format of this IovSetDto.  # noqa: E501
         :type: str
         """
+        if format is None:
+            raise ValueError("Invalid value for `format`, must not be `None`")  # noqa: E501
 
         self._format = format
 
@@ -107,7 +111,7 @@ class IovSetDto(object):
 
 
         :return: The iovs_list of this IovSetDto.  # noqa: E501
-        :rtype: list[IovDto]
+        :rtype: list[IovPayloadDto]
         """
         return self._iovs_list
 
@@ -117,10 +121,17 @@ class IovSetDto(object):
 
 
         :param iovs_list: The iovs_list of this IovSetDto.  # noqa: E501
-        :type: list[IovDto]
+        :type: list[IovPayloadDto]
         """
+        if iovs_list is None:
+            raise ValueError("Invalid value for `iovs_list`, must not be `None`")  # noqa: E501
 
         self._iovs_list = iovs_list
+
+    def get_real_child_model(self, data):
+        """Returns the real base class specified by the discriminator"""
+        discriminator_value = data[self.discriminator]
+        return self.discriminator_value_class_map.get(discriminator_value)
 
     def to_dict(self):
         """Returns the model properties as a dict"""

@@ -4,6 +4,7 @@
 package hep.crest.server.services;
 
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -179,6 +180,22 @@ public class PayloadService {
 		} catch (Exception e) {
 			log.error("Exception in copying payload to disk in file {}: {}",file,e.getMessage());
 			throw new CdbServiceException("Cannot store payload : " + e.getMessage());
+		}
+	}
+
+	/**
+	 * @param is
+	 * @param file
+	 * @return
+	 * @throws CdbServiceException
+	 */
+	public String getInputStreamHash(InputStream is) throws CdbServiceException {
+		try {
+			log.debug("Save inputstream and compute hash");
+			return payloadHandler.getHashFromStream((BufferedInputStream) is);
+		} catch (Exception e) {
+			log.error("Exception in getting hash from string payload {}",e.getMessage());
+			throw new CdbServiceException("Cannot get payload hash: " + e.getMessage());
 		}
 	}
 
