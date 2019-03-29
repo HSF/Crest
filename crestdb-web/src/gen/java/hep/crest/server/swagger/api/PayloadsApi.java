@@ -9,6 +9,7 @@ import io.swagger.jaxrs.*;
 import java.math.BigDecimal;
 import java.io.File;
 import hep.crest.swagger.model.HTTPResponse;
+import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
 
 import java.util.Map;
@@ -37,7 +38,7 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the payloads API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-01-11T13:34:58.643+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-28T10:58:03.879+01:00")
 public class PayloadsApi  {
 	@Autowired
 	private PayloadsApiService delegate;
@@ -105,6 +106,24 @@ public class PayloadsApi  {
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.getPayloadMetaInfo(hash,securityContext,info);
+    }
+    @POST
+    @Path("/storebatch")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Create many Payloads in the database, associated to a given iov since list and tag name.", notes = "This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB", response = IovSetDto.class, tags={ "payloads", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = IovSetDto.class) })
+    public Response storePayloadBatchWithIovMultiForm(
+            @FormDataParam("files") List<FormDataBodyPart> filesbodyparts,
+            @FormDataParam("files") FormDataContentDisposition filesDetail
+            ,@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
+,@ApiParam(value = "", required=true)@FormDataParam("iovsetupload")  FormDataBodyPart iovsetupload
+,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
+,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.storePayloadBatchWithIovMultiForm(filesbodyparts, filesDetail,tag,iovsetupload,xCrestPayloadFormat,endtime,securityContext,info);
     }
     @POST
     @Path("/store")

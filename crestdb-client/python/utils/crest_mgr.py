@@ -30,7 +30,7 @@ from datetime import datetime
 sys.path.append(os.path.join(sys.path[0],'..'))
 
 from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
-from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto,PayloadDto
+from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
 from crestapi.configuration import Configuration
@@ -92,8 +92,10 @@ class PhysDBDriver():
         print (" - ADD <type> [json-filename] [type = tags, globaltags, ...] : add the selected resource using the json file provided in input")
         print ("        ex: ADD globaltags <json-filename>: add a new global tag with the content taken from json file")
         print (" ")
-        print (" - INSERT <tag> <since> blob-file <json-payload> : add a new IOV with its payload + metadata")
+        print (" - INSERT <tag> <since> blob-file : add a new IOV with its payload")
         print ("        ex: INSERT my-tag 10000 myblob.blob mypayload.json: add a payload and then the iov in the correspoding tag")
+        print (" - BATCHINSERT multi-iov-file : add a new IOV LIST with its payload files included in the multi-iov-file")
+        print ("        ex: BATCHINSERT iovset.json: the internal format of the file should include the iov list")
         print (" ")
         print (" - RM <type> [id] [type = tags, globaltags, ...] : remove the selected resource")
         print ("        ex: RM globaltags MY_TEST02_GTAG : remove the global tag identified by MY_TEST02_GTAG")
@@ -227,6 +229,28 @@ class PhysDBDriver():
                 sys.exit("failed on action INSERT: %s" % (str(e)))
                 raise
 
+        elif (self.action=='BATCHINSERT'):
+            try:
+                print ('Action BATCHINSERT is used to add multi payload resources in the DB, with a list of since, for a given tagname')
+                print ('Found N arguments %s' % len(self.args))
+                if len(self.args)<1:
+                    sys.exit("Number of arguments is wrong...")
+                    raise
+                iovsetfile=self.args[0]
+
+                self.insert_multiiovs_payload(iovsetfile)
+
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                print ("*** print_tb:")
+                traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+                print ("*** print_exception:")
+                traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout)
+
+                sys.exit("failed on action BATCHINSERT: %s" % (str(e)))
+                raise
+
         elif (self.action=='HASH'):
             try:
                 print ('Action HASH is used to compute a payload hash given a file in input')
@@ -327,6 +351,39 @@ class PhysDBDriver():
             print('Stored payload %s' % papi_response)
         except ApiException as e:
             print ("Exception when calling PayloadsApi->store_payload_with_iov_multi_form: %s\n" % e)
+
+    def insert_multiiovs_payload(self,iovsetfile):
+        dtodict = {}
+        jobj = None
+        with open(iovsetfile, 'r') as mfile:
+            jobj = mfile.read()
+            dtodict = json.loads(jobj)
+
+        files = []
+        iovs = []
+        tag = ""
+        ni = len(dtodict["iovsList"])
+        fmt= dtodict["format"]
+        for aniov in dtodict["iovsList"]:
+            fname = aniov["payloadHash"]
+            if "file://" not in fname:
+                aniov["payloadHash"] = "file://%s" % fname
+            else:
+                fname = fname.replace("file://","")
+            print("found file name %s" % fname)
+            files.append(fname)
+            tag=aniov["tagName"]
+            iovdto = IovDto(since=aniov["since"],tag_name=aniov["tagName"],payload_hash=aniov["payloadHash"])
+            iovs.append(iovdto)
+
+        iovsetdto = IovSetDto(niovs=ni,format=fmt,iovs_list=iovs)
+        print("created iovset dto : %s" % iovsetdto)
+        papi_instance = PayloadsApi(self.api_client)
+        try:
+            papi_response = papi_instance.store_payload_batch_with_iov_multi_form(files=files,tag=tag,iovsetupload=jobj)
+            print('Stored payload %s' % papi_response)
+        except ApiException as e:
+            print ("Exception when calling PayloadsApi->store_payload_batch_with_iov_multi_form: %s\n" % e)
 
     def insertiov(self,tag,since,pyldf,payload):
         # pyldf is the BLOB

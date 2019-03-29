@@ -1193,6 +1193,13 @@
 						"type": "file"
 					},
 					{
+						"name": "tag",
+						"in": "formData",
+						"description": "The tag name",
+						"required": true,
+						"type": "string"
+					},
+					{
 						"name": "iovsetupload",
 						"in": "formData",
 						"required": true,
@@ -1210,10 +1217,7 @@
 					"201": {
 						"description": "successful operation",
 						"schema": {
-							"type": "object",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
