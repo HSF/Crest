@@ -1,8 +1,8 @@
 {
   "niovs": 2,
-  "format": "JSON",
+  "format": "PYLD_JSON",
   "iovsList": [
-    { "tagName": "L1CALO-RUN3-01", "since" : 300, "payloadHash" : "file:///tmp/map.json"},
-    { "tagName": "L1CALO-RUN3-01", "since" : 400, "payloadHash" : "file:///tmp/noise.json"}
+    { "since" : 600, "payload" : "{\"key\":\"some val\"}"},
+    { "since" : 700, "payload" : "{\"key\":\"some val again\"}"}
   ]
 }

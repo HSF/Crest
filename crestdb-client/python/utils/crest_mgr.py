@@ -30,7 +30,7 @@ from datetime import datetime
 sys.path.append(os.path.join(sys.path[0],'..'))
 
 from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
-from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto
+from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto, IovPayloadDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
 from crestapi.configuration import Configuration
@@ -236,9 +236,10 @@ class PhysDBDriver():
                 if len(self.args)<1:
                     sys.exit("Number of arguments is wrong...")
                     raise
-                iovsetfile=self.args[0]
+                tagname=self.args[0]
+                iovsetfile=self.args[1]
 
-                self.insert_multiiovs_payload(iovsetfile)
+                self.insert_multiiovs_payload(tagname,iovsetfile)
 
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -352,7 +353,7 @@ class PhysDBDriver():
         except ApiException as e:
             print ("Exception when calling PayloadsApi->store_payload_with_iov_multi_form: %s\n" % e)
 
-    def insert_multiiovs_payload(self,iovsetfile):
+    def insert_multiiovs_payload(self,tagname,iovsetfile):
         dtodict = {}
         jobj = None
         with open(iovsetfile, 'r') as mfile:
@@ -364,26 +365,41 @@ class PhysDBDriver():
         tag = ""
         ni = len(dtodict["iovsList"])
         fmt= dtodict["format"]
-        for aniov in dtodict["iovsList"]:
-            fname = aniov["payloadHash"]
-            if "file://" not in fname:
-                aniov["payloadHash"] = "file://%s" % fname
-            else:
-                fname = fname.replace("file://","")
-            print("found file name %s" % fname)
-            files.append(fname)
-            tag=aniov["tagName"]
-            iovdto = IovDto(since=aniov["since"],tag_name=aniov["tagName"],payload_hash=aniov["payloadHash"])
-            iovs.append(iovdto)
+        iovsetdto = None
+        if "PYLD_JSON" in fmt:
+            for aniov in dtodict["iovsList"]:
+                iovdto = IovPayloadDto(since=aniov["since"],payload=aniov["payload"])
+                iovs.append(iovdto)
 
-        iovsetdto = IovSetDto(niovs=ni,format=fmt,iovs_list=iovs)
-        print("created iovset dto : %s" % iovsetdto)
-        papi_instance = PayloadsApi(self.api_client)
-        try:
-            papi_response = papi_instance.store_payload_batch_with_iov_multi_form(files=files,tag=tag,iovsetupload=jobj)
-            print('Stored payload %s' % papi_response)
-        except ApiException as e:
-            print ("Exception when calling PayloadsApi->store_payload_batch_with_iov_multi_form: %s\n" % e)
+            iovsetdto = IovSetDto(niovs=ni,format=fmt,iovs_list=iovs)
+            print("created iovset using payload dto : %s" % iovsetdto)
+            papi_instance = PayloadsApi(self.api_client)
+            try:
+                papi_response = papi_instance.store_payload_batch_with_iov_multi_form(tag=tagname,iovsetupload=jobj)
+                print('Stored payload %s' % papi_response)
+            except ApiException as e:
+                print ("Exception when calling PayloadsApi->store_payload_batch_with_iov_multi_form: %s\n" % e)
+        else:
+            for aniov in dtodict["iovsList"]:
+                fname = aniov["payload"]
+                if "file://" not in fname:
+                    aniov["payloadHash"] = "file://%s" % fname
+                else:
+                    fname = fname.replace("file://","")
+                print("found file name %s" % fname)
+                files.append(fname)
+                iovdto = IovPayloadDto(since=aniov["since"],payload=aniov["payload"])
+                iovs.append(iovdto)
+
+            iovsetdto = IovSetDto(niovs=ni,format=fmt,iovs_list=iovs)
+            print("created iovset dto : %s" % iovsetdto)
+
+            papi_instance = PayloadsApi(self.api_client)
+            try:
+                papi_response = papi_instance.upload_payload_batch_with_iov_multi_form(files=files,tag=tagname,iovsetupload=jobj)
+                print('Stored payload %s' % papi_response)
+            except ApiException as e:
+                print ("Exception when calling PayloadsApi->upload_payload_batch_with_iov_multi_form: %s\n" % e)
 
     def insertiov(self,tag,since,pyldf,payload):
         # pyldf is the BLOB

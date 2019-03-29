@@ -1163,14 +1163,14 @@
 				}
 			}
 		},
-		"/payloads/storebatch": {
+		"/payloads/uploadbatch": {
 			"post": {
 				"tags": [
 					"payloads"
 				],
 				"summary": "Create many Payloads in the database, associated to a given iov since list and tag name.",
 				"description": "This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB",
-				"operationId": "storePayloadBatchWithIovMultiForm",
+				"operationId": "uploadPayloadBatchWithIovMultiForm",
 				"consumes": [
 					"multipart/form-data"
 				],
@@ -1182,7 +1182,7 @@
 						"in": "header",
 						"name": "X-Crest-PayloadFormat",
 						"description": "The format of the input data",
-						"default": "JSON",
+						"default": "FILE",
 						"type": "string"
 					},
 					{
@@ -1219,7 +1219,60 @@
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
+					}					
+				}
+			}
+		},
+		"/payloads/storebatch": {
+			"post": {
+				"tags": [
+					"payloads"
+				],
+				"summary": "Create many Payloads in the database, associated to a given iov since list and tag name.",
+				"description": "This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB",
+				"operationId": "storePayloadBatchWithIovMultiForm",
+				"consumes": [
+					"multipart/form-data"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "header",
+						"name": "X-Crest-PayloadFormat",
+						"description": "The format of the input data",
+						"default": "PYLD_JSON",
+						"type": "string"
+					},
+					{
+						"name": "tag",
+						"in": "formData",
+						"description": "The tag name",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"name": "iovsetupload",
+						"in": "formData",
+						"required": true,
+						"type" : "string"
+					},
+					{
+						"name": "endtime",
+						"in": "formData",
+						"description": "The end time to be used for protection at tag level",
+						"required": false,
+						"type": "number"
 					}
+				],
+				"responses": {
+					"201": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+						}
+					}					
 				}
 			}
 		},

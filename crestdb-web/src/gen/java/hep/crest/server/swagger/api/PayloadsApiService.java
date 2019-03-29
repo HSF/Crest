@@ -29,6 +29,7 @@ public abstract class PayloadsApiService {
     public abstract Response getBlob(String hash,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response getPayload(String hash,String xCrestPayloadFormat,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response getPayloadMetaInfo(String hash,SecurityContext securityContext, UriInfo info) throws NotFoundException;
-    public abstract Response storePayloadBatchWithIovMultiForm(List<FormDataBodyPart> filesbodyparts, FormDataContentDisposition filesDetail, String tag, FormDataBodyPart iovsetupload, String xCrestPayloadFormat,BigDecimal endtime,SecurityContext securityContext, UriInfo info) throws NotFoundException;
+    public abstract Response uploadPayloadBatchWithIovMultiForm(List<FormDataBodyPart> filesbodyparts, FormDataContentDisposition filesDetail, String tag, FormDataBodyPart iovsetupload, String xCrestPayloadFormat,BigDecimal endtime,SecurityContext securityContext, UriInfo info) throws NotFoundException;
+    public abstract Response storePayloadBatchWithIovMultiForm(String tag, FormDataBodyPart iovsetupload, String xCrestPayloadFormat,BigDecimal endtime,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response storePayloadWithIovMultiForm(InputStream fileInputStream, FormDataContentDisposition fileDetail,String tag,BigDecimal since,String xCrestPayloadFormat,BigDecimal endtime,SecurityContext securityContext, UriInfo info) throws NotFoundException;
 }

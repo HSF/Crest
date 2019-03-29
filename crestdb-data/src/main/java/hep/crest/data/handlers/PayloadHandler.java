@@ -120,6 +120,19 @@ public class PayloadHandler {
 
 	/**
 	 * @param uploadedInputStream
+	 * @return
+	 * @throws PayloadEncodingException 
+	 */
+	public String getHashFromStream(BufferedInputStream uploadedInputStream) throws PayloadEncodingException {
+		try {
+			return HashGenerator.hash(uploadedInputStream);
+		} catch (NoSuchAlgorithmException | IOException e) {
+			throw new PayloadEncodingException("Error in hashing stream");
+		}
+	}
+	
+	/**
+	 * @param uploadedInputStream
 	 * @param uploadedFileLocation
 	 */
 	public void saveStreamToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
