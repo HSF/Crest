@@ -16,7 +16,9 @@ package hep.crest.swagger.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import hep.crest.swagger.model.IovDto;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import hep.crest.swagger.model.IovPayloadDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ import javax.validation.constraints.*;
 /**
  * IovSetDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-28T17:56:56.645+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-29T18:09:29.144+01:00")
 public class IovSetDto   {
   @JsonProperty("niovs")
   private Long niovs = null;
@@ -35,7 +37,7 @@ public class IovSetDto   {
   private String format = null;
 
   @JsonProperty("iovsList")
-  private List<IovDto> iovsList = null;
+  private List<IovPayloadDto> iovsList = new ArrayList<IovPayloadDto>();
 
   public IovSetDto niovs(Long niovs) {
     this.niovs = niovs;
@@ -66,7 +68,8 @@ public class IovSetDto   {
    * @return format
    **/
   @JsonProperty("format")
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
   public String getFormat() {
     return format;
   }
@@ -75,15 +78,12 @@ public class IovSetDto   {
     this.format = format;
   }
 
-  public IovSetDto iovsList(List<IovDto> iovsList) {
+  public IovSetDto iovsList(List<IovPayloadDto> iovsList) {
     this.iovsList = iovsList;
     return this;
   }
 
-  public IovSetDto addIovsListItem(IovDto iovsListItem) {
-    if (this.iovsList == null) {
-      this.iovsList = new ArrayList<IovDto>();
-    }
+  public IovSetDto addIovsListItem(IovPayloadDto iovsListItem) {
     this.iovsList.add(iovsListItem);
     return this;
   }
@@ -93,12 +93,13 @@ public class IovSetDto   {
    * @return iovsList
    **/
   @JsonProperty("iovsList")
-  @ApiModelProperty(value = "")
-  public List<IovDto> getIovsList() {
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
+  public List<IovPayloadDto> getIovsList() {
     return iovsList;
   }
 
-  public void setIovsList(List<IovDto> iovsList) {
+  public void setIovsList(List<IovPayloadDto> iovsList) {
     this.iovsList = iovsList;
   }
 
