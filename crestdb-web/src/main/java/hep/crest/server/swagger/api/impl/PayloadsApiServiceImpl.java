@@ -105,6 +105,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			throws NotFoundException {
 		this.log.info("PayloadRestController processing request to download payload {} using format {}", hash, format);
 		try {
+			PayloadDto pdto = payloadService.getPayloadMetaInfo(hash);
+			String ptype = pdto.getObjectType();
+			log.debug("Found metadata {}",pdto);
+			
+			MediaType media_type = getMediaType(ptype);
 			if (format == null || format.equals("BLOB")) {
 				InputStream in = payloadService.getPayloadData(hash);
 				StreamingOutput stream = new StreamingOutput() {
@@ -131,8 +136,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 					}
 				};
 				log.debug("Send back the stream....");
-				return Response.ok(stream, "application/octet-stream") /// MediaType.APPLICATION_JSON_TYPE)
-						.header("Content-Disposition", "attachment; filename=\"" + hash + ".blob\"")
+				String rettype = media_type.toString();
+				String ext = getExtension(ptype);
+				return Response.ok(stream) /// MediaType.APPLICATION_JSON_TYPE)
+						.header("Content-type", rettype)
+						.header("Content-Disposition", "Inline; filename=\"" + hash + ext + "\"")
 						// .header("Content-Length", new
 						// Long(f.length()).toString())
 						.build();
@@ -332,6 +340,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		this.log.info("PayloadRestController processing request to download blob {}", hash);
 		StreamingOutput stream = null;
 		try {
+			PayloadDto pdto = payloadService.getPayloadMetaInfo(hash);
+			String ptype = pdto.getObjectType();
+			log.debug("Found metadata {}",pdto);
+			MediaType media_type = getMediaType(ptype);
+
 			InputStream in = payloadService.getPayloadData(hash);
 			stream = new StreamingOutput() {
 				@Override
@@ -355,11 +368,15 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 				}
 			};
 			log.debug("Send back the stream....");
-			return Response.ok(stream, "application/octet-stream") /// MediaType.APPLICATION_JSON_TYPE)
-					.header("Content-Disposition", "attachment; filename=\"" + hash + ".blob\"")
+			String rettype = media_type.toString();
+			String ext = getExtension(ptype);
+			return Response.ok(stream) /// MediaType.APPLICATION_JSON_TYPE)
+					.header("Content-type", rettype)
+					.header("Content-Disposition", "Inline; filename=\"" + hash + ext + "\"")
 					// .header("Content-Length", new
 					// Long(f.length()).toString())
 					.build();
+
 		} catch (CdbServiceException e) {
 			String msg = "Error retrieving payload from hash " + hash;
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
@@ -418,4 +435,48 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		return retmap;
 	}
 
+	protected MediaType getMediaType(String ptype) {
+		MediaType media_type = MediaType.APPLICATION_OCTET_STREAM_TYPE;
+		if ("PNG".equalsIgnoreCase(ptype)) {
+			media_type = new MediaType("image", "png");
+		} else if (ptype.toLowerCase().contains("svg")) {
+			media_type = MediaType.APPLICATION_SVG_XML_TYPE;
+		} else if (ptype.toLowerCase().contains("txt")) {
+			media_type = MediaType.TEXT_PLAIN_TYPE;
+		} else if (ptype.toLowerCase().contains("csv")) {
+			media_type = new MediaType("text", "csv");
+		} else if (ptype.toLowerCase().contains("json")) {
+			media_type = MediaType.APPLICATION_JSON_TYPE;
+		} else if (ptype.toLowerCase().contains("xml")) {
+			media_type = MediaType.APPLICATION_XML_TYPE;
+		} else if (ptype.toLowerCase().contains("tgz")) {
+			media_type = new MediaType("application", "x-gtar-compressed");
+		} else if (ptype.toLowerCase().contains("gz")) {
+			media_type = new MediaType("application", "gzip");
+		}
+		return media_type;
+	}
+	
+	protected String getExtension(String ptype) {
+		String extension = ".blob";
+		if ("PNG".equalsIgnoreCase(ptype)) {
+			extension = "png";
+		} else if (ptype.toLowerCase().contains("svg")) {
+			extension = "svg";
+		} else if (ptype.toLowerCase().contains("txt")) {
+			extension = "txt";
+		} else if (ptype.toLowerCase().contains("csv")) {
+			extension = "csv";
+		} else if (ptype.toLowerCase().contains("json")) {
+			extension = "json";
+		} else if (ptype.toLowerCase().contains("xml")) {
+			extension = "xml";
+		} else if (ptype.toLowerCase().contains("tgz")) {
+			extension = "tgz";
+		} else if (ptype.toLowerCase().contains("gz")) {
+			extension = "gz";
+		}
+		return extension;
+	}
+	
 }
