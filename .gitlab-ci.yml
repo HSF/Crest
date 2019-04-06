@@ -128,7 +128,7 @@ package_cern_application:
    paths:
    - ./crestdb-web/build/libs/crest.war
 
-package_cern web_application:
+package_cern_web_application:
   stage: package_web_application
   environment: cern
   only:
