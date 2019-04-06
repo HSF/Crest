@@ -58,8 +58,8 @@ before_script:
 
 stages:
  - package_application
- - build
  - webui
+ - build
  - release
  - redeploy
 
