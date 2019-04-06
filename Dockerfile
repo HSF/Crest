@@ -19,7 +19,7 @@ ENV TZ GMT
 RUN  mkdir -p ${crest_dir} \
   && mkdir -p ${data_dir}/web \
   && mkdir -p ${data_dir}/dump \
-  && mkdir -p ${data_dir}/logs 
+  && mkdir -p ${data_dir}/logs
 
 ### This is if you need to create a full war on docker
 #ADD . ${crest_dir}
@@ -29,6 +29,7 @@ RUN  mkdir -p ${crest_dir} \
 ADD crestdb-web/build/libs/crest.war ${crest_dir}/crest.war
 ADD web ${data_dir}/web
 ADD logback.xml.crest ${data_dir}/logback.xml
+COPY ./web-ui/crest-ui/dist ${data_dir}/web/crestui
 
 VOLUME "${data_dir}/web"
 VOLUME "${data_dir}/dump"

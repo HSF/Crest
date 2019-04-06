@@ -128,6 +128,22 @@ package_cern_application:
    paths:
    - ./crestdb-web/build/libs/crest.war
 
+package_cern web_application:
+  stage: package_web_application
+  environment: cern
+  only:
+    refs:
+      - master
+    variables:
+      - $REMOTE_NAME == "cern"
+  image: node:9.11.1-alpine
+  script:
+   - ./vuecompile.sh
+  allow_failure: false
+  artifacts:
+   paths:
+   - ./web-ui/crest-ui/dist
+
 
 build_cern_docker_image:
   stage: build
@@ -142,6 +158,7 @@ build_cern_docker_image:
   script: "echo building $CI_REGISTRY_IMAGE:runner" # No empty scripts are allowed
   variables:
    TO: $CI_REGISTRY_IMAGE:runner # Where to push resulting image
+
 
 redeploy:
   stage: redeploy
