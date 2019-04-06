@@ -50,7 +50,7 @@ export default {
     sdata.append("since", this.savedIov.since);
 
       axios({
-        url: `http://${hostname}/${this.apiName}/payloads/store`,
+        url: `${this.hostbaseurl}/payloads/store`,
         method: 'post',
         header: 'X-Crest-PayloadFormat: JSON',
         data: sdata
@@ -72,6 +72,17 @@ export default {
           })
       });
     },
+  },
+  computed: {
+      hostbaseurl () {
+        if (this.selectedserver.url !== "") {
+          return this.selectedserver.url;
+        }
+        const selprotocol = this.selectedserver.protocol.toLowerCase();
+        const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
+        var burl = `${selprotocol}://${hostname}/crestapi`;
+        return burl;
+      },
   },
   components: {
 

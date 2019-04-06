@@ -57,9 +57,9 @@
 import axios from 'axios'
 
 export default {
-  name: 'ApidForm',
+  name: 'TagForm',
   props : {
-  selectedserver : Object,
+    selectedserver : Object,
   },
   data: function () {
     return {
@@ -77,7 +77,7 @@ export default {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
       const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
         axios({
-          url: `http://${hostname}/${this.apiName}/tags`,
+          url: `${this.hostbaseurl}/tags`,
           method: 'post',
           data: this.savedTag
         })
@@ -90,6 +90,17 @@ export default {
             console.log(error);
         });
     },
+  },
+  computed: {
+      hostbaseurl () {
+        if (this.selectedserver.url !== "") {
+          return this.selectedserver.url;
+        }
+        const selprotocol = this.selectedserver.protocol.toLowerCase();
+        const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
+        var burl = `${selprotocol}://${hostname}/crestapi`;
+        return burl;
+      },
   },
   components: {
 

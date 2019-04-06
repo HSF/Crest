@@ -3,7 +3,7 @@
 <div class="container is-widescreen"">
   <div class="notification">
     Download or show information on Payload.
-    Access api on {{selectedserver.host}}:{{selectedserver.port}}<br>
+    Access api on {{hostbaseurl}}<br>
     Selected iov is : {{selectedIov}}<br>
     Selected tag is : {{tagname}}<br>
     Selected payload is : {{selectedPayload}}<br>
@@ -50,12 +50,12 @@ export default {
   computed: {
     "payloadmeta": function loadPayloadmeta() {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
+//      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       if (typeof this.selectedIov.payloadHash === "undefined") {
         return {};
       } else {
       axios({
-        url: `http://${hostname}/${this.apiName}/payloads/`+this.selectedIov.payloadHash+'/meta',
+        url: `${this.hostbaseurl}/payloads/`+this.selectedIov.payloadHash+'/meta',
         method: 'GET',
       }).then((response) => {
         (this.selectedPayload = response.data); return response.data;
@@ -65,9 +65,9 @@ export default {
   methods: {
     async download() {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
+//      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios({
-        url: `http://${hostname}/${this.apiName}/payloads/`+this.selectedIov.payloadHash,
+        url: `${this.hostbaseurl}/payloads/`+this.selectedIov.payloadHash,
         method: 'GET',
         responseType: 'blob', // important
       }).then((response) => {
@@ -81,14 +81,25 @@ export default {
     },
     async loadMetadata() {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
+//      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios({
-        url: `http://${hostname}/${this.apiName}/payloads/`+this.selectedIov.payloadHash+'/meta',
+        url: `${this.hostbaseurl}/payloads/`+this.selectedIov.payloadHash+'/meta',
         method: 'GET',
       }).then((response) => {
         (this.selectedPayload = response.data)
       });
     }
+  },
+  computed: {
+      hostbaseurl () {
+        if (this.selectedserver.url !== "") {
+          return this.selectedserver.url;
+        }
+        const selprotocol = this.selectedserver.protocol.toLowerCase();
+        const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
+        var burl = `${selprotocol}://${hostname}/crestapi`;
+        return burl;
+      },
   },
   components: {
   }

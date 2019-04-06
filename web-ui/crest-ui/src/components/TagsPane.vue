@@ -2,7 +2,7 @@
 <div class="container">
     <div class="notification">
         Search for Tags.
-        Access api on {{selectedserver.host}}:{{selectedserver.port}}<br>
+        Access api on {{hostbaseurl}}<br>
         Selected tag is : {{selectedTag}}<br>
         <p class="content">
             <b>Selection mode:</b>
@@ -44,14 +44,14 @@
             <button class="button is-primary" v-on:click="loadTags()" :disabled="radioButton !== 'Search'">Search</button>
           </p>
         </b-field>
-        <b-field>
-          <p class="control">
-            <button class="button is-info" v-on:click="gotoIovs()">Search Iovs</button>
-          </p>
-        </b-field>
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
+          <b-field>
+            <p class="control">
+              <button class="button is-info" v-on:click="gotoIovs()">Search Iovs</button>
+            </p>
+          </b-field>
           <GenericTable v-bind:data="rows" v-bind:columns="columns" v-on:select-row="updateTag"/>
         </div>
         <div v-else>
@@ -106,7 +106,7 @@ export default {
                 },
             ],
         selected: null,
-        selactiveTab : 2,
+        selactiveTab : 1,
         thetag: ''};
   },
   methods: {
@@ -116,7 +116,7 @@ export default {
     this.$emit('select-tag', this.thetag)
   },
   gotoIovs() {
-    this.selactiveTab = 2
+    this.selactiveTab = 1
     this.$emit('select-tab', this.selactiveTab)
   },
     async printRows() {
@@ -126,14 +126,14 @@ export default {
     },
     async loadTags() {
       //const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
+      //const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
 
       const params = [
           `by=name:${this.thetag}`,
       ].join('&')
 
       axios
-        .get(`http://${hostname}/${this.apiName}/tags?${params}`)
+        .get(`${this.hostbaseurl}/tags?${params}`)
         .then(response => (this.rows = response.data))
         .catch(error => { console.error(error); return Promise.reject(error); });
     }
@@ -141,20 +141,29 @@ export default {
   mounted: function() {
 //      console.log('existing rows '+this.rows);
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
-      axios
-        .get(`http://${hostname}/${this.apiName}/tags`)
-        .then(response => (this.rows = response.data))
-        .catch(error => { console.error(error); return Promise.reject(error); });
+//      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
+//      axios
+//        .get(`${this.hostbaseurl}/tags`)
+//        .then(response => (this.rows = response.data))
+//        .catch(error => { console.error(error); return Promise.reject(error); });
   },
   computed: {
+      hostbaseurl () {
+        if (this.selectedserver.url !== "") {
+          return this.selectedserver.url;
+        }
+        const selprotocol = this.selectedserver.protocol.toLowerCase();
+        const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
+        var burl = `${selprotocol}://${hostname}/crestapi`;
+        return burl;
+      },
       tagnames() {
         let result = this.rows.map(a => a.name);
         return result
       },
       filteredDataArray() {
           return this.tagnames.filter((option) => {
-              console.log('filtering '+option)
+              //console.log('filtering '+option)
               return option
                   .toString()
                   .toLowerCase()
