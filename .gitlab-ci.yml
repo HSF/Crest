@@ -129,7 +129,7 @@ package_cern_application:
    - ./crestdb-web/build/libs/crest.war
 
 package_cern_web_application:
-  stage: package_web_application
+  stage: webui
   environment: cern
   only:
     refs:
