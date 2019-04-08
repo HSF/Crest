@@ -4,7 +4,7 @@
     Search for Iovs. Use the tag selected on the Tags tab.
     Access api on {{hostbaseurl}}<br>
     Selected iov is : {{selectedIov}}<br>
-    Selected tag is : {{tagname}}<br>
+    Selected tag is : {{selectedtag.name}}<br>
     <p class="content">
         <b>Selection mode:</b>
         {{ radioButton }}
@@ -36,7 +36,7 @@
     <b-input v-model="until" maxlength="20"></b-input>
   </b-field>
   <b-field label="Tag">
-      <b-input v-model="tagname" placeholder="Tag selection on another tab" disabled></b-input>
+      <b-input v-model="selectedtag.name" placeholder="Tag selection on another tab" disabled></b-input>
   </b-field>
   <b-field>
   <p class="control">
@@ -51,10 +51,10 @@
     <button class="button is-info" v-on:click="gotoPayloads()">Payload Info</button>
   </p>
   </b-field>
-    <GenericTable v-bind:data="rows" v-bind:columns="columns" v-bind:sortcolumn="since" v-on:select-row="updateHash"/>
+    <CrestIovsTable v-bind:data="rows" v-bind:selectedtag="selectedtag" v-bind:isloading="isLoading" v-on:select-row="updateHash"/>
   </div>
   <div v-else>
-    <IovForm v-bind:selectedserver="selectedserver"/>
+    <IovForm v-bind:selectedserver="selectedserver" v-bind:selectedtag="selectedtag"/>
   </div>
 </div>
 </div>
@@ -62,14 +62,14 @@
 </template>
 
 <script>
-import GenericTable from './GenericTable.vue'
+import CrestIovsTable from './CrestIovsTable.vue'
 import IovForm from './IovForm.vue'
 import axios from 'axios';
 
 export default {
   name: 'IovsPane',
   props : {
-    tagname : '',
+    selectedtag : Object,
     selectedserver : Object,
   },
   data: function () {
@@ -125,14 +125,14 @@ export default {
     },
     async loadIovs() {
       this.isLoading = true
-      setTimeout(() => {
-          this.isLoading = false
-      }, 10 * 1000)
+//      setTimeout(() => {
+//          this.isLoading = false
+//      }, 10 * 1000)
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
 //      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
 
       const params = [
-      `tagname=${this.tagname}`,
+      `tagname=${this.selectedtag.name}`,
       `since=${this.since}`,
       `until=${this.until}`,
       `snapshot=${this.snapshot}`,
@@ -140,8 +140,8 @@ export default {
 
       axios
         .get(`${this.hostbaseurl}/iovs/selectIovs?${params}`)
-        .then(response => (this.rows = response.data))
-        .catch(error => { console.error(error); return Promise.reject(error); });
+        .then(response => {this.isLoading = false; (this.rows = response.data)})
+        .catch(error => { console.error(error); this.isLoading = false; return Promise.reject(error); });
     }
   },
   computed: {
@@ -154,9 +154,17 @@ export default {
         var burl = `${selprotocol}://${hostname}/crestapi`;
         return burl;
       },
+      isLoadingData () {
+        if (this.rows.length <= 0 && this.isLoading) {
+          return true;
+        } else {
+          this.isLoading = false;
+          return false;
+        }
+      }
   },
   components: {
-    GenericTable,
+    CrestIovsTable,
     IovForm
   }
 };

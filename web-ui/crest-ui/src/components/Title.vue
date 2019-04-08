@@ -6,7 +6,7 @@
     <nav class="navbar is-transparent">
       <div class="navbar-brand">
         <a class="navbar-item" href="https://atlas.web.cern.ch">
-          <img src="../assets/atlas-logo-ref-cmyk-h.png" alt="ATLAS Experiment" width="140" height="120px">
+          <img src="../assets/irfu_logo.png" alt="this.apiTitle" width="40" height="10">
         </a>
       </div>
       <div id="navbarStaticLinks" class="navbar-menu">
@@ -51,7 +51,7 @@
         CREST MANAGER UI
       </h1>
       <h2 class="subtitle">
-        Atlas experiment
+        {{ apiTitle }}
       </h2>
     </div>
   </section>

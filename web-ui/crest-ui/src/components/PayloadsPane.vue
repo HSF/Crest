@@ -1,11 +1,11 @@
 <template>
 <section>
-<div class="container is-widescreen"">
+<div class="container is-widescreen">
   <div class="notification">
     Download or show information on Payload.
     Access api on {{hostbaseurl}}<br>
-    Selected iov is : {{selectedIov}}<br>
-    Selected tag is : {{tagname}}<br>
+    Selected iov is : {{selectediov}}<br>
+    Selected tag is : {{selectedtag.name}}<br>
     Selected payload is : {{selectedPayload}}<br>
 
     <b-message  type="is-info">
@@ -20,10 +20,17 @@
 
   <b-field grouped>
   <p class="control">
-    <button class="button is-primary" v-on:click="loadMetadata()">Info</button>
+    <button class="button is-primary" v-on:click="loadMetadata()">
+      <b-icon icon="eye"></b-icon>
+      <span>Info</span>
+    </button>
   </p>
   <p class="control">
-    <button class="button is-primary" v-on:click="download()">Download</button>
+    <a v-bind:href="downloadlink" v-show="selectDoc">
+      <b-icon icon="download"></b-icon>
+      <span>Download</span>
+    </a>
+  <!--  <button class="button is-primary" v-on:click="download()">Download</button> -->
   </p>
   </b-field>
   </div>
@@ -37,37 +44,53 @@ import axios from 'axios';
 export default {
   name: 'PayloadsPane',
   props : {
-  tagname : '',
-  selectedIov : Object,
+  selectedtag : Object,
+  selectediov : Object,
   selectedserver : Object,
   },
   data: function () {
     return {
-        thehash: '',
-        selectedPayload : {}
+        selectedPayload : {},
+        dowloadlink : ''
     };
   },
   computed: {
     "payloadmeta": function loadPayloadmeta() {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
 //      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
-      if (typeof this.selectedIov.payloadHash === "undefined") {
+      if (typeof this.selectediov.payloadHash === "undefined") {
         return {};
       } else {
       axios({
-        url: `${this.hostbaseurl}/payloads/`+this.selectedIov.payloadHash+'/meta',
+        url: `${this.hostbaseurl}/payloads/`+this.selectediov.payloadHash+'/meta',
         method: 'GET',
       }).then((response) => {
         (this.selectedPayload = response.data); return response.data;
       }).catch(error => { console.error(error); return Promise.reject(error); });
-    }}
+    }},
+    selectDoc() {
+      if (this.selectediov.payloadHash !== "") {
+        this.download2();
+        return true;
+      }
+      return false;
+    },
+    hostbaseurl () {
+      if (this.selectedserver.url !== "") {
+        return this.selectedserver.url;
+      }
+      const selprotocol = this.selectedserver.protocol.toLowerCase();
+      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
+      var burl = `${selprotocol}://${hostname}/crestapi`;
+      return burl;
+    },
   },
   methods: {
     async download() {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
 //      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios({
-        url: `${this.hostbaseurl}/payloads/`+this.selectedIov.payloadHash,
+        url: `${this.hostbaseurl}/payloads/`+this.selectediov.payloadHash,
         method: 'GET',
         responseType: 'blob', // important
       }).then((response) => {
@@ -83,23 +106,15 @@ export default {
 //      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
 //      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
       axios({
-        url: `${this.hostbaseurl}/payloads/`+this.selectedIov.payloadHash+'/meta',
+        url: `${this.hostbaseurl}/payloads/`+this.selectediov.payloadHash+'/meta',
         method: 'GET',
       }).then((response) => {
         (this.selectedPayload = response.data)
       });
-    }
-  },
-  computed: {
-      hostbaseurl () {
-        if (this.selectedserver.url !== "") {
-          return this.selectedserver.url;
-        }
-        const selprotocol = this.selectedserver.protocol.toLowerCase();
-        const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
-        var burl = `${selprotocol}://${hostname}/crestapi`;
-        return burl;
-      },
+    },
+    download2() {
+			this.downloadlink = this.hostbaseurl + '/payloads/'+this.selectediov.payloadHash;
+		},
   },
   components: {
   }

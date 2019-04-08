@@ -13,6 +13,7 @@ Vue.prototype.apiHost = process.env.VUE_APP_REST_API
 Vue.prototype.apiPort = process.env.VUE_APP_REST_PORT
 Vue.prototype.apiName = process.env.VUE_APP_API_NAME
 Vue.prototype.apiProtocol = process.env.VUE_APP_API_PROTOCOL
+Vue.prototype.apiTitle = process.env.VUE_APP_TITLE
 
 Vue.use(Buefy)
 

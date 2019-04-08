@@ -3,7 +3,7 @@
     <div class="notification">
         Search for Tags.
         Access api on {{hostbaseurl}}<br>
-        Selected tag is : {{selectedTag}}<br>
+        Selected tag is : {{selectedtag}}<br>
         <p class="content">
             <b>Selection mode:</b>
             {{ radioButton }}
@@ -52,10 +52,10 @@
               <button class="button is-info" v-on:click="gotoIovs()">Search Iovs</button>
             </p>
           </b-field>
-          <GenericTable v-bind:data="rows" v-bind:columns="columns" v-on:select-row="updateTag"/>
+          <CrestTagsTable v-bind:data="rows" v-on:select-row="updateTag"/>
         </div>
         <div v-else>
-          <TagForm v-bind:selectedserver="selectedserver"/>
+          <TagForm v-bind:selectedserver="selectedserver" v-bind:selectedtag="selectedtag"/>
         </div>
       </div>
     </div>
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import GenericTable from './GenericTable.vue'
+import CrestTagsTable from './CrestTagsTable.vue'
 import TagForm from './TagForm.vue'
 
 import axios from 'axios';
@@ -75,7 +75,7 @@ export default {
   },
   data: function () {
     return {
-        selectedTag : {},
+        selectedtag : {},
         radioButton : 'Search',
         rows: [],
         columns : [
@@ -111,9 +111,9 @@ export default {
   },
   methods: {
   updateTag(stag) {
-    this.selectedTag = stag
+    this.selectedtag = stag
     this.thetag = stag.name
-    this.$emit('select-tag', this.thetag)
+    this.$emit('select-tag', this.selectedtag)
   },
   gotoIovs() {
     this.selactiveTab = 1
@@ -172,7 +172,7 @@ export default {
       }
   },
   components: {
-    GenericTable,
+    CrestTagsTable,
     TagForm
   }
 };

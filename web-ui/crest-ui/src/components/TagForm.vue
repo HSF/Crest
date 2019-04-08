@@ -1,7 +1,7 @@
 <template>
   <div class="container">
   <b-field label="Tag Name">
-    <b-input v-model="savedTag.name"></b-input>
+    <b-input v-model="savedTag.name" placeholder="set a name for the new tag"></b-input>
   </b-field>
   <b-field label="Tag Description">
     <b-input v-model="savedTag.description"></b-input>
@@ -60,6 +60,7 @@ export default {
   name: 'TagForm',
   props : {
     selectedserver : Object,
+    //selectedtag: Object,
   },
   data: function () {
     return {

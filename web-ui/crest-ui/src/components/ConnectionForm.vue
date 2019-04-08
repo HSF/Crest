@@ -31,8 +31,11 @@
       },
       methods: {
         save() {
-          console.log('saving server '+this.url);
-          this.$emit('select-server', { url : this.url } )
+          this.$toast.open({
+                   message: 'Saving url '+this.url,
+                   type: 'is-success'
+          });
+          this.$emit('select-server', { url : this.url } );
         },
         close() {
           this.$parent.close();

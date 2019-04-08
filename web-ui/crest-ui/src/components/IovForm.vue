@@ -1,7 +1,7 @@
 <template>
   <div class="container">
   <b-field label="Tag Name">
-    <b-input v-model="savedIov.tag"></b-input>
+    <b-input v-model="savedIov.tagname" disabled></b-input>
   </b-field>
   <b-field label="Since">
     <b-input v-model="savedIov.since"></b-input>
@@ -31,12 +31,12 @@ import axios from 'axios'
 export default {
   name: 'IovForm',
   props : {
-  selectedserver : Object,
+    selectedserver : Object,
+    selectedtag: Object,
   },
   data: function () {
     return {
-    savedIov : { tag : '', since : 0 , file : null, endtime : 0 },
-
+      savedIov : { tagname : this.selectedtag.name, since : 0 , file : null, endtime : 0 },
     };
   },
   methods: {
@@ -46,9 +46,9 @@ export default {
     const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
     const sdata = new FormData();
     sdata.append("file", this.savedIov.file);
-    sdata.append("tag", this.savedIov.tag);
+    sdata.append("tag", this.savedIov.tagname);
     sdata.append("since", this.savedIov.since);
-
+    let that=this
       axios({
         url: `${this.hostbaseurl}/payloads/store`,
         method: 'post',
@@ -57,7 +57,7 @@ export default {
       })
       .then(function (response) {
           // your action after success
-          this.$toast.open({
+          that.$toast.open({
                    message: 'Saved Iov successfully!',
                    type: 'is-success'
           })
@@ -66,7 +66,7 @@ export default {
       .catch(function (error) {
          // your action on error success
           console.log(error);
-          this.$toast.open({
+          that.$toast.open({
                    message: 'Error in saving Iov '+error,
                    type: 'is-danger'
           })
