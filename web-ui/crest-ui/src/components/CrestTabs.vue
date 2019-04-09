@@ -59,6 +59,7 @@ import PayloadsPane from './PayloadsPane.vue'
           const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
           var burl = `${selprotocol}://${hostname}/${this.selectedserver.api}`;
           return burl;
+        }
       },
       components: {
         TagsPane,
