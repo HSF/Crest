@@ -86,7 +86,7 @@ build_svom_docker_image:
   image: java:8
   script:
     - docker info
-    - docker build --tag=$CONTAINER_IMAGE .
+    - docker build --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
   only:
   - svom-dc0
 
