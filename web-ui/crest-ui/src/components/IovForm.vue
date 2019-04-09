@@ -37,6 +37,8 @@ export default {
   data: function () {
     return {
       savedIov : { tagname : this.selectedtag.name, since : 0 , file : null, endtime : 0 },
+      savedresponse : {},
+      savederror : {},
     };
   },
   methods: {
@@ -48,7 +50,7 @@ export default {
     sdata.append("file", this.savedIov.file);
     sdata.append("tag", this.savedIov.tagname);
     sdata.append("since", this.savedIov.since);
-    let that=this
+    let that=this;
       axios({
         url: `${this.hostbaseurl}/payloads/store`,
         method: 'post',
@@ -57,32 +59,33 @@ export default {
       })
       .then(function (response) {
           // your action after success
-          that.$toast.open({
-                   message: 'Saved Iov successfully!',
-                   type: 'is-success'
-          })
-          //console.log(response);
+          this.savedresponse = response;
       })
       .catch(function (error) {
          // your action on error success
           console.log(error);
-          that.$toast.open({
-                   message: 'Error in saving Iov '+error,
-                   type: 'is-danger'
-          })
+          this.savederror = error;
       });
     },
   },
   computed: {
       hostbaseurl () {
-        if (this.selectedserver.url !== "") {
-          return this.selectedserver.url;
-        }
-        const selprotocol = this.selectedserver.protocol.toLowerCase();
-        const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
-        var burl = `${selprotocol}://${hostname}/crestapi`;
-        return burl;
+        return this.selectedserver;
       },
+  },
+  watch: {
+    savedresponse : function() {
+      this.$toast.open({
+               message: 'Saved Iov successfully!',
+               type: 'is-success'
+      })
+    },
+    savederror : function() {
+      this.$toast.open({
+               message: 'Error saving iov!',
+               type: 'is-danger'
+      })
+    }
   },
   components: {
 
