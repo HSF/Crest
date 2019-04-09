@@ -15,10 +15,11 @@ ENV crest_dir /home/${USR}/swagger_crest
 ENV data_dir /data
 ENV gradle_version 4.2.1
 ENV TZ GMT
-RUN mkdir -p ${data_dir}/logs
-RUN mkdir -p ${crest_dir}
-RUN mkdir -p ${data_dir}/web
-RUN mkdir -p ${data_dir}/dump
+
+RUN  mkdir -p ${crest_dir} \
+  && mkdir -p ${data_dir}/web \
+  && mkdir -p ${data_dir}/dump \
+  && mkdir -p ${data_dir}/logs
 
 ### This is if you need to create a full war on docker
 #ADD . ${crest_dir}
