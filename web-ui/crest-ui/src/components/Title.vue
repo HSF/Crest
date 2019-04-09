@@ -11,7 +11,7 @@
       </div>
       <div id="navbarStaticLinks" class="navbar-menu">
         <div class="navbar-start">
-          <a class="navbar-item" href="/nswui/index.html">
+          <a class="navbar-item" href="/crestui/index.html">
             <span class="icon">
               <i class="fas fa-home"></i>
             </span>
