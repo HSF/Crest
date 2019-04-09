@@ -20,7 +20,7 @@ export default {
     return {
       thenotification : 'none',
       thetype : '',
-      selectedserver: { host: this.apiHost, port: this.apiPort, protocol: this.apiProtocol, url: ''},
+      selectedserver: { host: this.apiHost, port: this.apiPort, protocol: this.apiProtocol, api: this.apiName, url: ''},
       msg: 'Welcome to Crest Browser'
     }
   },

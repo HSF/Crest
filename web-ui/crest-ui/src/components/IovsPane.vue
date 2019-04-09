@@ -70,7 +70,7 @@ export default {
   name: 'IovsPane',
   props : {
     selectedtag : Object,
-    selectedserver : Object,
+    selectedserver : String,
   },
   data: function () {
     return {
@@ -146,13 +146,7 @@ export default {
   },
   computed: {
       hostbaseurl () {
-        if (this.selectedserver.url !== "") {
-          return this.selectedserver.url;
-        }
-        const selprotocol = this.selectedserver.protocol.toLowerCase();
-        const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
-        var burl = `${selprotocol}://${hostname}/crestapi`;
-        return burl;
+      return this.selectedserver;
       },
       isLoadingData () {
         if (this.rows.length <= 0 && this.isLoading) {

@@ -7,13 +7,13 @@
 </b-tab-item>
 -->
 <b-tab-item label="Tags">
-    <TagsPane v-bind:selectedserver="selectedserver" v-on:select-tag="updateTag"  v-on:select-tab="selActive"/>
+    <TagsPane v-bind:selectedserver="hostbaseurl" v-on:select-tag="updateTag"  v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Iovs">
-    <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="selectedserver" v-on:select-iov="updateIov"  v-on:select-tab="selActive"/>
+    <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-iov="updateIov"  v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Payloads">
-    <PayloadsPane v-bind:selectedtag="selectedtag" v-bind:selectediov="selectediov" v-bind:selectedserver="selectedserver"/>
+    <PayloadsPane v-bind:selectedtag="selectedtag" v-bind:selectediov="selectediov" v-bind:selectedserver="hostbaseurl"/>
 </b-tab-item>
 </b-tabs>
 </section>
@@ -49,6 +49,16 @@ import PayloadsPane from './PayloadsPane.vue'
           console.log('Change iov selection '+iov)
           this.selectediov = iov
         },
+      },
+      computed: {
+        hostbaseurl () {
+          if (this.selectedserver.url !== "") {
+            return this.selectedserver.url;
+          }
+          const selprotocol = this.selectedserver.protocol.toLowerCase();
+          const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
+          var burl = `${selprotocol}://${hostname}/${this.selectedserver.api}`;
+          return burl;
       },
       components: {
         TagsPane,

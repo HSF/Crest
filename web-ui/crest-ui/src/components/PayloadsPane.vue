@@ -46,7 +46,7 @@ export default {
   props : {
   selectedtag : Object,
   selectediov : Object,
-  selectedserver : Object,
+  selectedserver : String,
   },
   data: function () {
     return {
@@ -76,13 +76,7 @@ export default {
       return false;
     },
     hostbaseurl () {
-      if (this.selectedserver.url !== "") {
-        return this.selectedserver.url;
-      }
-      const selprotocol = this.selectedserver.protocol.toLowerCase();
-      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
-      var burl = `${selprotocol}://${hostname}/crestapi`;
-      return burl;
+    return this.selectedserver;
     },
   },
   methods: {
