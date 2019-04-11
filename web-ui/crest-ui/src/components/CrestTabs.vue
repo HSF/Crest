@@ -13,7 +13,7 @@
     <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-iov="updateIov"  v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Payloads">
-    <PayloadsPane v-bind:selectedtag="selectedtag" v-bind:selectediov="selectediov" v-bind:selectedserver="hostbaseurl"/>
+    <PayloadsPane v-bind:selectedtag="selectedtag" v-bind:selectediov="selectediov" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
 </b-tabs>
 </section>

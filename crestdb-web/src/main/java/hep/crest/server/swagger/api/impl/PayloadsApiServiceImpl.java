@@ -110,7 +110,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			log.debug("Found metadata {}",pdto);
 			
 			MediaType media_type = getMediaType(ptype);
-			if (format == null || format.equals("BLOB")) {
+			
+			if (format == null || format.equalsIgnoreCase("BLOB") || format.equalsIgnoreCase("BIN")) {
 				InputStream in = payloadService.getPayloadData(hash);
 				StreamingOutput stream = new StreamingOutput() {
 					@Override
@@ -165,17 +166,21 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 	public Response storePayloadWithIovMultiForm(InputStream fileInputStream, FormDataContentDisposition fileDetail,
 			String tag, BigDecimal since, String format, BigDecimal endtime, SecurityContext securityContext,
 			UriInfo info) throws NotFoundException {
-		this.log.info("PayloadRestController processing request to store payload in tag {} and at since {}", tag,
-				since);
+		this.log.info("PayloadRestController processing request to store payload in tag {} and at since {} using format {}", tag,
+				since,format);
 		try {
-			String filename = cprops.getDumpdir() + "/" + tag + "_" + since + ".blob";
+			String fdetailsname = fileDetail.getFileName();
+			if (fdetailsname.isEmpty()) {
+				fdetailsname = ".blob";
+			}
+			String filename = cprops.getDumpdir() + "/" + tag + "_" + since + "_" + fdetailsname;
 			File tempfile = new File(filename);
 			Path temppath = Paths.get(filename);
 			String hash = payloadService.saveInputStreamGetHash(fileInputStream, filename);
 			if (format == null) {
 				format = "JSON";
 			}
-			log.debug("Create dto with hash {},  format {}, ...", hash, format);
+			log.debug("Create dto with hash {},  format {}, use filename {} ", hash, format, filename);
 			PayloadDto payloaddto = new PayloadDto().hash(hash).objectType(format).streamerInfo(format.getBytes())
 					.version("test");
 			InputStream is = new FileInputStream(tempfile);
@@ -267,9 +272,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			List<IovPayloadDto> iovlist = dto.getIovsList();
 			List<IovPayloadDto> savediovlist = new ArrayList<>();
 			if (xCrestPayloadFormat == null) {
-				xCrestPayloadFormat = "PYLD_JSON";
+				xCrestPayloadFormat = "JSON";
 			}
-			if (xCrestPayloadFormat.equals("PYLD_JSON")) {
+			if (xCrestPayloadFormat.equalsIgnoreCase("JSON")) {
 				for (IovPayloadDto piovDto : iovlist) {
 					PayloadDto pdto = new PayloadDto().objectType(dto.getFormat()).hash("none")
 							.streamerInfo(dto.getFormat().getBytes()).version("none")
@@ -437,6 +442,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
 	protected MediaType getMediaType(String ptype) {
 		MediaType media_type = MediaType.APPLICATION_OCTET_STREAM_TYPE;
+		
 		if ("PNG".equalsIgnoreCase(ptype)) {
 			media_type = new MediaType("image", "png");
 		} else if (ptype.toLowerCase().contains("svg")) {
@@ -453,6 +459,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			media_type = new MediaType("application", "x-gtar-compressed");
 		} else if (ptype.toLowerCase().contains("gz")) {
 			media_type = new MediaType("application", "gzip");
+		} else if (ptype.toLowerCase().contains("pdf")) {
+			media_type = new MediaType("application", "pdf");
 		}
 		return media_type;
 	}
@@ -475,6 +483,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			extension = "tgz";
 		} else if (ptype.toLowerCase().contains("gz")) {
 			extension = "gz";
+		} else if (ptype.toLowerCase().contains("pdf")) {
+			extension = "pdf";
 		}
 		return extension;
 	}

@@ -1,14 +1,15 @@
 <template>
 <div class="container">
-    <div class="notification">
-        Search for Tags.
-        Access api on {{hostbaseurl}}<br>
-        Selected tag is : {{selectedtag}}<br>
-        <p class="content">
-            <b>Selection mode:</b>
-            {{ radioButton }}
-        </p>
-    </div>
+    <p class="has-text-info is-size-2">Search for Tags</p>
+    <nav class="level">
+        <div class="level is-mobile">
+          <div class="level-left">
+            <div class="level-item">
+              <HelpInfoPane v-bind:helpmessage="helpmsg" v-bind:infomessage="infomsg" v-bind:notifytext="notifytext" v-bind:notiftype="notiftype" v-bind:links="flinks" v-on:child-switchtab="selectTab"/>
+            </div>
+        </div>
+      </div>
+    </nav>
     <div class="columns">
       <div class="column is-one-fifth">
           <b-field>
@@ -47,11 +48,6 @@
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
-          <b-field>
-            <p class="control">
-              <button class="button is-info" v-on:click="gotoIovs()">Search Iovs</button>
-            </p>
-          </b-field>
           <CrestTagsTable v-bind:data="rows" v-on:select-row="updateTag"/>
         </div>
         <div v-else>
@@ -65,60 +61,47 @@
 <script>
 import CrestTagsTable from './CrestTagsTable.vue'
 import TagForm from './TagForm.vue'
+import HelpInfoPane from './HelpInfoPane.vue';
 
 import axios from 'axios';
 
 export default {
   name: 'TagsPane',
   props : {
-  selectedserver : String,
+    selectedserver : String,
   },
   data: function () {
     return {
         selectedtag : {},
         radioButton : 'Search',
+        flinks: [
+          {'btnlabel' : 'Get Iovs', 'seltab' : 1}
+        ],
+        helpmsg: "<p>Search for tags using filtering by tag name.</p>"
+          +"<p>Once you select a tag you can browse the associated IOVs by changing to appropriate tab or clicking on the <b>Get Iovs</b> button.</p>"
+          +"<p>You can use the <b>Create</b> button to create a new tag.</p>",
+        notiftype : 'is-info',
+        notifytext : 'Searching tags....',
         rows: [],
-        columns : [
-                {
-                    field: 'name',
-                    label: 'TAG NAME',
-                    width: '40',
-                    sortable: true
-                },
-                {
-                    field: 'timeType',
-                    label: 'Type',
-                    width: '15',
-                    sortable: true
-                },
-                {
-                    field: 'description',
-                    label: 'Description',
-                },
-                {
-                    field: 'objectType',
-                    label: 'Object Type',
-                },
-                {
-                    field: 'insertionTime',
-                    label: 'Insert Time',
-                    sortable: true
-                },
-            ],
         selected: null,
         selactiveTab : 1,
-        thetag: ''};
+        thetag: ''
+      };
   },
   methods: {
-  updateTag(stag) {
-    this.selectedtag = stag
-    this.thetag = stag.name
-    this.$emit('select-tag', this.selectedtag)
-  },
-  gotoIovs() {
-    this.selactiveTab = 1
-    this.$emit('select-tab', this.selactiveTab)
-  },
+    updateTag(stag) {
+      this.selectedtag = stag
+      this.thetag = stag.name
+      this.$emit('select-tag', this.selectedtag)
+    },
+    gotoIovs() {
+      this.selactiveTab = 1
+      this.$emit('select-tab', this.selactiveTab)
+    },
+    selectTab(nt) {
+      this.selactiveTab = nt
+      this.$emit('select-tab', this.selactiveTab)
+    },
     async printRows() {
       for (var i in this.rows) {
         console.log(this.rows[i]);
@@ -138,15 +121,6 @@ export default {
         .catch(error => { console.error(error); return Promise.reject(error); });
     }
   },
-  mounted: function() {
-//      console.log('existing rows '+this.rows);
-//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-//      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
-//      axios
-//        .get(`${this.hostbaseurl}/tags`)
-//        .then(response => (this.rows = response.data))
-//        .catch(error => { console.error(error); return Promise.reject(error); });
-  },
   computed: {
       hostbaseurl () {
       return this.selectedserver;
@@ -163,11 +137,16 @@ export default {
                   .toLowerCase()
                   .indexOf(this.thetag.toLowerCase()) >= 0
           })
+      },
+      infomsg () {
+        return "Access api  "+this.selectedserver
+          +"<br> Selected tag is : "+this.selectedtag.name ;
       }
   },
   components: {
     CrestTagsTable,
-    TagForm
+    TagForm,
+    HelpInfoPane
   }
 };
 </script>

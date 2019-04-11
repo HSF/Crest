@@ -1,21 +1,21 @@
 <template>
 <div class="container">
-<div class="notification">
-    Search for Iovs. Use the tag selected on the Tags tab.
-    Access api on {{hostbaseurl}}<br>
-    Selected iov is : {{selectedIov}}<br>
-    Selected tag is : {{selectedtag.name}}<br>
-    <p class="content">
-        <b>Selection mode:</b>
-        {{ radioButton }}
-    </p>
-</div>
+  <p class="has-text-info is-size-2">Search for Iovs</p>
+  <nav class="level">
+      <div class="level is-mobile">
+        <div class="level-left">
+          <div class="level-item">
+            <HelpInfoPane v-bind:helpmessage="helpmsg" v-bind:infomessage="infomsg" v-bind:notifytext="notifytext" v-bind:notiftype="notiftype" v-bind:links="flinks" v-on:child-switchtab="selectTab"/>
+          </div>
+      </div>
+    </div>
+  </nav>
 <div class="columns">
 <div class="column is-one-fifth">
     <b-field>
       <b-radio-button v-model="radioButton"
-          native-value="Search"
-          type="is-info">
+                      native-value="Search"
+                      type="is-info">
           <b-icon icon="magnify"></b-icon>
           <span>Search</span>
       </b-radio-button>
@@ -23,8 +23,8 @@
 
       <b-field>
       <b-radio-button v-model="radioButton"
-          native-value="Create"
-          type="is-success">
+                      native-value="Create"
+                      type="is-success">
           <b-icon icon="check"></b-icon>
           <span>Create</span>
       </b-radio-button>
@@ -46,11 +46,6 @@
 </div>
 <div class="column is-four-fifths">
   <div v-if="radioButton === 'Search'">
-  <b-field>
-  <p class="control">
-    <button class="button is-info" v-on:click="gotoPayloads()">Payload Info</button>
-  </p>
-  </b-field>
     <CrestIovsTable v-bind:data="rows" v-bind:selectedtag="selectedtag" v-bind:isloading="isLoading" v-on:select-row="updateHash"/>
   </div>
   <div v-else>
@@ -65,6 +60,7 @@
 import CrestIovsTable from './CrestIovsTable.vue'
 import IovForm from './IovForm.vue'
 import axios from 'axios';
+import HelpInfoPane from './HelpInfoPane.vue';
 
 export default {
   name: 'IovsPane',
@@ -74,49 +70,34 @@ export default {
   },
   data: function () {
     return {
-    isFullPage : false,
-    isLoading : false,
-    selectedIov : {},
-        radioButton : 'Search',
-        since : 0,
-        until : 'INF',
-        rows: [],
-        snapshot : '0',
-        selactiveTab : 2,
-        columns : [
-                {
-                    field: 'tagName',
-                    label: 'TAG NAME',
-                    width: '20',
-                },
-                {
-                    field: 'since',
-                    label: 'SINCE',
-                    width: '15',
-                    sortable: true
-                },
-                {
-                    field: 'insertionTime',
-                    label: 'Insert Time',
-                    sortable: true
-                },
-                {
-                    field: 'payloadHash',
-                    label: 'HASH',
-                    width: '60'
-                },
-            ],
-        thehash: ''};
+      flinks: [
+        {'btnlabel' : 'Get Payload', 'seltab' : 2}
+      ],
+      helpmsg: "<p>Search for tags using filtering by tag name.</p>"
+        +"<p>Once you select a tag you can browse the associated IOVs by changing to appropriate tab or clicking on the <b>Get Iovs</b> button.</p>"
+        +"<p>You can use the <b>Create</b> button to create a new tag.</p>",
+      notiftype : 'is-info',
+      notifytext : 'Searching iovs....',
+      isFullPage : false,
+      isLoading : false,
+      selectedIov : {},
+      radioButton : 'Search',
+      since : 0,
+      until : 'INF',
+      rows: [],
+      snapshot : '0',
+      selactiveTab : 2,
+      thehash: ''};
   },
   methods: {
-    gotoPayloads() {
-      this.selactiveTab = 2
-      this.$emit('select-tab', this.selactiveTab)
-    },
     updateHash(row) {
       this.selectedIov = row
       this.thehash = row.payloadHash
       this.$emit('select-iov', this.selectedIov)
+    },
+    selectTab(nt) {
+      this.selactiveTab = nt
+      this.$emit('select-tab', this.selactiveTab)
     },
     async printRows() {
       for (var i in this.rows) {
@@ -124,13 +105,7 @@ export default {
       }
     },
     async loadIovs() {
-      this.isLoading = true
-//      setTimeout(() => {
-//          this.isLoading = false
-//      }, 10 * 1000)
-//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-//      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
-
+      this.isLoading = true;
       const params = [
       `tagname=${this.selectedtag.name}`,
       `since=${this.since}`,
@@ -155,11 +130,17 @@ export default {
           this.isLoading = false;
           return false;
         }
+      },
+      infomsg () {
+        return "Access api  "+this.selectedserver
+          +"<br> Selected tag is : "+this.selectedtag.name
+          +"<br> Selected iov is : "+this.selectedIov.since;
       }
   },
   components: {
     CrestIovsTable,
-    IovForm
+    IovForm,
+    HelpInfoPane
   }
 };
 </script>

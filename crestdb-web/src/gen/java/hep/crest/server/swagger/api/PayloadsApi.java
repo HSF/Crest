@@ -117,7 +117,7 @@ public class PayloadsApi  {
         @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = IovSetDto.class) })
     public Response storePayloadBatchWithIovMultiForm(@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
 ,@ApiParam(value = "", required=true)@FormDataParam("iovsetupload")  FormDataBodyPart iovsetupload
-,@ApiParam(value = "The format of the input data" , defaultValue="PYLD_JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
+,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
 ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
@@ -154,7 +154,7 @@ public class PayloadsApi  {
             @FormDataParam("file") FormDataContentDisposition fileDetail
 ,@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
 ,@ApiParam(value = "The since time", required=true)@FormDataParam("since")  BigDecimal since
-,@ApiParam(value = "The format of the input data" , defaultValue="PYLD_JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
+,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
 ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {

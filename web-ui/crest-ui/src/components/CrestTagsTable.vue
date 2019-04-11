@@ -81,34 +81,34 @@
       isloading : Boolean
     },
     data: function() {
-            return {
-                isPaginated: true,
-                isPaginationSimple: true,
-                defaultSortDirection: 'asc',
-                currentPage: 1,
-                perPage: 10,
-                selected: {},
-                columns : [
-                        {
-                            field: 'name',
-                            label: 'TAG NAME',
-                            width: '40',
-                            visible: true,
-                            sortable: true
-                        },
-                        {
-                            field: 'description',
-                            label: 'Description',
-                            visible: true,
-                            sortable: false,
-                        },
-                        {
-                            field: 'objectType',
-                            label: 'Object Type',
-                            visible: true,
-                            sortable: true
-                        },
-                    ],
+      return {
+          isPaginated: true,
+          isPaginationSimple: true,
+          defaultSortDirection: 'asc',
+          currentPage: 1,
+          perPage: 10,
+          selected: {},
+          columns : [
+                  {
+                      field: 'name',
+                      label: 'TAG NAME',
+                      width: '40',
+                      visible: true,
+                      sortable: true
+                  },
+                  {
+                      field: 'description',
+                      label: 'Description',
+                      visible: true,
+                      sortable: false,
+                  },
+                  {
+                      field: 'objectType',
+                      label: 'Object Type',
+                      visible: true,
+                      sortable: true
+                  },
+              ],
             }
     },
     methods: {

@@ -6,6 +6,16 @@
   <b-field label="Since">
     <b-input v-model="savedIov.since"></b-input>
   </b-field>
+  <b-field label="Format">
+      <b-select placeholder="Select a format" v-model="format">
+          <option
+              v-for="option in fmtdata"
+              :value="option.format"
+              :key="option.format">
+              {{ option.format }}
+          </option>
+      </b-select>
+  </b-field>
   <b-field class="file">
       <b-upload v-model="savedIov.file">
           <a class="button is-primary">
@@ -31,40 +41,55 @@ import axios from 'axios'
 export default {
   name: 'IovForm',
   props : {
-    selectedserver : Object,
+    selectedserver : String,
     selectedtag: Object,
   },
   data: function () {
     return {
+      format : 'JSON',
       savedIov : { tagname : this.selectedtag.name, since : 0 , file : null, endtime : 0 },
+      fmtdata : [
+        { 'format' : 'PNG'},
+        { 'format' : 'JSON'},
+        { 'format' : 'YAML'},
+        { 'format' : 'FITS'},
+        { 'format' : 'ROOT'},
+        { 'format' : 'CSV'},
+        { 'format' : 'XML'},
+        { 'format' : 'TXT'},
+        { 'format' : 'BIN'},
+        { 'format' : 'PDF'},
+        { 'format' : 'empty'}
+      ],
       savedresponse : {},
       savederror : {},
     };
   },
   methods: {
   save() {
-    console.log('saving a iov '+this.savedIov.tag+' '+this.savedIov.since)
-//    const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-    const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
+    let that=this;
+
+    console.log('saving a iov '+this.savedIov.tagname+' '+this.savedIov.since+" with format "+this.format)
     const sdata = new FormData();
     sdata.append("file", this.savedIov.file);
     sdata.append("tag", this.savedIov.tagname);
     sdata.append("since", this.savedIov.since);
-    let that=this;
-      axios({
-        url: `${this.hostbaseurl}/payloads/store`,
-        method: 'post',
-        header: 'X-Crest-PayloadFormat: JSON',
-        data: sdata
-      })
+    var postobj = {
+      url: `${this.hostbaseurl}/payloads/store`,
+      method: 'post',
+      headers: { 'X-Crest-PayloadFormat' : `${this.format}` },
+      data: sdata
+    };
+    console.log('use header '+postobj.headers['X-Crest-PayloadFormat']);
+    axios(postobj)
       .then(function (response) {
           // your action after success
-          this.savedresponse = response;
+          that.savedresponse = response;
       })
       .catch(function (error) {
          // your action on error success
           console.log(error);
-          this.savederror = error;
+          that.savederror = error;
       });
     },
   },
