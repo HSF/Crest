@@ -1242,7 +1242,7 @@
 						"in": "header",
 						"name": "X-Crest-PayloadFormat",
 						"description": "The format of the input data",
-						"default": "PYLD_JSON",
+						"default": "JSON",
 						"type": "string"
 					},
 					{

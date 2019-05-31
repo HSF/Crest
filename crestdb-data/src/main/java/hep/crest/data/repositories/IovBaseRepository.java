@@ -44,6 +44,22 @@ public interface IovBaseRepository extends PagingAndSortingRepository<Iov, IovId
 			+ "ORDER BY p.id.since ASC, p.id.insertionTime DESC")
 	List<Iov> selectSnapshotByGroup(@Param("name") String name, @Param("since") BigDecimal since, @Param("until") BigDecimal until, @Param("snap") Date snapshot);
 
+	//FIXME : complete as NATIVE request: @Query(nativeQuery = true)
+	/**
+	 * Native query example:
+	 * select * from IOV where 
+		TAG_NAME = 'MuonAlignMDTBarrelAlign-RUN2-BA_ROLLING_11-BLKP-UPD4-00' AND since = (
+		select max(SINCE) from IOV 
+		    where TAG_NAME = 'MuonAlignMDTBarrelAlign-RUN2-BA_ROLLING_11-BLKP-UPD4-00'
+        AND SINCE<=1433565235500000000 )
+	 */
+	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.tag tag "
+			+ "WHERE tag.name = (:name) AND p.id.since = ("
+			+ "SELECT max(pi.id.since) FROM Iov pi JOIN pi.tag pt "
+			+ "WHERE pt.name = (:name) AND pi.id.since <= :since AND pi.id.insertionTime <= :snap) "
+			+ "ORDER BY p.id.since ASC, p.id.insertionTime DESC")
+	List<Iov> selectAtTime(@Param("name") String name, @Param("since") BigDecimal since, @Param("snap") Date snapshot);
+
 	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.tag tag "
 			+ "WHERE tag.name = (:name) "
 			+ "ORDER BY p.id.since ASC, p.id.insertionTime DESC")
