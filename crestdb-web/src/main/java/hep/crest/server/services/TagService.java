@@ -175,7 +175,7 @@ public class TagService {
 			}
 			Tag toupd = tmpt.get();
 			toupd.setDescription(dto.getDescription());
-			toupd.setObjectType(dto.getObjectType());
+			toupd.setObjectType(dto.getPayloadSpec());
 			toupd.setSynchronization(dto.getSynchronization());
 			toupd.setEndOfValidity(dto.getEndOfValidity());
 			toupd.setLastValidatedTime(dto.getLastValidatedTime());

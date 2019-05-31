@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
 /**
  * TagDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-17T18:27:45.152+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-05-31T15:58:56.095+02:00")
 public class TagDto   {
   @JsonProperty("name")
   private String name = null;
@@ -33,8 +33,8 @@ public class TagDto   {
   @JsonProperty("timeType")
   private String timeType = null;
 
-  @JsonProperty("objectType")
-  private String objectType = null;
+  @JsonProperty("payloadSpec")
+  private String payloadSpec = null;
 
   @JsonProperty("synchronization")
   private String synchronization = null;
@@ -92,23 +92,23 @@ public class TagDto   {
     this.timeType = timeType;
   }
 
-  public TagDto objectType(String objectType) {
-    this.objectType = objectType;
+  public TagDto payloadSpec(String payloadSpec) {
+    this.payloadSpec = payloadSpec;
     return this;
   }
 
   /**
-   * Get objectType
-   * @return objectType
+   * Get payloadSpec
+   * @return payloadSpec
    **/
-  @JsonProperty("objectType")
+  @JsonProperty("payloadSpec")
   @ApiModelProperty(value = "")
-  public String getObjectType() {
-    return objectType;
+  public String getPayloadSpec() {
+    return payloadSpec;
   }
 
-  public void setObjectType(String objectType) {
-    this.objectType = objectType;
+  public void setPayloadSpec(String payloadSpec) {
+    this.payloadSpec = payloadSpec;
   }
 
   public TagDto synchronization(String synchronization) {
@@ -237,7 +237,7 @@ public class TagDto   {
     TagDto tagDto = (TagDto) o;
     return Objects.equals(this.name, tagDto.name) &&
         Objects.equals(this.timeType, tagDto.timeType) &&
-        Objects.equals(this.objectType, tagDto.objectType) &&
+        Objects.equals(this.payloadSpec, tagDto.payloadSpec) &&
         Objects.equals(this.synchronization, tagDto.synchronization) &&
         Objects.equals(this.description, tagDto.description) &&
         Objects.equals(this.lastValidatedTime, tagDto.lastValidatedTime) &&
@@ -248,7 +248,7 @@ public class TagDto   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, timeType, objectType, synchronization, description, lastValidatedTime, endOfValidity, insertionTime, modificationTime);
+    return Objects.hash(name, timeType, payloadSpec, synchronization, description, lastValidatedTime, endOfValidity, insertionTime, modificationTime);
   }
 
 
@@ -259,7 +259,7 @@ public class TagDto   {
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    timeType: ").append(toIndentedString(timeType)).append("\n");
-    sb.append("    objectType: ").append(toIndentedString(objectType)).append("\n");
+    sb.append("    payloadSpec: ").append(toIndentedString(payloadSpec)).append("\n");
     sb.append("    synchronization: ").append(toIndentedString(synchronization)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    lastValidatedTime: ").append(toIndentedString(lastValidatedTime)).append("\n");

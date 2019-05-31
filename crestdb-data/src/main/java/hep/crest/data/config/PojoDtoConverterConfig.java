@@ -57,7 +57,9 @@ public class PojoDtoConverterConfig {
 	}
 
 	protected void initTagMap(MapperFactory mapperFactory) {
-		mapperFactory.classMap(Tag.class, TagDto.class).exclude("globalTagMaps").byDefault().register();
+		mapperFactory.classMap(Tag.class, TagDto.class)
+			.field("objectType", "payloadSpec")
+			.exclude("globalTagMaps").byDefault().register();
 	}
 
 	protected void initIovMap(MapperFactory mapperFactory) {

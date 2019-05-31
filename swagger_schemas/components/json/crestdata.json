@@ -190,7 +190,7 @@
 				"timeType": {
 					"type": "string"
 				},
-				"objectType": {
+				"payloadSpec": {
 					"type": "string"
 				},
 				"synchronization": {
@@ -250,7 +250,7 @@
 			"required": [
 				"format",
 				"iovsList"
-			],			
+			],
 			"properties": {
 				"niovs": {
 					"type": "integer",

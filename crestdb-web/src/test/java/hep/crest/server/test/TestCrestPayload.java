@@ -25,37 +25,42 @@ import hep.crest.swagger.model.TagDto;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ActiveProfiles("default") 
+@ActiveProfiles("default")
 public class TestCrestPayload {
-    @Autowired
-    private TestRestTemplate testRestTemplate;
-   
-    @Test
-    public void testA_storeTags() {
-    		TagDto dto = new TagDto().description("test").name("SB_TAG-PYLD").endOfValidity(new BigDecimal(1)).lastValidatedTime(new BigDecimal(1)).objectType("test").synchronization("BLK").timeType("run").modificationTime(new Date()).insertionTime(new Date());
-        System.out.println("Store request: "+dto);
-        ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
-        System.out.println("Received response: "+response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-    }
-     
-    @Test
-    public void testB_storePayload() {
-    		byte[] bindata = new String("This is a fake payload").getBytes();
-    		PayloadDto dto = new PayloadDto().insertionTime(new Date()).data(bindata).hash("AFAKEHASH").objectType("FAKE").streamerInfo(bindata).version("1");
-        System.out.println("Store payload request: "+dto);
-        ResponseEntity<PayloadDto> response = this.testRestTemplate.postForEntity("/crestapi/payloads", dto, PayloadDto.class);
-        System.out.println("Received response: "+response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-    }
+	@Autowired
+	private TestRestTemplate testRestTemplate;
 
-    @Test
-    public void testC_storeIov() {
-    		IovDto dto = new IovDto().insertionTime(new Date()).since(new BigDecimal("100")).payloadHash("AFAKEHASH").tagName("SB_TAG-PYLD");
-        System.out.println("Store payload request: "+dto);
-        ResponseEntity<IovDto> response = this.testRestTemplate.postForEntity("/crestapi/iovs", dto, IovDto.class);
-        System.out.println("Received response: "+response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-    }
+	@Test
+	public void testA_storeTags() {
+		TagDto dto = new TagDto().description("test").name("SB_TAG-PYLD").endOfValidity(new BigDecimal(1))
+				.lastValidatedTime(new BigDecimal(1)).payloadSpec("test").synchronization("BLK").timeType("run")
+				.modificationTime(new Date()).insertionTime(new Date());
+		System.out.println("Store request: " + dto);
+		ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
+		System.out.println("Received response: " + response);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	}
+
+	@Test
+	public void testB_storePayload() {
+		byte[] bindata = new String("This is a fake payload").getBytes();
+		PayloadDto dto = new PayloadDto().insertionTime(new Date()).data(bindata).hash("AFAKEHASH").objectType("FAKE")
+				.streamerInfo(bindata).version("1");
+		System.out.println("Store payload request: " + dto);
+		ResponseEntity<PayloadDto> response = this.testRestTemplate.postForEntity("/crestapi/payloads", dto,
+				PayloadDto.class);
+		System.out.println("Received response: " + response);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	}
+
+	@Test
+	public void testC_storeIov() {
+		IovDto dto = new IovDto().insertionTime(new Date()).since(new BigDecimal("100")).payloadHash("AFAKEHASH")
+				.tagName("SB_TAG-PYLD");
+		System.out.println("Store payload request: " + dto);
+		ResponseEntity<IovDto> response = this.testRestTemplate.postForEntity("/crestapi/iovs", dto, IovDto.class);
+		System.out.println("Received response: " + response);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	}
 
 }

@@ -24,38 +24,40 @@ import hep.crest.swagger.model.TagDto;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ActiveProfiles("sqlite") 
+@ActiveProfiles("sqlite")
 public class TestCrestTag {
-    @Autowired
-    private TestRestTemplate testRestTemplate;
-   
-    @Test
-    public void testA_getAndRemoveTags() {
-        ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
-        TagDto[] taglist = response.getBody();
-        for (TagDto tagDto : taglist) {
-        		String url = "/crestapi/admin/tags/"+tagDto.getName();
-        		System.out.println("Removing tag "+url);
-            this.testRestTemplate.delete(url);
-		}
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
-    }
+	@Autowired
+	private TestRestTemplate testRestTemplate;
 
-   @Test
-    public void testB_storeTags() {
-    		TagDto dto = new TagDto().description("test").name("SB_TAG").endOfValidity(new BigDecimal(1)).lastValidatedTime(new BigDecimal(1)).objectType("test").synchronization("BLK").timeType("run").modificationTime(new Date()).insertionTime(new Date());
-        System.out.println("Store request: "+dto);
-        ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
-        System.out.println("Received response: "+response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-    }
-    
-    @Test
-    public void testC_getAllTags() {
-        ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
-    }
+	@Test
+	public void testA_getAndRemoveTags() {
+		ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
+		TagDto[] taglist = response.getBody();
+		for (TagDto tagDto : taglist) {
+			String url = "/crestapi/admin/tags/" + tagDto.getName();
+			System.out.println("Removing tag " + url);
+			this.testRestTemplate.delete(url);
+		}
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
+	}
+
+	@Test
+	public void testB_storeTags() {
+		TagDto dto = new TagDto().description("test").name("SB_TAG").endOfValidity(new BigDecimal(1))
+				.lastValidatedTime(new BigDecimal(1)).payloadSpec("test").synchronization("BLK").timeType("run")
+				.modificationTime(new Date()).insertionTime(new Date());
+		System.out.println("Store request: " + dto);
+		ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
+		System.out.println("Received response: " + response);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	}
+
+	@Test
+	public void testC_getAllTags() {
+		ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
+	}
 
 }
