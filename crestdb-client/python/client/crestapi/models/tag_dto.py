@@ -33,7 +33,7 @@ class TagDto(object):
     swagger_types = {
         'name': 'str',
         'time_type': 'str',
-        'object_type': 'str',
+        'payload_spec': 'str',
         'synchronization': 'str',
         'description': 'str',
         'last_validated_time': 'float',
@@ -45,7 +45,7 @@ class TagDto(object):
     attribute_map = {
         'name': 'name',
         'time_type': 'timeType',
-        'object_type': 'objectType',
+        'payload_spec': 'payloadSpec',
         'synchronization': 'synchronization',
         'description': 'description',
         'last_validated_time': 'lastValidatedTime',
@@ -54,12 +54,12 @@ class TagDto(object):
         'modification_time': 'modificationTime'
     }
 
-    def __init__(self, name=None, time_type=None, object_type=None, synchronization=None, description=None, last_validated_time=None, end_of_validity=None, insertion_time=None, modification_time=None):  # noqa: E501
+    def __init__(self, name=None, time_type=None, payload_spec=None, synchronization=None, description=None, last_validated_time=None, end_of_validity=None, insertion_time=None, modification_time=None):  # noqa: E501
         """TagDto - a model defined in Swagger"""  # noqa: E501
 
         self._name = None
         self._time_type = None
-        self._object_type = None
+        self._payload_spec = None
         self._synchronization = None
         self._description = None
         self._last_validated_time = None
@@ -72,8 +72,8 @@ class TagDto(object):
             self.name = name
         if time_type is not None:
             self.time_type = time_type
-        if object_type is not None:
-            self.object_type = object_type
+        if payload_spec is not None:
+            self.payload_spec = payload_spec
         if synchronization is not None:
             self.synchronization = synchronization
         if description is not None:
@@ -130,25 +130,25 @@ class TagDto(object):
         self._time_type = time_type
 
     @property
-    def object_type(self):
-        """Gets the object_type of this TagDto.  # noqa: E501
+    def payload_spec(self):
+        """Gets the payload_spec of this TagDto.  # noqa: E501
 
 
-        :return: The object_type of this TagDto.  # noqa: E501
+        :return: The payload_spec of this TagDto.  # noqa: E501
         :rtype: str
         """
-        return self._object_type
+        return self._payload_spec
 
-    @object_type.setter
-    def object_type(self, object_type):
-        """Sets the object_type of this TagDto.
+    @payload_spec.setter
+    def payload_spec(self, payload_spec):
+        """Sets the payload_spec of this TagDto.
 
 
-        :param object_type: The object_type of this TagDto.  # noqa: E501
+        :param payload_spec: The payload_spec of this TagDto.  # noqa: E501
         :type: str
         """
 
-        self._object_type = object_type
+        self._payload_spec = payload_spec
 
     @property
     def synchronization(self):

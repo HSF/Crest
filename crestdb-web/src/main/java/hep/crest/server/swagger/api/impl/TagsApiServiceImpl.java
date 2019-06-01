@@ -55,8 +55,6 @@ public class TagsApiServiceImpl extends TagsApiService {
 		} catch (AlreadyExistsPojoException e) {
 			return Response.status(Response.Status.SEE_OTHER).entity(body).build();
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			String message = e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -99,8 +97,6 @@ public class TagsApiServiceImpl extends TagsApiService {
 			return Response.created(info.getRequestUri()).entity(saved).build();
 
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			String message = e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();

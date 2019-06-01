@@ -324,7 +324,7 @@ class CMFileApi(ConditionManagementAbstract):
         self.checkdir(tagpath)
 
         try:
-            dto = TagDto(tagname,time_type=tag_params['time_type'], object_type=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity'])
+            dto = TagDto(tagname,time_type=tag_params['time_type'], payload_spec=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity'])
             msg = ('Created dto resource %s ' ) % (dto.to_dict())
             self._logger.debug("createTag: %s" % msg)
             # HERE the low level API method
@@ -610,7 +610,7 @@ class TagDtoWrap():
 
     def to_str(self):
         msglist=[]
-        msg = "tag:  {:<70} [{:>10}] {:<80}".format(self._tdto.name, self._tdto.time_type,self._tdto.object_type)
+        msg = "tag:  {:<70} [{:>10}] {:<80}".format(self._tdto.name, self._tdto.time_type,self._tdto.payload_spec)
         msglist.append(msg)
         msg = "\t \t \t insertion time={} \n\t \t \t synchro={:>20}".format(self._tdto.insertion_time,self._tdto.synchronization)
         msglist.append(msg)
@@ -874,7 +874,7 @@ class CMApi(ConditionManagementAbstract):
         self._logger.debug('Creating tag dto %s %s ' % (tagname,tag_params))
         api_instance = TagsApi(self.api_client)
         try:
-            dto = TagDto(tagname,time_type=tag_params['time_type'], object_type=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity'])
+            dto = TagDto(tagname,time_type=tag_params['time_type'], payload_spec=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity'])
             msg = ('Created dto resource %s ' ) % (dto.to_dict())
             api_response = api_instance.create_tag(dto)
             return api_response
