@@ -13,10 +13,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
@@ -29,6 +37,9 @@ import hep.crest.swagger.model.TagDto;
 public class TestCrestPayload {
 	@Autowired
 	private TestRestTemplate testRestTemplate;
+
+	@Autowired
+	private ObjectMapper jacksonMapper;
 
 	@Test
 	public void testA_storeTags() {
@@ -53,6 +64,7 @@ public class TestCrestPayload {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 	}
 
+	
 	@Test
 	public void testC_storeIov() {
 		IovDto dto = new IovDto().insertionTime(new Date()).since(new BigDecimal("100")).payloadHash("AFAKEHASH")
@@ -60,6 +72,53 @@ public class TestCrestPayload {
 		System.out.println("Store payload request: " + dto);
 		ResponseEntity<IovDto> response = this.testRestTemplate.postForEntity("/crestapi/iovs", dto, IovDto.class);
 		System.out.println("Received response: " + response);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	}
+	
+	@Test
+	public void testD_storePayload() {
+		byte[] bindata = new String("This is another fake payload").getBytes();
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+		PayloadDto dto = new PayloadDto().insertionTime(new Date()).hash("ANOTHERFAKEHASH").objectType("FAKE")
+				.streamerInfo(bindata).version("1");
+		String jsondto = "";
+		try {
+			jsondto = jacksonMapper.writeValueAsString(dto);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Use json body : "+jsondto);
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+		map.add("file", new String(bindata));
+		map.add("payload", jsondto);
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
+		ResponseEntity<String> response = this.testRestTemplate.postForEntity("/crestapi/payloads/upload", request, String.class);
+		
+		System.out.println("Upload request gave response: " + response);
+		
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	}
+
+	@Test
+	public void testD_storePayloadWithIov() {
+		byte[] bindata = new String("This is yet another fake payload").getBytes();
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+		String tagname = "SB_TAG-PYLD";
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+		map.add("file", new String(bindata));
+		map.add("since", "1000000");
+		map.add("endtime", "0");
+		map.add("tag", tagname);
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
+		ResponseEntity<String> response = this.testRestTemplate.postForEntity("/crestapi/payloads/store", request, String.class);
+		
+		System.out.println("Upload request gave response: " + response);
+		
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 	}
 
