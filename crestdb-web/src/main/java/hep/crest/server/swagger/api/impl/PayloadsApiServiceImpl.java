@@ -336,22 +336,25 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 	@Transactional
 	protected IovDto saveIovAndPayload(IovDto dto, String filename, InputStream fileInputStream, PayloadDto pdto)
 			throws CdbServiceException, IOException {
-		File tempfile = new File(filename);
+
 		Path temppath = Paths.get(filename);
 		String hash = payloadService.saveInputStreamGetHash(fileInputStream, filename);
-		log.debug("Create dto with hash {},  format {}, ...", hash, pdto.getObjectType());
 
-		pdto.hash(hash).streamerInfo(pdto.getObjectType().getBytes());
-		InputStream is = new FileInputStream(tempfile);
-		FileChannel tempchan = FileChannel.open(temppath);
-		pdto.size((int) (tempchan.size()));
-		PayloadDto saved = payloadService.insertPayloadAndInputStream(pdto, is);
-		dto.payloadHash(hash);
-		IovDto savediov = iovService.insertIov(dto);
-		log.debug("Create payload {} and iov {} ", saved, savediov);
-		Files.deleteIfExists(temppath);
-		log.debug("Removed temporary file");
-		return savediov;
+		try (InputStream is = new FileInputStream(filename);) {
+			log.debug("Create dto with hash {},  format {}, ...", hash, pdto.getObjectType());
+
+			pdto.hash(hash).streamerInfo(pdto.getObjectType().getBytes());
+			FileChannel tempchan = FileChannel.open(temppath);
+			pdto.size((int) (tempchan.size()));
+			PayloadDto saved = payloadService.insertPayloadAndInputStream(pdto, is);
+			dto.payloadHash(hash);
+			IovDto savediov = iovService.insertIov(dto);
+			log.debug("Create payload {} and iov {} ", saved, savediov);
+			return savediov;
+		} finally {
+			Files.deleteIfExists(temppath);
+			log.debug("Removed temporary file");
+		}
 	}
 
 	@Transactional

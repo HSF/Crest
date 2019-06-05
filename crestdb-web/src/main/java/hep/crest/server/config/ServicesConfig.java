@@ -54,7 +54,6 @@ public class ServicesConfig {
 	public ObjectMapper getJacksonMapper() {
 		ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-	    //mapper.setDateFormat(new ISO8601DateFormat());
 	    return mapper;
 	}
 	
