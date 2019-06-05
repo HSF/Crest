@@ -67,6 +67,9 @@ dependencies {
  	//////compile "org.glassfish.jersey.media:jersey-media-sse:$jersey2_version" 	
     
 	testCompile("org.springframework.boot:spring-boot-starter-test") 
+	//compile group: 'org.reactivestreams', name: 'reactive-streams', version: '1.0.0'
+	testCompile("org.apache.httpcomponents:httpclient")
+	testCompile("org.apache.httpcomponents:httpmime")
 }
 
 sourceSets {

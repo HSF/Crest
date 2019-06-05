@@ -324,6 +324,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			pdto.hash(hash).streamerInfo(pdto.getObjectType().getBytes());
 			FileChannel tempchan = FileChannel.open(temppath);
 			pdto.size((int) (tempchan.size()));
+			tempchan.close();
 			PayloadDto saved = payloadService.insertPayloadAndInputStream(pdto, is);
 			dto.payloadHash(hash);
 			IovDto savediov = iovService.insertIov(dto);
@@ -332,6 +333,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		} finally {
 			Files.deleteIfExists(temppath);
 			log.debug("Removed temporary file");
+			if (fileInputStream != null) {
+				fileInputStream.close();
+			}
 		}
 	}
 

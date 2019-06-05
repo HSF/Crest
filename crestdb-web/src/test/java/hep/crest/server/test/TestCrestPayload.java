@@ -2,9 +2,24 @@ package hep.crest.server.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,11 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
@@ -27,6 +45,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
 
@@ -64,7 +84,6 @@ public class TestCrestPayload {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 	}
 
-	
 	@Test
 	public void testC_storeIov() {
 		IovDto dto = new IovDto().insertionTime(new Date()).since(new BigDecimal("100")).payloadHash("AFAKEHASH")
@@ -74,11 +93,11 @@ public class TestCrestPayload {
 		System.out.println("Received response: " + response);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 	}
-	
+
 	@Test
 	public void testD_storePayload() {
 		byte[] bindata = new String("This is another fake payload").getBytes();
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 		PayloadDto dto = new PayloadDto().insertionTime(new Date()).hash("ANOTHERFAKEHASH").objectType("FAKE")
@@ -90,22 +109,23 @@ public class TestCrestPayload {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Use json body : "+jsondto);
+		System.out.println("Use json body : " + jsondto);
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("file", new String(bindata));
 		map.add("payload", jsondto);
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-		ResponseEntity<String> response = this.testRestTemplate.postForEntity("/crestapi/payloads/upload", request, String.class);
-		
+		ResponseEntity<String> response = this.testRestTemplate.postForEntity("/crestapi/payloads/upload", request,
+				String.class);
+
 		System.out.println("Upload request gave response: " + response);
-		
+
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 	}
 
 	@Test
 	public void testD_storePayloadWithIov() {
 		byte[] bindata = new String("This is yet another fake payload").getBytes();
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 		String tagname = "SB_TAG-PYLD";
@@ -115,11 +135,65 @@ public class TestCrestPayload {
 		map.add("endtime", "0");
 		map.add("tag", tagname);
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-		ResponseEntity<String> response = this.testRestTemplate.postForEntity("/crestapi/payloads/store", request, String.class);
-		
+		ResponseEntity<String> response = this.testRestTemplate.postForEntity("/crestapi/payloads/store", request,
+				String.class);
+
 		System.out.println("Upload request gave response: " + response);
-		
+
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	}
+
+	@Test
+	public void testE_storeBatchPayloadWithIov() {
+		try {
+			String content1 = "This is a fake payload batch 1";
+			Files.write(Paths.get("/tmp/batch1.txt"), content1.getBytes());
+			String content2 = "This is a fake payload batch 2";
+			Files.write(Paths.get("/tmp/batch2.txt"), content2.getBytes());
+			IovSetDto sdto = new IovSetDto();
+			sdto.addIovsListItem(new IovPayloadDto().payload("file:///tmp/batch1.txt").since(new BigDecimal(100)));
+			sdto.addIovsListItem(new IovPayloadDto().payload("file:///tmp/batch2.txt").since(new BigDecimal(200)));
+			sdto.niovs(2L);
+			sdto.format("FILE");
+			String rooturi = this.testRestTemplate.getRootUri();
+			System.out.println("Root URI is "+rooturi);
+			String json = jacksonMapper.writeValueAsString(sdto);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+			String tagname = "SB_TAG-PYLD";
+			File f1 = new File("/tmp/batch1.txt");
+			File f2 = new File("/tmp/batch2.txt");
+			FileDataBodyPart filePart1 = new FileDataBodyPart("file", f1);
+			FileDataBodyPart filePart2 = new FileDataBodyPart("file", f2);
+			List<FormDataBodyPart> bodyParts = new ArrayList<>();
+			bodyParts.add(filePart1);
+			bodyParts.add(filePart2);
+
+			CloseableHttpClient client = HttpClients.createDefault();
+			HttpPost post = new HttpPost(rooturi+"/crestapi/payloads/uploadbatch");
+
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+			
+			//MultipartBodyBuilder builder = new MultipartBodyBuilder();
+			builder.addBinaryBody("files", f1, ContentType.DEFAULT_BINARY, "/tmp/batch1.txt");
+			builder.addBinaryBody("files", f2, ContentType.DEFAULT_BINARY, "/tmp/batch2.txt");
+			builder.addTextBody("tag", tagname);
+			builder.addTextBody("iovsetupload", json);
+			builder.addTextBody("endtime", "0");
+			
+			org.apache.http.HttpEntity entity = builder.build();
+			post.setEntity(entity);
+			HttpResponse response = client.execute(post);
+
+			System.out.println("Upload batch request gave response: " + response);
+
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.CREATED.value());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 }
