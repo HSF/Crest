@@ -54,6 +54,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	private static final String SLASH =  (File.pathSeparator.equals(":")) ? "/" : File.pathSeparator;
+
 	@Autowired
 	private PayloadService payloadService;
 	@Autowired
@@ -173,7 +175,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			if (fdetailsname == null || fdetailsname.isEmpty()) {
 				fdetailsname = ".blob";
 			}
-			String filename = cprops.getDumpdir() + File.pathSeparator + tag + "_" + since + "_" + fdetailsname;
+			String filename = cprops.getDumpdir() + SLASH + tag + "_" + since + "_" + fdetailsname;
 			if (format == null) {
 				format = "JSON";
 			}
@@ -181,30 +183,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			PayloadDto pdto = new PayloadDto().objectType(format).streamerInfo(format.getBytes()).version("none");
 			IovDto iovDto = new IovDto().payloadHash(pdto.getHash()).since(since).tagName(tag);
 			IovDto saveddto = saveIovAndPayload(iovDto, filename, fileInputStream, pdto);
-
-			// File tempfile = new File(filename);
-			// Path temppath = Paths.get(filename);
-			// String hash = payloadService.saveInputStreamGetHash(fileInputStream,
-			// filename);
-			// if (format == null) {
-			// format = "JSON";
-			// }
-			// log.debug("Create dto with hash {}, format {}, use filename {} ", hash,
-			// format, filename);
-			// PayloadDto payloaddto = new
-			// PayloadDto().hash(hash).objectType(format).streamerInfo(format.getBytes())
-			// .version("test");
-			// InputStream is = new FileInputStream(tempfile);
-			// FileChannel tempchan = FileChannel.open(temppath);
-			// payloaddto.setSize((int) (tempchan.size()));
-			// PayloadDto saved = payloadService.insertPayloadAndInputStream(payloaddto,
-			// is);
-			// IovDto iovdto = new IovDto().payloadHash(hash).tagName(tag).since(since);
-			// IovDto savediov = iovService.insertIov(iovdto);
-			// log.debug("Create payload {} and iov {} ", saved, savediov);
-			//
-			// Files.deleteIfExists(temppath);
-			// log.debug("Removed temporary file");
 			HTTPResponse resp = new HTTPResponse().action("storePayloadWithIovMultiForm")
 					.code(Response.Status.CREATED.getStatusCode()).id(saveddto.getPayloadHash())
 					.message("Created new entry in tag " + tag);
