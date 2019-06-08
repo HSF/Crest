@@ -57,18 +57,18 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	@Autowired
 	private PayloadHandler payloadHandler;
 
-	private String defaultTablename=null;
+	private String defaultTablename = null;
 
 	public PayloadDataDBImpl(DataSource ds) {
 		super();
 		this.ds = ds;
 	}
-	
+
 	public void setDefaultTablename(String defaultTablename) {
 		if (this.defaultTablename == null)
 			this.defaultTablename = defaultTablename;
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -76,29 +76,31 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		Table ann = Payload.class.getAnnotation(Table.class);
 		String tablename = ann.name();
 		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
+			tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
 		} else if (this.defaultTablename != null) {
 			tablename = this.defaultTablename + "." + tablename;
 		}
 		return tablename;
 	}
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#find(java.lang.String)
 	 */
 	@Transactional
 	public Payload find(String id) {
-		log.info("Find payload {} using JDBCTEMPLATE",id);
+		log.info("Find payload {} using JDBCTEMPLATE", id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
 		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,PYLD_SIZE from " + tablename
 				+ " where HASH=?";
-		
-		// Be careful, this seems not to work with Postgres: probably getBlob loads an OID and not the byte[] 
+
+		// Be careful, this seems not to work with Postgres: probably getBlob loads an
+		// OID and not the byte[]
 		// Temporarely, try to create a postgresql implementation of this class.
-		
+
 		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setHash(rs.getString("HASH"));
@@ -113,37 +115,51 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		});
 	}
 
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#findMetaInfo(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * hep.crest.data.repositories.PayloadDataBaseCustom#findMetaInfo(java.lang.
+	 * String)
 	 */
 	@Transactional
 	public Payload findMetaInfo(String id) {
-		log.info("Find payload meta info {} using JDBCTEMPLATE",id);
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		String tablename = this.tablename();
+		log.info("Find payload meta info {} using JDBCTEMPLATE", id);
+		try {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+			String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from " + tablename
-				+ " where HASH=?";
-		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
-			final Payload entity = new Payload();
-			entity.setHash(rs.getString("HASH"));
-			entity.setObjectType(rs.getString("OBJECT_TYPE"));
-			entity.setVersion(rs.getString("VERSION"));
-			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
-			entity.setSize(rs.getInt("PYLD_SIZE"));
+			String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from " + tablename
+					+ " where HASH=?";
 
-			return entity;
-		});
+			return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+				final Payload entity = new Payload();
+				entity.setHash(rs.getString("HASH"));
+				entity.setObjectType(rs.getString("OBJECT_TYPE"));
+				entity.setVersion(rs.getString("VERSION"));
+				entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
+				entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
+				entity.setSize(rs.getInt("PYLD_SIZE"));
+
+				return entity;
+			});
+		} catch (Exception e) {
+			log.error("Cannot find payload metadata with hash {}", id);
+			return null;
+		}
 
 	}
 
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
 	 */
 	@Transactional
 	public Payload findData(String id) {
-		log.info("Find payload data {} using JDBCTEMPLATE",id);
+		log.info("Find payload data {} using JDBCTEMPLATE", id);
+		try {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
@@ -153,10 +169,18 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			entity.setData(rs.getBlob("DATA"));
 			return entity;
 		});
+		} catch (Exception e) {
+			log.error("Cannot find payload with data for hash {}",id);
+			return null;
+		}
 	}
 
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.model.PayloadDto)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.
+	 * model.PayloadDto)
 	 */
 	@Override
 	@Transactional
@@ -165,7 +189,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		try {
 			savedentity = this.saveBlobAsBytes(entity);
 		} catch (IOException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		}
 		return savedentity;
 	}
@@ -177,12 +201,11 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String sql = "INSERT INTO " + tablename
 				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME,PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
 
-		log.info("Insert Payload {} using JDBCTEMPLATE ",entity.getHash() );
+		log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
-		try (Connection conn = ds.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql);) {
+		try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, entity.getHash());
 			ps.setString(2, entity.getObjectType());
 			ps.setString(3, entity.getVersion());
@@ -190,19 +213,23 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.setBytes(5, entity.getStreamerInfo());
 			ps.setDate(6, inserttime);
 			ps.setInt(7, entity.getSize());
-			log.info("Dump preparedstatement {} using sql {} and arguments : {} {} {} {}",
-					ps, sql, entity.getHash(),entity.getObjectType(),entity.getVersion(),entity.getInsertionTime());
+			log.info("Dump preparedstatement {} using sql {} and arguments : {} {} {} {}", ps, sql, entity.getHash(),
+					entity.getObjectType(), entity.getVersion(), entity.getInsertionTime());
 			ps.execute();
-			log.debug("Search for stored payload as a verification, use hash {} ",entity.getHash());
+			log.debug("Search for stored payload as a verification, use hash {} ", entity.getHash());
 			return find(entity.getHash());
 		} catch (SQLException e) {
-			log.error("Exception when savinf payload as bytes: {} ",e.getMessage());
-		} 
+			log.error("Exception when savinf payload as bytes: {} ", e.getMessage());
+		}
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.model.PayloadDto, java.io.InputStream)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.
+	 * model.PayloadDto, java.io.InputStream)
 	 */
 	@Override
 	@Transactional
@@ -210,15 +237,15 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		Payload savedentity = null;
 		try {
 			if ((savedentity = findMetaInfo(entity.getHash())) != null) {
-				log.warn("The hash {} already exists...return the existing entity...",entity.getHash());
+				log.warn("The hash {} already exists...return the existing entity...", entity.getHash());
 				return savedentity;
 			}
 			this.saveBlobAsStream(entity, is);
 			savedentity = findMetaInfo(entity.getHash());
 		} catch (IOException e) {
-			log.error("IOException during payload dto insertion: {}",e.getMessage());
+			log.error("IOException during payload dto insertion: {}", e.getMessage());
 		} catch (Exception e) {
-			log.error("Exception during payload dto insertion: {}",e.getMessage());
+			log.error("Exception during payload dto insertion: {}", e.getMessage());
 		}
 		return savedentity;
 	}
@@ -234,16 +261,15 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String sql = "INSERT INTO " + tablename
 				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
 
-		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
+		log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
 		byte[] blob = payloadHandler.getBytesFromInputStream(is);
 		entity.setSize(blob.length);
 		log.debug("Streamer info {}", entity.getStreamerInfo());
-		log.debug("Read data blob of length {} and streamer info {}",blob.length, entity.getStreamerInfo().length);
+		log.debug("Read data blob of length {} and streamer info {}", blob.length, entity.getStreamerInfo().length);
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
-		try (Connection conn = ds.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql);) {
+		try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, entity.getHash());
 			ps.setString(2, entity.getObjectType());
 			ps.setString(3, entity.getVersion());
@@ -251,10 +277,10 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.setBytes(5, entity.getStreamerInfo());
 			ps.setDate(6, inserttime);
 			ps.setInt(7, entity.getSize());
-			log.debug("Dump preparedstatement {}",ps);
+			log.debug("Dump preparedstatement {}", ps);
 			ps.execute();
 		} catch (SQLException e) {
-			log.error("Exception from SQL during insertion: {}",e.getMessage());
+			log.error("Exception from SQL during insertion: {}", e.getMessage());
 		} finally {
 			log.debug("Nothing to do here ?");
 		}
@@ -272,20 +298,19 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		String sql = "INSERT INTO " + tablename
 				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?)";
 
-		log.info("Insert Payload Meta Info {} using JDBCTEMPLATE",metainfoentity.getHash());
-		try (Connection conn = ds.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql);) {
+		log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
+		try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, metainfoentity.getHash());
 			ps.setString(2, metainfoentity.getObjectType());
 			ps.setString(3, metainfoentity.getVersion());
 			ps.setBytes(4, metainfoentity.getStreamerInfo());
 			// FIXME: be careful to the insertion time...is the one provided correct ?
 			ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
-			log.debug("Dump preparedstatement {}",ps);
+			log.debug("Dump preparedstatement {}", ps);
 			ps.execute();
 			return find(metainfoentity.getHash());
 		} catch (SQLException e) {
-			log.error("Exception : {}",e.getMessage());
+			log.error("Exception : {}", e.getMessage());
 		} finally {
 			log.debug("Nothing to do here ?");
 		}
@@ -302,13 +327,13 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		return null;
 	}
 
-	//FIXME: THIS METHOD is FOR OLD SCHEMA....Should be updated...
+	// FIXME: THIS METHOD is FOR OLD SCHEMA....Should be updated...
 	@Override
 	@Transactional
 	public void delete(String id) {
 		String tablename = this.tablename();
-		String sql = "DELETE FROM "+ tablename + " WHERE HASH=(?)";
-		log.info("Remove payload with hash {} using JDBCTEMPLATE",id);
+		String sql = "DELETE FROM " + tablename + " WHERE HASH=(?)";
+		log.info("Remove payload with hash {} using JDBCTEMPLATE", id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		jdbcTemplate.update(sql, new Object[] { id });
 		log.debug("Entity removal done...");

@@ -85,6 +85,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.PayloadsApiService#createPayloadMultiForm(java.io.InputStream, org.glassfish.jersey.media.multipart.FormDataContentDisposition, org.glassfish.jersey.media.multipart.FormDataBodyPart, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
 	@Override
 	public Response createPayloadMultiForm(InputStream fileInputStream, FormDataContentDisposition fileDetail,
 			FormDataBodyPart payload, SecurityContext securityContext, UriInfo info) throws NotFoundException {
@@ -93,7 +96,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		try {
 			payload.setMediaType(MediaType.APPLICATION_JSON_TYPE);
 			PayloadDto payloaddto = payload.getValueAs(PayloadDto.class);
-			log.debug("Received body json " + payload);
+			log.debug("Received body json " + payloaddto);
 			PayloadDto saved = payloadService.insertPayloadAndInputStream(payloaddto, fileInputStream);
 			return Response.created(info.getRequestUri()).entity(saved).build();
 
