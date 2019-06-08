@@ -35,6 +35,8 @@ import org.springframework.stereotype.Component;
 
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.server.annotations.CacheControlCdb;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.PayloadService;
@@ -62,6 +64,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 	private IovService iovService;
 	@Autowired
 	TagService tagService;
+	@Autowired
+	private PayloadHandler payloadHandler;
 
 	@Autowired
 	private CrestProperties cprops;
@@ -316,8 +320,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			throws CdbServiceException, IOException {
 
 		Path temppath = Paths.get(filename);
-		String hash = payloadService.saveInputStreamGetHash(fileInputStream, filename);
-
+		String hash = "none";
+		try (BufferedInputStream bis = new BufferedInputStream(fileInputStream)) {
+			 hash = payloadHandler.saveToFileGetHash(bis, filename);
+		} catch (PayloadEncodingException e) {
+			throw new CdbServiceException("Cannot compute the hash : "+e.getMessage());
+		}
 		try (InputStream is = new FileInputStream(filename);) {
 			log.debug("Create dto with hash {},  format {}, ...", hash, pdto.getObjectType());
 
@@ -344,7 +352,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		String hash = "none";
 		try (BufferedInputStream stringInputStream = new BufferedInputStream(
 				new ByteArrayInputStream(pdto.getData()))) {
-			hash = payloadService.getInputStreamHash(stringInputStream);
+			//hash = payloadService.getInputStreamHash(stringInputStream);
+			hash = payloadHandler.getHashFromStream(stringInputStream);
+		} catch (PayloadEncodingException e) {
+			throw new CdbServiceException("Hash generation error: "+e.getMessage());
 		}
 		log.debug("Create dto with hash {},  format {}, ...", hash, pdto.getObjectType());
 		if (hash.equals("none")) {

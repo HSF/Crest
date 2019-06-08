@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.PayloadDto;
@@ -62,7 +63,7 @@ public class PayloadHandler {
 	 * @param uploadedInputStream
 	 * @param uploadedFileLocation
 	 */
-	public void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
+	public void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CdbServiceException {
 
 		try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
 			int read = 0;
@@ -73,7 +74,8 @@ public class PayloadHandler {
 			}
 			out.flush();
 		} catch (IOException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Exception saving stream to file: {}", e.getMessage());
+			throw new CdbServiceException("Cannot save stream to file "+uploadedFileLocation);
 		}
 	}
 
@@ -103,6 +105,9 @@ public class PayloadHandler {
 	}
 
 	/**
+	 * Get hash while reading the stream and saving it to a file. The internal method will close the
+	 * output and input stream but we also do it here just in case.
+	 * 
 	 * @param uploadedInputStream
 	 * @param uploadedFileLocation
 	 * @return
@@ -115,6 +120,14 @@ public class PayloadHandler {
 			return HashGenerator.hashoutstream(uploadedInputStream, out);
 		} catch (NoSuchAlgorithmException | IOException e) {
 			throw new PayloadEncodingException(e.getMessage());
+		} finally {
+			if (uploadedInputStream != null) {
+				try {
+					uploadedInputStream.close();
+				} catch (IOException e) {
+					log.error("error closing input stream in saveToFileGetHash");
+				}
+			}
 		}
 	}
 

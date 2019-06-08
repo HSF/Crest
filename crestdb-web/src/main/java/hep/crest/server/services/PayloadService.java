@@ -167,37 +167,43 @@ public class PayloadService {
 		}
 	}
 
-	/**
-	 * @param is
-	 * @param file
-	 * @return
-	 * @throws CdbServiceException
-	 */
-	public String saveInputStreamGetHash(InputStream is, String file) throws CdbServiceException {
-		try {
-			log.debug("Save inputstream and compute hash");
-			return payloadHandler.saveToFileGetHash(is, file);
-		} catch (Exception e) {
-			log.error("Exception in copying payload to disk in file {}: {}",file,e.getMessage());
-			throw new CdbServiceException("Cannot store payload : " + e.getMessage());
-		}
-	}
+//	/**
+//	 * @param is
+//	 * @param file
+//	 * @return
+//	 * @throws CdbServiceException
+//	 */
+//	public String saveInputStreamGetHash(InputStream is, String file) throws CdbServiceException {
+//		try {
+//			log.debug("Save inputstream and compute hash");
+//			return payloadHandler.saveToFileGetHash(is, file);
+//		} catch (Exception e) {
+//			log.error("Exception in copying payload to disk in file {}: {}",file,e.getMessage());
+//			throw new CdbServiceException("Cannot store payload : " + e.getMessage());
+//		} finally {
+//			try {
+//				is.close();
+//			} catch (IOException e) {
+//				log.error("Cannot close input stream");
+//			}
+//		}
+//	}
 
-	/**
-	 * @param is
-	 * @param file
-	 * @return
-	 * @throws CdbServiceException
-	 */
-	public String getInputStreamHash(InputStream is) throws CdbServiceException {
-		try {
-			log.debug("Save inputstream and compute hash");
-			return payloadHandler.getHashFromStream((BufferedInputStream) is);
-		} catch (Exception e) {
-			log.error("Exception in getting hash from string payload {}",e.getMessage());
-			throw new CdbServiceException("Cannot get payload hash: " + e.getMessage());
-		}
-	}
+//	/**
+//	 * @param is
+//	 * @param file
+//	 * @return
+//	 * @throws CdbServiceException
+//	 */
+//	public String getInputStreamHash(InputStream is) throws CdbServiceException {
+//		try {
+//			log.debug("Save inputstream and compute hash");
+//			return payloadHandler.getHashFromStream((BufferedInputStream) is);
+//		} catch (Exception e) {
+//			log.error("Exception in getting hash from string payload {}",e.getMessage());
+//			throw new CdbServiceException("Cannot get payload hash: " + e.getMessage());
+//		}
+//	}
 
 	/**
 	 * @param dto

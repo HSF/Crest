@@ -209,6 +209,10 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	public Payload save(PayloadDto entity, InputStream is) throws CdbServiceException {
 		Payload savedentity = null;
 		try {
+			if ((savedentity = findMetaInfo(entity.getHash())) != null) {
+				log.warn("The hash {} already exists...return the existing entity...",entity.getHash());
+				return savedentity;
+			}
 			this.saveBlobAsStream(entity, is);
 			savedentity = findMetaInfo(entity.getHash());
 		} catch (IOException e) {
