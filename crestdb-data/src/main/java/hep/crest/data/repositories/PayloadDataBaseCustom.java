@@ -33,8 +33,25 @@ import hep.crest.swagger.model.PayloadDto;
 public interface PayloadDataBaseCustom {
 	Payload find(String id);
 	Payload findData(String id);
+	/**
+	 * The method does not access blob data.
+	 * @param id
+	 * @return The payload or null.
+	 */
 	Payload findMetaInfo(String id);
+	/**
+	 * @param entity
+	 * @return Either the entity which has been saved or null.
+	 * @throws CdbServiceException
+	 * 	It should in reality not throw any exception
+	 */
 	Payload save(PayloadDto entity) throws CdbServiceException;
+	/**
+	 * @param entity
+	 * @param is
+	 * @return Either the entity which has been saved or null.
+	 * @throws CdbServiceException
+	 */
 	Payload save(PayloadDto entity, InputStream is) throws CdbServiceException;
 	Payload saveNull() throws IOException, PayloadEncodingException;
 	void delete(String id);

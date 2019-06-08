@@ -88,7 +88,7 @@ public class TestCrestPayload {
 	public void testC_storeIov() {
 		IovDto dto = new IovDto().insertionTime(new Date()).since(new BigDecimal("100")).payloadHash("AFAKEHASH")
 				.tagName("SB_TAG-PYLD");
-		System.out.println("Store payload request: " + dto);
+		System.out.println("Store iov request: " + dto);
 		ResponseEntity<IovDto> response = this.testRestTemplate.postForEntity("/crestapi/iovs", dto, IovDto.class);
 		System.out.println("Received response: " + response);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -109,7 +109,7 @@ public class TestCrestPayload {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Use json body : " + jsondto);
+		System.out.println("Upload payload: use json body " + jsondto);
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("file", new String(bindata));
 		map.add("payload", jsondto);

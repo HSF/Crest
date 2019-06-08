@@ -188,13 +188,13 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		Payload savedentity = null;
 		try {
 			savedentity = this.saveBlobAsBytes(entity);
-		} catch (IOException e) {
-			log.error("Exception : {}", e.getMessage());
+		} catch (CdbServiceException e) {
+			log.error("Exception in save() : {}", e.getMessage());
 		}
 		return savedentity;
 	}
 
-	protected Payload saveBlobAsBytes(PayloadDto entity) throws IOException {
+	protected Payload saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
 
 		String tablename = this.tablename();
 
@@ -219,9 +219,12 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			log.debug("Search for stored payload as a verification, use hash {} ", entity.getHash());
 			return find(entity.getHash());
 		} catch (SQLException e) {
-			log.error("Exception when savinf payload as bytes: {} ", e.getMessage());
+			log.error("SQL Exception when saving blob as bytes: {} ", e.getMessage());
+			throw new CdbServiceException("SQL error "+e.getMessage());
+		} catch (Exception e) {
+			log.error("Generic Exception when savinf payload as bytes: {} ", e.getMessage());
+			throw new CdbServiceException("Error "+e.getMessage());
 		}
-		return null;
 	}
 
 	/*
@@ -242,9 +245,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			}
 			this.saveBlobAsStream(entity, is);
 			savedentity = findMetaInfo(entity.getHash());
-		} catch (IOException e) {
-			log.error("IOException during payload dto insertion: {}", e.getMessage());
-		} catch (Exception e) {
+		} catch (CdbServiceException e) {
 			log.error("Exception during payload dto insertion: {}", e.getMessage());
 		}
 		return savedentity;
@@ -255,7 +256,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	 * @param is
 	 * @throws IOException
 	 */
-	protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws IOException {
+	protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
@@ -281,40 +282,13 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.execute();
 		} catch (SQLException e) {
 			log.error("Exception from SQL during insertion: {}", e.getMessage());
+			throw new CdbServiceException(e.getMessage());
+		} catch (Exception e) {
+			log.error("Exception during payload dto insertion: {}", e.getMessage());
+			throw new CdbServiceException("Exception occurred during payload insertion from stream.."+e.getMessage());
 		} finally {
 			log.debug("Nothing to do here ?");
 		}
-	}
-
-	/**
-	 * @param metainfoentity
-	 * @return
-	 * @throws IOException
-	 */
-	protected Payload saveMetaInfo(PayloadDto metainfoentity) throws IOException {
-
-		String tablename = this.tablename();
-
-		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?)";
-
-		log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
-		try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
-			ps.setString(1, metainfoentity.getHash());
-			ps.setString(2, metainfoentity.getObjectType());
-			ps.setString(3, metainfoentity.getVersion());
-			ps.setBytes(4, metainfoentity.getStreamerInfo());
-			// FIXME: be careful to the insertion time...is the one provided correct ?
-			ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
-			log.debug("Dump preparedstatement {}", ps);
-			ps.execute();
-			return find(metainfoentity.getHash());
-		} catch (SQLException e) {
-			log.error("Exception : {}", e.getMessage());
-		} finally {
-			log.debug("Nothing to do here ?");
-		}
-		return null;
 	}
 
 	/*
@@ -324,6 +298,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	 */
 	@Override
 	public Payload saveNull() throws IOException, PayloadEncodingException {
+		log.warn("Method not implemented");
 		return null;
 	}
 
