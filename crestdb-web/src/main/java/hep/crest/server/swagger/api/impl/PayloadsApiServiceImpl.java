@@ -38,6 +38,7 @@ import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.server.annotations.CacheControlCdb;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.PayloadService;
 import hep.crest.server.services.TagService;
@@ -56,7 +57,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	private static final String SLASH =  (File.pathSeparator.equals(":")) ? "/" : File.pathSeparator;
+	private static final String SLASH = (File.pathSeparator.equals(":")) ? "/" : File.pathSeparator;
+
+	private static final int MAX_FILE_UPLOAD = 1000;
 
 	@Autowired
 	private PayloadService payloadService;
@@ -85,8 +88,15 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see hep.crest.server.swagger.api.PayloadsApiService#createPayloadMultiForm(java.io.InputStream, org.glassfish.jersey.media.multipart.FormDataContentDisposition, org.glassfish.jersey.media.multipart.FormDataBodyPart, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * hep.crest.server.swagger.api.PayloadsApiService#createPayloadMultiForm(java.
+	 * io.InputStream,
+	 * org.glassfish.jersey.media.multipart.FormDataContentDisposition,
+	 * org.glassfish.jersey.media.multipart.FormDataBodyPart,
+	 * javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
 	 */
 	@Override
 	public Response createPayloadMultiForm(InputStream fileInputStream, FormDataContentDisposition fileDetail,
@@ -188,11 +198,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			}
 
 			PayloadDto pdto = new PayloadDto().objectType(format).streamerInfo(format.getBytes()).version("none");
-			IovDto iovDto = new IovDto().payloadHash(pdto.getHash()).since(since).tagName(tag);
-			IovDto saveddto = saveIovAndPayload(iovDto, filename, fileInputStream, pdto);
-			HTTPResponse resp = new HTTPResponse().action("storePayloadWithIovMultiForm")
-					.code(Response.Status.CREATED.getStatusCode()).id(saveddto.getPayloadHash())
-					.message("Created new entry in tag " + tag);
+			String hash = getHash(fileInputStream, filename);
+			pdto.hash(hash);
+			IovDto iovDto = new IovDto().payloadHash(hash).since(since).tagName(tag);
+			HTTPResponse resp = saveIovAndPayload(iovDto, pdto, filename);
+			resp.action("storePayloadWithIovMultiForm");
 			return Response.created(info.getRequestUri()).entity(resp).build();
 
 		} catch (CdbServiceException | IOException e) {
@@ -222,8 +232,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			FormDataContentDisposition filesDetail, String tag, FormDataBodyPart iovsetupload,
 			String xCrestPayloadFormat, BigDecimal endtime, SecurityContext securityContext, UriInfo info)
 			throws NotFoundException {
-		this.log.info("PayloadRestController processing request to upload payload batch in tag {} with multi-iov {}",
-				tag, filesbodyparts.size());
+		this.log.info("PayloadRestController processing request to upload payload batch in tag {} with multi-iov {} and body {}",
+				tag, filesbodyparts.size(), iovsetupload.getValue());
 		iovsetupload.setMediaType(MediaType.APPLICATION_JSON_TYPE);
 		try {
 			IovSetDto dto = iovsetupload.getValueAs(IovSetDto.class);
@@ -233,17 +243,29 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			if (xCrestPayloadFormat == null) {
 				xCrestPayloadFormat = "FILE";
 			}
+			if (filesbodyparts.size()>MAX_FILE_UPLOAD) {
+				String msg = "Too many files attached to the request...> MAX_FILE_UPLOAD = "+MAX_FILE_UPLOAD;
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+				return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+			}
 			if (xCrestPayloadFormat.equals("FILE")) {
 				for (IovPayloadDto piovDto : iovlist) {
 					Map<String, Object> retmap = getDocumentStream(piovDto, filesbodyparts);
 					PayloadDto pdto = new PayloadDto().objectType(dto.getFormat())
 							.streamerInfo(dto.getFormat().getBytes()).version("none");
-					IovDto iovDto = new IovDto().payloadHash(pdto.getHash()).since(piovDto.getSince()).tagName(tag);
-					IovDto saveddto = saveIovAndPayload(iovDto, (String) retmap.get("file"),
-							(InputStream) retmap.get("stream"), pdto);
-					IovPayloadDto sd = new IovPayloadDto().since(saveddto.getSince())
-							.payload(saveddto.getPayloadHash());
-					savediovlist.add(sd);
+					String filename = (String) retmap.get("file");
+					log.debug("Use input filename for hash generation and later storage...{}",filename);
+					String hash = getHash((InputStream) retmap.get("stream"), filename);
+					pdto.hash(hash);
+					IovDto iovDto = new IovDto().payloadHash(hash).since(piovDto.getSince()).tagName(tag);
+					try {
+						saveIovAndPayload(iovDto, pdto, filename);
+						IovPayloadDto sd = new IovPayloadDto().since(iovDto.getSince())
+								.payload(iovDto.getPayloadHash());
+						savediovlist.add(sd);
+					} catch (CdbServiceException e1) {
+						log.error("Cannot insert iov {}", piovDto);
+					}
 				}
 				dto.niovs((long) savediovlist.size());
 				dto.iovsList(savediovlist);
@@ -253,7 +275,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			}
 
 		} catch (CdbServiceException | IOException e) {
-			String msg = "Error creating payload resource using " + tag.toString() + " : " + e.getMessage();
+			String msg = "Error creating multi payload resource using " + tag.toString() + " : " + e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		} catch (Exception e) {
@@ -292,11 +314,17 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 					PayloadDto pdto = new PayloadDto().objectType(dto.getFormat()).hash("none")
 							.streamerInfo(dto.getFormat().getBytes()).version("none")
 							.data(piovDto.getPayload().getBytes());
-					IovDto iovDto = new IovDto().payloadHash(pdto.getHash()).since(piovDto.getSince()).tagName(tag);
-					IovDto saveddto = saveIovAndPayload(iovDto, pdto);
-					IovPayloadDto sd = new IovPayloadDto().since(saveddto.getSince())
-							.payload(saveddto.getPayloadHash());
-					savediovlist.add(sd);
+					String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
+					pdto.hash(hash);
+					IovDto iovDto = new IovDto().payloadHash(hash).since(piovDto.getSince()).tagName(tag);
+					try {
+						saveIovAndPayload(iovDto, pdto, null);
+						IovPayloadDto sd = new IovPayloadDto().since(iovDto.getSince())
+								.payload(iovDto.getPayloadHash());
+						savediovlist.add(sd);
+					} catch (CdbServiceException e1) {
+						log.error("Cannot insert iov {}", piovDto);
+					}
 				}
 				dto.niovs((long) savediovlist.size());
 				dto.iovsList(savediovlist);
@@ -318,61 +346,73 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		}
 	}
 
-	@Transactional
-	protected IovDto saveIovAndPayload(IovDto dto, String filename, InputStream fileInputStream, PayloadDto pdto)
-			throws CdbServiceException, IOException {
-
-		Path temppath = Paths.get(filename);
-		String hash = "none";
+	/**
+	 * @param fileInputStream
+	 * @param filename
+	 * @return the computed hash from the byte stream.
+	 * @throws CdbServiceException
+	 * @throws IOException
+	 */
+	protected String getHash(InputStream fileInputStream, String filename) throws CdbServiceException, IOException {
 		try (BufferedInputStream bis = new BufferedInputStream(fileInputStream)) {
-			 hash = payloadHandler.saveToFileGetHash(bis, filename);
+			if (filename.equals("none")) {
+				return payloadHandler.getHashFromStream(bis);
+			}
+			return payloadHandler.saveToFileGetHash(bis, filename);			
 		} catch (PayloadEncodingException e) {
-			throw new CdbServiceException("Cannot compute the hash : "+e.getMessage());
+			throw new CdbServiceException("Cannot compute the hash : " + e.getMessage());
 		}
+	}
+	
+	/**
+	 * @param dto
+	 * @param pdto
+	 * @param filename
+	 * @return
+	 * @throws CdbServiceException
+	 * @throws IOException
+	 */
+	@Transactional
+	protected HTTPResponse saveIovAndPayload(IovDto dto, PayloadDto pdto, String filename)
+			throws CdbServiceException, IOException {
+		log.debug("Create dto with hash {},  format {}, ...", dto.getPayloadHash(), pdto.getObjectType());
+		if (filename == null) {
+			try {
+				//pdto.hash(hash).streamerInfo(pdto.getObjectType().getBytes());
+				pdto.size(pdto.getData().length);
+				PayloadDto saved = payloadService.insertPayload(pdto);
+				IovDto savediov = iovService.insertIov(dto);
+				log.debug("Created payload {} and iov {} ", saved, savediov);
+				return new HTTPResponse().code(Response.Status.CREATED.getStatusCode()).id(savediov.getPayloadHash())
+						.message("Iov created in tag " + savediov.getTagName() + " with time " + savediov.getSince());
+			} catch (AlreadyExistsPojoException e) {
+				return new HTTPResponse().code(Response.Status.NOT_MODIFIED.getStatusCode()).id(dto.getPayloadHash())
+						.message("Iov already exists in tag " + dto.getTagName() + " with time " + dto.getSince());
+			} 			
+		}
+		Path temppath = Paths.get(filename);
 		try (InputStream is = new FileInputStream(filename);) {
-			log.debug("Create dto with hash {},  format {}, ...", hash, pdto.getObjectType());
-
-			pdto.hash(hash).streamerInfo(pdto.getObjectType().getBytes());
+			//pdto.streamerInfo(pdto.getObjectType().getBytes());
 			FileChannel tempchan = FileChannel.open(temppath);
 			pdto.size((int) (tempchan.size()));
 			tempchan.close();
 			PayloadDto saved = payloadService.insertPayloadAndInputStream(pdto, is);
-			dto.payloadHash(hash);
 			IovDto savediov = iovService.insertIov(dto);
 			log.debug("Create payload {} and iov {} ", saved, savediov);
-			return savediov;
+			return new HTTPResponse().code(Response.Status.CREATED.getStatusCode()).id(savediov.getPayloadHash())
+					.message("Iov created in tag " + savediov.getTagName() + " with time " + savediov.getSince());
+		} catch (AlreadyExistsPojoException e) {
+			return new HTTPResponse().code(Response.Status.NOT_MODIFIED.getStatusCode()).id(dto.getPayloadHash())
+					.message("Iov already exists in tag " + dto.getTagName() + " with time " + dto.getSince());
 		} finally {
 			Files.deleteIfExists(temppath);
 			log.debug("Removed temporary file");
-			if (fileInputStream != null) {
-				fileInputStream.close();
-			}
 		}
 	}
 
-	@Transactional
-	protected IovDto saveIovAndPayload(IovDto dto, PayloadDto pdto) throws CdbServiceException, IOException {
-		String hash = "none";
-		try (BufferedInputStream stringInputStream = new BufferedInputStream(
-				new ByteArrayInputStream(pdto.getData()))) {
-			//hash = payloadService.getInputStreamHash(stringInputStream);
-			hash = payloadHandler.getHashFromStream(stringInputStream);
-		} catch (PayloadEncodingException e) {
-			throw new CdbServiceException("Hash generation error: "+e.getMessage());
-		}
-		log.debug("Create dto with hash {},  format {}, ...", hash, pdto.getObjectType());
-		if (hash.equals("none")) {
-			throw new CdbServiceException("Could not compute hash");
-		}
-		pdto.hash(hash).streamerInfo(pdto.getObjectType().getBytes());
-		pdto.size(pdto.getData().length);
-		PayloadDto saved = payloadService.insertPayload(pdto);
-		dto.payloadHash(hash);
-		IovDto savediov = iovService.insertIov(dto);
-		log.debug("Create payload {} and iov {} ", saved, savediov);
-		return savediov;
-	}
-
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.PayloadsApiService#getBlob(java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
 	@Override
 	public Response getBlob(String hash, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		this.log.info("PayloadRestController processing request to download blob {}", hash);
@@ -449,6 +489,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		}
 	}
 
+	/**
+	 * @param mddto
+	 * @param bodyParts
+	 * @return
+	 * @throws CdbServiceException
+	 */
 	protected Map<String, Object> getDocumentStream(IovPayloadDto mddto, List<FormDataBodyPart> bodyParts)
 			throws CdbServiceException {
 		log.debug("Extracting document BLOB for file {}", mddto.getPayload());
@@ -472,6 +518,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		return retmap;
 	}
 
+	/**
+	 * @param ptype
+	 * @return
+	 */
 	protected MediaType getMediaType(String ptype) {
 		MediaType media_type = MediaType.APPLICATION_OCTET_STREAM_TYPE;
 
@@ -497,6 +547,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		return media_type;
 	}
 
+	/**
+	 * @param ptype
+	 * @return
+	 */
 	protected String getExtension(String ptype) {
 		String extension = ".blob";
 		if ("PNG".equalsIgnoreCase(ptype)) {

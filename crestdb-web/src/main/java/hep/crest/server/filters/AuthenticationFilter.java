@@ -73,40 +73,49 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 				return;
 			}
 
-			// Split username and password tokens
-			final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
-			final String username = tokenizer.nextToken();
-			final String password = tokenizer.nextToken();
-
-			// Verifying Username and password
-			if ((username.equalsIgnoreCase("reader") && password.equalsIgnoreCase("password"))) {
-				log.debug("Found reader user....");
-			} else if (!(username.equalsIgnoreCase("admin") && password.equalsIgnoreCase("password"))) {
+			if (!isUserAuthenticated(usernameAndPassword)) {
 				requestContext.abortWith(ACCESS_DENIED);
-				return;
 			}
-
 			// Verify user access
 			if (method.isAnnotationPresent(RolesAllowed.class)) {
 				RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
-				Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
+				Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
 
 				// Is user valid?
-				if (!isUserAllowed(username, password, rolesSet)) {
+				if (!isUserAllowed(usernameAndPassword, rolesSet)) {
 					requestContext.abortWith(ACCESS_DENIED);
 				}
 			}
 		}
 	}
 
-	private boolean isUserAllowed(final String username, final String password, final Set<String> rolesSet) {
+	private boolean isUserAuthenticated(final String userpass) {
+		// Split username and password tokens
+		final StringTokenizer tokenizer = new StringTokenizer(userpass, ":");
+		final String username = tokenizer.nextToken();
+		final String password = tokenizer.nextToken();
+
+		// Verifying Username and password
+		if ((username.equalsIgnoreCase("reader") && password.equalsIgnoreCase("password"))) {
+			log.debug("Found reader user....");
+			return true;
+		} else if (!(username.equalsIgnoreCase("admin") && password.equalsIgnoreCase("password"))) {
+			return false;
+		}
+		return false;
+	}
+	
+	private boolean isUserAllowed(final String userpass, final Set<String> rolesSet) {
+		// Split username and password tokens
+		final StringTokenizer tokenizer = new StringTokenizer(userpass, ":");
+		final String username = tokenizer.nextToken();
 		boolean isAllowed = false;
 
 		// Step 1. Fetch password from database and match with password in argument
-		// If both match then get the defined role for user from database and continue;
-		// else return isAllowed [false]
-		// Access the database and do this part yourself
-		// String userRole = userMgr.getUserRole(username);
+		// If both match then get the defined role for user from database and continue.
+		// If not then return isAllowed [false]
+		// Access the database and do this part yourself : get the user role
+		// e.g.:  userMgr.getUserRole(username)
 		String userRole = "ADMIN";
 		if (username.equalsIgnoreCase("reader")) {
 			userRole="READER";

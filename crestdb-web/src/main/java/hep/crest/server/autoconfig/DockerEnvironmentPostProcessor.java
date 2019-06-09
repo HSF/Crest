@@ -143,7 +143,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 		for (PropertySource<?> propertySource : propertySources) {
 			log.info("Found property source: {} : {}",propertySource.getName(), propertySource);
 			if (propertySource instanceof MapPropertySource) {
-				String keys[] = ((MapPropertySource) propertySource).getPropertyNames();
+				String[] keys = ((MapPropertySource) propertySource).getPropertyNames();
 				for (int i = 0; i < keys.length; i++) {
 					String key = keys[i];
 					Object val = ((MapPropertySource) propertySource).getProperty(key);

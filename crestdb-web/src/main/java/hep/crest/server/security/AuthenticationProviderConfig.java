@@ -5,7 +5,6 @@ package hep.crest.server.security;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -20,11 +19,8 @@ import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 @PropertySource("classpath:/ldap.properties")
 public class AuthenticationProviderConfig {
 
-	@Autowired
-	private DataSource ds;
-
 	@Bean(name="dbUserDetailsService")
-	public UserDetailsService userDetails() {
+	public UserDetailsService userDetails(DataSource ds) {
 		JdbcDaoImpl jdbc = new JdbcDaoImpl();
 		jdbc.setDataSource(ds);
 		jdbc.setUsersByUsernameQuery("select crest_usrname as username, crest_usrpss as password, 1 from CREST_USERS where crest_usrname=?");

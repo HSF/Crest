@@ -31,6 +31,7 @@ import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.TagRepository;
 import hep.crest.server.annotations.ProfileAndLog;
 import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.TagSummaryDto;
@@ -171,7 +172,7 @@ public class IovService {
 			List<BigDecimal> minsincelist = selectGroupsByTagNameAndSnapshotTime(tagname, snapshot, groupsize);
 			return new GroupDto().groups(minsincelist);
 		} catch (Exception e) {
-			log.error("Exception in retrieving iov groups list using {}", tagname);
+			log.error("Exception in retrieving iov groups list using tag and snapshot {}", tagname);
 			throw new CdbServiceException("Cannot find iov groups by tag name: " + e.getMessage());
 		}
 	}
@@ -195,7 +196,7 @@ public class IovService {
 			}
 			return StreamSupport.stream(entities.spliterator(), false).map(s -> mapper.map(s,IovDto.class)).collect(Collectors.toList());
 		} catch (Exception e) {
-			log.debug("Exception in retrieving iov groups list using {}",tagname);
+			log.debug("Exception in retrieving iov list using tag {} and snapshot and time range",tagname);
 			throw new CdbServiceException("Cannot find iov size by tag name: " + e.getMessage());
 		}
 	}
@@ -213,7 +214,7 @@ public class IovService {
 			entities = iovRepository.selectSnapshot(tagname, snapshot);
 			return StreamSupport.stream(entities.spliterator(), false).map(s -> mapper.map(s,IovDto.class)).collect(Collectors.toList());
 		} catch (Exception e) {
-			log.error("Exception in retrieving iov groups list using {}", tagname);
+			log.error("Exception in retrieving iov list by tag using {}", tagname);
 			throw new CdbServiceException("Cannot find iov size by tag name and snapshot: " + e.getMessage());
 		}
 	}
@@ -275,7 +276,7 @@ public class IovService {
 			Iov tmpiov = iovRepository.findBySinceAndTagNameAndHash(entity.getId().getTagName(), entity.getId().getSince(), entity.getPayloadHash());
 			if (tmpiov != null) {
 				log.debug("Found iov with the same Id and Hash...skip insertion....");
-				return  mapper.map(tmpiov,IovDto.class);
+				throw new AlreadyExistsPojoException(tmpiov.toString());
 			}
 			// The IOV is not yet stored. Verify that the tag exists before inserting it.
 			Optional<Tag> tg = tagRepository.findById(dto.getTagName());
