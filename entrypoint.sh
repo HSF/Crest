@@ -3,7 +3,7 @@
 ## -Dlogging.config=/data/logs/logback.xml
 
 echo "Setting JAVA_OPTS from file javaopts.properties"
-joptfile=./javaopt.properties
+joptfile=./javaopts.properties
 echo "use opt : "
 cat $joptfile
 if [ -e $joptfile ]; then

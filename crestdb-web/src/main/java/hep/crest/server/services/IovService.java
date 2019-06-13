@@ -269,15 +269,24 @@ public class IovService {
 	 */
 	@Transactional
 	public IovDto insertIov(IovDto dto) throws CdbServiceException {
+		log.debug("Create iov from dto {}", dto);
+		Iov tmpiov = null;
+		Iov entity = null;
 		try {
-			log.debug("Create iov from dto {}", dto);
-			Iov entity =  mapper.map(dto,Iov.class);
+			entity =  mapper.map(dto,Iov.class);
 			log.debug("Verify if the same IOV is already stored with the same hash....");
-			Iov tmpiov = iovRepository.findBySinceAndTagNameAndHash(entity.getId().getTagName(), entity.getId().getSince(), entity.getPayloadHash());
-			if (tmpiov != null) {
-				log.debug("Found iov with the same Id and Hash...skip insertion....");
-				throw new AlreadyExistsPojoException(tmpiov.toString());
-			}
+			tmpiov = iovRepository.findBySinceAndTagNameAndHash(entity.getId().getTagName(), entity.getId().getSince(), entity.getPayloadHash());
+		} catch (Exception e) {
+			log.warn("Searching iov {} has not found anything...",dto);
+		}
+		if (entity == null) {
+			throw new CdbServiceException("Cannot map entity to dto "+dto); 
+		}
+		if (tmpiov != null) {
+			log.debug("Found iov with the same Id and Hash...skip insertion....");
+			throw new AlreadyExistsPojoException(tmpiov.toString());
+		}
+		try {
 			// The IOV is not yet stored. Verify that the tag exists before inserting it.
 			Optional<Tag> tg = tagRepository.findById(dto.getTagName());
 			if (tg.isPresent()) {
