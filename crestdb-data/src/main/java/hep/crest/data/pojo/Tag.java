@@ -83,7 +83,7 @@ public class Tag implements java.io.Serializable {
 		this.timeType = timeType;
 	}
 
-	@Column(name = "OBJECT_TYPE", nullable = false, length = 255)
+	@Column(name = "OBJECT_TYPE", nullable = false, length = 4000)
 	public String getObjectType() {
 		return this.objectType;
 	}
