@@ -1396,7 +1396,7 @@ class CMApi(ConditionManagementAbstract):
         api_instance = PayloadsApi(self.api_client)
         try:
             #print 'Retrieving payload using hash ',phash
-            api_response = api_instance.get_payload(phash,format='DTO',_preload_content=False,_return_http_data_only=True)
+            api_response = api_instance.get_payload(phash,x_crest_payload_format='DTO',_preload_content=False,_return_http_data_only=True)
             self.__payload['hash'] = phash
             self.__payload['payload'] = api_response
             self._logger.debug('Retrieved payload : %s ' % self.__payload)
@@ -1418,7 +1418,7 @@ class CMApi(ConditionManagementAbstract):
             self.__payload['payload'] = api_response
             return api_response
         except Exception as e:
-            print ("Exception when calling getPayload: %s\n" % e)
+            print ("Exception when calling getBlob: %s\n" % e)
         return None
 
     def readPayloadFromFile(self,filename):
@@ -1725,10 +1725,11 @@ class CrestConsole(CMApi):
         return InfoList(nchans)
 
     def getpayload(self,thash):
-        res = self.getPayload(thash)
+        #res = self.getPayload(thash)
+        res = self.getBlob(thash)
         print(res)
-        wrapres = self.payloadInfo(res)
-        return InfoList(wrapres)
+        #wrapres = self.payloadInfo(res)
+        return InfoList(res)
 
     def dumppayload(self, mhash, col):
 
