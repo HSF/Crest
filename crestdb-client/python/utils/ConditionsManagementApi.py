@@ -631,7 +631,7 @@ class TagInfoWrap():
 
     def to_str(self):
         msglist=[]
-        msg = "tag:  {:<70} [{:>10}] {:<80}".format(self._tdto.name, self._tdto.time_type,self._tdto.object_type)
+        msg = "tag:  {:<70} [{:>10}] {:<80}".format(self._tdto.name, self._tdto.time_type,self._tdto.payload_spec)
         msglist.append(msg)
         msg = "\t \t \t insertion time={} \n\t \t \t synchro={:>20}".format(self._tdto.insertion_time,self._tdto.synchronization)
         msglist.append(msg)
@@ -842,7 +842,7 @@ class CMApi(ConditionManagementAbstract):
             raise
 
     def createTag(self,tagname,**kwargs):
-        all_params = [ 'time_type', 'object_type', 'synchronization', 'description', 'last_validated_time', 'end_of_validity' ]
+        all_params = [ 'time_type', 'payload_spec', 'synchronization', 'description', 'last_validated_time', 'end_of_validity' ]
 
         params = locals()
         for key, val in params['kwargs'].items():
@@ -853,12 +853,12 @@ class CMApi(ConditionManagementAbstract):
                 )
             params[key] = val
         del params['kwargs']
-        tag_params = { 'time_type' : 'time', 'object_type' : 'json', 'synchronization' : 'none', 'description' : 'none', 'last_validated_time' : 0, 'end_of_validity' : 0 }
+        tag_params = { 'time_type' : 'time', 'payload_spec' : 'json', 'synchronization' : 'none', 'description' : 'none', 'last_validated_time' : 0, 'end_of_validity' : 0 }
 
         if 'time_type' in params:
             tag_params['time_type'] = params['time_type']
         if 'object_type' in params:
-            tag_params['object_type'] = params['object_type']
+            tag_params['payload_spec'] = params['payload_spec']
         if 'synchronization' in params:
             tag_params['synchronization'] = params['synchronization']
         if 'description' in params:
@@ -869,12 +869,12 @@ class CMApi(ConditionManagementAbstract):
             tag_params['end_of_validity'] = params['end_of_validity']
 
         # check types
-        if len(tag_params['object_type']) > MAX_OBJTYPE_LENGTH:
+        if len(tag_params['payload_spec']) > MAX_OBJTYPE_LENGTH:
             raise ApiException('Cannot create tag with object_type length > %s' % MAX_OBJTYPE_LENGTH)
         self._logger.debug('Creating tag dto %s %s ' % (tagname,tag_params))
         api_instance = TagsApi(self.api_client)
         try:
-            dto = TagDto(tagname,time_type=tag_params['time_type'], payload_spec=tag_params['object_type'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity'])
+            dto = TagDto(tagname,time_type=tag_params['time_type'], payload_spec=tag_params['payload_spec'], synchronization=tag_params['synchronization'], description=tag_params['description'], last_validated_time=tag_params['last_validated_time'], end_of_validity=tag_params['end_of_validity'])
             msg = ('Created dto resource %s ' ) % (dto.to_dict())
             api_response = api_instance.create_tag(dto)
             return api_response
