@@ -1529,12 +1529,12 @@ class CrestConsole(CMApi):
                 self.updateTag(tagdic['name'], tagdic)
             else:
                 self._logger.debug('Tag with name: %s does not exists...creating it now....' % tagdic['name'])
-                tagdic = { 'timeType':'time', 'objectType':'none', 'synchronization':'all', 'description':'a new tag', 'lastValidatedTime':0, 'endOfValidity':0 }
+                tagdic = { 'timeType':'time', 'payload_spec':'none', 'synchronization':'all', 'description':'a new tag', 'lastValidatedTime':0, 'endOfValidity':0 }
                 for ar in args:
                     (k,v) = (ar.split('=')[0],ar.split('=')[1])
                     tagdic[k] = v
                     self._logger.debug('Fill dictionary with key=%s and value=%s' % (k,v))
-                self.createTag(tagdic['name'], time_type=tagdic['timeType'], object_type=tagdic['objectType'], synchronization=tagdic['synchronization'], description=tagdic['description'], last_validated_time=tagdic['lastValidatedTime'], end_of_validity=tagdic['endOfValidity'])
+                self.createTag(tagdic['name'], time_type=tagdic['timeType'], payload_spec=tagdic['payload_spec'], synchronization=tagdic['synchronization'], description=tagdic['description'], last_validated_time=tagdic['lastValidatedTime'], end_of_validity=tagdic['endOfValidity'])
         except:
             print('Exception in creating or updating a tag')
 
@@ -1736,7 +1736,7 @@ class CrestConsole(CMApi):
         thash = mhash
         colsel = col.split(',')
         if 'all' in colsel[0]:
-            colsel = tag.object_type.split(',')
+            colsel = tag.payload_spec.split(',')
         res = self.getPayload(thash)
         synchro = tag.synchronization
         plist = []
