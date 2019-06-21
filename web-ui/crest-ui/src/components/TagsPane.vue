@@ -51,7 +51,7 @@
           <CrestTagsTable v-bind:data="rows" v-on:select-row="updateTag"/>
         </div>
         <div v-else>
-          <TagForm v-bind:selectedserver="selectedserver" v-bind:selectedtag="selectedtag"/>
+          <TagForm/>
         </div>
       </div>
     </div>
@@ -59,11 +59,10 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
 import CrestTagsTable from './CrestTagsTable.vue'
 import TagForm from './TagForm.vue'
 import HelpInfoPane from './HelpInfoPane.vue';
-
-import axios from 'axios';
 
 export default {
   name: 'TagsPane',
@@ -89,6 +88,7 @@ export default {
       };
   },
   methods: {
+      ...mapActions('db/tags', ['fetchTagByName']),
     updateTag(stag) {
       this.selectedtag = stag
       this.thetag = stag.name
@@ -102,29 +102,17 @@ export default {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
     },
-    async printRows() {
-      for (var i in this.rows) {
-        console.log(this.rows[i]);
-      }
+    loadTags(){
+        let liste_tags = [];
+        const tag = Object.entries(this.getTag);
+        for (var i = 0; i < tag.length; i++){
+            liste_tags.push(tag[i][1]);
+        }
+        this.rows = liste_tags;
     },
-    async loadTags() {
-      //const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-      //const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
-
-      const params = [
-          `by=name:${this.thetag}`,
-      ].join('&')
-
-      axios
-        .get(`${this.hostbaseurl}/tags?${params}`)
-        .then(response => (this.rows = response.data))
-        .catch(error => { console.error(error); return Promise.reject(error); });
-    }
   },
   computed: {
-      hostbaseurl () {
-      return this.selectedserver;
-      },
+      ...mapGetters('db/tags', ['getTag']),
       tagnames() {
         let result = this.rows.map(a => a.name);
         return result
@@ -142,6 +130,14 @@ export default {
         return "Access api  "+this.selectedserver
           +"<br> Selected tag is : "+this.selectedtag.name ;
       }
+  },
+  watch: {
+      thetag: function() {
+          this.fetchTagByName(this.thetag);
+      }
+  },
+  created(){
+      this.fetchTagByName(this.thetag);  
   },
   components: {
     CrestTagsTable,

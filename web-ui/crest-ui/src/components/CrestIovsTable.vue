@@ -136,6 +136,7 @@
         }
       },
       onClick(row) {
+        this.$store.commit('gui/crest/selectIov', row.payloadHash);
         //console.log('Clicked row : '+row)
         this.$emit('select-row', row)
       }

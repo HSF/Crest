@@ -7,7 +7,7 @@
     <b-input v-model="savedTag.description"></b-input>
   </b-field>
   <b-field label="Object Type">
-    <b-input v-model="savedTag.objectType"></b-input>
+    <b-input v-model="savedTag.payloadSpec"></b-input>
   </b-field>
   <b-field label="End Of Validity">
     <b-input v-model="savedTag.endOfValidity"></b-input>
@@ -54,47 +54,42 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'TagForm',
   props : {
-    selectedserver : String,
   },
   data: function () {
     return {
-    savedTag : { name : '',
-                 timeType : '',
-                 description : '' ,
-                 objectType : '',
-                 synchronization : 'all',
-                 lastValidatedTime: 0,
-                 endOfValidity: 0},
     };
   },
   methods: {
+    ...mapActions('db/tags', ['createTag']),
     save() {
-//      const hostname=[`${this.apiHost}`,`${this.apiPort}`].join(':')
-      const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':')
-        axios({
-          url: `${this.hostbaseurl}/tags`,
-          method: 'post',
-          data: this.savedTag
-        })
-        .then(function (response) {
-            // your action after success
-            console.log(response);
-        })
-        .catch(function (error) {
-           // your action on error success
-            console.log(error);
-        });
+          this.createTag(this.savedTag).then(response => {
+              this.$toast.open({
+                  message: 'Saved Tag successfully!',
+                  type: 'is-success'
+              })},
+              error => {
+              this.$toast.open({
+                  message: 'Error saving tag!',
+                  type: 'is-danger'
+              })
+          });
     },
   },
   computed: {
-    hostbaseurl () {
-    return this.selectedserver;
-    },
+      savedTag: function() {
+          return { name : '',
+              timeType : '',
+              description : '' ,
+              payloadSpec : '',
+              synchronization : 'all',
+              lastValidatedTime: 0,
+              endOfValidity: 0};
+      }
   },
   components: {
 

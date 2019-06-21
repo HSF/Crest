@@ -36,12 +36,11 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { mapActions, mapState } from 'vuex'
 
 export default {
   name: 'IovForm',
   props : {
-    selectedserver : String,
     selectedtag: Object,
   },
   data: function () {
@@ -66,51 +65,25 @@ export default {
     };
   },
   methods: {
+      ...mapActions('db/iovs', ['createIov']),
   save() {
-    let that=this;
-
-    console.log('saving a iov '+this.savedIov.tagname+' '+this.savedIov.since+" with format "+this.format)
-    const sdata = new FormData();
-    sdata.append("file", this.savedIov.file);
-    sdata.append("tag", this.savedIov.tagname);
-    sdata.append("since", this.savedIov.since);
-    var postobj = {
-      url: `${this.hostbaseurl}/payloads/store`,
-      method: 'post',
-      headers: { 'X-Crest-PayloadFormat' : `${this.format}` },
-      data: sdata
-    };
-    console.log('use header '+postobj.headers['X-Crest-PayloadFormat']);
-    axios(postobj)
-      .then(function (response) {
-          // your action after success
-          that.savedresponse = response;
-      })
-      .catch(function (error) {
-         // your action on error success
-          console.log(error);
-          that.savederror = error;
-      });
+          var iovForm = {'tagname':this.selectedTagname,'since':this.selectedSince,'until':this.selectedUntil,'snapshot':this.selectedSnapshot};
+          var res = {'setIov':this.savedIov,'iovForm':iovForm}
+          this.createIov(res).then(response => {
+              this.$toast.open({
+                  message: 'Saved Iov successfully!',
+                  type: 'is-success'
+              })},
+              error => {
+              this.$toast.open({
+                  message: 'Error saving iov!',
+                  type: 'is-danger'
+              })
+          });
     },
   },
   computed: {
-      hostbaseurl () {
-        return this.selectedserver;
-      },
-  },
-  watch: {
-    savedresponse : function() {
-      this.$toast.open({
-               message: 'Saved Iov successfully!',
-               type: 'is-success'
-      })
-    },
-    savederror : function() {
-      this.$toast.open({
-               message: 'Error saving iov!',
-               type: 'is-danger'
-      })
-    }
+      ...mapState('gui/iovForm', ['selectedTagname', 'selectedSince', 'selectedUntil', 'selectedSnapshot']),
   },
   components: {
 

@@ -46,7 +46,7 @@
 </div>
 <div class="column is-four-fifths">
   <div v-if="radioButton === 'Search'">
-    <CrestIovsTable v-bind:data="rows" v-bind:selectedtag="selectedtag" v-bind:isloading="isLoading" v-on:select-row="updateHash"/>
+    <CrestIovsTable v-bind:data="iovs" v-bind:selectedtag="selectedtag" v-bind:isloading="isLoading" v-on:select-row="updateHash"/>
   </div>
   <div v-else>
     <IovForm v-bind:selectedserver="selectedserver" v-bind:selectedtag="selectedtag"/>
@@ -57,9 +57,9 @@
 </template>
 
 <script>
+import { mapGetters, mapActions, mapState } from 'vuex'
 import CrestIovsTable from './CrestIovsTable.vue'
 import IovForm from './IovForm.vue'
-import axios from 'axios';
 import HelpInfoPane from './HelpInfoPane.vue';
 
 export default {
@@ -84,12 +84,12 @@ export default {
       radioButton : 'Search',
       since : 0,
       until : 'INF',
-      rows: [],
       snapshot : '0',
       selactiveTab : 2,
       thehash: ''};
   },
   methods: {
+      ...mapActions('db/iovs', ['fetchIovByTagName']),
     updateHash(row) {
       this.selectedIov = row
       this.thehash = row.payloadHash
@@ -99,43 +99,50 @@ export default {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
     },
-    async printRows() {
+    /*async printRows() {
       for (var i in this.rows) {
         console.log(this.rows[i]);
       }
-    },
-    async loadIovs() {
-      this.isLoading = true;
-      const params = [
-      `tagname=${this.selectedtag.name}`,
-      `since=${this.since}`,
-      `until=${this.until}`,
-      `snapshot=${this.snapshot}`,
-      ].join('&')
-
-      axios
-        .get(`${this.hostbaseurl}/iovs/selectIovs?${params}`)
-        .then(response => {this.isLoading = false; (this.rows = response.data)})
-        .catch(error => { console.error(error); this.isLoading = false; return Promise.reject(error); });
+    },*/
+    loadIovs() {
+        this.$store.commit('gui/iovForm/selectTagname', this.selectedTag);
+        this.$store.commit('gui/iovForm/selectSince', this.since);
+        this.$store.commit('gui/iovForm/selectUntil', this.until);
+        this.$store.commit('gui/iovForm/selectSnapshot', this.snapshot);        
+        this.searchIovs;
     }
   },
   computed: {
+      ...mapState('gui/crest', ['selectedTag']),
+      ...mapGetters('db/iovs', ['getIovForTag']),
       hostbaseurl () {
       return this.selectedserver;
       },
-      isLoadingData () {
+      /*isLoadingData () {
         if (this.rows.length <= 0 && this.isLoading) {
           return true;
         } else {
           this.isLoading = false;
           return false;
         }
-      },
+      },*/
       infomsg () {
         return "Access api  "+this.selectedserver
           +"<br> Selected tag is : "+this.selectedtag.name
           +"<br> Selected iov is : "+this.selectedIov.since;
+      },
+      iovs: function() {
+          return this.getIovForTag(this.selectedTag);
+      },
+      searchIovs: function() {
+          var searchIov = {'tagname':this.selectedTag,'since':this.since,'until':this.until,'snapshot':this.snapshot};
+          return this.fetchIovByTagName(searchIov);
       }
+  },
+  watch: {
+      selectedTag: function() {
+          this.searchIovs;
+      },
   },
   components: {
     CrestIovsTable,
