@@ -127,7 +127,7 @@
           return '0'
         }
         if (this.selectedtag.timeType === 'time')
-          return new Date(atime/1000000).toUTCString()
+          return new Date(atime*1000).toGMTString()
         if (this.selectedtag.timeType.startsWith('run')) {
           var coolt = Long.fromString(atime.toString(),10);
           var run = coolt.getHighBitsUnsigned()

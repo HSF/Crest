@@ -29,11 +29,14 @@
           <span>Create</span>
       </b-radio-button>
   </b-field>
+  
   <b-field label="Since">
-    <b-input v-model="since" maxlength="20"></b-input>
+    <b-input v-if="tag[selectedTag].timeType != 'time'" v-model="since" maxlength="20"></b-input>
+    <DateTimePicker v-if="tag[selectedTag].timeType == 'time'" v-on:select-since="selectSince" v-model="since" />
   </b-field>
   <b-field label="Until">
-    <b-input v-model="until" maxlength="20"></b-input>
+    <b-input v-if="tag[selectedTag].timeType != 'time'" v-model="until" maxlength="20"></b-input>
+    <DateTimePicker v-if="tag[selectedTag].timeType == 'time'" v-on:select-until="selectUntil" v-model="until" />
   </b-field>
   <b-field label="Tag">
       <b-input v-model="selectedtag.name" placeholder="Tag selection on another tab" disabled></b-input>
@@ -60,7 +63,8 @@
 import { mapGetters, mapActions, mapState } from 'vuex'
 import CrestIovsTable from './CrestIovsTable.vue'
 import IovForm from './IovForm.vue'
-import HelpInfoPane from './HelpInfoPane.vue';
+import HelpInfoPane from './HelpInfoPane.vue'
+import DateTimePicker from './DateTimePicker.vue';
 
 export default {
   name: 'IovsPane',
@@ -110,22 +114,21 @@ export default {
         this.$store.commit('gui/iovForm/selectUntil', this.until);
         this.$store.commit('gui/iovForm/selectSnapshot', this.snapshot);        
         this.searchIovs;
-    }
+    },
+    selectSince(since) {
+        this.since = since;
+    },
+    selectUntil(until) {
+        this.until = until;
+    },
   },
   computed: {
       ...mapState('gui/crest', ['selectedTag']),
+      ...mapGetters('db/tags', ['getTag']),
       ...mapGetters('db/iovs', ['getIovForTag']),
       hostbaseurl () {
       return this.selectedserver;
       },
-      /*isLoadingData () {
-        if (this.rows.length <= 0 && this.isLoading) {
-          return true;
-        } else {
-          this.isLoading = false;
-          return false;
-        }
-      },*/
       infomsg () {
         return "Access api  "+this.selectedserver
           +"<br> Selected tag is : "+this.selectedtag.name
@@ -137,6 +140,9 @@ export default {
       searchIovs: function() {
           var searchIov = {'tagname':this.selectedTag,'since':this.since,'until':this.until,'snapshot':this.snapshot};
           return this.fetchIovByTagName(searchIov);
+      },
+      tag: function() {
+          return this.getTag;
       }
   },
   watch: {
@@ -147,7 +153,8 @@ export default {
   components: {
     CrestIovsTable,
     IovForm,
-    HelpInfoPane
+    HelpInfoPane,
+    DateTimePicker
   }
 };
 </script>

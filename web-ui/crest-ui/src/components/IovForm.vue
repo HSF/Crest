@@ -4,7 +4,8 @@
     <b-input v-model="savedIov.tagname" disabled></b-input>
   </b-field>
   <b-field label="Since">
-    <b-input v-model="savedIov.since"></b-input>
+    <b-input v-if="selectedtag.timeType != 'time'" v-model="savedIov.since" maxlength="20"></b-input>
+    <DateTimePicker v-if="selectedtag.timeType == 'time'" v-on:select-since="selectSince" v-model="savedIov.since" />
   </b-field>
   <b-field label="Format">
       <b-select placeholder="Select a format" v-model="format">
@@ -37,6 +38,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex'
+import DateTimePicker from './DateTimePicker.vue';
 
 export default {
   name: 'IovForm',
@@ -66,6 +68,12 @@ export default {
   },
   methods: {
       ...mapActions('db/iovs', ['createIov']),
+      selectSince(since) {
+          this.savedIov['since'] = since;
+      },
+      selectUntil(until) {
+          this.savedIov['until'] = until;
+      },
   save() {
           var iovForm = {'tagname':this.selectedTagname,'since':this.selectedSince,'until':this.selectedUntil,'snapshot':this.selectedSnapshot};
           var res = {'setIov':this.savedIov,'iovForm':iovForm}
@@ -86,7 +94,7 @@ export default {
       ...mapState('gui/iovForm', ['selectedTagname', 'selectedSince', 'selectedUntil', 'selectedSnapshot']),
   },
   components: {
-
+      DateTimePicker
   }
 };
 </script>
