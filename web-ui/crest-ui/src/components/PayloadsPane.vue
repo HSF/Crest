@@ -51,13 +51,12 @@
 </div>
 </template>
 <script>
-import axios from 'axios';
+import { mapState, mapActions, mapGetters } from 'vuex'
 import HelpInfoPane from './HelpInfoPane.vue';
 
 export default {
   name: 'PayloadsPane',
   props : {
-    selectedtag : Object,
     selectediov : Object,
     selectedserver : String,
   },
@@ -77,19 +76,22 @@ export default {
     };
   },
   computed: {
+      ...mapState('gui/crest', ['selectedTag', 'selectedIov']),
+      ...mapGetters('db/payloads', ['getPayload']),
     "payloadmeta": function loadPayloadmeta() {
-      if (typeof this.selectediov.payloadHash === "undefined") {
+      if (typeof this.selectedIov === "undefined") {
         return {};
       } else {
-      axios({
-        url: `${this.hostbaseurl}/payloads/`+this.selectediov.payloadHash+'/meta',
-        method: 'GET',
-      }).then((response) => {
-        (this.selectedPayload = response.data); return response.data;
-      }).catch(error => { console.error(error); return Promise.reject(error); });
+          this.fetchPayloadMeta(this.selectedIov).then(() => {
+              (this.selectedPayload = this.getPayload[this.selectedIov]);
+              return this.getPayload[this.selectedIov];
+          }).catch(error => {
+              console.error(error);
+              return Promise.reject(error);
+          });
     }},
     selectDoc() {
-      if (this.selectediov.payloadHash !== "") {
+      if (this.selectedIov !== "") {
         this.download2();
         return true;
       }
@@ -100,19 +102,20 @@ export default {
     },
     infomsg () {
       return "Access api  "+this.selectedserver
-        +"<br> Selected tag is : "+this.selectedtag.name
-        +"<br> Selected iov is : "+this.selectediov.since+" hash=>"+this.selectediov.payloadHash;
+        +"<br> Selected tag is : "+this.selectedTag
+        +"<br> Selected iov is : "+this.selectediov.since+" hash=>"+this.selectedIov;
     }
   },
   methods: {
+      ...mapActions('db/payloads', ['fetchPayloadMeta']),
     selectTab(nt) {
       console.log('Selecting tab '+nt)
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
     },
-    async download() {
+  /*  async download() {
       axios({
-        url: `${this.hostbaseurl}/payloads/`+this.selectediov.payloadHash,
+        url: `${this.hostbaseurl}/payloads/`+this.selectedIov,
         method: 'GET',
         responseType: 'blob', // important
       }).then((response) => {
@@ -123,17 +126,14 @@ export default {
          document.body.appendChild(link);
          link.click();
       });
-    },
-    async loadMetadata() {
-      axios({
-        url: `${this.hostbaseurl}/payloads/`+this.selectediov.payloadHash+'/meta',
-        method: 'GET',
-      }).then((response) => {
-        (this.selectedPayload = response.data)
-      });
+    },*/
+    loadMetadata() {
+        this.fetchPayloadMeta(this.selectedIov).then(() => {
+            (this.selectedPayload = this.getPayload[this.selectedIov])
+        });
     },
     download2() {
-			this.downloadlink = this.hostbaseurl + '/payloads/'+this.selectediov.payloadHash;
+			this.downloadlink = '/crestapi/payloads/'+this.selectedIov;
 		},
     show() {
       if (this.selectDoc) {
