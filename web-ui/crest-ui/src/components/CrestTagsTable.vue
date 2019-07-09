@@ -130,8 +130,6 @@
       },
       onClick(row) {
         this.$store.commit('gui/crest/selectTag', row.name);
-        //console.log('Clicked row : '+row)
-        this.$emit('select-row', row)
       }
     },
     computed: {

@@ -7,19 +7,20 @@
 </b-tab-item>
 -->
 <b-tab-item label="Tags">
-    <TagsPane v-bind:selectedserver="hostbaseurl" v-on:select-tag="updateTag"  v-on:select-tab="selActive"/>
+    <TagsPane v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Iovs">
-    <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-iov="updateIov"  v-on:select-tab="selActive"/>
+    <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Payloads">
-    <PayloadsPane v-bind:selectedtag="selectedtag" v-bind:selectediov="selectediov" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <PayloadsPane v-bind:selectediov="selectediov" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
 </b-tabs>
 </section>
 </template>
 <script>
 
+import { mapState, mapActions, mapGetters } from 'vuex'
 import TagsPane from './TagsPane.vue'
 import IovsPane from './IovsPane.vue'
 import PayloadsPane from './PayloadsPane.vue'
@@ -37,20 +38,34 @@ import PayloadsPane from './PayloadsPane.vue'
         }
       },
       methods : {
+          ...mapActions('db/tags', ['fetchTagByName']),
         selActive(activetab) {
           console.log('Change active tab '+activetab)
           this.activeTab = activetab
         },
-        updateTag(tag) {
-          console.log('Change tag selection '+tag.name)
-          this.selectedtag = tag
+        updateTag() {
+            const tag = Object.entries(this.getTag);
+            for (var i = 0; i < tag.length; i++){
+                if (tag[i][0] == this.selectedTag) {
+                    this.selectedtag = tag[i][1];
+                    console.log('Change tag selection '+tag[i][1].name)
+                }
+            }
         },
-        updateIov(iov) {
-          console.log('Change iov selection '+iov)
-          this.selectediov = iov
-        },
+        updateIov() {
+            const iov = Object.entries(this.getIovForTag(this.selectedTag));
+            for (var i = 0; i < iov.length; i++){
+                if (iov[i][1].payloadHash == this.selectedIov) {
+                    this.selectIov = iov[i][1];
+                    console.log('Change iov selection '+iov[i][1])
+                }
+            }
+        }
       },
       computed: {
+          ...mapState('gui/crest', ['selectedTag', 'selectedIov']),
+          ...mapGetters('db/tags', ['getTag']),
+          ...mapGetters('db/iovs', ['getIovForTag']),
         hostbaseurl () {
           if (this.selectedserver.url !== "") {
             return this.selectedserver.url;
@@ -60,6 +75,15 @@ import PayloadsPane from './PayloadsPane.vue'
           var burl = `${selprotocol}://${hostname}/${this.selectedserver.api}`;
           return burl;
         }
+      },
+      watch: {
+          selectedTag: function() {
+              this.fetchTagByName(this.selectedTag);  
+              this.updateTag();
+          },
+          selectedIov: function() { 
+              this.updateIov();
+          }
       },
       components: {
         TagsPane,

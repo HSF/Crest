@@ -62,8 +62,6 @@ export default {
         { 'format' : 'PDF'},
         { 'format' : 'empty'}
       ],
-      savedresponse : {},
-      savederror : {},
     };
   },
   methods: {
@@ -75,7 +73,7 @@ export default {
           this.savedIov['until'] = until;
       },
   save() {
-          var iovForm = {'tagname':this.selectedTagname,'since':this.selectedSince,'until':this.selectedUntil,'snapshot':this.selectedSnapshot};
+          var iovForm = {'tagname':this.selectedTag,'since':this.selectedSince,'until':this.selectedUntil,'snapshot':this.selectedSnapshot};
           var res = {'setIov':this.savedIov,'iovForm':iovForm}
           this.createIov(res).then(response => {
               this.$toast.open({
@@ -91,7 +89,8 @@ export default {
     },
   },
   computed: {
-      ...mapState('gui/iovForm', ['selectedTagname', 'selectedSince', 'selectedUntil', 'selectedSnapshot']),
+      ...mapState('gui/iovForm', ['selectedSince', 'selectedUntil', 'selectedSnapshot']),
+      ...mapState('gui/crest', ['selectedTag']),
   },
   components: {
       DateTimePicker

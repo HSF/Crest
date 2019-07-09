@@ -48,7 +48,7 @@
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
-          <CrestTagsTable v-bind:data="rows" v-on:select-row="updateTag"/>
+          <CrestTagsTable v-bind:data="rows"/>
         </div>
         <div v-else>
           <TagForm/>
@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions, mapState } from 'vuex'
 import CrestTagsTable from './CrestTagsTable.vue'
 import TagForm from './TagForm.vue'
 import HelpInfoPane from './HelpInfoPane.vue';
@@ -89,10 +89,14 @@ export default {
   },
   methods: {
       ...mapActions('db/tags', ['fetchTagByName']),
-    updateTag(stag) {
-      this.selectedtag = stag
-      this.thetag = stag.name
-      this.$emit('select-tag', this.selectedtag)
+    updateTag() {
+      const tag = Object.entries(this.getTag);
+      for (var i = 0; i < tag.length; i++){
+          if (tag[i][0] == this.selectedTag) {
+              this.selectedtag = tag[i][1];
+          }
+      }
+      this.thetag = this.selectedTag;
     },
     gotoIovs() {
       this.selactiveTab = 1
@@ -112,6 +116,7 @@ export default {
     },
   },
   computed: {
+      ...mapState('gui/crest', ['selectedTag']),
       ...mapGetters('db/tags', ['getTag']),
       tagnames() {
         let result = this.rows.map(a => a.name);
@@ -134,6 +139,10 @@ export default {
   watch: {
       thetag: function() {
           this.fetchTagByName(this.thetag);
+      },
+      selectedTag: function() {
+          this.fetchTagByName(this.selectedTag);  
+          this.updateTag();
       }
   },
   created(){

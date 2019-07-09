@@ -49,7 +49,7 @@
 </div>
 <div class="column is-four-fifths">
   <div v-if="radioButton === 'Search'">
-    <CrestIovsTable v-bind:data="iovs" v-bind:selectedtag="selectedtag" v-bind:isloading="isLoading" v-on:select-row="updateHash"/>
+    <CrestIovsTable v-bind:data="iovs" v-bind:selectedtag="selectedtag"/>
   </div>
   <div v-else>
     <IovForm v-bind:selectedserver="selectedserver" v-bind:selectedtag="selectedtag"/>
@@ -83,31 +83,27 @@ export default {
       notiftype : 'is-info',
       notifytext : 'Searching iovs....',
       isFullPage : false,
-      isLoading : false,
-      selectedIov : {},
+      selectIov : {},
       radioButton : 'Search',
       since : 0,
       until : 'INF',
       snapshot : '0',
-      selactiveTab : 2,
-      thehash: ''};
+      selactiveTab : 2};
   },
   methods: {
       ...mapActions('db/iovs', ['fetchIovByTagName']),
-    updateHash(row) {
-      this.selectedIov = row
-      this.thehash = row.payloadHash
-      this.$emit('select-iov', this.selectedIov)
+    updateHash() {
+      const iov = Object.entries(this.getIovForTag(this.selectedTag));
+      for (var i = 0; i < iov.length; i++){
+          if (iov[i][1].payloadHash == this.selectedIov) {
+              this.selectIov = iov[i][1];
+          }
+      }
     },
     selectTab(nt) {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
     },
-    /*async printRows() {
-      for (var i in this.rows) {
-        console.log(this.rows[i]);
-      }
-    },*/
     loadIovs() {
         this.$store.commit('gui/iovForm/selectTagname', this.selectedTag);
         this.$store.commit('gui/iovForm/selectSince', this.since);
@@ -123,7 +119,7 @@ export default {
     },
   },
   computed: {
-      ...mapState('gui/crest', ['selectedTag']),
+      ...mapState('gui/crest', ['selectedTag', 'selectedIov']),
       ...mapGetters('db/tags', ['getTag']),
       ...mapGetters('db/iovs', ['getIovForTag']),
       hostbaseurl () {
@@ -132,7 +128,7 @@ export default {
       infomsg () {
         return "Access api  "+this.selectedserver
           +"<br> Selected tag is : "+this.selectedtag.name
-          +"<br> Selected iov is : "+this.selectedIov.since;
+          +"<br> Selected iov is : "+this.selectIov.since;
       },
       iovs: function() {
           return this.getIovForTag(this.selectedTag);
@@ -149,6 +145,9 @@ export default {
       selectedTag: function() {
           this.searchIovs;
       },
+      selectedIov: function() {
+          this.updateHash();
+      }
   },
   components: {
     CrestIovsTable,
