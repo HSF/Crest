@@ -1,58 +1,25 @@
 <template>
-<div class="container">
-  <p class="has-text-info is-size-2">Payload information</p>
-  <nav class="level">
-      <div class="level is-mobile">
-        <div class="level-left">
-          <div class="level-item">
-            <HelpInfoPane v-bind:helpmessage="helpmsg"
-              v-bind:infomessage="infomsg"
-              v-bind:notifytext="notifytext"
-              v-bind:notiftype="notiftype"
-              v-bind:links="flinks"
-              v-on:child-switchtab="selectTab"/>
-          </div>
-      </div>
-    </div>
-  </nav>
+  <div class="content">
     <div class="columns">
-    <div class="column is-one-fifth">
-      <b-field grouped>
-      <p class="control">
-        <button class="button is-primary" v-on:click="loadMetadata()">
-          <b-icon icon="eye"></b-icon>
-          <span>Meta</span>
-        </button>
-      </p>
-      <p class="control">
-        <button class="button is-primary" @click="show()">Download</button>
-<!--
-        <a v-bind:href="downloadlink" v-show="selectDoc">
-          <b-icon icon="download"></b-icon>
-          <span>Download</span>
-        </a>
-      -->
-      <!--  <button class="button is-primary" v-on:click="download()">Download</button> -->
-      </p>
-      </b-field>
-    </div>
-    <div class="column is-four-fifths">
-      <b-message  type="is-info">
-      <div class="content">
-      <ul id="pyld-info">
-        <li v-for="(val,key) in selectedPayload">
-          {{ key }} : {{val}}
-        </li>
-      </ul>
+      <div class="column is-four-fifths">
+        <ul id="pyld-info">
+          <li v-for="(val,key) in selectedPayload">
+            {{ key }} : {{val}}
+          </li>
+        </ul>
       </div>
-      </b-message>
+      <div class="column is-one-fifth">
+        <b-field grouped>
+        <p class="control">
+          <button class="button is-primary" @click="show()">Download</button>
+        </p>
+        </b-field>
+      </div>
     </div>
-    </div>
-</div>
+  </div>
 </template>
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
-import HelpInfoPane from './HelpInfoPane.vue';
 
 export default {
   name: 'PayloadsPane',
@@ -62,14 +29,6 @@ export default {
   },
   data: function () {
     return {
-      flinks: [
-        {'btnlabel' : 'Get Iovs', 'seltab' : 1}
-      ],
-      helpmsg: "<p>Get payload information on the selected IOV.</p>"
-        +"<p>Click on <b>Metadata</b> to get meta data informations.</p>"
-        +"<p>You can use the <b>Dowload</b> link to view or download the file.</p>",
-      notiftype : 'is-info',
-      notifytext : 'Searching payloads....',
       selectedPayload : {},
       selactiveTab : 0,
       dowloadlink : ''
@@ -142,7 +101,10 @@ export default {
     }
   },
   components: {
-    HelpInfoPane
+  },
+  created() {
+      this.$store.commit('gui/crest/selectIov', this.selectediov.payloadHash);
+      this.loadMetadata();
   }
 };
 </script>

@@ -12,6 +12,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
     name: 'DateTimePicker',
     props : {
@@ -52,7 +53,16 @@ export default {
             if (this.date != null){
                 this.date_heure();
             }
+        },
+        selectedSince: function() {
+            if ((this.selectedSince == 0) && (this.selectedUntil == 'INF')) {                
+                this.date = '';                
+                this.heure = '';
+            }
         }
+    },
+    computed: {
+        ...mapState('gui/iovForm', ['selectedSince', 'selectedUntil']),
     }
 }
 </script>

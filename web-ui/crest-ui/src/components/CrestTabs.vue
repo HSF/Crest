@@ -12,9 +12,6 @@
 <b-tab-item label="Iovs">
     <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
-<b-tab-item label="Payloads">
-    <PayloadsPane v-bind:selectediov="selectediov" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
-</b-tab-item>
 </b-tabs>
 </section>
 </template>
@@ -23,7 +20,6 @@
 import { mapState, mapActions, mapGetters } from 'vuex'
 import TagsPane from './TagsPane.vue'
 import IovsPane from './IovsPane.vue'
-import PayloadsPane from './PayloadsPane.vue'
 
   export default {
       props : {
@@ -88,7 +84,6 @@ import PayloadsPane from './PayloadsPane.vue'
       components: {
         TagsPane,
         IovsPane,
-        PayloadsPane,
       }
   }
 </script>

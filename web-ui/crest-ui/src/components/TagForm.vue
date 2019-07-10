@@ -93,6 +93,9 @@ export default {
   },
   components: {
 
+  },
+  created() {
+      this.$store.commit('gui/crest/selectTag', '');
   }
 };
 </script>

@@ -2,8 +2,31 @@
   <section>
     <p>Number of rows: {{ numrows }}
     </p>
+    {{ loadTags }}
     <b-tabs>
-        <b-tab-item label="Table">
+      <b-tab-item label="Table">
+        <b-field grouped group-multiline>
+          <b-field label="Search Tag by name">
+            <b-autocomplete
+              rounded
+              v-model="thetag"
+              :data="filteredDataArray"
+              placeholder="e.g. MuonAlign"
+              icon="magnify"
+              @select="option => selected = option">
+              <template slot="empty">No results found</template>
+            </b-autocomplete>
+          </b-field>
+         <!-- <b-field label="Search Tag by name">
+            <b-input v-model="thetag" placeholder="e.g. MuonAlign" ></b-input>
+          </b-field>-->
+          <b-field label="Selection">
+            <button class="button field is-danger" @click="selected = {}" :disabled="!selected">
+              <b-icon icon="close"></b-icon>
+              <span>Clear</span>
+            </button>
+          </b-field>
+        </b-field>
         <b-field grouped group-multiline>
             <div v-for="(column, index) in columns"
                 :key="index"
@@ -15,7 +38,7 @@
         </b-field>
 
         <b-table
-            :data="data"
+            :data="tagfiltereddata"
             :paginated="isPaginated"
             :per-page="perPage"
             :current-page.sync="currentPage"
@@ -24,11 +47,7 @@
             :selected.sync="selected"
             default-sort="name"
             @click="onClick"
-            style="overflow: scroll"
-            :loading="isloading"
-            striped
-            bordered
-            narrowed>
+            :loading="isloading">
             <template slot-scope="props">
               <b-table-column v-for="(column, index) in columns"
                   :key="index"
@@ -72,12 +91,13 @@
 </template>
 
 <script>
+import { mapActions, mapState, mapGetters } from 'vuex'
   import Long from 'long';
 
   export default {
     name: 'CrestTagsTable',
     props : {
-      data : Array,
+     // data : Array,
       isloading : Boolean
     },
     data: function() {
@@ -109,9 +129,12 @@
                       sortable: true
                   },
               ],
-            }
+          thetag: '',
+          data: ''
+      }
     },
     methods: {
+        ...mapActions('db/tags', ['fetchTagByName']),
       timestr (atime) {
         if (!atime) {
           return 'none'
@@ -130,14 +153,60 @@
       },
       onClick(row) {
         this.$store.commit('gui/crest/selectTag', row.name);
-      }
+      },
+      loadAllTags() {
+            let liste_tags = [];
+            const tag = Object.entries(this.getTag);
+            for (var i = 0; i < tag.length; i++){
+                liste_tags.push(tag[i][1]);
+            }
+            this.data = liste_tags;      
+        }
     },
     computed: {
+        ...mapState('gui/crest', ['selectedTag']),
+        ...mapGetters('db/tags', ['getTag']),
       numrows () {
         return (!this.data ? -1 : this.data.length)
       },
+      tagnames() {
+          let result = this.data.map(a => a.name);
+          return result
+      },
+      filteredDataArray() {
+          return this.tagnames.filter((option) => {
+              //console.log('filtering '+option)
+              return option
+                  .toString()
+                  .toLowerCase()
+                  .indexOf(this.thetag.toLowerCase()) >= 0
+          })
+      },
+      tagfiltereddata: {
+          get: function() {
+            return this.data.filter(row => (row.name.includes(this.thetag) ))
+          }
+      },
+      loadTags() {
+          if (this.selectedTag == "") {
+              let liste_tags = [];
+              const tag = Object.entries(this.getTag);
+              for (var i = 0; i < tag.length; i++){
+                  liste_tags.push(tag[i][1]);
+              }
+              this.data = liste_tags;      
+          }
+      }
     },
-
+    watch: {
+        selectedTag: function() {
+            this.fetchTagByName(this.selectedTag);
+        }
+    },
+    created() {
+        this.fetchTagByName('');
+        this.loadAllTags();
+    }
   }
 
 </script>
