@@ -27,7 +27,6 @@ export default {
 	},
 	mutations: {
 		mergeTags(state, tags_list) {
-			state.tag = {};
 			tags_list.forEach(tag => {
 				let name = tag.name;
 				if (!(name in state.tag)) {

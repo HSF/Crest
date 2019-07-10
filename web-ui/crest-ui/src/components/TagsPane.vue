@@ -78,10 +78,6 @@ export default {
       }
       this.thetag = this.selectedTag;
     },
-    gotoIovs() {
-      this.selactiveTab = 1
-      this.$emit('select-tab', this.selactiveTab)
-    },
     selectTab(nt) {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)

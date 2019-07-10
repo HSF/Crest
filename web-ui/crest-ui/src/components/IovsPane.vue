@@ -101,9 +101,6 @@ export default {
       ...mapState('gui/crest', ['selectedTag', 'selectedIov']),
       ...mapGetters('db/tags', ['getTag']),
       ...mapGetters('db/iovs', ['getIovForTag']),
-      hostbaseurl () {
-      return this.selectedserver;
-      },
       infomsg () {
         return "Access api  "+this.selectedserver
           +"<br> Selected tag is : "+this.selectedtag.name

@@ -3,13 +3,11 @@
         <b-table
             :data="data"
             :loading="loading"
-
             paginated
             backend-pagination
             :total="total"
             :per-page="perPage"
             @page-change="onPageChange"
-
             backend-sorting
             :default-sort-direction="defaultSortOrder"
             :default-sort="[sortField, sortOrder]"

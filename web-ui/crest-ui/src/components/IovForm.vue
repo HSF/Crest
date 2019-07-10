@@ -72,7 +72,7 @@ export default {
       selectUntil(until) {
           this.savedIov['until'] = until;
       },
-  save() {
+      save() {
           var iovForm = {'tagname':this.selectedTag,'since':this.selectedSince,'until':this.selectedUntil,'snapshot':this.selectedSnapshot};
           var res = {'setIov':this.savedIov,'iovForm':iovForm}
           this.createIov(res).then(response => {
@@ -86,7 +86,7 @@ export default {
                   type: 'is-danger'
               })
           });
-    },
+      },
   },
   computed: {
       ...mapState('gui/iovForm', ['selectedSince', 'selectedUntil', 'selectedSnapshot']),

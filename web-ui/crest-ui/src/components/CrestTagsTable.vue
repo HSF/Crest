@@ -97,7 +97,6 @@ import { mapActions, mapState, mapGetters } from 'vuex'
   export default {
     name: 'CrestTagsTable',
     props : {
-     // data : Array,
       isloading : Boolean
     },
     data: function() {
