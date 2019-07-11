@@ -62,9 +62,7 @@ export default {
           +"<p>You can use the <b>Create</b> button to create a new tag.</p>",
         notiftype : 'is-info',
         notifytext : 'Searching tags....',
-        selected: null,
-        selactiveTab : 1,
-        thetag: ''
+        selactiveTab : 1
       };
   },
   methods: {
@@ -76,7 +74,6 @@ export default {
               this.selectedtag = tag[i][1];
           }
       }
-      this.thetag = this.selectedTag;
     },
     selectTab(nt) {
       this.selactiveTab = nt
@@ -92,16 +89,13 @@ export default {
       }
   },
   watch: {
-      thetag: function() {
-          this.fetchTagByName(this.thetag);
-      },
       selectedTag: function() {
           this.fetchTagByName(this.selectedTag);  
           this.updateTag();
       }
   },
   created(){
-      this.fetchTagByName(this.thetag);  
+      this.fetchTagByName('');  
   },
   components: {
     CrestTagsTable,

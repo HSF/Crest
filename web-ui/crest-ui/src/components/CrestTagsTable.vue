@@ -11,8 +11,7 @@
             v-model="thetag"
             :data="filteredDataArray"
             placeholder="e.g. MuonAlign"
-            icon="magnify"
-            @select="option => selected = option">
+            icon="magnify">
             <template slot="empty">No results found</template>
           </b-autocomplete>
         </b-field>
@@ -35,6 +34,7 @@
             :default-sort-direction="defaultSortDirection"
             :selected.sync="selected"
             default-sort="name"
+            @click="onClick"
             :loading="isloading">
             <template slot-scope="props">
               <b-table-column v-for="(column, index) in columns"
@@ -142,6 +142,9 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           return run.toString()+'-'+lumi.toString();
         }
       },
+      onClick(row) {
+          this.$store.commit('gui/crest/selectTag', row.name);
+      },
       loadAllTags() {
           let liste_tags = [];
           const tag = Object.entries(this.getTag);
@@ -172,7 +175,6 @@ import { mapActions, mapState, mapGetters } from 'vuex'
       },
       filteredDataArray() {
           return this.tagnames.filter((option) => {
-              //console.log('filtering '+option)
               return option
                   .toString()
                   .toLowerCase()

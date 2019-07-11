@@ -66,3 +66,9 @@ export default {
     }
 }
 </script>
+
+<style>
+.dropdown-menu {
+    padding-bottom:5px;
+}
+</style>
