@@ -29,7 +29,7 @@
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
-          <CrestTagsTable />
+          <CrestTagsTable v-on:select-tag="selectTab" />
         </div>
         <div v-else>
           <TagForm/>

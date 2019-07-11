@@ -5,27 +5,16 @@
     {{ loadTags }}
     <b-tabs>
       <b-tab-item label="Table">
-        <b-field grouped group-multiline>
-          <b-field label="Search Tag by name">
-            <b-autocomplete
-              rounded
-              v-model="thetag"
-              :data="filteredDataArray"
-              placeholder="e.g. MuonAlign"
-              icon="magnify"
-              @select="option => selected = option">
-              <template slot="empty">No results found</template>
-            </b-autocomplete>
-          </b-field>
-         <!-- <b-field label="Search Tag by name">
-            <b-input v-model="thetag" placeholder="e.g. MuonAlign" ></b-input>
-          </b-field>-->
-          <b-field label="Selection">
-            <button class="button field is-danger" @click="selected = {}" :disabled="!selected">
-              <b-icon icon="close"></b-icon>
-              <span>Clear</span>
-            </button>
-          </b-field>
+        <b-field label="Search Tag by name">
+          <b-autocomplete
+            rounded
+            v-model="thetag"
+            :data="filteredDataArray"
+            placeholder="e.g. MuonAlign"
+            icon="magnify"
+            @select="option => selected = option">
+            <template slot="empty">No results found</template>
+          </b-autocomplete>
         </b-field>
         <b-field grouped group-multiline>
             <div v-for="(column, index) in columns"
@@ -46,7 +35,6 @@
             :default-sort-direction="defaultSortDirection"
             :selected.sync="selected"
             default-sort="name"
-            @click="onClick"
             :loading="isloading">
             <template slot-scope="props">
               <b-table-column v-for="(column, index) in columns"
@@ -66,6 +54,9 @@
                   <span class="tag is-success">
                       {{ (props.row.insertionTime) }}
                   </span>
+              </b-table-column>
+              <b-table-column field="niovs" label="Get iovs" centered>
+                 <a class="tag is-info" style="text-decoration:none;" @click="goIovs(props.row.name)">Get {{ props.row.niovs }} iovs</a>
               </b-table-column>
             </template>
             <template slot="empty">
@@ -134,6 +125,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
     },
     methods: {
         ...mapActions('db/tags', ['fetchTagByName']),
+        ...mapActions('db/iovs', ['countIovsByTag']),
       timestr (atime) {
         if (!atime) {
           return 'none'
@@ -150,21 +142,27 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           return run.toString()+'-'+lumi.toString();
         }
       },
-      onClick(row) {
-        this.$store.commit('gui/crest/selectTag', row.name);
-      },
       loadAllTags() {
-            let liste_tags = [];
-            const tag = Object.entries(this.getTag);
-            for (var i = 0; i < tag.length; i++){
-                liste_tags.push(tag[i][1]);
-            }
-            this.data = liste_tags;      
-        }
+          let liste_tags = [];
+          const tag = Object.entries(this.getTag);
+          for (var i = 0; i < tag.length; i++){
+              liste_tags.push(tag[i][1]);
+              this.countIovs(tag[i][1].name);
+          }
+          this.data = liste_tags;      
+      },
+      countIovs(tagname) {
+          this.countIovsByTag(tagname);
+      },
+      goIovs(tagname) {
+          this.$emit('select-tag', 1);
+          this.$store.commit('gui/crest/selectTag', tagname);
+      }
     },
     computed: {
         ...mapState('gui/crest', ['selectedTag']),
         ...mapGetters('db/tags', ['getTag']),
+        ...mapState('db/iovs', ['nb_iovs_for_tag']),
       numrows () {
         return (!this.data ? -1 : this.data.length)
       },
@@ -191,6 +189,17 @@ import { mapActions, mapState, mapGetters } from 'vuex'
               let liste_tags = [];
               const tag = Object.entries(this.getTag);
               for (var i = 0; i < tag.length; i++){
+                  this.countIovs(tag[i][1].name);
+                  const nb_iovs = Object.entries(this.nb_iovs_for_tag);
+                  for (var j = 0; j < nb_iovs.length; j++){
+                      if (nb_iovs[j][0] == tag[i][1].name) {
+                          if (nb_iovs[j][1]) {
+                              tag[i][1]['niovs'] = nb_iovs[j][1].niovs;
+                          } else {
+                              tag[i][1]['niovs'] = 0;
+                          }
+                      }
+                  }
                   liste_tags.push(tag[i][1]);
               }
               this.data = liste_tags;      

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="content" style="overflow:scroll; margin-right:20px;">
   <b-field label="Tag Name">
     <b-input v-model="savedIov.tagname" disabled></b-input>
   </b-field>
