@@ -3,8 +3,40 @@
     <p>Number of rows: {{ numrows }}
     </p>
     <b-tabs>
-        <b-tab-item label="Table">
-        <b-field grouped group-multiline>
+      <b-tab-item label="Table">    
+      <div class="columns">
+      <div class="column is-three-quarters">
+          <span v-if="selectedTag != ''">    
+            <b-field label="Since">
+              <b-input v-if="tag[selectedTag].timeType != 'time'" v-model="since" maxlength="20"></b-input>
+              <DateTimePicker v-if="tag[selectedTag].timeType == 'time'" v-on:select-since="selectSince" v-model="since" />
+            </b-field>
+            <b-field label="Until">
+              <b-input v-if="tag[selectedTag].timeType != 'time'" v-model="until" maxlength="20"></b-input>
+              <DateTimePicker v-if="tag[selectedTag].timeType == 'time'" v-on:select-until="selectUntil" v-model="until" />
+            </b-field>
+            </span>
+            </div>
+            <div class="column is-one-quarter">     
+            <span v-if="selectedTag != ''">  
+            <b-field label="Tag">
+              <b-input v-model="selectedtag.name" placeholder="Tag selection on another tab" disabled></b-input>
+            </b-field>
+            <b-field>
+              <p class="control">
+                <button class="button is-primary" v-on:click="loadIovs()">Search</button>
+              </p>
+            </b-field>
+            <b-field>
+              <button class="button field is-danger" @click="clearFilters()" :disabled="!selected">
+                <b-icon icon="close"></b-icon>
+                <span>Clear filters</span>
+              </button>
+            </b-field>
+          </span>
+          </div>
+          </div>
+        <!--<b-field grouped group-multiline>
             <div v-for="(column, index) in columns"
                 :key="index"
                 class="control">
@@ -12,10 +44,11 @@
                     {{ column.label }}
                 </b-checkbox>
             </div>
-        </b-field>
+        </b-field>-->
 
         <b-table
             :data="data"
+            detailed
             :paginated="isPaginated"
             :per-page="perPage"
             :current-page.sync="currentPage"
@@ -23,12 +56,7 @@
             :default-sort-direction="defaultSortDirection"
             :selected.sync="selected"
             default-sort="since"
-            @click="onClick"
-            style="overflow: scroll"
-            :loading="isloading"
-            striped
-            bordered
-            narrowed>
+            :loading="isloading">
             <template slot-scope="props">
               <b-table-column v-for="(column, index) in columns"
                   :key="index"
@@ -48,6 +76,9 @@
                       {{ (props.row.insertionTime) }}
                   </span>
               </b-table-column>
+            </template>
+            <template slot="detail" slot-scope="props">
+              <PayloadsPane v-bind:selectediov="props.row"/>
             </template>
             <template slot="empty">
                 <section class="section">
@@ -72,7 +103,10 @@
 </template>
 
 <script>
-  import Long from 'long';
+import { mapState, mapGetters, mapActions } from 'vuex'
+import DateTimePicker from './DateTimePicker.vue'
+import PayloadsPane from'./PayloadsPane.vue'
+import Long from 'long';
 
   export default {
     name: 'CrestIovsTable',
@@ -116,9 +150,13 @@
                             visible: false
                         },
                     ],
+                since : 0,
+                until : 'INF',
+                snapshot : '0'
             }
     },
     methods: {
+        ...mapActions('db/iovs', ['fetchIovByTagName']),
       timestr (atime) {
         if (!atime) {
           return 'none'
@@ -127,7 +165,7 @@
           return '0'
         }
         if (this.selectedtag.timeType === 'time')
-          return new Date(atime/1000000).toUTCString()
+          return new Date(atime*1000).toGMTString()
         if (this.selectedtag.timeType.startsWith('run')) {
           var coolt = Long.fromString(atime.toString(),10);
           var run = coolt.getHighBitsUnsigned()
@@ -135,18 +173,45 @@
           return run.toString()+'-'+lumi.toString();
         }
       },
-      onClick(row) {
-        this.$store.commit('gui/crest/selectIov', row.payloadHash);
-        //console.log('Clicked row : '+row)
-        this.$emit('select-row', row)
+      loadIovs() {
+          this.$store.commit('gui/iovForm/selectTagname', this.selectedTag);
+          this.$store.commit('gui/iovForm/selectSince', this.since);
+          this.$store.commit('gui/iovForm/selectUntil', this.until);
+          this.$store.commit('gui/iovForm/selectSnapshot', this.snapshot);        
+          this.searchIovs;
+      },
+      selectSince(since) {
+          this.since = since;
+      },
+      selectUntil(until) {
+          this.until = until;
+      },
+      clearFilters(){
+          this.since = 0;
+          this.until = 'INF';
+          this.$store.commit('gui/iovForm/selectSince', this.since);
+          this.$store.commit('gui/iovForm/selectUntil', this.until);
+          this.searchIovs;
       }
     },
     computed: {
+        ...mapState('gui/crest', ['selectedTag']),
+        ...mapGetters('db/tags', ['getTag']),
       numrows () {
         return (!this.data ? -1 : this.data.length)
       },
+      searchIovs: function() {
+          var searchIov = {'tagname':this.selectedTag,'since':this.since,'until':this.until,'snapshot':this.snapshot};
+          return this.fetchIovByTagName(searchIov);
+      },
+      tag: function() {
+          return this.getTag;
+      }
     },
-
+    components: {
+        DateTimePicker,
+        PayloadsPane
+    }
   }
 
 </script>

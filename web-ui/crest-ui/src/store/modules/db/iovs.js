@@ -9,6 +9,11 @@ export default {
 	        tagname: [ ...payloadHashs ]
 			*/
 		},
+		nb_iovs_for_tag: {
+			/*
+	        tagname: [ ...nbIovs ]
+			*/
+		}
 	},
 	getters: {
 		getIovForTag : (state) => (tagName) => {
@@ -16,11 +21,22 @@ export default {
                 return [];
             }
             return state.iovs_for_tag[tagName];
+        },
+		getNbIovForTag : (state) => (tagName) => {
+            if (!tagName || !state.nb_iovs_for_tag.hasOwnProperty(tagName)) {
+                return [];
+            }
+            return state.nb_iovs_for_tag[tagName];
         }
 	},
 	mutations: {
 		mergeIovsForTag(state, {tagname, iovs_list}) {
             Vue.set(state.iovs_for_tag, tagname, iovs_list);
+        },
+        mergeNbIovs(state, {tagname, iovs_list}) {
+        	if (!(tagname in state.nb_iovs_for_tag)) {
+        		Vue.set(state.nb_iovs_for_tag, tagname, iovs_list[0]);
+        	}
         }
 	},
 	actions: {
@@ -53,6 +69,14 @@ export default {
 			.post(`/crestapi/payloads/store`, data, {headers: config})
 			.then(response => response.data)
 			.then(() => {return dispatch('fetchIovByTagName', iovForm);})
+			.catch(error => { return Promise.reject(error) });
+		},
+		countIovsByTag({commit}, tagname) {
+			const params = `tagname=` + tagname;
+			return axios
+			.get(`/crestapi/iovs/getSizeByTag?${params}`)
+			.then(response => response.data)
+			.then(iovs_list => {commit('mergeNbIovs', {tagname, iovs_list})})
 			.catch(error => { return Promise.reject(error) });
 		}
 	}

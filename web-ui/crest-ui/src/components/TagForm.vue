@@ -67,17 +67,17 @@ export default {
   methods: {
     ...mapActions('db/tags', ['createTag']),
     save() {
-          this.createTag(this.savedTag).then(response => {
-              this.$toast.open({
-                  message: 'Saved Tag successfully!',
-                  type: 'is-success'
-              })},
-              error => {
-              this.$toast.open({
-                  message: 'Error saving tag!',
-                  type: 'is-danger'
-              })
-          });
+        this.createTag(this.savedTag).then(response => {
+            this.$toast.open({
+                message: 'Saved Tag successfully!',
+                type: 'is-success'
+            })},
+            error => {
+            this.$toast.open({
+                message: 'Error saving tag!',
+                type: 'is-danger'
+            })
+        });
     },
   },
   computed: {
@@ -92,7 +92,9 @@ export default {
       }
   },
   components: {
-
+  },
+  created() {
+      this.$store.commit('gui/crest/selectTag', '');
   }
 };
 </script>

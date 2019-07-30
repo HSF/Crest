@@ -19,36 +19,17 @@
                 <b-icon icon="magnify"></b-icon>
                 <span>Search</span>
             </b-radio-button>
-            </b-field>
-
-            <b-field>
             <b-radio-button v-model="radioButton"
                 native-value="Create"
                 type="is-success">
-                <b-icon icon="check"></b-icon>
+                <b-icon icon="lead-pencil"></b-icon>
                 <span>Create</span>
             </b-radio-button>
-        </b-field>
-        <b-field label="Search Tag by name">
-            <b-autocomplete
-                rounded
-                v-model="thetag"
-                :data="filteredDataArray"
-                placeholder="e.g. MuonAlign"
-                icon="magnify"
-                @select="option => selected = option">
-                <template slot="empty">No results found</template>
-            </b-autocomplete>
-        </b-field>
-        <b-field>
-          <p class="control">
-            <button class="button is-primary" v-on:click="loadTags()" :disabled="radioButton !== 'Search'">Search</button>
-          </p>
         </b-field>
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
-          <CrestTagsTable v-bind:data="rows" v-on:select-row="updateTag"/>
+          <CrestTagsTable v-on:select-tag="selectTab" />
         </div>
         <div v-else>
           <TagForm/>
@@ -59,7 +40,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions, mapState } from 'vuex'
 import CrestTagsTable from './CrestTagsTable.vue'
 import TagForm from './TagForm.vue'
 import HelpInfoPane from './HelpInfoPane.vue';
@@ -81,63 +62,40 @@ export default {
           +"<p>You can use the <b>Create</b> button to create a new tag.</p>",
         notiftype : 'is-info',
         notifytext : 'Searching tags....',
-        rows: [],
-        selected: null,
-        selactiveTab : 1,
-        thetag: ''
+        selactiveTab : 1
       };
   },
   methods: {
       ...mapActions('db/tags', ['fetchTagByName']),
-    updateTag(stag) {
-      this.selectedtag = stag
-      this.thetag = stag.name
-      this.$emit('select-tag', this.selectedtag)
-    },
-    gotoIovs() {
-      this.selactiveTab = 1
-      this.$emit('select-tab', this.selactiveTab)
+    updateTag() {
+      const tag = Object.entries(this.getTag);
+      for (var i = 0; i < tag.length; i++){
+          if (tag[i][0] == this.selectedTag) {
+              this.selectedtag = tag[i][1];
+          }
+      }
     },
     selectTab(nt) {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
     },
-    loadTags(){
-        let liste_tags = [];
-        const tag = Object.entries(this.getTag);
-        for (var i = 0; i < tag.length; i++){
-            liste_tags.push(tag[i][1]);
-        }
-        this.rows = liste_tags;
-    },
   },
   computed: {
+      ...mapState('gui/crest', ['selectedTag']),
       ...mapGetters('db/tags', ['getTag']),
-      tagnames() {
-        let result = this.rows.map(a => a.name);
-        return result
-      },
-      filteredDataArray() {
-          return this.tagnames.filter((option) => {
-              //console.log('filtering '+option)
-              return option
-                  .toString()
-                  .toLowerCase()
-                  .indexOf(this.thetag.toLowerCase()) >= 0
-          })
-      },
       infomsg () {
         return "Access api  "+this.selectedserver
           +"<br> Selected tag is : "+this.selectedtag.name ;
       }
   },
   watch: {
-      thetag: function() {
-          this.fetchTagByName(this.thetag);
+      selectedTag: function() {
+          this.fetchTagByName(this.selectedTag);  
+          this.updateTag();
       }
   },
   created(){
-      this.fetchTagByName(this.thetag);  
+      this.fetchTagByName('');  
   },
   components: {
     CrestTagsTable,
