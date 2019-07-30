@@ -1,5 +1,7 @@
 <template>
-<section>
+  <body>
+    <section>
+      <div class="container is-fluid">
 <b-tabs v-model="activeTab">
 <!--
 <b-tab-item label="Server">
@@ -13,7 +15,9 @@
     <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
 </b-tabs>
+</div>
 </section>
+</body>
 </template>
 <script>
 
@@ -74,10 +78,10 @@ import IovsPane from './IovsPane.vue'
       },
       watch: {
           selectedTag: function() {
-              this.fetchTagByName(this.selectedTag);  
+              this.fetchTagByName(this.selectedTag);
               this.updateTag();
           },
-          selectedIov: function() { 
+          selectedIov: function() {
               this.updateIov();
           }
       },

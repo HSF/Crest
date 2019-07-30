@@ -1,5 +1,5 @@
 <template>
-<div id="app" class="container">
+<div id="app">
   <Title v-on:select-server="selectServer"/>
   <CrestTabs v-bind:selectedserver="selectedserver" v-on:info-notification="activateInfoNotification"
     v-on:error-notification="activateErrorNotification"/>
@@ -9,6 +9,11 @@
 
 </div>
 </template>
+
+<style lang="scss">
+@import "bulma_custom";
+</style>
+
 <script>
 import Title from './components/Title.vue'
 import CrestTabs from './components/CrestTabs.vue'

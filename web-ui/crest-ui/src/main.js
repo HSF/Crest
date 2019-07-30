@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Buefy from 'buefy'
 import store from './store'
-import 'buefy/dist/buefy.css'
+//import 'buefy/dist/buefy.css'
 
 import App from './App.vue'
 

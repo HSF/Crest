@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div>
     <p class="has-text-info is-size-2">Search for Iovs</p>
     <nav class="level">
       <div class="level is-mobile">
@@ -87,7 +87,7 @@ export default {
         this.$store.commit('gui/iovForm/selectTagname', this.selectedTag);
         this.$store.commit('gui/iovForm/selectSince', this.since);
         this.$store.commit('gui/iovForm/selectUntil', this.until);
-        this.$store.commit('gui/iovForm/selectSnapshot', this.snapshot);        
+        this.$store.commit('gui/iovForm/selectSnapshot', this.snapshot);
         this.searchIovs;
     },
     selectSince(since) {

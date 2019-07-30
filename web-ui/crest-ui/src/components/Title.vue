@@ -1,58 +1,57 @@
 <template>
-  <section class="hero is-info">
+  <section class="hero is-primary">
     <div class="hero-head">
-      <header class="navbar">
-    <div class="container">
-    <nav class="navbar is-transparent">
-      <div class="navbar-brand">
-        <a class="navbar-item" href="https://atlas.web.cern.ch">
-          <img src="../assets/irfu_logo.png" alt="this.apiTitle" width="40" height="10">
-        </a>
-      </div>
-      <div id="navbarStaticLinks" class="navbar-menu">
-        <div class="navbar-start">
-          <a class="navbar-item" href="/crestui/index.html">
-            <span class="icon">
-              <i class="fas fa-home"></i>
-            </span>
-            <span>Home</span>
-          </a>
-          <a class="navbar-item" href="https://crest-undertow.web.cern.ch/ext/web/ui/index.html">
-            <span class="icon">
-              <i class="fas fa-file-alt"></i>
-            </span>
-            <span>API</span>
-          </a>
-        </div>
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <span><Connection v-on:select-server="selectServer"/></span>
+      <nav class="navbar">
+        <div class="container">
+          <div class="navbar-brand">
+            <a class="navbar-item" href="http://irfu.cea.fr/">
+              <img src="../assets/irfu_logo.png" alt="Logo">
+            </a>
+            <a class="navbar-item" href="https://atlas.web.cern.ch">
+              <img src="../assets/atlas-logo-web-V02.png" alt="Logo">
+            </a>
+            <div class="navbar-burger" @click="showNav = !showNav" :class="{ 'is-active': showNav }">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
-          <div class="navbar-item">
-            <div class="field is-grouped">
-              <p class="control">
-                  <a class="button is-primary" href="https://gitlab.cern.ch/formica/swagger_crestdb">
+          <div class="navbar-menu" :class="{ 'is-active': showNav }">
+            <div class="navbar-end">
+              <a class="navbar-item is-active" href="index.html">
+                <span class="icon">
+                  <i class="fas fa-home"></i>
+                </span>
+                <span>Home</span>
+              </a>
+              <a class="navbar-item" href="/ext/web/ui/index.html">
+                <span class="icon">
+                  <i class="fas fa-file-alt"></i>
+                </span>
+                <span>API</span>
+              </a>
+              <span class="navbar-item">
+                <a class="button is-primary is-inverted" href="https://gitlab.cern.ch/formica/swagger_crestdb">
                   <span class="icon">
-                    <i class="fab fa-gitlab"></i>
+                    <i class="fab fa-github"></i>
                   </span>
                   <span>Download</span>
-                  </a>
-              </p>
+                </a>
+              </span>
             </div>
           </div>
         </div>
-      </div>
-    </nav>
-  </div>
-  </header>
-</div>
+      </nav>
+    </div>
     <div class="hero-body">
-      <h1 class="title">
-        CREST MANAGER UI
-      </h1>
-      <h2 class="subtitle">
-        {{ apiTitle }}
-      </h2>
+      <div class="container">
+        <h1 class="title">
+          Crest Manager UI
+        </h1>
+        <h2 class="subtitle">
+          Atlas experiment
+        </h2>
+      </div>
     </div>
   </section>
 </template>
@@ -65,6 +64,7 @@ export default {
   data: function () {
     return {
       selectedserver: { host: this.apiHost, port: this.apiPort, protocol: this.apiProtocol, url: '' },
+      showNav: false
     };
   },
   methods: {

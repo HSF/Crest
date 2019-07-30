@@ -1,5 +1,5 @@
 <template>
-<div class="container">
+<div>
     <p class="has-text-info is-size-2">Search for Tags</p>
     <nav class="level">
         <div class="level is-mobile">
@@ -90,12 +90,12 @@ export default {
   },
   watch: {
       selectedTag: function() {
-          this.fetchTagByName(this.selectedTag);  
+          this.fetchTagByName(this.selectedTag);
           this.updateTag();
       }
   },
   created(){
-      this.fetchTagByName('');  
+      this.fetchTagByName('');
   },
   components: {
     CrestTagsTable,
