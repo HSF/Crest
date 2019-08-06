@@ -85,8 +85,8 @@ public class TagMetaDBImpl implements TagMetaDataBaseCustom {
 
 		log.info("Insert TagMeta {} using JDBCTEMPLATE", entity.getTagName());
 		log.debug("Channel info {}", entity.getChannelInfo());
-		log.debug("Read data blob of length {} and streamer info {}", entity.getChannelInfo().length,
-				entity.getPayloadInfo().length);
+		log.debug("Read data blob of length {} and streamer info {}", entity.getChannelInfo().getBytes().length,
+				entity.getPayloadInfo().getBytes().length);
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
@@ -95,8 +95,8 @@ public class TagMetaDBImpl implements TagMetaDataBaseCustom {
 			ps.setString(2, entity.getDescription());
 			ps.setInt(3, entity.getChansize());
 			ps.setInt(4, entity.getColsize());
-			ps.setBytes(5, entity.getChannelInfo());
-			ps.setBytes(6, entity.getPayloadInfo());
+			ps.setBytes(5, entity.getChannelInfo().getBytes());
+			ps.setBytes(6, entity.getPayloadInfo().getBytes());
 			ps.setDate(7, inserttime);
 			log.debug("Dump preparedstatement {}", ps);
 			ps.execute();
@@ -120,14 +120,14 @@ public class TagMetaDBImpl implements TagMetaDataBaseCustom {
 
 		log.info("Insert TagMeta {} using JDBCTEMPLATE", entity.getTagName());
 		log.debug("Channel info {}", entity.getChannelInfo());
-		log.debug("Read data blob of length {} and streamer info {}", entity.getChannelInfo().length,
-				entity.getPayloadInfo().length);
+		log.debug("Read data blob of length {} and streamer info {}", entity.getChannelInfo().getBytes().length,
+				entity.getPayloadInfo().getBytes().length);
 		try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, entity.getDescription());
 			ps.setInt(2, entity.getChansize());
 			ps.setInt(3, entity.getColsize());
-			ps.setBytes(4, entity.getChannelInfo());
-			ps.setBytes(5, entity.getPayloadInfo());
+			ps.setBytes(4, entity.getChannelInfo().getBytes());
+			ps.setBytes(5, entity.getPayloadInfo().getBytes());
 			ps.setString(6, entity.getTagName());
 			log.debug("Dump preparedstatement {}", ps);
 			ps.execute();

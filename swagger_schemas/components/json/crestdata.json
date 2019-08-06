@@ -233,12 +233,10 @@
 					"format": "int32"
 				},
 				"channelInfo": {
-					"type": "string",
-					"format": "byte"
+					"type": "string"
 				},
 				"payloadInfo": {
-					"type": "string",
-					"format": "byte"
+					"type": "string"
 				},
 				"insertionTime": {
 					"type": "string",

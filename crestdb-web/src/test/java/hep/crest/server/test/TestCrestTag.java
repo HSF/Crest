@@ -61,8 +61,8 @@ public class TestCrestTag {
 
 	@Test
 	public void testC_storeTagMeta() {
-		TagMetaDto dto = new TagMetaDto().description("<some>description</some>").tagName("SB_TAG").channelInfo("[{\"0\": \"achannel\"},{ \"1\":\"another_chan\"}]".getBytes()
-				).payloadInfo("{ \"col1\": \"Int\"}".getBytes()).chansize(2).colsize(1);
+		TagMetaDto dto = new TagMetaDto().description("<some>description</some>").tagName("SB_TAG").channelInfo("[{\"0\": \"achannel\"},{ \"1\":\"another_chan\"}]"
+				).payloadInfo("{ \"col1\": \"Int\"}").chansize(2).colsize(1);
 		System.out.println("Store tag meta request: " + dto);
 		ResponseEntity<TagMetaDto> response = this.testRestTemplate.postForEntity("/crestapi/tags/SB_TAG/meta", dto, TagMetaDto.class);
 		System.out.println("Received response: " + response);

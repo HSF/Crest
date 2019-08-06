@@ -42,7 +42,6 @@ public class PojoDtoConverterConfig {
 		this.initGlobalTagMap(mapperFactory);
 		this.initGlobalTagMapsMap(mapperFactory);
 		this.initTagMap(mapperFactory);
-		this.initTagMetaMap(mapperFactory);
 		this.initIovMap(mapperFactory);
 		this.initPayloadMap(mapperFactory);
 		this.initRunLumiInfoMap(mapperFactory);
@@ -65,27 +64,6 @@ public class PojoDtoConverterConfig {
 			.exclude("globalTagMaps").byDefault().register();
 	}
 
-	protected void initTagMetaMap(MapperFactory mapperFactory) {
-		mapperFactory.classMap(TagMeta.class, TagMetaDto.class)
-		.byDefault()
-		.customize(new CustomMapper<TagMeta, TagMetaDto>() {
-			@Override
-			public void mapAtoB(TagMeta a, TagMetaDto b, MappingContext context) {
-				try {
-					b.tagName(a.getTagName())
-					.description(a.getDescription())
-					.channelInfo(a.getChannelInfo().getBytes(1, (int) a.getChannelInfo().length()))
-					.payloadInfo(a.getPayloadInfo().getBytes(1, (int) a.getPayloadInfo().length()))
-					.chansize(a.getChansize())
-					.colsize(a.getColsize())
-					.insertionTime(a.getInsertionTime());
-				} catch (SQLException e) {
-					log.error("SQL exception in mapping pojo and dto for payload...: {}",e.getMessage());
-				}
-			}
-		})
-		.register();
-	}
 
 	protected void initIovMap(MapperFactory mapperFactory) {
 		mapperFactory.classMap(Iov.class, IovDto.class).field("id.tagName", "tagName").field("id.since", "since")

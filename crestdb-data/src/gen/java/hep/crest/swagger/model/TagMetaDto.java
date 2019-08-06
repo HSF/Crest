@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
 /**
  * TagMetaDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-08-05T12:13:26.482+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-08-06T20:34:48.558+02:00")
 public class TagMetaDto   {
   @JsonProperty("tagName")
   private String tagName = null;
@@ -39,10 +39,10 @@ public class TagMetaDto   {
   private Integer colsize = null;
 
   @JsonProperty("channelInfo")
-  private byte[] channelInfo = null;
+  private String channelInfo = null;
 
   @JsonProperty("payloadInfo")
-  private byte[] payloadInfo = null;
+  private String payloadInfo = null;
 
   @JsonProperty("insertionTime")
   private Date insertionTime = null;
@@ -123,7 +123,7 @@ public class TagMetaDto   {
     this.colsize = colsize;
   }
 
-  public TagMetaDto channelInfo(byte[] channelInfo) {
+  public TagMetaDto channelInfo(String channelInfo) {
     this.channelInfo = channelInfo;
     return this;
   }
@@ -134,15 +134,15 @@ public class TagMetaDto   {
    **/
   @JsonProperty("channelInfo")
   @ApiModelProperty(value = "")
- @Pattern(regexp="^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$")  public byte[] getChannelInfo() {
+  public String getChannelInfo() {
     return channelInfo;
   }
 
-  public void setChannelInfo(byte[] channelInfo) {
+  public void setChannelInfo(String channelInfo) {
     this.channelInfo = channelInfo;
   }
 
-  public TagMetaDto payloadInfo(byte[] payloadInfo) {
+  public TagMetaDto payloadInfo(String payloadInfo) {
     this.payloadInfo = payloadInfo;
     return this;
   }
@@ -153,11 +153,11 @@ public class TagMetaDto   {
    **/
   @JsonProperty("payloadInfo")
   @ApiModelProperty(value = "")
- @Pattern(regexp="^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$")  public byte[] getPayloadInfo() {
+  public String getPayloadInfo() {
     return payloadInfo;
   }
 
-  public void setPayloadInfo(byte[] payloadInfo) {
+  public void setPayloadInfo(String payloadInfo) {
     this.payloadInfo = payloadInfo;
   }
 

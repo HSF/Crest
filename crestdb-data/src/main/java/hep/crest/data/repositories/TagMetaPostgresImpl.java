@@ -96,13 +96,13 @@ public class TagMetaPostgresImpl extends TagMetaDBImpl implements TagMetaDataBas
 
 		log.info("Insert TagMeta {} using JDBCTEMPLATE", entity.getTagName());
 		log.debug("Channel info {}", entity.getChannelInfo());
-		log.debug("Read data blob of length {} and streamer info {}", entity.getChannelInfo().length, entity.getPayloadInfo().length);
+		log.debug("Read data blob of length {} and streamer info {}", entity.getChannelInfo().getBytes().length, entity.getPayloadInfo().getBytes().length);
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
 		entity.setInsertionTime(calendar.getTime());
 		
-		InputStream cis = new ByteArrayInputStream(entity.getChannelInfo());
-		InputStream pis = new ByteArrayInputStream(entity.getPayloadInfo());
+		InputStream cis = new ByteArrayInputStream(entity.getChannelInfo().getBytes());
+		InputStream pis = new ByteArrayInputStream(entity.getPayloadInfo().getBytes());
 
 		try (Connection conn = ds.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql);) {

@@ -241,11 +241,11 @@ public class TagsApiServiceImpl extends TagsApiService {
 				}
 				if (key == "channelInfo") {
 					byte[] val = body.get(key).getBytes();
-					dto.setChannelInfo(val);
+					dto.setChannelInfo(new String(val));
 				}
 				if (key == "payloadInfo") {
 					byte[] val = body.get(key).getBytes();
-					dto.setPayloadInfo(val);
+					dto.setPayloadInfo(new String(val));
 				}
 			}
 			TagMetaDto saved = tagService.updateTagMeta(dto);

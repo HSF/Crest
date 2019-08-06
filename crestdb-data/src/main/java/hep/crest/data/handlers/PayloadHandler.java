@@ -336,10 +336,11 @@ public class PayloadHandler {
 			InputStream insi = entity.getPayloadInfo().getBinaryStream();
 			pyldbarr = readLobs(insi);
 			entity.getPayloadInfo().free();
-
+			String chinfo = new String(chanbarr);
+			String pyldinfo = new String(pyldbarr);
 			return new TagMetaDto().tagName(entity.getTagName()).description(entity.getDescription())
-					.colsize(entity.getColsize()).chansize(entity.getChansize()).channelInfo(chanbarr)
-					.payloadInfo(pyldbarr).insertionTime(entity.getInsertionTime());
+					.colsize(entity.getColsize()).chansize(entity.getChansize()).channelInfo(chinfo)
+					.payloadInfo(pyldinfo).insertionTime(entity.getInsertionTime());
 		} catch (SQLException e) {
 			log.error("Exception : {}", e.getMessage());
 		}
