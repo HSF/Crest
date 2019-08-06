@@ -28,6 +28,7 @@ import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.TagsApiService;
 import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagMetaDto;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class TagsApiServiceImpl extends TagsApiService {
@@ -161,4 +162,99 @@ public class TagsApiServiceImpl extends TagsApiService {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
+
+
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.TagsApiService#createTagMeta(java.lang.String, hep.crest.swagger.model.TagMetaDto, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
+	@Override
+	public Response createTagMeta(String name, TagMetaDto body, SecurityContext securityContext, UriInfo info)
+			throws NotFoundException {
+   		log.info("TagRestController processing request for creating a tag meta data entry for {}",name);
+		try {
+			TagDto tagdto = tagService.findOne(name);
+			if (tagdto == null) {
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,"Tag entity not found for name "+name);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			}
+			log.debug("Add meta information to tag {}",name);
+			TagMetaDto saved = tagService.insertTagMeta(body);
+			return Response.created(info.getRequestUri()).entity(saved).build();
+
+		} catch (AlreadyExistsPojoException e) {
+			return Response.status(Response.Status.SEE_OTHER).entity(body).build();
+		} catch (CdbServiceException e) {
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+
+
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.TagsApiService#findTagMeta(java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
+	@Override
+	public Response findTagMeta(String name, SecurityContext securityContext, UriInfo info) throws NotFoundException {
+		this.log.info("TagRestController processing request to find tag metadata for name " + name);
+		try {
+			TagMetaDto dto = tagService.findMeta(name);
+			if (dto == null) {
+				log.debug("Entity not found for name " + name);
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,"Entity not found for name "+name);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();				
+			}
+			return Response.ok().entity(dto).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+
+
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.TagsApiService#updateTagMeta(java.lang.String, hep.crest.swagger.model.GenericMap, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
+	@Override
+	public Response updateTagMeta(String name, GenericMap body, SecurityContext securityContext, UriInfo info)
+			throws NotFoundException {
+    	log.info("TagRestController processing request for creating a tag");
+		try {
+			TagMetaDto dto = tagService.findMeta(name);
+			if (dto == null) {
+				log.debug("Cannot update meta data on null tag meta entity for {}",name);
+				String message = ("TagMeta "+name+" not found...");
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			}
+			for (String  key : body.keySet()) {
+				if (key == "description") {
+					dto.setDescription(body.get(key));
+				}
+				if (key == "chansize") {
+					dto.setChansize(new Integer(body.get(key)));
+				}
+				if (key == "colsize") {
+					dto.setColsize(new Integer(body.get(key)));
+				}
+				if (key == "channelInfo") {
+					byte[] val = body.get(key).getBytes();
+					dto.setChannelInfo(val);
+				}
+				if (key == "payloadInfo") {
+					byte[] val = body.get(key).getBytes();
+					dto.setPayloadInfo(val);
+				}
+			}
+			TagMetaDto saved = tagService.updateTagMeta(dto);
+			return Response.created(info.getRequestUri()).entity(saved).build();
+
+		} catch (CdbServiceException e) {
+			String message = e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
 }

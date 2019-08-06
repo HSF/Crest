@@ -18,6 +18,10 @@ import hep.crest.data.repositories.PayloadDataPostgresImpl;
 import hep.crest.data.repositories.PayloadDataSQLITEImpl;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
+import hep.crest.data.repositories.TagMetaDBImpl;
+import hep.crest.data.repositories.TagMetaDataBaseCustom;
+import hep.crest.data.repositories.TagMetaPostgresImpl;
+import hep.crest.data.repositories.TagMetaSQLITEImpl;
 
 @Configuration
 @ComponentScan("hep.crest.data.repositories")
@@ -66,9 +70,39 @@ public class RepositoryConfig {
     */
 
     @Profile({"test","default","prod","h2","wildfly","ssl","dev","mysql"})
+    @Bean(name = "tagmetarepo")
+    public TagMetaDataBaseCustom tagmetaDefaultRepository(@Qualifier("dataSource") DataSource mainDataSource) {
+    	TagMetaDBImpl bean = new TagMetaDBImpl(mainDataSource);
+		if (!cprops.getSchemaname().equals("none")) {
+			bean.setDefaultTablename(cprops.getSchemaname());
+		}
+		return bean;
+    }
+
+    @Profile({"postgres","pgsvom"})
+    @Bean(name = "tagmetarepo")
+    public TagMetaDataBaseCustom tagmetaPostgresRepository(@Qualifier("dataSource") DataSource mainDataSource) {
+    	TagMetaPostgresImpl bean = new TagMetaPostgresImpl(mainDataSource);
+		if (!cprops.getSchemaname().equals("none")) {
+			bean.setDefaultTablename(cprops.getSchemaname());
+		}
+		return bean;
+    }
+    
+    @Profile({"sqlite"})
+    @Bean(name = "tagmetarepo")
+    public TagMetaDataBaseCustom tagmetaSqliteRepository(@Qualifier("dataSource") DataSource mainDataSource) {
+    	TagMetaSQLITEImpl bean = new TagMetaSQLITEImpl(mainDataSource);
+		if (!cprops.getSchemaname().equals("none")) {
+			bean.setDefaultTablename(cprops.getSchemaname());
+		}
+		return bean;
+    }
+
+    @Profile({"test","default","prod","h2","wildfly","ssl","dev","mysql"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("dataSource") DataSource mainDataSource) {
-    		PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
+    	PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
 			bean.setDefaultTablename(cprops.getSchemaname());
 		}
@@ -78,7 +112,7 @@ public class RepositoryConfig {
     @Profile({"postgres","pgsvom"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadPostgresRepository(@Qualifier("dataSource") DataSource mainDataSource) {
-    		PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
+    	PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
 			bean.setDefaultTablename(cprops.getSchemaname());
 		}
@@ -88,7 +122,7 @@ public class RepositoryConfig {
     @Profile("sqlite")
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadSqliteRepository(@Qualifier("dataSource") DataSource mainDataSource) {
-    		PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
+    	PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
 		if (!cprops.getSchemaname().equals("none")) {
 			bean.setDefaultTablename(cprops.getSchemaname());
 		}

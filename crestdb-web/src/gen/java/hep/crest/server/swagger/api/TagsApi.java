@@ -8,6 +8,7 @@ import io.swagger.jaxrs.*;
 
 import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagMetaDto;
 
 import java.util.Map;
 import java.util.List;
@@ -34,7 +35,7 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the tags API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-27T13:10:49.872+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-08-05T16:52:59.274+02:00")
 public class TagsApi  {
 	@Autowired
 	private TagsApiService delegate;
@@ -51,6 +52,19 @@ public class TagsApi  {
     throws NotFoundException {
         return delegate.createTag(body,securityContext,info);
     }
+    @POST
+    @Path("/{name}/meta")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Create a TagMeta in the database.", notes = "This method allows to insert a TagMeta.Arguments: TagMetaDto should be provided in the body as a JSON file.", response = TagMetaDto.class, tags={ "tags", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = TagMetaDto.class) })
+    public Response createTagMeta(@ApiParam(value = "name: the tag name",required=true) @PathParam("name") String name
+,@ApiParam(value = "A json string that is used to construct a tagmetadto object: { tagName: xxx, ... }" ,required=true) TagMetaDto body
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.createTagMeta(name,body,securityContext,info);
+    }
     @GET
     @Path("/{name}")
     
@@ -62,6 +76,18 @@ public class TagsApi  {
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.findTag(name,securityContext,info);
+    }
+    @GET
+    @Path("/{name}/meta")
+    
+    @Produces({ "application/json", "application/xml" })
+    @io.swagger.annotations.ApiOperation(value = "Finds a TagMetaDto by name", notes = "This method will search for a tag metadata with the given name. Only one tag should be returned.", response = TagMetaDto.class, tags={ "tags", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = TagMetaDto.class) })
+    public Response findTagMeta(@ApiParam(value = "name: the tag name",required=true) @PathParam("name") String name
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.findTagMeta(name,securityContext,info);
     }
     @GET
     
@@ -90,5 +116,18 @@ public class TagsApi  {
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.updateTag(name,body,securityContext,info);
+    }
+    @PUT
+    @Path("/{name}/meta")
+    
+    @Produces({ "application/json", "application/xml" })
+    @io.swagger.annotations.ApiOperation(value = "Update a TagMetaDto by name", notes = "This method will search for a tag with the given name, and update its content for the provided body fields. Only the following fields can be updated: description, timeType, objectTime, endOfValidity, lastValidatedTime.", response = TagMetaDto.class, tags={ "tags", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = TagMetaDto.class) })
+    public Response updateTagMeta(@ApiParam(value = "name: the tag name",required=true) @PathParam("name") String name
+,@ApiParam(value = "A json string that is used to construct a map of updatable fields: { description: xxx, ... }" ,required=true) GenericMap body
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.updateTagMeta(name,body,securityContext,info);
     }
 }

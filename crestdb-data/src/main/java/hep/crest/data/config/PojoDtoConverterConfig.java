@@ -14,6 +14,7 @@ import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
+import hep.crest.data.pojo.TagMeta;
 import hep.crest.data.runinfo.pojo.RunLumiInfo;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.swagger.model.FolderDto;
@@ -23,6 +24,7 @@ import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagMetaDto;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
@@ -40,6 +42,7 @@ public class PojoDtoConverterConfig {
 		this.initGlobalTagMap(mapperFactory);
 		this.initGlobalTagMapsMap(mapperFactory);
 		this.initTagMap(mapperFactory);
+		this.initTagMetaMap(mapperFactory);
 		this.initIovMap(mapperFactory);
 		this.initPayloadMap(mapperFactory);
 		this.initRunLumiInfoMap(mapperFactory);
@@ -60,6 +63,28 @@ public class PojoDtoConverterConfig {
 		mapperFactory.classMap(Tag.class, TagDto.class)
 			.field("objectType", "payloadSpec")
 			.exclude("globalTagMaps").byDefault().register();
+	}
+
+	protected void initTagMetaMap(MapperFactory mapperFactory) {
+		mapperFactory.classMap(TagMeta.class, TagMetaDto.class)
+		.byDefault()
+		.customize(new CustomMapper<TagMeta, TagMetaDto>() {
+			@Override
+			public void mapAtoB(TagMeta a, TagMetaDto b, MappingContext context) {
+				try {
+					b.tagName(a.getTagName())
+					.description(a.getDescription())
+					.channelInfo(a.getChannelInfo().getBytes(1, (int) a.getChannelInfo().length()))
+					.payloadInfo(a.getPayloadInfo().getBytes(1, (int) a.getPayloadInfo().length()))
+					.chansize(a.getChansize())
+					.colsize(a.getColsize())
+					.insertionTime(a.getInsertionTime());
+				} catch (SQLException e) {
+					log.error("SQL exception in mapping pojo and dto for payload...: {}",e.getMessage());
+				}
+			}
+		})
+		.register();
 	}
 
 	protected void initIovMap(MapperFactory mapperFactory) {

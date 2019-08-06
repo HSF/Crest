@@ -280,6 +280,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			ps.setInt(7, entity.getSize());
 			log.debug("Dump preparedstatement {}", ps);
 			ps.execute();
+			conn.commit();
 		} catch (SQLException e) {
 			log.error("Exception from SQL during insertion: {}", e.getMessage());
 			throw new CdbServiceException(e.getMessage());

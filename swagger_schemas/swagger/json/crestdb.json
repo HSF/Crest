@@ -1219,7 +1219,7 @@
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
-					}					
+					}
 				}
 			}
 		},
@@ -1272,7 +1272,7 @@
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
-					}					
+					}
 				}
 			}
 		},
@@ -1534,6 +1534,115 @@
 						"description": "successful operation",
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+						}
+					}
+				}
+			}
+		},
+		"/tags/{name}/meta": {
+			"get": {
+				"tags": [
+					"tags"
+				],
+				"summary": "Finds a TagMetaDto by name",
+				"description": "This method will search for a tag metadata with the given name. Only one tag should be returned.",
+				"operationId": "findTagMeta",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"description": "name: the tag name",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/TagMetaDto"
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"tags"
+				],
+				"summary": "Create a TagMeta in the database.",
+				"description": "This method allows to insert a TagMeta.Arguments: TagMetaDto should be provided in the body as a JSON file.",
+				"operationId": "createTagMeta",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"description": "name: the tag name",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a tagmetadto object: { tagName: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/TagMetaDto"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/TagMetaDto"
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"tags"
+				],
+				"summary": "Update a TagMetaDto by name",
+				"description": "This method will search for a tag with the given name, and update its content for the provided body fields. Only the following fields can be updated: description, timeType, objectTime, endOfValidity, lastValidatedTime.",
+				"operationId": "updateTagMeta",
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"parameters": [
+					{
+						"name": "name",
+						"in": "path",
+						"description": "name: the tag name",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a map of updatable fields: { description: xxx, ... }",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/GenericMap"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/TagMetaDto"
 						}
 					}
 				}
