@@ -91,7 +91,9 @@ class PhysDBDriver():
         print ("        ex: FIND globaltags : retrieve full list of global tags")
         print ("        ex: --by=name:BLKPA globaltags : retrieve list of global tags where name contains BLKPA")
         print (" ")
-        print (" - TRACE <globaltag name>: show tags associated to the selected global tag. ")
+        print (" - INFO <tag name>: show metadata associated with tag. ")
+        print (" ")
+        print (" - TRACE <globaltag name>: show tags associated with the selected global tag. ")
         print (" ")
         print (" - IOVS <tag name>: show iovs associated to the selected tag, use option to limit time range. ")
         print (" ")
@@ -202,6 +204,22 @@ class PhysDBDriver():
             except Exception as e:
                 sys.exit("failed on action LS: %s" % (str(e)))
                 raise
+        elif (self.action=='INFO'):
+            try:
+                print ('Action INFO is used to retrieve tags metadata associated to a given tag')
+                print ('Found N arguments %s' % len(self.args))
+                object=self.args[0]
+                msg = ('INFO: selected tag is %s ') % (object)
+                self.printmsg(msg,'cyan')
+                resp = self.infotags(object)
+                if self.dump:
+                    json.dump(resp, outfile)
+                    outfile.close()
+
+            except Exception as e:
+                sys.exit("failed on action TRACE: %s" % (str(e)))
+                raise
+
         elif (self.action=='TRACE'):
             try:
                 print ('Action TRACE is used to retrieve tags associated to a given global tag')
@@ -377,6 +395,20 @@ class PhysDBDriver():
                 print ("Exception when calling TagsApi->list_tags: %s\n" % e)
         else:
             print ('Cannot use resource %s ' % objtype )
+        return
+
+    def infotags(self,tagname):
+        print ('Trace global tag %s ' % tagname)
+        api_instance = TagsApi(self.api_client)
+        try:
+        # Finds a TagDtos lists associated to the global tag name in input.
+            api_response = api_instance.find_tag_meta(tagname)
+            dictresp = self.api_client.sanitize_for_serialization(api_response)
+            print (json.dumps(dictresp, indent=4, sort_keys=True))
+            return dictresp
+
+        except ApiException as e:
+            print ("Exception when calling TagsApi->find_tag_meta: %s\n" % e)
         return
 
     def tracetags(self,globaltagname,record='',label=''):

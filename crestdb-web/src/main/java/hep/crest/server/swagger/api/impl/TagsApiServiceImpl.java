@@ -221,6 +221,9 @@ public class TagsApiServiceImpl extends TagsApiService {
 	public Response updateTagMeta(String name, GenericMap body, SecurityContext securityContext, UriInfo info)
 			throws NotFoundException {
     	log.info("TagRestController processing request for creating a tag");
+    	// FIXME: This should be allowed only if the tag is not locked. 
+    	// FIXME: For the moment I do not know what to use to see if a tag is locked...
+    	// FIXME: Ask CMS guys about this.
 		try {
 			TagMetaDto dto = tagService.findMeta(name);
 			if (dto == null) {
@@ -240,10 +243,12 @@ public class TagsApiServiceImpl extends TagsApiService {
 					dto.setColsize(new Integer(body.get(key)));
 				}
 				if (key == "channelInfo") {
+					// The field is a string ... this is mandatory for the moment....
 					byte[] val = body.get(key).getBytes();
 					dto.setChannelInfo(new String(val));
 				}
 				if (key == "payloadInfo") {
+					// The field is a string ... this is mandatory for the moment....
 					byte[] val = body.get(key).getBytes();
 					dto.setPayloadInfo(new String(val));
 				}

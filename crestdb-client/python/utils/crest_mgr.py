@@ -30,7 +30,7 @@ from datetime import datetime
 sys.path.append(os.path.join(sys.path[0],'..'))
 
 from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
-from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto, IovPayloadDto
+from crestapi.models import GlobalTagDto, TagDto, TagMetaDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto, IovPayloadDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
 from crestapi.configuration import Configuration
@@ -91,6 +91,8 @@ class PhysDBDriver():
         print ("Actions list:")
         print (" - ADD <type> [json-filename] [type = tags, globaltags, ...] : add the selected resource using the json file provided in input")
         print ("        ex: ADD globaltags <json-filename>: add a new global tag with the content taken from json file")
+        print (" ")
+        print (" - ADDINFO <tag> [json-filename] : add metadata to tag")
         print (" ")
         print (" - INSERT <tag> <since> blob-file : add a new IOV with its payload")
         print ("        ex: INSERT my-tag 10000 myblob.blob mypayload.json: add a payload and then the iov in the correspoding tag")
@@ -202,6 +204,28 @@ class PhysDBDriver():
 
             except Exception as e:
                 sys.exit("failed on action ADD: %s" % (str(e)))
+                raise
+
+        elif (self.action=='ADDINFO'):
+            try:
+                print ('Action ADDINFO is used to add metadata resources to a tag in the DB')
+                print ('Found N arguments %s' % len(self.args))
+                if len(self.args)<2:
+                    sys.exit("Number of arguments is wrong...may be you forgot tag name or file with metadata ?")
+                    raise
+                tagname=self.args[0]
+                filename = self.args[1]
+                self.add_tag_meta(tagname,filename)
+
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                print ("*** print_tb:")
+                traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+                print ("*** print_exception:")
+                traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout)
+
+                sys.exit("failed on action INSERT: %s" % (str(e)))
                 raise
 
         elif (self.action=='INSERT'):
@@ -512,6 +536,23 @@ class PhysDBDriver():
         else:
             print ('Cannot use resource %s' % objtype)
         return
+
+    def add_tag_meta(self,tagname,filename):
+        api_instance = TagsApi(self.api_client)
+        try:
+            f = open(filename, 'r')
+            jsondtodict = f.read()
+            print ('Loaded json from file %s' % jsondtodict)
+            dtodict = json.loads(jsondtodict)
+            print ('Create dto dictionary from json %s ' % dtodict)
+            dto = TagMetaDto(tagname,dtodict['description'],dtodict['chansize'],dtodict['colsize'],
+                               dtodict['channelInfo'],dtodict['payloadInfo'],None)
+            msg = ('Created dto resource %s ' ) % (dto.to_dict())
+            pprint(msg)
+            api_response = api_instance.create_tag_meta(tagname,dto)
+            pprint(api_response)
+        except ApiException as e:
+            print ("Exception when calling TagsApi->create_tag_meta: %s\n" % e)
 
 
     def ls(self,objtype):

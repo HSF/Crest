@@ -219,9 +219,6 @@ class FolderDto(object):
                 ))
             else:
                 result[attr] = value
-        if issubclass(FolderDto, dict):
-            for key, value in self.items():
-                result[key] = value
 
         return result
 

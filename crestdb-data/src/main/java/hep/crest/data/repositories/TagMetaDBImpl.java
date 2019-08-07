@@ -81,11 +81,11 @@ public class TagMetaDBImpl implements TagMetaDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(TAG_NAME, DESCRIPTION, CHANNEL_SIZE, COLUMN_SIZE, CHANNEL_INFO, PAYLOAD_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?,?)";
+				+ " (TAG_NAME, DESCRIPTION, CHANNEL_SIZE, COLUMN_SIZE, CHANNEL_INFO, PAYLOAD_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert TagMeta {} using JDBCTEMPLATE", entity.getTagName());
 		log.debug("Channel info {}", entity.getChannelInfo());
-		log.debug("Read data blob of length {} and streamer info {}", entity.getChannelInfo().getBytes().length,
+		log.debug("Read channel info length {} and payload info {}", entity.getChannelInfo().getBytes().length,
 				entity.getPayloadInfo().getBytes().length);
 		Calendar calendar = Calendar.getInstance();
 		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
@@ -100,7 +100,6 @@ public class TagMetaDBImpl implements TagMetaDataBaseCustom {
 			ps.setDate(7, inserttime);
 			log.debug("Dump preparedstatement {}", ps);
 			ps.execute();
-			conn.commit();
 		} catch (SQLException e) {
 			log.error("Exception from SQL during insertion: {}", e.getMessage());
 			throw new CdbServiceException(e.getMessage());
