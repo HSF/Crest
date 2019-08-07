@@ -29,8 +29,8 @@ from datetime import datetime
 
 sys.path.append(os.path.join(sys.path[0],'..'))
 
-from crestapi.api import GlobaltagsApi, TagsApi, IovsApi, PayloadsApi
-from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto
+from crestapi.api import GlobaltagsApi, TagsApi, IovsApi, PayloadsApi, FoldersApi
+from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto, FolderDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
 from crestapi.configuration import Configuration
@@ -185,7 +185,7 @@ class PhysDBDriver():
                 print ('Found N arguments %s' % len(self.args))
                 object=self.args[0]
                 msg = ('LS: selected object is %s ') % (object)
-                if object in [ 'globaltags', 'tags' ]:
+                if object in [ 'globaltags', 'tags', 'folders' ]:
                     self.printmsg(msg,'cyan')
                 else:
                     msg = ('LS: cannot apply command to object %s ') % (object)
@@ -393,6 +393,16 @@ class PhysDBDriver():
 
             except ApiException as e:
                 print ("Exception when calling TagsApi->list_tags: %s\n" % e)
+
+        elif objtype == 'folders':
+            api_instance = FoldersApi(self.api_client)
+            try:
+            # Finds a TagDtos lists.
+                api_response = api_instance.list_folders(by=by, sort=sort)
+                pprint(api_response)
+            except ApiException as e:
+                print ("Exception when calling FoldersApi->list_folders: %s\n" % e )
+
         else:
             print ('Cannot use resource %s ' % objtype )
         return

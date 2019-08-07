@@ -29,8 +29,8 @@ from datetime import datetime
 
 sys.path.append(os.path.join(sys.path[0],'..'))
 
-from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
-from crestapi.models import GlobalTagDto, TagDto, TagMetaDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto, IovPayloadDto
+from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi, FoldersApi
+from crestapi.models import FolderDto, GlobalTagDto, TagDto, TagMetaDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto, IovPayloadDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
 from crestapi.configuration import Configuration
@@ -89,7 +89,7 @@ class PhysDBDriver():
         print ("Server url is needed in order to provide the system with the base url; defaults to localhost (see below)")
         print ("Action determines which rest method to call")
         print ("Actions list:")
-        print (" - ADD <type> [json-filename] [type = tags, globaltags, ...] : add the selected resource using the json file provided in input")
+        print (" - ADD <type> [json-filename] [type = tags, globaltags, folders...] : add the selected resource using the json file provided in input")
         print ("        ex: ADD globaltags <json-filename>: add a new global tag with the content taken from json file")
         print (" ")
         print (" - ADDINFO <tag> [json-filename] : add metadata to tag")
@@ -192,7 +192,7 @@ class PhysDBDriver():
                     raise
                 object=self.args[0]
                 msg = ('ADD: selected object is %s ') % (object)
-                if object in [ 'globaltags', 'tags', 'maps' ]:
+                if object in [ 'globaltags', 'tags', 'maps', 'folders' ]:
                     self.printmsg(msg,'cyan')
                 else:
                     msg = ('ADD: cannot apply command to object %s ') % (object)
@@ -533,6 +533,20 @@ class PhysDBDriver():
                 pprint(api_response)
             except ApiException as e:
                 print ("Exception when calling GlobaltagmapsApi->create_global_tag_map: %s\n" % e)
+
+        elif objtype == 'folders':
+            api_instance = FoldersApi(self.api_client)
+            try:
+                f = open(filename, 'r')
+                jsondtodict = f.read()
+                dtodict = json.loads(jsondtodict)
+                dto = FolderDto(dtodict['nodeFullpath'],dtodict['schemaName'],dtodict['nodeName'],dtodict['nodeDescription'],dtodict['tagPattern'],dtodict['groupRole'])
+                msg = ('Created dto resource %s ' ) % (dto.to_dict())
+                pprint(msg)
+                api_response = api_instance.create_folder(dto)
+                pprint(api_response)
+            except ApiException as e:
+                print ("Exception when calling FoldersApi->create_folder: %s\n" % e)
         else:
             print ('Cannot use resource %s' % objtype)
         return
@@ -580,6 +594,16 @@ class PhysDBDriver():
                 pprint(api_response)
             except ApiException as e:
                 print ("Exception when calling TagsApi->list_tags: %s\n" % e )
+
+        elif objtype == 'folders':
+            api_instance = FoldersApi(self.api_client)
+            try:
+            # Finds a TagDtos lists.
+                api_response = api_instance.list_folders(by=by, sort=sort)
+                pprint(api_response)
+            except ApiException as e:
+                print ("Exception when calling FoldersApi->list_folders: %s\n" % e )
+
         else:
             print ('Cannot use resource %s' % objtype)
         return

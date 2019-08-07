@@ -1,0 +1,7 @@
+{ "nodeFullpath": "/MUONALIGN/MDT/BARREL",
+  "schemaName": "COOLOFL_MUONALIGN",
+  "nodeName": "MUONALIGN_MDT_BARREL",
+  "nodeDescription": "Barrel Muon Alignment",
+  "tagPattern": "MuonAlignMdtBarrel",
+  "groupRole": "atlas-muonalign"
+}
