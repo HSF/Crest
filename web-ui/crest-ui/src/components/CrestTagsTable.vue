@@ -27,6 +27,7 @@
 
         <b-table
             :data="tagfiltereddata"
+            detailed
             :paginated="isPaginated"
             :per-page="perPage"
             :current-page.sync="currentPage"
@@ -58,6 +59,9 @@
               <b-table-column field="niovs" label="Get iovs" centered>
                  <a class="tag is-info" style="text-decoration:none;" @click="goIovs(props.row.name)">Get {{ props.row.niovs }} iovs</a>
               </b-table-column>
+            </template>
+            <template slot="detail" slot-scope="props">
+              <span>{{ count(props.row.name) }} iovs</span>
             </template>
             <template slot="empty">
                 <section class="section">
@@ -145,21 +149,27 @@ import { mapActions, mapState, mapGetters } from 'vuex'
       onClick(row) {
           this.$store.commit('gui/crest/selectTag', row.name);
       },
-      loadAllTags() {
-          let liste_tags = [];
-          const tag = Object.entries(this.getTag);
-          for (var i = 0; i < tag.length; i++){
-              liste_tags.push(tag[i][1]);
-              this.countIovs(tag[i][1].name);
-          }
-          this.data = liste_tags;      
-      },
       countIovs(tagname) {
           this.countIovsByTag(tagname);
       },
       goIovs(tagname) {
           this.$emit('select-tag', 1);
           this.$store.commit('gui/crest/selectTag', tagname);
+      },
+      count(tagname) {
+          let niovs = 0;
+          this.countIovs(tagname);
+          const nb_iovs = Object.entries(this.nb_iovs_for_tag);
+          for (var i = 0; i < nb_iovs.length; i++){
+              if (nb_iovs[i][0] == tagname) {
+                  if (nb_iovs[i][1]) {
+                      niovs = nb_iovs[i][1].niovs;
+                  } else {
+                      niovs = 0;
+                  }
+              }
+          }
+          return niovs;
       }
     },
     computed: {
@@ -187,25 +197,12 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           }
       },
       loadTags() {
-          if (this.selectedTag == "") {
-              let liste_tags = [];
-              const tag = Object.entries(this.getTag);
-              for (var i = 0; i < tag.length; i++){
-                  this.countIovs(tag[i][1].name);
-                  const nb_iovs = Object.entries(this.nb_iovs_for_tag);
-                  for (var j = 0; j < nb_iovs.length; j++){
-                      if (nb_iovs[j][0] == tag[i][1].name) {
-                          if (nb_iovs[j][1]) {
-                              tag[i][1]['niovs'] = nb_iovs[j][1].niovs;
-                          } else {
-                              tag[i][1]['niovs'] = 0;
-                          }
-                      }
-                  }
-                  liste_tags.push(tag[i][1]);
-              }
-              this.data = liste_tags;      
+          let liste_tags = [];
+          const tag = Object.entries(this.getTag);
+          for (var i = 0; i < tag.length; i++){
+              liste_tags.push(tag[i][1]);
           }
+          this.data = liste_tags; 
       }
     },
     watch: {
@@ -215,7 +212,6 @@ import { mapActions, mapState, mapGetters } from 'vuex'
     },
     created() {
         this.fetchTagByName('');
-        this.loadAllTags();
     }
   }
 
