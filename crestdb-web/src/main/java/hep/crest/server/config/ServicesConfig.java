@@ -26,7 +26,7 @@ public class ServicesConfig {
 	@Autowired
 	private CrestProperties cprops;
 	
-    @Profile({"prod","wildfly","ssl"})
+    @Profile({"prod","wildfly","ssl","cmsprep"})
 	@Bean(name = "jerseyConfig")
 	public JerseyConfig getJerseyResource() {
 		JerseyConfig jc = new JerseyConfig();
