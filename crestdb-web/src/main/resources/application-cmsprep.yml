@@ -1,0 +1,53 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+spring:
+ profiles:
+  include: default
+spring:
+    profiles: cmsprep
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=int2r-s.cern.ch)(PORT=10121))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=int2r_lb.cern.ch)))
+      driverClassName: oracle.jdbc.OracleDriver
+      username: cms_cond_general_w
+      password: ${crest.db.password}
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        connection-test-query: SELECT 1 FROM DUAL
+        maximum-pool-size: 20
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.show_sql: false
+        hibernate.default_schema: CMS_CONDITIONS
+server:
+    port: 8080
+    connection-timeout: 300s
+crest:
+  schemaname: CMS_CONDITIONS  
+  webstaticdir: ${crest.web.static}
+  dumpdir: ${crest.dump.dir}
+  security: none
+  synchro: none
+  authenticationtype: none
+caching:
+  iovsgroups_maxage: 600
+  iovsgroups_snapshot_maxage: 3600
+  iovs_maxage: 600
+  iovs_snapshot_maxage: 3600
+  payloads_maxage: 604800
+  timetype_groupsize: 3600  # expressed in seconds
+  runtype_groupsize: 100    # expressed in run numbers  
+info:
+  app:
+    name: Crest Application
+    description: Rest services for conditions data management 
+    profile: prod
+    
+
