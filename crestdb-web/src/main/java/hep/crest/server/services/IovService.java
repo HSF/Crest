@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -69,7 +70,8 @@ public class IovService {
 	public List<IovDto> findAllIovsByTagName(String tagname) throws CdbServiceException {
 		try {
 			log.debug("Search for iovs by tag name {}", tagname);
-			List<Iov> entitylist =  iovRepository.findByIdTagName(tagname);
+			Tag atag = tagRepository.findByName(tagname);
+			List<Iov> entitylist =  iovRepository.findByIdTagid(atag.getTagid());
 			return entitylist.stream().map(s -> mapper.map(s,IovDto.class)).collect(Collectors.toList());
 		} catch (Exception e) {
 			log.error("Exception in retrieving iov list using IdByTagName expression...{}",tagname);
@@ -107,7 +109,8 @@ public class IovService {
 	public List<IovDto> findAllIovsByTagName(String tagname, Pageable req) throws CdbServiceException {
 		try {
 			log.debug("Search for iovs by tag name {} using pagination request",tagname);
-			List<Iov> entitylist =  iovRepository.findByIdTagName(tagname,req);
+			Tag atag = tagRepository.findByName(tagname);
+			Page<Iov> entitylist =  iovRepository.findByIdTagid(atag.getTagid(),req);
 			return entitylist.stream().map(s -> mapper.map(s,IovDto.class)).collect(Collectors.toList());
 		} catch (Exception e) {
 			log.debug("Exception in retrieving iov list using IdByTagName expression and pagination...{}", tagname);
@@ -146,10 +149,11 @@ public class IovService {
 		try {
 			log.debug("Search for iovs groups by tag name {} and snapshot time {}",tagname,snapshot);
 			List<BigDecimal> minsincelist = null;
+			Tag atag = tagRepository.findByName(tagname);
 			if (snapshot == null) {
-				minsincelist =  iovgroupsrepo.selectGroups(tagname,groupsize);
+				minsincelist =  iovgroupsrepo.selectGroups(atag.getTagid(),groupsize);
 			} else {
-				minsincelist =  iovgroupsrepo.selectSnapshotGroups(tagname, snapshot, groupsize);
+				minsincelist =  iovgroupsrepo.selectSnapshotGroups(atag.getTagid(), snapshot, groupsize);
 			}
 			
 			return minsincelist;
@@ -226,7 +230,8 @@ public class IovService {
 	 */
 	public Long getSizeByTag(String tagname) throws CdbServiceException {
 		try {
-			return iovgroupsrepo.getSize(tagname);	
+			Tag atag = tagRepository.findByName(tagname);
+			return iovgroupsrepo.getSize(atag.getTagid());	
 		} catch (Exception e) {
 			log.error("Exception in retrieving iov size using tag {}", tagname);
 			throw new CdbServiceException("Cannot find iov size by tag name: " + e.getMessage());
@@ -241,7 +246,8 @@ public class IovService {
 	 */
 	public Long getSizeByTagAndSnapshot(String tagname, Date snapshot) throws CdbServiceException {
 		try {
-			return iovgroupsrepo.getSizeBySnapshot(tagname, snapshot);	
+			Tag atag = tagRepository.findByName(tagname);
+			return iovgroupsrepo.getSizeBySnapshot(atag.getTagid(), snapshot);	
 		} catch (Exception e) {
 			log.debug("Exception in retrieving iov size using tag {} and snapshot {}",tagname,snapshot);
 			throw new CdbServiceException("Cannot find iov size by tag name and snapshot: " + e.getMessage());
@@ -272,10 +278,20 @@ public class IovService {
 		log.debug("Create iov from dto {}", dto);
 		Iov tmpiov = null;
 		Iov entity = null;
+		Tag atag = null;
+		try {
+			atag = tagRepository.findByName(dto.getTagName());
+			if (atag == null) {
+				throw new CdbServiceException("Unkown tag : " +dto.getTagName());
+			}
+			log.debug("Found tag entity {} to store iov",atag);
+		} catch (Exception e) {
+			throw new CdbServiceException("Unkown tag : " +dto.getTagName());		
+		}
 		try {
 			entity =  mapper.map(dto,Iov.class);
 			log.debug("Verify if the same IOV is already stored with the same hash....");
-			tmpiov = iovRepository.findBySinceAndTagNameAndHash(entity.getId().getTagName(), entity.getId().getSince(), entity.getPayloadHash());
+			tmpiov = iovRepository.findBySinceAndTagidAndHash(atag.getTagid(), entity.getId().getSince(), entity.getPayloadHash());
 		} catch (Exception e) {
 			log.warn("Searching iov {} has not found anything...",dto);
 		}
@@ -288,19 +304,18 @@ public class IovService {
 		}
 		try {
 			// The IOV is not yet stored. Verify that the tag exists before inserting it.
-			Optional<Tag> tg = tagRepository.findById(dto.getTagName());
-			if (tg.isPresent()) {
-				Tag t = tg.get();
-		    		t.setModificationTime(null);
-				Tag updtag = tagRepository.save(t);
-				entity.setTag(updtag);
-				Iov saved = iovRepository.save(entity);
-				log.debug("Saved entity: {}", saved);
-				IovDto dtoentity = mapper.map(saved,IovDto.class);
-				log.debug("Returning iovDto: {}", dtoentity);
-				return dtoentity;
-			}
-			throw new CdbServiceException("Unkown tag : " +dto.getTagName());
+	    	atag.setModificationTime(null);
+			Tag updtag = tagRepository.save(atag);
+			log.debug("Update tag for modification time {} ",updtag);
+			entity.setTag(updtag);
+			entity.getId().setTagid(updtag.getTagid());
+			Iov saved = iovRepository.save(entity);
+			log.debug("Saved entity: {}", saved);
+			IovDto dtoentity = mapper.map(saved,IovDto.class);
+			dtoentity.setTagName(atag.getName());
+			log.debug("Returning iovDto: {}", dtoentity);
+			return dtoentity;
+			
 
 		} catch (Exception e) {
 			log.error("Exception in storing iov {}", dto);

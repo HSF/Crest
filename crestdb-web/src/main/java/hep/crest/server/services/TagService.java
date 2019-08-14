@@ -4,7 +4,6 @@
 package hep.crest.server.services;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -63,7 +62,7 @@ public class TagService {
 	public boolean exists(String tagname) throws CdbServiceException {
 		try {
 			log.debug("Search for tag by name if exists: {}", tagname);
-			return tagRepository.existsById(tagname);
+			return tagRepository.existsByName(tagname);
 		} catch (Exception e) {
 			log.error("Exception in checking if tag exists...{}", tagname);
 			throw new CdbServiceException("Cannot decide tag existence: " + e.getMessage());
@@ -92,31 +91,15 @@ public class TagService {
 	public TagDto findOne(String id) throws CdbServiceException {
 		try {
 			log.debug("Search for tag by Id...{}",id);
-			Optional<Tag> entity = tagRepository.findById(id);
-			if (entity.isPresent()) {
-				return mapper.map(entity.get(),TagDto.class);
+			Tag entity = tagRepository.findByName(id);
+			if (entity != null) {
+				return mapper.map(entity,TagDto.class);
 			}
 		} catch (Exception e) {
 			log.error("Exception in retrieving tag by id...");
 			throw new CdbServiceException("Cannot retreive tag by id: " + e.getMessage());
 		}
 		return null; // This will trigger a response 404
-	}
-	
-	
-	/**
-	 * @param ids
-	 * @return
-	 * @throws CdbServiceException
-	 */
-	public List<TagDto> findAllTags(Iterable<String> ids) throws CdbServiceException {
-		try {
-			log.debug("Search for all tags by Id list...");
-			Iterable<Tag> entitylist = tagRepository.findAllById(ids);
-			return StreamSupport.stream(entitylist.spliterator(), false).map(s -> mapper.map(s,TagDto.class)).collect(Collectors.toList());
-		} catch (Exception e) {
-			throw new CdbServiceException("Cannot find tag list by Id list" + e.getMessage());
-		}
 	}
 	
 	/**
@@ -150,8 +133,8 @@ public class TagService {
 		try {
 			log.debug("Create tag from dto {}", dto);
 			Tag entity =  mapper.map(dto,Tag.class);
-			Optional<Tag> tmpt = tagRepository.findById(entity.getName());
-			if (tmpt.isPresent()) {
+			Tag tmpt = tagRepository.findByName(entity.getName());
+			if (tmpt != null) {
 				log.debug("Cannot store tag {} : resource already exists.. ",dto);
 				throw new AlreadyExistsPojoException("Tag already exists for name "+dto.getName());
 			}
@@ -179,12 +162,12 @@ public class TagService {
 		try {
 			log.debug("Update tag from dto {}", dto);
 			Tag entity =  mapper.map(dto,Tag.class);
-			Optional<Tag> tmpt = tagRepository.findById(entity.getName());
-			if (!tmpt.isPresent()) {
+			Tag tmpt = tagRepository.findByName(entity.getName());
+			if (tmpt == null) {
 				log.debug("Cannot update tag {} : resource does not exists.. ",dto);
 				throw new CdbServiceException("Tag does not exists for name "+dto.getName());
 			}
-			Tag toupd = tmpt.get();
+			Tag toupd = tmpt;
 			toupd.setDescription(dto.getDescription());
 			toupd.setObjectType(dto.getPayloadSpec());
 			toupd.setSynchronization(dto.getSynchronization());
@@ -208,7 +191,10 @@ public class TagService {
 	public void removeTag(String name) throws CdbServiceException {
 		try {
 			log.debug("Remove tag {}",name);
-			tagRepository.deleteById(name);
+			Tag deleted = tagRepository.findByName(name);
+			if (deleted != null) {
+				tagRepository.deleteById(deleted.getTagid());
+			}
 			log.debug("Removed entity: {}",name);
 		} catch (Exception e) {
 			log.error("Exception in removing tag {}", name);

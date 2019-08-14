@@ -19,9 +19,11 @@ import hep.crest.data.pojo.Tag;
  *
  */
 @Transactional(readOnly = true)
-public interface TagBaseRepository extends PagingAndSortingRepository<Tag, String> , QuerydslPredicateExecutor<Tag>{
+public interface TagBaseRepository extends PagingAndSortingRepository<Tag, Long> , QuerydslPredicateExecutor<Tag>{
 
 	Tag findByName(@Param("name") String name);
+
+	boolean existsByName(@Param("name") String name);
 	
 	List<Tag> findByNameLike(@Param("name") String name);
 	
