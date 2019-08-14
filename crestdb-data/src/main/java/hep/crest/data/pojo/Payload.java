@@ -75,7 +75,7 @@ public class Payload implements java.io.Serializable {
 		this.objectType = objectType;
 	}
 
-	@Column(name = "PYLD_SIZE", nullable = true)
+	@Column(name = "DATA_SIZE", nullable = true)
 	public Integer getSize() {
 		return size;
 	}

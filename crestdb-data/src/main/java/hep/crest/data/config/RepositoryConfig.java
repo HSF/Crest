@@ -99,7 +99,7 @@ public class RepositoryConfig {
 		return bean;
     }
 
-    @Profile({"test","default","prod","h2","wildfly","ssl","dev","mysql"})
+    @Profile({"test","default","prod","h2","wildfly","ssl","dev","mysql","cmsprep"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadDefaultRepository(@Qualifier("dataSource") DataSource mainDataSource) {
     	PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
