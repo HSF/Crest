@@ -157,8 +157,8 @@ public class IovGroupsImpl implements IovGroupsCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 		String tagtablename = this.tagtablename();
-		String sql = "select tags.TAG_NAME, COUNT(iovs.TAG_ID) as NIOVS from "
-				+ tablename +" iovs left join "+tagtablename+" tags on tags.tag_id=iovs.tag_id where tags.TAG_NAME like ? GROUP BY tags.TAG_NAME";
+		String sql = "select tags.NAME as TAG_NAME, COUNT(iovs.TAG_ID) as NIOVS from "
+				+ tablename +" iovs left join "+tagtablename+" tags on tags.tag_id=iovs.tag_id where tags.NAME like ? GROUP BY tags.NAME";
 		return jdbcTemplate.query(sql, new Object[] { tagname }, (rs, num) -> {
 			final TagSummaryDto entity = new TagSummaryDto();
 			entity.setTagname(rs.getString("TAG_NAME"));

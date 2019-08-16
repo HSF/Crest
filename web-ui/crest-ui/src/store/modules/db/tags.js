@@ -18,11 +18,20 @@ export default {
 				"modificationTime": "2019-06-18T13:45:51.825+0000"
 			}
 			*/
-		}
+		},
+		taglist: []
 	},
 	getters: {
 		getTag: (state) => {
 			return state.tag;
+		},
+		getTaglist: (state) => {
+			let tag_list = [];
+			const tag = Object.entries(state.tag);
+			for (var i = 0; i < tag.length; i++){
+					tag_list.push(tag[i][1]);
+			}
+			return tag_list;
 		}
 	},
 	mutations: {
@@ -32,14 +41,15 @@ export default {
 				if (!(name in state.tag)) {
 					Vue.set(state.tag, name, tag);
 				}
-			})
+			});
+
 		},
 		mergeNewTag(state, tag) {
 			let name = tag.name;
 			if (!(name in state.tag)) {
 				Vue.set(state.tag, name, tag)
 			}
-		}
+		},
 	},
 	actions: {
 		fetchTagByName({commit}, name) {
