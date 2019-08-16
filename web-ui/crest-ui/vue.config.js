@@ -5,13 +5,13 @@ module.exports = {
     ? process.env.VUE_APP_BASEURL
     : '/crestui'*/
     	publicPath: process.env.NODE_ENV === 'production' ? '/ext/web/crestui/' : '/crestui',
-    			  devServer: {
-    			    proxy: {
-    			      '^/crestapi': {
-    			        target: process.env.VUE_APP_CRESTAPI_URL,
-    			        ws: true,
-    			        changeOrigin: true
-    			      }
-    			    }
-    			  },
+		  devServer: {
+		    proxy: {
+		      '^/crestapi': {
+		        target: process.env.VUE_APP_CRESTAPI_URL,
+		        ws: true,
+		        changeOrigin: true
+		      }
+		    }
+		  },
 }
