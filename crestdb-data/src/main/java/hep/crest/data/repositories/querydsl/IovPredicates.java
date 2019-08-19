@@ -33,7 +33,7 @@ public class IovPredicates {
 	 */
 	public static BooleanExpression hasTagName(String tagname) {
 		log.debug("hasTagName: argument {}",tagname);
-		return  QIov.iov.id.tagName.eq(tagname);
+		return  QIov.iov.tag.name.eq(tagname);
 	}
 
 	/**

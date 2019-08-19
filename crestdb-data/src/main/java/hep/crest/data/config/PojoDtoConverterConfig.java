@@ -62,9 +62,13 @@ public class PojoDtoConverterConfig {
 			.exclude("globalTagMaps").byDefault().register();
 	}
 
+
 	protected void initIovMap(MapperFactory mapperFactory) {
-		mapperFactory.classMap(Iov.class, IovDto.class).field("id.tagName", "tagName").field("id.since", "since")
-				.field("id.insertionTime", "insertionTime").field("payloadHash", "payloadHash").register();
+		mapperFactory.classMap(Iov.class, IovDto.class)
+				.field("id.since", "since")
+				.field("id.insertionTime", "insertionTime")
+				.field("payloadHash", "payloadHash")
+				.register();
 	}
 
 	protected void initPayloadMap(MapperFactory mapperFactory) {

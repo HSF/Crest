@@ -43,7 +43,7 @@ public class Iov implements java.io.Serializable {
 	@EmbeddedId
 
 	@AttributeOverrides({
-			@AttributeOverride(name = "tagName", column = @Column(name = "TAG_NAME", nullable = false, length = 100)),
+			@AttributeOverride(name = "tagid", column = @Column(name = "TAG_ID", nullable = false, length = 100)),
 			@AttributeOverride(name = "since", column = @Column(name = "SINCE", nullable = false, precision = 38, scale = 0)),
 			@AttributeOverride(name = "insertionTime", column = @Column(name = "INSERTION_TIME", nullable = false, length = 11)) })
 	public IovId getId() {
@@ -55,7 +55,7 @@ public class Iov implements java.io.Serializable {
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "TAG_NAME", nullable = false, insertable = false, updatable = false)
+	@JoinColumn(name = "TAG_ID", nullable = false, insertable = false, updatable = false)
 	public Tag getTag() {
 		return this.tag;
 	}

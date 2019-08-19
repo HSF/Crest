@@ -55,7 +55,7 @@ public class GlobalTagMap implements java.io.Serializable {
         this.id = id;
     }
 @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="TAG_NAME", nullable=false)
+    @JoinColumn(name="TAG_ID", nullable=false)
     public Tag getTag() {
         return this.tag;
     }

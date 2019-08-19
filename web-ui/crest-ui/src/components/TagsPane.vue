@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="container">
     <p class="has-text-info is-size-2">Search for Tags</p>
     <nav class="level">
         <div class="level is-mobile">

@@ -28,12 +28,12 @@ public class Payload implements java.io.Serializable {
 	*/
 	private static final long serialVersionUID = 5486724556389838782L;
 	private String hash;
+	private Date insertionTime;
 	private String version;
 	private String objectType;
 	private Integer size;
 	private Blob data;
 	private Blob streamerInfo;
-	private Date insertionTime;
 
 	public Payload() {
 	}
@@ -84,15 +84,14 @@ public class Payload implements java.io.Serializable {
 		this.size = size;
 	}
 
-	@Column(name = "DATA", nullable = false)
-	@Lob
-	@Type(type = "org.hibernate.type.BlobType")
-	public Blob getData() {
-		return this.data;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "INSERTION_TIME", nullable = false, length = 11)
+	public Date getInsertionTime() {
+		return this.insertionTime;
 	}
 
-	public void setData(Blob data) {
-		this.data = data;
+	public void setInsertionTime(Date insertionTime) {
+		this.insertionTime = insertionTime;
 	}
 
 	@Column(name = "STREAMER_INFO", nullable = false)
@@ -106,14 +105,15 @@ public class Payload implements java.io.Serializable {
 		this.streamerInfo = streamerInfo;
 	}
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "INSERTION_TIME", nullable = false, length = 11)
-	public Date getInsertionTime() {
-		return this.insertionTime;
+	@Column(name = "DATA", nullable = false)
+	@Lob
+	@Type(type = "org.hibernate.type.BlobType")
+	public Blob getData() {
+		return this.data;
 	}
 
-	public void setInsertionTime(Date insertionTime) {
-		this.insertionTime = insertionTime;
+	public void setData(Blob data) {
+		this.data = data;
 	}
 
 	@Override

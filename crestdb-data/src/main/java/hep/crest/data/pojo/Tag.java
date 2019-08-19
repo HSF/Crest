@@ -11,10 +11,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -31,6 +33,7 @@ public class Tag implements java.io.Serializable {
 	* 
 	*/
 	private static final long serialVersionUID = -7205518190608667851L;
+	private Long tagid;
 	private String name;
 	private String timeType;
 	private String objectType;
@@ -64,12 +67,28 @@ public class Tag implements java.io.Serializable {
 	}
 
 	@Id
+    @SequenceGenerator(name="tagid_seq", sequenceName=DatabasePropertyConfigurator.SCHEMA_NAME+".TAGID_SEQUENCE")
+    @GeneratedValue(generator = "tagid_seq")    
+	@Column(name = "TAG_ID", unique = true, nullable = false, precision = 20, scale = 0)
+	/**
+	 * @return the tagid
+	 */
+	public Long getTagid() {
+		return tagid;
+	}
+
+	/**
+	 * @param tagid the tagid to set
+	 */
+	public void setTagid(Long tagid) {
+		this.tagid = tagid;
+	}
+
 
 	@Column(name = "NAME", unique = true, nullable = false, length = 255)
 	public String getName() {
 		return this.name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -174,17 +193,15 @@ public class Tag implements java.io.Serializable {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "Tag [name=" + name + ", timeType=" + timeType + ", objectType=" + objectType + ", synchronization="
-				+ synchronization + ", description=" + description + ", lastValidatedTime=" + lastValidatedTime
-				+ ", endOfValidity=" + endOfValidity + ", insertionTime=" + insertionTime + ", modificationTime="
-				+ modificationTime + "]";
+		return "Tag [tagid=" + tagid + ", name=" + name + ", timeType=" + timeType + ", objectType=" + objectType
+				+ ", synchronization=" + synchronization + ", description=" + description + ", lastValidatedTime="
+				+ lastValidatedTime + ", endOfValidity=" + endOfValidity + ", insertionTime=" + insertionTime
+				+ ", modificationTime=" + modificationTime + ", globalTagMaps=" + globalTagMaps + "]";
 	}
 
 }

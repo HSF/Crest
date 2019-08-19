@@ -215,6 +215,35 @@
 				}
 			}
 		},
+		"TagMetaDto": {
+			"type": "object",
+			"properties": {
+				"tagName": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"chansize": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"colsize": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"channelInfo": {
+					"type": "string"
+				},
+				"payloadInfo": {
+					"type": "string"
+				},
+				"insertionTime": {
+					"type": "string",
+					"format": "date-time"
+				}
+			}
+		},
 		"IovDto": {
 			"type": "object",
 			"properties": {

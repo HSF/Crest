@@ -87,7 +87,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,PYLD_SIZE from " + tablename
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,DATA_SIZE from " + tablename
 				+ " where HASH=?";
 
 		// Be careful, this seems not to work with Postgres: probably getBlob loads an
@@ -102,7 +102,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			entity.setData(rs.getBlob("DATA"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
-			entity.setSize(rs.getInt("PYLD_SIZE"));
+			entity.setSize(rs.getInt("DATA_SIZE"));
 			return entity;
 		});
 	}
@@ -116,7 +116,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from " + tablename
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,DATA_SIZE from " + tablename
 				+ " where HASH=?";
 		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
@@ -125,7 +125,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			entity.setVersion(rs.getString("VERSION"));
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
-			entity.setSize(rs.getInt("PYLD_SIZE"));
+			entity.setSize(rs.getInt("DATA_SIZE"));
 			return entity;
 		});
 
@@ -237,7 +237,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, DATA_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
 		Calendar calendar = Calendar.getInstance();
@@ -259,10 +259,11 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setLong(4, oid);
 			ps.setLong(5, sioid);
 			ps.setDate(6, inserttime);
+			ps.setInt(7, entity.getSize());
 			log.info("Dump preparedstatement {} using sql {} and args {} {} {} {}", ps, sql,
 					entity.getHash(), entity.getObjectType(), entity.getVersion(), entity.getInsertionTime());
 			ps.execute();
-			conn.commit();
+			//conn.commit();
 			log.debug("Search for stored payload as a verification, use hash {}", entity.getHash());
 			return find(entity.getHash());
 		} catch (SQLException e) {
@@ -302,7 +303,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, DATA_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
 
@@ -328,7 +329,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setInt(7, entity.getSize());
 			log.debug("Dump preparedstatement {} ", ps);
 			ps.executeUpdate();
-			conn.commit();
+			//conn.commit();
 		} catch (SQLException e) {
 			log.error("Exception from SQL during insertion: {}", e.getMessage());
 		} finally {
@@ -346,7 +347,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME,PYLD_SIZE) VALUES (?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME,DATA_SIZE) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
 		try (Connection conn = ds.getConnection();

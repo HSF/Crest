@@ -93,14 +93,19 @@ Class | Method | HTTP request | Description
 *PayloadsApi* | [**get_blob**](docs/PayloadsApi.md#get_blob) | **GET** /payloads/{hash}/data | Finds payload data by hash; the payload object contains the real BLOB.
 *PayloadsApi* | [**get_payload**](docs/PayloadsApi.md#get_payload) | **GET** /payloads/{hash} | Finds a payload resource associated to the hash.
 *PayloadsApi* | [**get_payload_meta_info**](docs/PayloadsApi.md#get_payload_meta_info) | **GET** /payloads/{hash}/meta | Finds a payload resource associated to the hash.
+*PayloadsApi* | [**store_payload_batch_with_iov_multi_form**](docs/PayloadsApi.md#store_payload_batch_with_iov_multi_form) | **POST** /payloads/storebatch | Create many Payloads in the database, associated to a given iov since list and tag name.
 *PayloadsApi* | [**store_payload_with_iov_multi_form**](docs/PayloadsApi.md#store_payload_with_iov_multi_form) | **POST** /payloads/store | Create a Payload in the database, associated to a given iov since and tag name.
+*PayloadsApi* | [**upload_payload_batch_with_iov_multi_form**](docs/PayloadsApi.md#upload_payload_batch_with_iov_multi_form) | **POST** /payloads/uploadbatch | Create many Payloads in the database, associated to a given iov since list and tag name.
 *RuninfoApi* | [**create_run_lumi_info**](docs/RuninfoApi.md#create_run_lumi_info) | **POST** /runinfo | Create an entry for run information.
 *RuninfoApi* | [**find_run_lumi_info**](docs/RuninfoApi.md#find_run_lumi_info) | **GET** /runinfo/list | Finds a RunLumiInfoDto lists using parameters.
 *RuninfoApi* | [**list_run_lumi_info**](docs/RuninfoApi.md#list_run_lumi_info) | **GET** /runinfo | Finds a RunLumiInfoDto lists.
 *TagsApi* | [**create_tag**](docs/TagsApi.md#create_tag) | **POST** /tags | Create a Tag in the database.
+*TagsApi* | [**create_tag_meta**](docs/TagsApi.md#create_tag_meta) | **POST** /tags/{name}/meta | Create a TagMeta in the database.
 *TagsApi* | [**find_tag**](docs/TagsApi.md#find_tag) | **GET** /tags/{name} | Finds a TagDto by name
+*TagsApi* | [**find_tag_meta**](docs/TagsApi.md#find_tag_meta) | **GET** /tags/{name}/meta | Finds a TagMetaDto by name
 *TagsApi* | [**list_tags**](docs/TagsApi.md#list_tags) | **GET** /tags | Finds a TagDtos lists.
-*TagsApi* | [**update_tag**](docs/TagsApi.md#update_tag) | **POST** /tags/{name} | Update a TagDto by name
+*TagsApi* | [**update_tag**](docs/TagsApi.md#update_tag) | **PUT** /tags/{name} | Update a TagDto by name
+*TagsApi* | [**update_tag_meta**](docs/TagsApi.md#update_tag_meta) | **PUT** /tags/{name}/meta | Update a TagMetaDto by name
 
 
 ## Documentation For Models
@@ -112,10 +117,13 @@ Class | Method | HTTP request | Description
  - [GroupDto](docs/GroupDto.md)
  - [HTTPResponse](docs/HTTPResponse.md)
  - [IovDto](docs/IovDto.md)
+ - [IovPayloadDto](docs/IovPayloadDto.md)
+ - [IovSetDto](docs/IovSetDto.md)
  - [PayloadDto](docs/PayloadDto.md)
  - [PayloadTagInfoDto](docs/PayloadTagInfoDto.md)
  - [RunLumiInfoDto](docs/RunLumiInfoDto.md)
  - [TagDto](docs/TagDto.md)
+ - [TagMetaDto](docs/TagMetaDto.md)
  - [TagSummaryDto](docs/TagSummaryDto.md)
 
 
