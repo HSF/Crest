@@ -29,7 +29,7 @@
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
-          <CrestTagsTable v-bind:data="tags" v-on:select-tag="selectTab" />
+          <CrestTagsTable v-on:select-tag="selectTab" />
         </div>
         <div v-else>
           <TagForm/>
@@ -78,7 +78,7 @@ export default {
     selectTab(nt) {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
-    },
+    }
   },
   computed: {
       ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
@@ -86,10 +86,7 @@ export default {
       infomsg () {
         return "Access api  "+this.selectedserver
           +"<br> Selected tag is : "+this.selectedtag.name ;
-      },
-      tags: function() {
-          return this.getTagForGlobaltag(this.selectedGlobalTag);
-      },
+      }
   },
   watch: {
       selectedTag: function() {
