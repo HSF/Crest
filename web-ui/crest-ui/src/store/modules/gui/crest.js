@@ -1,10 +1,14 @@
 export default {
     namespaced: true,
     state: {
+        selectedGlobalTag: "",
         selectedTag: "",
         selectedIov: "",
     },
     mutations: {
+        selectGlobalTag(state, name) {
+            state.selectedGlobalTag = name;
+        },
         selectTag(state, name) {
             state.selectedTag = name;
         },
@@ -13,6 +17,9 @@ export default {
         },
     },
     actions: {
+    	selectGlobalTag({commit}, name) {
+            commit('selectGlobalTag', name);
+        },
         selectTag({commit}, name) {
             commit('selectTag', name);
         },
