@@ -26,13 +26,22 @@
                 <span>Create</span>
             </b-radio-button>
         </b-field>
+        <b-radio-button v-model="radioButton"
+            native-value="CreateGlobalTagMap"
+            type="is-success">
+            <b-icon icon="link-plus"></b-icon>
+            <span>Create global tag map</span>
+        </b-radio-button>
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
           <CrestGlobalTagsTable v-on:select-tag="selectTab" />
         </div>
-        <div v-else>
+        <div v-if="radioButton === 'Create'">
           <GlobalTagForm/>
+        </div>
+        <div v-else>
+          <GlobalTagMapForm/>
         </div>
       </div>
     </div>
@@ -43,6 +52,7 @@
 import { mapGetters, mapActions, mapState } from 'vuex'
 import CrestGlobalTagsTable from './CrestGlobalTagsTable.vue'
 import GlobalTagForm from './GlobalTagForm.vue'
+import GlobalTagMapForm from './GlobalTagMapForm.vue'
 import HelpInfoPane from './HelpInfoPane.vue';
 
 export default {
@@ -100,6 +110,7 @@ export default {
   components: {
     CrestGlobalTagsTable,
     GlobalTagForm,
+    GlobalTagMapForm,
     HelpInfoPane
   }
 };
