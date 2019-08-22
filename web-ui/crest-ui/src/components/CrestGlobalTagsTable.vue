@@ -2,7 +2,6 @@
   <section>
     <p>Number of rows: {{ numrows }}
     </p>
-    {{ loadTags }}
     <b-tabs>
       <b-tab-item label="Table">
         <b-field label="Search Tag by name">
@@ -26,8 +25,7 @@
         </b-field>
 
         <b-table
-            :data="tagfiltereddata"
-            detailed
+            :data="globaltagfiltereddata"
             :paginated="isPaginated"
             :per-page="perPage"
             :current-page.sync="currentPage"
@@ -46,22 +44,14 @@
                   sortable>
                   {{ props.row[column.field] }}
               </b-table-column>
-              <b-table-column field="timeType" label="Time Type" centered>
-                  <span class="tag is-primary">
-                      {{ props.row.timeType }}
-                  </span>
-              </b-table-column>
               <b-table-column field="insertionTime" label="Insert Time" centered>
                   <span class="tag is-success">
                       {{ (props.row.insertionTime) }}
                   </span>
               </b-table-column>
-              <b-table-column field="niovs" label="Get iovs" centered>
-                 <a class="tag is-info" style="text-decoration:none;" @click="goIovs(props.row.name)">Get {{ props.row.niovs }} iovs</a>
+              <b-table-column label="Get tags" centered>
+                 <a class="tag is-info" style="text-decoration:none;" @click="goTags(props.row.name)">Get tags</a>
               </b-table-column>
-            </template>
-            <template slot="detail" slot-scope="props">
-              <span>{{ count(props.row.name) }} iovs</span>
             </template>
             <template slot="empty">
                 <section class="section">
@@ -90,7 +80,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
   import Long from 'long';
 
   export default {
-    name: 'CrestTagsTable',
+    name: 'CrestGlobalTagsTable',
     props : {
       isloading : Boolean
     },
@@ -105,10 +95,16 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           columns : [
                   {
                       field: 'name',
-                      label: 'TAG NAME',
+                      label: 'Global tag name',
                       width: '40',
                       visible: true,
                       sortable: true
+                  },
+                  {
+                      field: 'validity',
+                      label: 'Validity',
+                      visible: true,
+                      sortable: false,
                   },
                   {
                       field: 'description',
@@ -117,19 +113,35 @@ import { mapActions, mapState, mapGetters } from 'vuex'
                       sortable: false,
                   },
                   {
-                      field: 'payloadSpec',
-                      label: 'Object Type',
+                      field: 'release',
+                      label: 'Release',
                       visible: true,
-                      sortable: true
+                      sortable: false,
+                  },
+                  {
+                      field: 'scenario',
+                      label: 'Scenario',
+                      visible: true,
+                      sortable: false,
+                  },
+                  {
+                      field: 'workflow',
+                      label: 'Workflow',
+                      visible: true,
+                      sortable: false,
+                  },
+                  {
+                      field: 'type',
+                      label: 'Type',
+                      visible: true,
+                      sortable: false,
                   },
               ],
           thetag: '',
-          data: ''
       }
     },
     methods: {
-        ...mapActions('db/tags', ['fetchTagByName']),
-        ...mapActions('db/iovs', ['countIovsByTag']),
+        ...mapActions('db/globaltags', ['fetchGlobalTagsByName']),
       timestr (atime) {
         if (!atime) {
           return 'none'
@@ -147,43 +159,24 @@ import { mapActions, mapState, mapGetters } from 'vuex'
         }
       },
       onClick(row) {
-          this.$store.commit('gui/crest/selectTag', row.name);
+          this.$store.commit('gui/crest/selectGlobalTag', row.name);
       },
-      countIovs(tagname) {
-          this.countIovsByTag(tagname);
-      },
-      goIovs(tagname) {
-          this.$emit('select-tag', 2);
-          this.$store.commit('gui/crest/selectTag', tagname);
-      },
-      count(tagname) {
-          let niovs = 0;
-          this.countIovs(tagname);
-          const nb_iovs = Object.entries(this.nb_iovs_for_tag);
-          for (var i = 0; i < nb_iovs.length; i++){
-              if (nb_iovs[i][0] == tagname) {
-                  if (nb_iovs[i][1]) {
-                      niovs = nb_iovs[i][1].niovs;
-                  } else {
-                      niovs = 0;
-                  }
-              }
-          }
-          return niovs;
+      goTags(globaltagname) {
+          this.$emit('select-tag', 1);
+          this.$store.commit('gui/crest/selectGlobalTag', globaltagname);
       }
     },
     computed: {
-        ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
-        ...mapGetters('db/tags', ['getTag','getTaglist', 'getTagForGlobaltag']),
-        ...mapState('db/iovs', ['nb_iovs_for_tag']),
+        ...mapState('gui/crest', ['selectedGlobalTag']),
+        ...mapGetters('db/globaltags', ['getGlobalTaglist']),
       numrows () {
-        return (!this.taglist ? -1 : this.taglist.length)
+        return (!this.globaltaglist ? -1 : this.globaltaglist.length)
       },
-      taglist: function() {
-        return this.getTagForGlobaltag(this.selectedGlobalTag);
+      globaltaglist: function() {
+        return this.getGlobalTaglist;
       },
       tagnames() {
-          let result = this.data.map(a => a.name);
+          let result = this.globaltaglist.map(a => a.name);
           return result
       },
       filteredDataArray() {
@@ -194,27 +187,19 @@ import { mapActions, mapState, mapGetters } from 'vuex'
                   .indexOf(this.thetag.toLowerCase()) >= 0
           })
       },
-      tagfiltereddata: {
+      globaltagfiltereddata: {
           get: function() {
-            return this.data.filter(row => (row.name.includes(this.thetag) ))
+            return this.globaltaglist.filter(row => (row.name.includes(this.thetag) ))
           }
-      },
-      loadTags() {
-          let liste_tags = [];
-          const tag = Object.entries(this.getTag);
-          for (var i = 0; i < tag.length; i++){
-              liste_tags.push(tag[i][1]);
-          }
-          this.data = liste_tags; 
       }
     },
     watch: {
-        selectedTag: function() {
-            this.fetchTagByName(this.selectedTag);
+        selectedGlobalTag: function() {
+            this.fetchGlobalTagsByName(this.selectedGlobalTag);
         }
     },
     created() {
-        this.fetchTagByName('');
+        this.fetchGlobalTagsByName('');
     }
   }
 

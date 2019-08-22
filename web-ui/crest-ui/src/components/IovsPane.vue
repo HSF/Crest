@@ -54,7 +54,7 @@ export default {
   data: function () {
     return {
       flinks: [
-        {'btnlabel' : 'Get Tags', 'seltab' : 0}
+        {'btnlabel' : 'Get Tags', 'seltab' : 1}
       ],
       helpmsg: "<p>Search for tags using filtering by tag name.</p>"
         +"<p>Once you select a tag you can browse the associated IOVs by changing to appropriate tab or clicking on the <b>Get Iovs</b> button.</p>"
@@ -82,13 +82,6 @@ export default {
     selectTab(nt) {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
-    },
-    loadIovs() {
-        this.$store.commit('gui/iovForm/selectTagname', this.selectedTag);
-        this.$store.commit('gui/iovForm/selectSince', this.since);
-        this.$store.commit('gui/iovForm/selectUntil', this.until);
-        this.$store.commit('gui/iovForm/selectSnapshot', this.snapshot);
-        this.searchIovs;
     },
     selectSince(since) {
         this.since = since;
