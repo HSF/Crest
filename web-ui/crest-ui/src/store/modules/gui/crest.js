@@ -17,7 +17,7 @@ export default {
         },
     },
     actions: {
-    	selectGlobalTag({commit}, name) {
+        selectGlobalTag({commit}, name) {
             commit('selectGlobalTag', name);
         },
         selectTag({commit}, name) {

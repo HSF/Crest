@@ -40,7 +40,7 @@
         <div v-if="radioButton === 'Create'">
           <GlobalTagForm/>
         </div>
-        <div v-else>
+        <div v-if="radioButton === 'CreateGlobalTagMap'">
           <GlobalTagMapForm/>
         </div>
       </div>
