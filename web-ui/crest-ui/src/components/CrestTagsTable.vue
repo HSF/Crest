@@ -172,13 +172,17 @@ import { mapActions, mapState, mapGetters } from 'vuex'
     },
     computed: {
         ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
-        ...mapGetters('db/tags', ['getTag','getTaglist', 'getTagForGlobaltag']),
+        ...mapGetters('db/tags', ['getTaglist', 'getTagForGlobaltag']),
         ...mapState('db/iovs', ['nb_iovs_for_tag']),
       numrows () {
         return (!this.taglist ? -1 : this.taglist.length)
       },
       taglist: function() {
-        return this.getTagForGlobaltag(this.selectedGlobalTag);
+          if (this.selectedGlobalTag != "") {
+              return this.getTagForGlobaltag(this.selectedGlobalTag);
+          } else {
+              return this.getTaglist;
+          }
       },
       tagnames() {
           let result = this.taglist.map(a => a.name);
@@ -204,7 +208,6 @@ import { mapActions, mapState, mapGetters } from 'vuex'
         }
     },
     created() {
-        this.fetchTagByName('');
     }
   }
 

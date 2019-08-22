@@ -19,7 +19,6 @@ export default {
 			}
 			*/
 		},
-		taglist: [],
 		tag_for_globaltag: {
 			/*
 	        globaltagname: [ ...tags ]
