@@ -24,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import hep.crest.swagger.model.GenericMap;
+import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagMetaDto;
 
@@ -57,6 +58,12 @@ public class TestCrestTag {
 		ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
 		System.out.println("Received response: " + response);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		
+		GlobalTagMapDto mapdto = new GlobalTagMapDto().globalTagName("MY_SB_TEST").label("label").record("0").tagName("SB_TAG");
+        System.out.println("Store request: "+mapdto);
+        ResponseEntity<GlobalTagMapDto> response2 = this.testRestTemplate.postForEntity("/crestapi/globaltagmaps", mapdto, GlobalTagMapDto.class);
+        System.out.println("Received response: "+response2);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 	}
 
 	@Test

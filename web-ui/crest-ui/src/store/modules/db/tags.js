@@ -19,12 +19,23 @@ export default {
 			}
 			*/
 		},
-		taglist: []
+		taglist: [],
+		tag_for_globaltag: {
+			/*
+	        globaltagname: [ ...tags ]
+			*/
+		}
 	},
 	getters: {
 		getTag: (state) => {
 			return state.tag;
 		},
+		getTagForGlobaltag : (state) => (globalTagName) => {
+            if (!globalTagName || !state.tag_for_globaltag.hasOwnProperty(globalTagName)) {
+                return [];
+            }
+            return state.tag_for_globaltag[globalTagName];
+        },
 		getTaglist: (state) => {
 			let tag_list = [];
 			const tag = Object.entries(state.tag);
@@ -42,8 +53,10 @@ export default {
 					Vue.set(state.tag, name, tag);
 				}
 			});
-
 		},
+		mergeTagsForGlobaltag(state, {gtname, tags_list}) {
+            Vue.set(state.tag_for_globaltag, gtname, tags_list);
+        },
 		mergeNewTag(state, tag) {
 			let name = tag.name;
 			if (!(name in state.tag)) {
@@ -58,6 +71,17 @@ export default {
 			.get(`/crestapi/tags?${params}`)
 			.then(response => response.data)
 			.then(tags_list => {commit('mergeTags', tags_list)})
+			.catch(error => { return Promise.reject(error) });
+		},
+		fetchTagByGlobalTags({commit}, getGlobalTag) {
+			const gtname = getGlobalTag.name;
+			const record = getGlobalTag.record;
+			const label = getGlobalTag.label;
+			const params = `record=` + record + `&label=` + label;
+			return axios
+			.get(`/crestapi/globaltags/${gtname}/tags?${params}`)
+			.then(response => response.data)
+			.then(tags_list => {commit('mergeTagsForGlobaltag', {gtname, tags_list})})
 			.catch(error => { return Promise.reject(error) });
 		},
 		createTag({commit}, setTag) {

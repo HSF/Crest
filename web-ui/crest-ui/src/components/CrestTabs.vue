@@ -1,13 +1,15 @@
 <template>
-  <body>
-    <section>
-      <div class="container is-fluid">
+
+<section>
 <b-tabs v-model="activeTab">
 <!--
 <b-tab-item label="Server">
   <ServerForm v-on:select-server="updateServer"/>
 </b-tab-item>
 -->
+<b-tab-item label="GlobalTags">
+    <GlobalTagsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+</b-tab-item>
 <b-tab-item label="Tags">
     <TagsPane v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
@@ -15,15 +17,14 @@
     <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
 </b-tabs>
-</div>
 </section>
-</body>
 </template>
 <script>
 
 import { mapState, mapActions, mapGetters } from 'vuex'
 import TagsPane from './TagsPane.vue'
 import IovsPane from './IovsPane.vue'
+import GlobalTagsPane from './GlobalTagsPane.vue'
 
   export default {
       props : {
@@ -78,16 +79,17 @@ import IovsPane from './IovsPane.vue'
       },
       watch: {
           selectedTag: function() {
-              this.fetchTagByName(this.selectedTag);
+              this.fetchTagByName(this.selectedTag);  
               this.updateTag();
           },
-          selectedIov: function() {
+          selectedIov: function() { 
               this.updateIov();
           }
       },
       components: {
+        GlobalTagsPane,
         TagsPane,
-        IovsPane,
+        IovsPane
       }
   }
 </script>
