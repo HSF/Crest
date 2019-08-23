@@ -112,6 +112,7 @@ export default {
   components: {
   },
   created() {
+      this.$store.commit('gui/crest/selectGlobalTag', '');
   }
 };
 </script>

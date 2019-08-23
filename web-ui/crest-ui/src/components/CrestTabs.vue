@@ -16,6 +16,9 @@
 <b-tab-item label="Iovs">
     <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
 </b-tab-item>
+<b-tab-item label="Folders">
+    <FoldersPane v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+</b-tab-item>
 </b-tabs>
 </section>
 </template>
@@ -24,6 +27,7 @@
 import { mapState, mapActions, mapGetters } from 'vuex'
 import TagsPane from './TagsPane.vue'
 import IovsPane from './IovsPane.vue'
+import FoldersPane from './FoldersPane.vue'
 import GlobalTagsPane from './GlobalTagsPane.vue'
 
   export default {
@@ -89,7 +93,8 @@ import GlobalTagsPane from './GlobalTagsPane.vue'
       components: {
         GlobalTagsPane,
         TagsPane,
-        IovsPane
+        IovsPane,
+        FoldersPane
       }
   }
 </script>

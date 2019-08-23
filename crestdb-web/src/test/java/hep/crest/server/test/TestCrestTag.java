@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.TagDto;
@@ -58,22 +59,34 @@ public class TestCrestTag {
 		ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
 		System.out.println("Received response: " + response);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		
-		GlobalTagMapDto mapdto = new GlobalTagMapDto().globalTagName("MY_SB_TEST").label("label").record("0").tagName("SB_TAG");
+	}
+
+    @Test
+    public void testC_storeGlobalTagMap() {
+        GlobalTagMapDto mapdto = new GlobalTagMapDto().globalTagName("MY_SB_TEST").label("label").record("0").tagName("SB_TAG");
         System.out.println("Store request: "+mapdto);
         ResponseEntity<GlobalTagMapDto> response2 = this.testRestTemplate.postForEntity("/crestapi/globaltagmaps", mapdto, GlobalTagMapDto.class);
         System.out.println("Received response: "+response2);
         assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
+    }
+
+    @Test
+    public void testC_storeTagMeta() {
+        TagMetaDto dto = new TagMetaDto().description("<some>description</some>").tagName("SB_TAG").channelInfo("[{\"0\": \"achannel\"},{ \"1\":\"another_chan\"}]"
+                ).payloadInfo("{ \"col1\": \"Int\"}").chansize(2).colsize(1);
+        System.out.println("Store tag meta request: " + dto);
+        ResponseEntity<TagMetaDto> response = this.testRestTemplate.postForEntity("/crestapi/tags/SB_TAG/meta", dto, TagMetaDto.class);
+        System.out.println("Received response: " + response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
 
 	@Test
-	public void testC_storeTagMeta() {
-		TagMetaDto dto = new TagMetaDto().description("<some>description</some>").tagName("SB_TAG").channelInfo("[{\"0\": \"achannel\"},{ \"1\":\"another_chan\"}]"
-				).payloadInfo("{ \"col1\": \"Int\"}").chansize(2).colsize(1);
-		System.out.println("Store tag meta request: " + dto);
-		ResponseEntity<TagMetaDto> response = this.testRestTemplate.postForEntity("/crestapi/tags/SB_TAG/meta", dto, TagMetaDto.class);
-		System.out.println("Received response: " + response);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	public void testC_storeFolder() {
+        FolderDto folderdto = new FolderDto().nodeFullpath("test").nodeDescription("description").groupRole("groupe").nodeName("node").schemaName("schema").tagPattern("tag");
+        System.out.println("Store request: "+folderdto);
+        ResponseEntity<FolderDto> response3 = this.testRestTemplate.postForEntity("/crestapi/folders", folderdto, FolderDto.class);
+        System.out.println("Received response: "+response3);
+        assertThat(response3.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 	}
 	
 	@Test
