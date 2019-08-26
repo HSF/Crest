@@ -70,98 +70,97 @@
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex'
-  import Long from 'long';
+import { mapActions, mapGetters } from 'vuex'
 
-  export default {
-    name: 'CrestFoldersTable',
-    props : {
-      isloading : Boolean
-    },
-    data: function() {
-      return {
-          isPaginated: true,
-          isPaginationSimple: true,
-          defaultSortDirection: 'asc',
-          currentPage: 1,
-          perPage: 10,
-          selected: {},
-          columns : [
-                  {
-                      field: 'nodeFullpath',
-                      label: 'Full path',
-                      width: '40',
-                      visible: true,
-                      sortable: true
-                  },
-                  {
-                      field: 'schemaName',
-                      label: 'Schema name',
-                      visible: true,
-                      sortable: false,
-                  },
-                  {
-                      field: 'nodeName',
-                      label: 'Name',
-                      visible: true,
-                      sortable: true
-                  },
-                  {
-                      field: 'nodeDescription',
-                      label: 'Description',
-                      visible: true,
-                      sortable: true
-                  },
-                  {
-                      field: 'tagPattern',
-                      label: 'Tag pattern',
-                      visible: true,
-                      sortable: true
-                  },
-                  {
-                      field: 'groupRole',
-                      label: 'Group role',
-                      visible: true,
-                      sortable: true
-                  },
-              ],
-          thetag: '',
-      }
-    },
-    methods: {
-        ...mapActions('db/folders', ['fetchFolder']),
-    },
-    computed: {
-        ...mapGetters('db/folders', ['getFolderlist']),
-      numrows () {
-        return (!this.folderlist ? -1 : this.folderlist.length)
-      },
-      folderlist: function() {
-          return this.getFolderlist;
-      },
-      foldernames() {
-          let result = this.folderlist.map(a => a.nodeFullpath);
-          return result
-      },
-      filteredDataArray() {
-          return this.foldernames.filter((option) => {
-              return option
-                  .toString()
-                  .toLowerCase()
-                  .indexOf(this.thetag.toLowerCase()) >= 0
-          })
-      },
-      folderfiltereddata: {
-          get: function() {
-            return this.folderlist.filter(row => (row.nodeFullpath.includes(this.thetag) ))
-          }
-      }
-    },
-    watch: {
-    },
-    created() {
-        this.fetchFolder();
+export default {
+  name: 'CrestFoldersTable',
+  props : {
+    isloading : Boolean
+  },
+  data: function() {
+    return {
+        isPaginated: true,
+        isPaginationSimple: true,
+        defaultSortDirection: 'asc',
+        currentPage: 1,
+        perPage: 10,
+        selected: {},
+        columns : [
+                {
+                    field: 'nodeFullpath',
+                    label: 'Full path',
+                    width: '40',
+                    visible: true,
+                    sortable: true
+                },
+                {
+                    field: 'schemaName',
+                    label: 'Schema name',
+                    visible: true,
+                    sortable: false,
+                },
+                {
+                    field: 'nodeName',
+                    label: 'Name',
+                    visible: true,
+                    sortable: true
+                },
+                {
+                    field: 'nodeDescription',
+                    label: 'Description',
+                    visible: true,
+                    sortable: true
+                },
+                {
+                    field: 'tagPattern',
+                    label: 'Tag pattern',
+                    visible: true,
+                    sortable: true
+                },
+                {
+                    field: 'groupRole',
+                    label: 'Group role',
+                    visible: true,
+                    sortable: true
+                },
+            ],
+        thetag: '',
     }
+  },
+  methods: {
+      ...mapActions('db/folders', ['fetchFolder']),
+  },
+  computed: {
+      ...mapGetters('db/folders', ['getFolderlist']),
+    numrows () {
+      return (!this.folderlist ? -1 : this.folderlist.length)
+    },
+    folderlist: function() {
+        return this.getFolderlist;
+    },
+    foldernames() {
+        let result = this.folderlist.map(a => a.nodeFullpath);
+        return result
+    },
+    filteredDataArray() {
+        return this.foldernames.filter((option) => {
+            return option
+                .toString()
+                .toLowerCase()
+                .indexOf(this.thetag.toLowerCase()) >= 0
+        })
+    },
+    folderfiltereddata: {
+        get: function() {
+          return this.folderlist.filter(row => (row.nodeFullpath.includes(this.thetag) ))
+        }
+    }
+  },
+  watch: {
+  },
+  created() {
+      this.fetchFolder();
   }
+}
 
 </script>

@@ -8,16 +8,16 @@
 </b-tab-item>
 -->
 <b-tab-item label="GlobalTags">
-    <GlobalTagsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <GlobalTagsPane v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Tags">
-    <TagsPane v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <TagsPane v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Iovs">
-    <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <IovsPane v-bind:selectedtag="selectedtag" v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Folders">
-    <FoldersPane v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <FoldersPane  v-on:select-tab="selActive"/>
 </b-tab-item>
 </b-tabs>
 </section>
@@ -83,10 +83,10 @@ import GlobalTagsPane from './GlobalTagsPane.vue'
       },
       watch: {
           selectedTag: function() {
-              this.fetchTagByName(this.selectedTag);  
+              this.fetchTagByName(this.selectedTag);
               this.updateTag();
           },
-          selectedIov: function() { 
+          selectedIov: function() {
               this.updateIov();
           }
       },

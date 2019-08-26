@@ -32,7 +32,7 @@
           <CrestIovsTable v-bind:data="iovs" v-bind:selectedtag="selectedtag"/>
         </div>
         <div v-else>
-          <IovForm v-bind:selectedserver="selectedserver" v-bind:selectedtag="selectedtag"/>
+          <IovForm v-bind:selectedtag="selectedtag"/>
         </div>
       </div>
     </div>
@@ -49,7 +49,6 @@ export default {
   name: 'IovsPane',
   props : {
     selectedtag : Object,
-    selectedserver : String,
   },
   data: function () {
     return {
@@ -95,8 +94,7 @@ export default {
       ...mapGetters('db/tags', ['getTag']),
       ...mapGetters('db/iovs', ['getIovForTag']),
       infomsg () {
-        return "Access api  "+this.selectedserver
-          +"<br> Selected tag is : "+this.selectedtag.name
+        return "Selected tag is : "+this.selectedtag.name
           +"<br> Selected iov is : "+this.selectIov.since;
       },
       iovs: function() {

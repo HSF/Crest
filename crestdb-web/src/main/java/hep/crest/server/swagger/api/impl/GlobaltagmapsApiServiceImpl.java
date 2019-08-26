@@ -34,7 +34,8 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
 		this.log.info("GlobalTagMapRestController processing request for creating a global tag map entry " + body);
 		try {
 			GlobalTagMapDto saved = globaltagmapService.insertGlobalTagMap(body);
-			return Response.ok().entity(saved).build();
+			return Response.created(info.getRequestUri()).entity(saved).build();
+
 		} catch (CdbServiceException e) {
 			String msg = "Error creating globaltagmap resource using " + body.toString();
 			e.printStackTrace();

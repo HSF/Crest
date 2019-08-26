@@ -48,7 +48,6 @@ import HelpInfoPane from './HelpInfoPane.vue';
 export default {
   name: 'TagsPane',
   props : {
-    selectedserver : String,
   },
   data: function () {
     return {
@@ -84,8 +83,7 @@ export default {
       ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
       ...mapGetters('db/tags', ['getTag', 'getTagForGlobaltag']),
       infomsg () {
-        return "Access api  "+this.selectedserver
-          +"<br> Selected tag is : "+this.selectedtag.name ;
+        return "Selected tag is : "+this.selectedtag.name ;
       }
   },
   watch: {

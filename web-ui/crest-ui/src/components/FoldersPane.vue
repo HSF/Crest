@@ -34,14 +34,13 @@
 </template>
 
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import CrestFoldersTable from './CrestFoldersTable.vue'
 import HelpInfoPane from './HelpInfoPane.vue';
 
 export default {
   name: 'FoldersPane',
   props : {
-    selectedserver : String,
   },
   data: function () {
     return {
@@ -74,8 +73,7 @@ export default {
     computed: {
         ...mapGetters('db/folders', ['getFolder']),
         infomsg () {
-          return "Access api  "+this.selectedserver
-            +"<br> Selected tag is : "+this.selectedtag.nodeFullpath ;
+          return "Selected tag is : "+this.selectedtag.nodeFullpath ;
         }
     },
     watch: {

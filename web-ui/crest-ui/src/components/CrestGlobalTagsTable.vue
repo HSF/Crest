@@ -2,6 +2,13 @@
   <section>
     <p>Number of rows: {{ numrows }}
     </p>
+    <button class="button field is-danger"
+      @click="selected = null; onClickClearselection();"
+      :disabled="!selected">
+      <b-icon icon="close"></b-icon>
+      <span>Clear selected</span>
+    </button>
+
     <b-tabs>
       <b-tab-item label="Table">
         <b-field label="Search Tag by name">
@@ -160,6 +167,9 @@ import { mapActions, mapState, mapGetters } from 'vuex'
       },
       onClick(row) {
           this.$store.commit('gui/crest/selectGlobalTag', row.name);
+      },
+      onClickClearselection() {
+          this.$store.commit('gui/crest/selectGlobalTag', '');
       },
       goTags(globaltagname) {
           this.$emit('select-tag', 1);

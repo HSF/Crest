@@ -43,22 +43,22 @@ export default {
 			return tag_list;
 		},
 		getTagForGlobaltag : (state) => (globalTagName) => {
-            if (!globalTagName || !state.tag_for_globaltag.hasOwnProperty(globalTagName)) {
-                return [];
-            }
-            return state.tag_for_globaltag[globalTagName];
-        },
+      if (!globalTagName || !state.tag_for_globaltag.hasOwnProperty(globalTagName)) {
+          return [];
+      }
+      return state.tag_for_globaltag[globalTagName];
+    },
 		getTagMetaForTag : (state) => (tagName) => {
-            if (!tagName || !state.tagmeta_for_tag.hasOwnProperty(tagName)) {
-                return [];
-            }
-            let tagmeta_list = [];
+      if (!tagName || !state.tagmeta_for_tag.hasOwnProperty(tagName)) {
+          return [];
+      }
+      let tagmeta_list = [];
 			const tagmeta = Object.entries(state.tagmeta_for_tag);
 			for (var i = 0; i < tagmeta.length; i++){
 				tagmeta_list.push(tagmeta[i]);
 			}
 			return tagmeta_list;
-        }
+    }
 	},
 	mutations: {
 		mergeTags(state, tags_list) {
@@ -70,13 +70,13 @@ export default {
 			});
 		},
 		mergeTagsForGlobaltag(state, {gtname, tags_list}) {
-            Vue.set(state.tag_for_globaltag, gtname, tags_list);
-        },
-        mergeTagMetaForTag(state, {tagname, tagmeta_list}) {
-        	if (!(tagname in state.tagmeta_for_tag)) {
-        		Vue.set(state.tagmeta_for_tag, tagname, tagmeta_list);
-        	}
-        },
+			Vue.set(state.tag_for_globaltag, gtname, tags_list);
+    },
+		mergeTagMetaForTag(state, {tagname, tagmeta_list}) {
+			if (!(tagname in state.tagmeta_for_tag)) {
+				Vue.set(state.tagmeta_for_tag, tagname, tagmeta_list);
+			}
+		},
 		mergeNewTag(state, tag) {
 			let name = tag.name;
 			if (!(name in state.tag)) {
