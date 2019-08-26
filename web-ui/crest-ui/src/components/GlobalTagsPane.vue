@@ -40,7 +40,7 @@
         <div v-if="radioButton === 'Create'">
           <GlobalTagForm/>
         </div>
-        <div v-else>
+        <div v-if="radioButton === 'CreateGlobalTagMap'">
           <GlobalTagMapForm/>
         </div>
       </div>
@@ -77,6 +77,7 @@ export default {
   },
   methods: {
     ...mapActions('db/globaltags', ['fetchGlobalTagsByName']),
+    ...mapActions('db/tags', ['fetchTagByName']),
     updateGlobalTag() {
       const globaltag = Object.entries(this.getGlobalTag);
       for (var i = 0; i < globaltag.length; i++){
@@ -95,7 +96,7 @@ export default {
       ...mapGetters('db/globaltags', ['getGlobalTag']),
       infomsg () {
         return "Access api  "+this.selectedserver
-          +"<br> Selected tag is : "+this.selectedtag.name ;
+          +"<br> Selected global tag is : "+this.selectedtag.name ;
       }
   },
   watch: {
@@ -106,6 +107,7 @@ export default {
   },
   created(){
       this.fetchGlobalTagsByName('');
+      this.fetchTagByName('');
   },
   components: {
     CrestGlobalTagsTable,

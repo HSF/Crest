@@ -1,6 +1,6 @@
 <template>
 <div class="">
-    <p class="has-text-info is-size-2">Search for Tags</p>
+    <p class="has-text-info is-size-2">Search for Folders</p>
     <nav class="level">
         <div class="level is-mobile">
           <div class="level-left">
@@ -19,17 +19,11 @@
                 <b-icon icon="magnify"></b-icon>
                 <span>Search</span>
             </b-radio-button>
-            <b-radio-button v-model="radioButton"
-                native-value="Create"
-                type="is-success">
-                <b-icon icon="lead-pencil"></b-icon>
-                <span>Create</span>
-            </b-radio-button>
         </b-field>
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
-          <CrestTagsTable v-on:select-tag="selectTab" />
+          <CrestFoldersTable v-on:select-tag="selectTab" />
         </div>
         <div v-else>
           <TagForm/>
@@ -41,12 +35,11 @@
 
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex'
-import CrestTagsTable from './CrestTagsTable.vue'
-import TagForm from './TagForm.vue'
+import CrestFoldersTable from './CrestFoldersTable.vue'
 import HelpInfoPane from './HelpInfoPane.vue';
 
 export default {
-  name: 'TagsPane',
+  name: 'FoldersPane',
   props : {
     selectedserver : String,
   },
@@ -66,42 +59,32 @@ export default {
       };
   },
   methods: {
-      ...mapActions('db/tags', ['fetchTagByName', 'fetchTagByGlobalTags']),
-    updateTag() {
-      const tag = Object.entries(this.getTag);
-      for (var i = 0; i < tag.length; i++){
-          if (tag[i][0] == this.selectedTag) {
-              this.selectedtag = tag[i][1];
-          }
-      }
-    },
-    selectTab(nt) {
-      this.selactiveTab = nt
-      this.$emit('select-tab', this.selactiveTab)
-    }
-  },
-  computed: {
-      ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
-      ...mapGetters('db/tags', ['getTag', 'getTagForGlobaltag']),
-      infomsg () {
-        return "Access api  "+this.selectedserver
-          +"<br> Selected tag is : "+this.selectedtag.name ;
-      }
-  },
-  watch: {
-      selectedTag: function() {
-          this.updateTag();
+      ...mapActions('db/folders', ['fetchFolder']),
+      updateFolder() {
+        const folder = Object.entries(this.getFolder);
+        for (var i = 0; i < folder.length; i++){
+            this.selectedtag = folder[i][1];
+        }
       },
-      selectedGlobalTag: function() {
-          var globaltag = {'name':this.selectedGlobalTag,'record':'','label':''};
-          this.fetchTagByGlobalTags(globaltag);
-      }
-  },
-  created(){
-  },
+      selectTab(nt) {
+        this.selactiveTab = nt
+        this.$emit('select-tab', this.selactiveTab)
+      },
+    },
+    computed: {
+        ...mapGetters('db/folders', ['getFolder']),
+        infomsg () {
+          return "Access api  "+this.selectedserver
+            +"<br> Selected tag is : "+this.selectedtag.nodeFullpath ;
+        }
+    },
+    watch: {
+    },
+    created(){
+        this.fetchFolder();
+    },
   components: {
-    CrestTagsTable,
-    TagForm,
+    CrestFoldersTable,
     HelpInfoPane
   }
 };

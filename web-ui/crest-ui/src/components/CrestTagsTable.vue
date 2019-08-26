@@ -60,7 +60,14 @@
               </b-table-column>
             </template>
             <template slot="detail" slot-scope="props">
-              <span>{{ count(props.row.name) }} iovs</span>
+              <div class="content">
+                <span>{{ count(props.row.name) }} iovs</span>
+                <ul id="tagMeta">
+                  <li v-for="(val,key) in detailsTag(props.row.name)">
+                    {{ key }} : {{ val }}
+                  </li>
+                </ul>
+              </div>
             </template>
             <template slot="empty">
                 <section class="section">
@@ -122,11 +129,11 @@ import { mapActions, mapState, mapGetters } from 'vuex'
                       sortable: true
                   },
               ],
-          thetag: '',
+          thetag: ''
       }
     },
     methods: {
-        ...mapActions('db/tags', ['fetchTagByName']),
+        ...mapActions('db/tags', ['fetchTagByName', 'fetchTagMetaByTagName']),
         ...mapActions('db/iovs', ['countIovsByTag']),
       timestr (atime) {
         if (!atime) {
@@ -168,17 +175,35 @@ import { mapActions, mapState, mapGetters } from 'vuex'
               }
           }
           return niovs;
+      },
+      getTagDetails(tagname) {
+          this.fetchTagMetaByTagName(tagname);
+      },
+      detailsTag(tagname) {
+          let liste = {};
+          this.getTagDetails(tagname);
+          const tagmeta = Object.entries(this.getTagMetaForTag(tagname));
+          for (var i = 0; i < tagmeta.length; i++){
+              if (tagmeta[i][1][0] == tagname) {
+                  liste = tagmeta[i][1][1];
+              }
+          }
+          return liste;
       }
     },
     computed: {
         ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
-        ...mapGetters('db/tags', ['getTag','getTaglist', 'getTagForGlobaltag']),
+        ...mapGetters('db/tags', ['getTaglist', 'getTagForGlobaltag', 'getTagMetaForTag']),
         ...mapState('db/iovs', ['nb_iovs_for_tag']),
       numrows () {
         return (!this.taglist ? -1 : this.taglist.length)
       },
       taglist: function() {
-        return this.getTagForGlobaltag(this.selectedGlobalTag);
+          if (this.selectedGlobalTag != "") {
+              return this.getTagForGlobaltag(this.selectedGlobalTag);
+          } else {
+              return this.getTaglist;
+          }
       },
       tagnames() {
           let result = this.taglist.map(a => a.name);
@@ -204,7 +229,6 @@ import { mapActions, mapState, mapGetters } from 'vuex'
         }
     },
     created() {
-        this.fetchTagByName('');
     }
   }
 
