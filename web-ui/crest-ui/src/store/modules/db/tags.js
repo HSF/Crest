@@ -18,15 +18,12 @@ export default {
 				"modificationTime": "2019-06-18T13:45:51.825+0000"
 			}
 			*/
-<<<<<<< HEAD
-=======
 		},
 		taglist: [],
 		tag_for_globaltag: {
 			/*
 	        globaltagname: [ ...tags ]
 			*/
->>>>>>> 7f46bd1... Add tab for global tags
 		}
 	},
 	getters: {
