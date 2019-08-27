@@ -25,6 +25,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.caching.CachingPolicyService;
@@ -95,21 +96,11 @@ public class IovsApiServiceImpl extends IovsApiService {
 			PageRequest preq = prh.createPageRequest(page, size, sort);
 			List<IovDto> dtolist = null;
 			if (tagname.equals("none")) {
-				dtolist = iovService.findAllIovs(null, preq);
+				String message = "Bad tag argument";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
+				return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
 			} else {
-
-				List<SearchCriteria> params = prh.createCriteria("tagname",":",tagname);
-				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
-				BooleanExpression wherepred = null;
-
-				for (BooleanExpression exp : expressions) {
-					if (wherepred == null) {
-						wherepred = exp;
-					} else {
-						wherepred = wherepred.and(exp);
-					}
-				}
-				dtolist = iovService.findAllIovs(wherepred, preq);
+				dtolist = iovService.findAllIovsByTagName(tagname,preq);
 			}
 			if (dtolist == null) {
 				String message = "No resource has been found";

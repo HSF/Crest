@@ -42,6 +42,11 @@ public class IovFiltering implements IFilteringCriteria {
 					BooleanExpression objtyplike = IovPredicates.hasTagName(searchCriteria.getValue().toString());
 					expressions.add(objtyplike);
 				} 
+				if (searchCriteria.getKey().equals("tagid")) {
+					Long tagid = new Long(searchCriteria.getValue().toString());
+					BooleanExpression objtypeq = IovPredicates.hasTagId(tagid);
+					expressions.add(objtypeq);
+				} 
 			}
 			return expressions;
 		} catch (Exception e) {

@@ -103,6 +103,24 @@ public class TagService {
 	}
 	
 	/**
+	 * @param id
+	 * @return
+	 * @throws CdbServiceException
+	 */
+	public Tag findTag(String id)throws CdbServiceException {
+		try {
+			log.debug("Search for tag by Id...{}",id);
+			Tag entity = tagRepository.findByName(id);
+			if (entity != null) {
+				return entity;
+			}
+		} catch (Exception e) {
+			log.error("Exception in retrieving tag by id...");
+			throw new CdbServiceException("Cannot retreive tag by id: " + e.getMessage());
+		}
+		return null; // This will trigger a response 404
+	}
+	/**
 	 * @param qry
 	 * @param req
 	 * @return

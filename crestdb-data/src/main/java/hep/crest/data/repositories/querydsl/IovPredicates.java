@@ -35,6 +35,15 @@ public class IovPredicates {
 		log.debug("hasTagName: argument {}",tagname);
 		return  QIov.iov.tag.name.eq(tagname);
 	}
+	
+	/**
+	 * @param tagid
+	 * @return
+	 */
+	public static BooleanExpression hasTagId(Long tagid) {
+		log.debug("hasTagId: argument {}",tagid);
+		return  QIov.iov.id.tagid.eq(tagid);
+	}
 
 	/**
 	 * @param since
