@@ -14,6 +14,6 @@ EOF
 host=$1
 pylddata="$(generate_post_data)"
 echo "Use data $pylddata"
-curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" "${host}/crestapi/payloads" --data "${pylddata}"
+curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" "${host}/api/payloads" --data "${pylddata}"
 echo "Try to get back data from server"
-curl -H "X-Crest-PayloadFormat: DTO" -X GET "${host}/crestapi/payloads/somehash"
+curl -H "X-Crest-PayloadFormat: DTO" -X GET "${host}/api/payloads/somehash"

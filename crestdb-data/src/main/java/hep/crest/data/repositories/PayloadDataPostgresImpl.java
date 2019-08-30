@@ -87,7 +87,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,PYLD_SIZE from " + tablename
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,DATA_SIZE from " + tablename
 				+ " where HASH=?";
 
 		// Be careful, this seems not to work with Postgres: probably getBlob loads an
@@ -102,7 +102,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			entity.setData(rs.getBlob("DATA"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
-			entity.setSize(rs.getInt("PYLD_SIZE"));
+			entity.setSize(rs.getInt("DATA_SIZE"));
 			return entity;
 		});
 	}
@@ -116,7 +116,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from " + tablename
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,DATA_SIZE from " + tablename
 				+ " where HASH=?";
 		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
@@ -125,7 +125,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			entity.setVersion(rs.getString("VERSION"));
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			entity.setStreamerInfo(rs.getBlob("STREAMER_INFO"));
-			entity.setSize(rs.getInt("PYLD_SIZE"));
+			entity.setSize(rs.getInt("DATA_SIZE"));
 			return entity;
 		});
 
@@ -302,7 +302,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, DATA_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
 
@@ -346,7 +346,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME,PYLD_SIZE) VALUES (?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, STREAMER_INFO, INSERTION_TIME,DATA_SIZE) VALUES (?,?,?,?,?,?)";
 
 		log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
 		try (Connection conn = ds.getConnection();
