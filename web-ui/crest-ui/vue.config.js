@@ -6,12 +6,12 @@ module.exports = {
   devServer: {
     proxy: {
       '^/crestui': {
-        target: process.env.VUE_APP_NSWAPI_URL,
+        target: process.env.VUE_APP_CRESTAPI_URL,
         ws: true,
         changeOrigin: true
       },
       '^/ext': {
-        target: process.env.VUE_APP_NSWAPI_URL,
+        target: process.env.VUE_APP_CRESTAPI_URL,
         ws: true,
         changeOrigin: true
       }
