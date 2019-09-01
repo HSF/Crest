@@ -24,7 +24,7 @@ export default {
 		fetchPayloadMeta({commit}, iov) {
 			const params = iov;
 			return axios
-			.get(`/crestapi/payloads/${params}/meta`)
+			.get(`/api/payloads/${params}/meta`)
 			.then(response => response.data)
 			.then(payload => {commit('mergePayload', payload)})
 			.catch(error => { return Promise.reject(error) });

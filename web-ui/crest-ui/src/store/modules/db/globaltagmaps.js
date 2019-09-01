@@ -31,7 +31,7 @@ export default {
 			const data = JSON.stringify({globalTagName: setGlobalTagMap.globalTagName, tagName: setGlobalTagMap.tagName,
 				record: setGlobalTagMap.record, label: setGlobalTagMap.label});
 			return axios
-			.post(`/crestapi/globaltagmaps`, data, {headers: config})
+			.post(`/api/globaltagmaps`, data, {headers: config})
 			.then(response => response.data)
 			.then(globaltagmap => commit('mergeNewGlobalTagMap', globaltagmap))
 			.catch(error => { return Promise.reject(error) });
