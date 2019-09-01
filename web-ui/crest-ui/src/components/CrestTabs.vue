@@ -8,13 +8,13 @@
 </b-tab-item>
 -->
 <b-tab-item label="GlobalTags">
-    <GlobalTagsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <GlobalTagsPane v-bind:selectedtag="selectedtag"  v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Tags">
-    <TagsPane v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <TagsPane  v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Iovs">
-    <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <IovsPane v-bind:selectedtag="selectedtag" v-on:select-tab="selActive"/>
 </b-tab-item>
 </b-tabs>
 </section>
@@ -28,7 +28,6 @@ import GlobalTagsPane from './GlobalTagsPane.vue'
 
   export default {
       props : {
-        selectedserver : Object
       },
       data : function() {
         return {
@@ -67,22 +66,14 @@ import GlobalTagsPane from './GlobalTagsPane.vue'
           ...mapState('gui/crest', ['selectedTag', 'selectedIov']),
           ...mapGetters('db/tags', ['getTag']),
           ...mapGetters('db/iovs', ['getIovForTag']),
-        hostbaseurl () {
-          if (this.selectedserver.url !== "") {
-            return this.selectedserver.url;
-          }
-          const selprotocol = this.selectedserver.protocol.toLowerCase();
-          const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
-          var burl = `${selprotocol}://${hostname}/${this.selectedserver.api}`;
-          return burl;
-        }
+
       },
       watch: {
           selectedTag: function() {
-              this.fetchTagByName(this.selectedTag);  
+              this.fetchTagByName(this.selectedTag);
               this.updateTag();
           },
-          selectedIov: function() { 
+          selectedIov: function() {
               this.updateIov();
           }
       },
