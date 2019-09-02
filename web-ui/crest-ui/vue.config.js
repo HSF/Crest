@@ -2,21 +2,6 @@ process.env.VUE_APP_CRESTAPI_URL = (typeof process.env.VUE_APP_API_URL != 'undef
 process.env.VUE_APP_CRESTBASE_URL = (typeof process.env.VUE_APP_BASEURL != 'undefined') ? process.env.VUE_APP_BASEURL : '/ext/web/crestui/'
 
 module.exports = {
-<<<<<<< HEAD
-  /*baseUrl: process.env.NODE_ENV === 'production'
-    ? process.env.VUE_APP_BASEURL
-    : '/crestui'*/
-    	publicPath: process.env.NODE_ENV === 'production' ? '/ext/web/crestui/' : '/crestui',
-    			  devServer: {
-    			    proxy: {
-    			      '^/crestapi': {
-    			        target: process.env.VUE_APP_CRESTAPI_URL,
-    			        ws: true,
-    			        changeOrigin: true
-    			      }
-    			    }
-    			  },
-=======
   publicPath: process.env.NODE_ENV === 'production' ? process.env.VUE_APP_CRESTBASE_URL : '/crestui',
   devServer: {
     proxy: {
@@ -48,5 +33,4 @@ module.exports = {
       }
     }
   },
->>>>>>> 69abfcf... Change UI.
 }
