@@ -114,7 +114,7 @@ registry-push:
   script:
     - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
     - docker push $CONTAINER_IMAGE
-    - docker push $WEB_CONTAINER_IMAGE
+###    - docker push $WEB_CONTAINER_IMAGE
   only:
   - svom-dc0
 
