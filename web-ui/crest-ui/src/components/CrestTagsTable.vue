@@ -2,7 +2,6 @@
   <section>
     <p>Number of rows: {{ numrows }}
     </p>
-    {{ loadTags }}
     <b-tabs>
       <b-tab-item label="Table">
         <b-field label="Search Tag by name">
@@ -203,14 +202,6 @@ import { mapActions, mapState, mapGetters } from 'vuex'
             return this.data.filter(row => (row.name.includes(this.thetag) ))
           }
       },
-      loadTags() {
-          let liste_tags = [];
-          const tag = Object.entries(this.getTag);
-          for (var i = 0; i < tag.length; i++){
-              liste_tags.push(tag[i][1]);
-          }
-          this.data = liste_tags; 
-      }
     },
     watch: {
         selectedTag: function() {
