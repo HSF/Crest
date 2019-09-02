@@ -17,27 +17,27 @@ export default {
 	},
 	getters: {
 		getIovForTag : (state) => (tagName) => {
-            if (!tagName || !state.iovs_for_tag.hasOwnProperty(tagName)) {
-                return [];
-            }
-            return state.iovs_for_tag[tagName];
-        },
+      if (!tagName || !state.iovs_for_tag.hasOwnProperty(tagName)) {
+          return [];
+      }
+      return state.iovs_for_tag[tagName];
+    },
 		getNbIovForTag : (state) => (tagName) => {
-            if (!tagName || !state.nb_iovs_for_tag.hasOwnProperty(tagName)) {
-                return [];
-            }
-            return state.nb_iovs_for_tag[tagName];
-        }
+      if (!tagName || !state.nb_iovs_for_tag.hasOwnProperty(tagName)) {
+          return [];
+      }
+      return state.nb_iovs_for_tag[tagName];
+    }
 	},
 	mutations: {
 		mergeIovsForTag(state, {tagname, iovs_list}) {
-            Vue.set(state.iovs_for_tag, tagname, iovs_list);
-        },
-        mergeNbIovs(state, {tagname, iovs_list}) {
-        	if (!(tagname in state.nb_iovs_for_tag)) {
-        		Vue.set(state.nb_iovs_for_tag, tagname, iovs_list[0]);
-        	}
-        }
+      Vue.set(state.iovs_for_tag, tagname, iovs_list);
+    },
+    mergeNbIovs(state, {tagname, iovs_list}) {
+    	if (!(tagname in state.nb_iovs_for_tag)) {
+    		Vue.set(state.nb_iovs_for_tag, tagname, iovs_list[0]);
+    	}
+    }
 	},
 	actions: {
 		fetchIovByTagName({commit}, getIov) {

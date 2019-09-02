@@ -75,7 +75,6 @@ export default {
     },
   },
   components: {
-  Connection
   }
 };
 </script>

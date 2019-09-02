@@ -59,7 +59,6 @@ before_script:
 stages:
  - package_application
  - webui
- - build_webui
  - build
  - release
  - redeploy
@@ -80,7 +79,7 @@ package_svom_application:
   - svom-dc0
 
 package_svom_web_application:
-  stage: build_webui
+  stage: webui
   environment: dc0
   tags:
     - dc0-shell
@@ -89,8 +88,11 @@ package_svom_web_application:
    - ./vuecompile.sh
   allow_failure: false
   artifacts:
-   paths:
-   - ./web-ui/crest-ui/dist
+    paths:
+    - ./web-ui/crest-ui/dist
+    expire_in: 1 week
+  only:
+  - svom-dc0
 
 build_svom_docker_image:
   stage: build
@@ -105,7 +107,7 @@ build_svom_docker_image:
   - svom-dc0
 
 webui:
-  stage: webui
+  stage: build-webui
   tags:
     - dc0-shell
   script:
