@@ -16,8 +16,7 @@ ENV gradle_version 5.2.1
 ENV TZ GMT
 
 RUN  mkdir -p ${crest_dir} \
-  && mkdir -p ${data_dir}/web \
-  && mkdir -p ${data_dir}/dump \
+  && mkdir -p ${data_dir}/web/dump \
   && mkdir -p ${data_dir}/logs
 
 ### This is if you need to create a full war on docker
@@ -30,7 +29,8 @@ ADD web ${data_dir}/web
 ADD logback.xml.crest ${data_dir}/logback.xml
 COPY ./web-ui/crest-ui/dist ${data_dir}/web/crestui
 
-VOLUME "${data_dir}"
+VOLUME "${data_dir}/logs"
+VOLUME "${data_dir}/web"
 
 EXPOSE 8080
 
