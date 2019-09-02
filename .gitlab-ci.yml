@@ -85,7 +85,7 @@ webui:
     - dc0-shell
   script:
     - docker info
-    - docker build --tag=$WEB_CONTAINER_IMAGE --file Dockerfile.nginx ./web-ui/crest-ui/
+    - docker build --tag=$WEB_CONTAINER_IMAGE --file ./web-ui/crest-ui/Dockerfile.nginx ./web-ui/crest-ui/
   only:
      refs:
        - svom-dc0
