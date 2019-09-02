@@ -27,7 +27,7 @@ module.exports = {
         changeOrigin: true
       },
       '^/ext': {
-        target: process.env.VUE_APP_CRESTAPI_URL,
+        target: process.env.VUE_APP_CRESTBASE_URL,
         ws: true,
         changeOrigin: true
       }

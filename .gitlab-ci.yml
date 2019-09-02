@@ -78,6 +78,19 @@ package_svom_application:
   only:
   - svom-dc0
 
+webui:
+  stage: webui
+  environment: dc0
+  tags:
+    - dc0-shell
+  script:
+    - docker info
+    - docker build --tag=$WEB_CONTAINER_IMAGE --file Dockerfile.nginx ./web-ui/crest-ui/
+  only:
+     refs:
+       - svom-dc0
+
+
 package_svom_web_application:
   stage: webui
   environment: dc0
@@ -114,7 +127,7 @@ registry-push:
   script:
     - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
     - docker push $CONTAINER_IMAGE
-###    - docker push $WEB_CONTAINER_IMAGE
+    - docker push $WEB_CONTAINER_IMAGE
   only:
   - svom-dc0
 
