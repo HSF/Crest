@@ -25,7 +25,7 @@ services:
     - source: crest-logs
       target: /home/svom/logback.xml
     - source: crest-jopts
-      target: /home/svom/javaopt.properties
+      target: /home/svom/javaopts.properties
     secrets:
     - source: crest-config
       target: /home/svom/application.properties
@@ -33,9 +33,7 @@ services:
         - crest.server.port=8080
         - spring.profiles.active=prod
     volumes:
-        - crest_data:/home/svom/data/logs
-        - crest_data:/home/svom/data/web
-        - crest_data:/home/svom/data/dump
+        - crest_data:/home/svom/data
 
   crest-ui:
     image: gitlab-registry.cern.ch/formica/swagger_crestui:tagmeta
