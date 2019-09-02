@@ -23,7 +23,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpMethod;
 
-import fr.svom.vhf.server.Application.ContextSecurityCustomizer;
 import io.undertow.servlet.api.SecurityConstraint;
 import io.undertow.servlet.api.WebResourceCollection;
 
@@ -50,7 +49,7 @@ public class Application extends SpringBootServletInitializer {
         };
     }
 	@Bean
-    public WebServerFactoryCustomizer containerCustomizer() {
+    public WebServerFactoryCustomizer<WebServerFactory> containerCustomizer() {
 		return factory -> {
 			if (factory.getClass().isAssignableFrom(UndertowServletWebServerFactory.class)) {
             	UndertowServletWebServerFactory undertowContainer = (UndertowServletWebServerFactory) factory;
