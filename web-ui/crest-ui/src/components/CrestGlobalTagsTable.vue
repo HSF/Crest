@@ -2,7 +2,6 @@
   <section>
     <p>Number of rows: {{ numrows }}
     </p>
-    
     <button class="button field is-danger"
       @click="selected = null; onClickClearselection();"
       :disabled="!selected">

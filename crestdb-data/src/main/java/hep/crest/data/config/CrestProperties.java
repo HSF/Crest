@@ -16,6 +16,7 @@ public class CrestProperties {
 
 	private String dumpdir;
 	private String schemaname;
+	private String apiname;
 	private String security;
 	private String synchro;
 	private String webstaticdir;
@@ -72,4 +73,20 @@ public class CrestProperties {
 	public void setAuthenticationtype(String authtype) {
 		this.authenticationtype = authtype;
 	}
+
+	/**
+	 * @return the apiname
+	 */
+	public String getApiname() {
+		return apiname;
+	}
+
+	/**
+	 * @param apiname the apiname to set
+	 */
+	public void setApiname(String apiname) {
+		this.apiname = apiname;
+	}
+	
+	
 }

@@ -55,7 +55,7 @@ export default {
 		fetchGlobalTagsByName({commit}, name) {
 			const params = `by=name:` + name;
 			return axios
-			.get(`/api/globaltags?${params}`)
+			.get(`${Vue.prototype.apiName}/globaltags?${params}`)
 			.then(response => response.data)
 			.then(globaltags_list => {commit('mergeGlobalTags', globaltags_list)})
 			.catch(error => { return Promise.reject(error) });
@@ -67,7 +67,7 @@ export default {
 				scenario: setGlobalTag.scenario, workflow: setGlobalTag.workflow,
 				type: setGlobalTag.type});
 			return axios
-			.post(`/api/globaltags`, data, {headers: config})
+			.post(`${Vue.prototype.apiName}/globaltags`, data, {headers: config})
 			.then(response => response.data)
 			.then(globaltag => commit('mergeNewGlobalTag', globaltag))
 			.catch(error => { return Promise.reject(error) });

@@ -1,7 +1,7 @@
 <template>
 <div class="">
     <p class="has-text-info is-size-2">Search for Tags</p>
-
+    
     <div class="columns">
       <div class="column is-one-fifth">
           <b-field>
@@ -45,6 +45,9 @@ export default {
     return {
         selectedtag : {},
         radioButton : 'Search',
+        flinks: [
+          {'btnlabel' : 'Get Iovs', 'seltab' : 1}
+        ],
         helpmsg: "<p>Search for tags using filtering by tag name.</p>"
           +"<p>Once you select a tag you can browse the associated IOVs by changing to appropriate tab or clicking on the <b>Get Iovs</b> button.</p>"
           +"<p>You can use the <b>Create</b> button to create a new tag.</p>",
@@ -88,7 +91,8 @@ export default {
   },
   components: {
     CrestTagsTable,
-    TagForm
+    TagForm,
+    HelpInfoPane
   }
 };
 </script>

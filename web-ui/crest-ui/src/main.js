@@ -10,11 +10,12 @@ import App from './App.vue'
 Vue.config.productionTip = false
 Vue.prototype.apiHost = "localhost"
 Vue.prototype.apiPort = "8090"
+Vue.prototype.apiUrl = process.env.VUE_APP_CRESTAPI_URL
 //Vue.prototype.apiHost = process.env.VUE_APP_REST_API
 //Vue.prototype.apiPort = process.env.VUE_APP_REST_PORT
 Vue.prototype.apiName = process.env.VUE_APP_API_NAME
 Vue.prototype.apiProtocol = process.env.VUE_APP_API_PROTOCOL
-//Vue.prototype.apiTitle = process.env.VUE_APP_TITLE
+Vue.prototype.apiTitle = process.env.VUE_APP_TITLE
 
 Vue.use(Buefy)
 

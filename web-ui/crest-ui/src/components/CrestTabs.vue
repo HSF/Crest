@@ -8,14 +8,15 @@
 </b-tab-item>
 -->
 <b-tab-item label="GlobalTags">
-    <GlobalTagsPane v-bind:selectedtag="selectedtag"  v-on:select-tab="selActive"/>
+    <GlobalTagsPane v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Tags">
-    <TagsPane  v-on:select-tab="selActive"/>
+    <TagsPane v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Iovs">
     <IovsPane v-bind:selectedtag="selectedtag" v-on:select-tab="selActive"/>
 </b-tab-item>
+
 </b-tabs>
 </section>
 </template>
@@ -24,10 +25,12 @@
 import { mapState, mapActions, mapGetters } from 'vuex'
 import TagsPane from './TagsPane.vue'
 import IovsPane from './IovsPane.vue'
+import FoldersPane from './FoldersPane.vue'
 import GlobalTagsPane from './GlobalTagsPane.vue'
 
   export default {
       props : {
+        selectedserver : Object
       },
       data : function() {
         return {
@@ -66,7 +69,6 @@ import GlobalTagsPane from './GlobalTagsPane.vue'
           ...mapState('gui/crest', ['selectedTag', 'selectedIov']),
           ...mapGetters('db/tags', ['getTag']),
           ...mapGetters('db/iovs', ['getIovForTag']),
-
       },
       watch: {
           selectedTag: function() {
@@ -80,7 +82,8 @@ import GlobalTagsPane from './GlobalTagsPane.vue'
       components: {
         GlobalTagsPane,
         TagsPane,
-        IovsPane
+        IovsPane,
+        FoldersPane
       }
   }
 </script>

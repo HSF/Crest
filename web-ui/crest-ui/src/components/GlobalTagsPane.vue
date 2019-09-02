@@ -1,7 +1,7 @@
 <template>
 <div class="">
     <p class="has-text-info is-size-2">Search for Global Tags</p>
-
+    
     <div class="columns">
       <div class="column is-one-fifth">
           <b-field>
@@ -32,7 +32,7 @@
         <div v-if="radioButton === 'Create'">
           <GlobalTagForm/>
         </div>
-        <div v-else>
+        <div v-if="radioButton === 'CreateGlobalTagMap'">
           <GlobalTagMapForm/>
         </div>
       </div>
@@ -45,6 +45,7 @@ import { mapGetters, mapActions, mapState } from 'vuex'
 import CrestGlobalTagsTable from './CrestGlobalTagsTable.vue'
 import GlobalTagForm from './GlobalTagForm.vue'
 import GlobalTagMapForm from './GlobalTagMapForm.vue'
+import HelpInfoPane from './HelpInfoPane.vue';
 
 export default {
   name: 'GlobalTagsPane',
@@ -54,6 +55,9 @@ export default {
     return {
         selectedtag : {},
         radioButton : 'Search',
+        flinks: [
+          {'btnlabel' : 'Get Tags', 'seltab' : 1}
+        ],
         helpmsg: "<p>Search for tags using filtering by tag name.</p>"
           +"<p>Once you select a tag you can browse the associated IOVs by changing to appropriate tab or clicking on the <b>Get Iovs</b> button.</p>"
           +"<p>You can use the <b>Create</b> button to create a new tag.</p>",
@@ -64,6 +68,7 @@ export default {
   },
   methods: {
     ...mapActions('db/globaltags', ['fetchGlobalTagsByName']),
+    ...mapActions('db/tags', ['fetchTagByName']),
     updateGlobalTag() {
       const globaltag = Object.entries(this.getGlobalTag);
       for (var i = 0; i < globaltag.length; i++){
@@ -81,7 +86,7 @@ export default {
       ...mapState('gui/crest', ['selectedGlobalTag']),
       ...mapGetters('db/globaltags', ['getGlobalTag']),
       infomsg () {
-        return "Selected tag is : "+this.selectedtag.name ;
+        return "Selected global tag is : "+this.selectedtag.name ;
       }
   },
   watch: {
@@ -92,11 +97,13 @@ export default {
   },
   created(){
       this.fetchGlobalTagsByName('');
+      this.fetchTagByName('');
   },
   components: {
     CrestGlobalTagsTable,
     GlobalTagForm,
     GlobalTagMapForm,
+    HelpInfoPane
   }
 };
 </script>
