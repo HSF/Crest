@@ -67,15 +67,6 @@ import GlobalTagsPane from './GlobalTagsPane.vue'
           ...mapState('gui/crest', ['selectedTag', 'selectedIov']),
           ...mapGetters('db/tags', ['getTag']),
           ...mapGetters('db/iovs', ['getIovForTag']),
-        hostbaseurl () {
-          if (this.selectedserver.url !== "") {
-            return this.selectedserver.url;
-          }
-          const selprotocol = this.selectedserver.protocol.toLowerCase();
-          const hostname=[`${this.selectedserver.host}`,`${this.selectedserver.port}`].join(':');
-          var burl = `${selprotocol}://${hostname}/${this.selectedserver.api}`;
-          return burl;
-        }
       },
       watch: {
           selectedTag: function() {

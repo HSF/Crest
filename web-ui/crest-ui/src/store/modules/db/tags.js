@@ -67,7 +67,7 @@ export default {
 		fetchTagByName({commit}, name) {
 			const params = `by=name:` + name;
 			return axios
-			.get(`/crestapi/tags?${params}`)
+			.get(`${Vue.prototype.apiName}/tags?${params}`)
 			.then(response => response.data)
 			.then(tags_list => {commit('mergeTags', tags_list)})
 			.catch(error => { return Promise.reject(error) });
@@ -78,9 +78,17 @@ export default {
 			const label = getGlobalTag.label;
 			const params = `record=` + record + `&label=` + label;
 			return axios
-			.get(`/crestapi/globaltags/${gtname}/tags?${params}`)
+			.get(`${Vue.prototype.apiName}/globaltags/${gtname}/tags?${params}`)
 			.then(response => response.data)
 			.then(tags_list => {commit('mergeTagsForGlobaltag', {gtname, tags_list})})
+			.catch(error => { return Promise.reject(error) });
+		},
+		fetchTagMetaByTagName({commit}, name) {
+			const tagname = name;
+			return axios
+			.get(`${Vue.prototype.apiName}/tags/${tagname}/meta`)
+			.then(response => response.data)
+			.then(tagmeta_list => {commit('mergeTagMetaForTag', {tagname, tagmeta_list})})
 			.catch(error => { return Promise.reject(error) });
 		},
 		createTag({commit}, setTag) {
@@ -90,7 +98,7 @@ export default {
 				lastValidatedTime: setTag.lastValidatedTime, timeType: setTag.timeType,
 				synchronization: setTag.synchronization});
 			return axios
-			.post(`/crestapi/tags`, data, {headers: config})
+			.post(`${Vue.prototype.apiName}/tags`, data, {headers: config})
 			.then(response => response.data)
 			.then(tag => commit('mergeNewTag', tag))
 			.catch(error => { return Promise.reject(error) });
