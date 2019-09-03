@@ -22,6 +22,7 @@ crest:
   synchro: none
   webstaticdir: /tmp
   dbfile: /tmp/crestdbh2
+  apiname: /crestapi
   authenticationtype: none
   
 server:
@@ -31,7 +32,7 @@ server:
 spring:
     security.strategy: MODE_INHERITABLETHREADLOCAL
     jersey:
-      application-path: /crestapi
+      application-path: ${crest.apiname}
     datasource:
       url: jdbc:h2:${crest.dbfile};DB_CLOSE_ON_EXIT=FALSE
       driverClassName: org.h2.Driver
