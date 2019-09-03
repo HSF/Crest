@@ -63,7 +63,7 @@
               <div class="content">
                 <span>{{ count(props.row.name) }} iovs</span>
                 <ul id="tagMeta">
-                  <li v-for="(val,key) in detailsTag(props.row.name)">
+                  <li v-for="(val,key) in detailsTag(props.row.name)" v-bind:key="key">
                     {{ key }} : {{ val }}
                   </li>
                 </ul>

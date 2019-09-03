@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import CrestFoldersTable from './CrestFoldersTable.vue'
 import HelpInfoPane from './HelpInfoPane.vue';
 

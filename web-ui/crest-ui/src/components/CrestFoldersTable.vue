@@ -70,8 +70,7 @@
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex'
-  import Long from 'long';
+import { mapActions, mapGetters } from 'vuex'
 
   export default {
     name: 'CrestFoldersTable',
