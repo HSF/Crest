@@ -64,6 +64,7 @@ export default {
 			const config = {'Content-Type': 'application/json'};
 			const data = JSON.stringify({name: setGlobalTag.name, validity: setGlobalTag.validity,
 				description: setGlobalTag.description, release: setGlobalTag.release,
+				snapshotTime: -1,
 				scenario: setGlobalTag.scenario, workflow: setGlobalTag.workflow,
 				type: setGlobalTag.type});
 			return axios

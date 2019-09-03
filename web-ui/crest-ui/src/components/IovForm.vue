@@ -73,7 +73,7 @@ export default {
           this.savedIov['until'] = until;
       },
       save() {
-          var iovForm = {'tagname':this.selectedTag,'since':this.selectedSince,'until':this.selectedUntil,'snapshot':this.selectedSnapshot};
+          var iovForm = {'format': this.format, 'tagname':this.selectedTag,'since':this.selectedSince,'until':this.selectedUntil,'snapshot':this.selectedSnapshot};
           var res = {'setIov':this.savedIov,'iovForm':iovForm}
           this.createIov(res).then(response => {
               this.$toast.open({
