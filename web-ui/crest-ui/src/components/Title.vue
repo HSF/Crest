@@ -62,12 +62,11 @@ export default {
   },
   data: function () {
     return {
-      titlemsg: 'Atlas experiment',
+      titlemsg: this.apiTitle,
       siteicon: '../assets/atlas-logo-web-V02.png',
       siteurl: 'https://atlas.web.cern.ch',
 //      siteicon: '../assets/svom-logo.png',
 //      siteurl: 'https://svom.fr',
-      selectedserver: { host: this.apiHost, port: this.apiPort, protocol: this.apiProtocol, url: '' },
       showNav: false
     };
   },
