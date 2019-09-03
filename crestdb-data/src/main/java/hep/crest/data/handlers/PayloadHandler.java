@@ -119,6 +119,7 @@ public class PayloadHandler {
 		try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
 			return HashGenerator.hashoutstream(uploadedInputStream, out);
 		} catch (NoSuchAlgorithmException | IOException e) {
+			log.error("Cannot generate hash : {}",e.getMessage());
 			throw new PayloadEncodingException(e.getMessage());
 		} finally {
 			if (uploadedInputStream != null) {
