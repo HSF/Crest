@@ -55,7 +55,7 @@ export default {
 		fetchGlobalTagsByName({commit}, name) {
 			const params = `by=name:` + name;
 			return axios
-			.get(`/crestapi/globaltags?${params}`)
+			.get(`${Vue.prototype.apiName}/globaltags?${params}`)
 			.then(response => response.data)
 			.then(globaltags_list => {commit('mergeGlobalTags', globaltags_list)})
 			.catch(error => { return Promise.reject(error) });
@@ -64,10 +64,11 @@ export default {
 			const config = {'Content-Type': 'application/json'};
 			const data = JSON.stringify({name: setGlobalTag.name, validity: setGlobalTag.validity,
 				description: setGlobalTag.description, release: setGlobalTag.release,
+				snapshotTime: -1,
 				scenario: setGlobalTag.scenario, workflow: setGlobalTag.workflow,
 				type: setGlobalTag.type});
 			return axios
-			.post(`/crestapi/globaltags`, data, {headers: config})
+			.post(`${Vue.prototype.apiName}/globaltags`, data, {headers: config})
 			.then(response => response.data)
 			.then(globaltag => commit('mergeNewGlobalTag', globaltag))
 			.catch(error => { return Promise.reject(error) });

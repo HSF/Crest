@@ -1,15 +1,7 @@
 <template>
 <div class="">
     <p class="has-text-info is-size-2">Search for Tags</p>
-    <nav class="level">
-        <div class="level is-mobile">
-          <div class="level-left">
-            <div class="level-item">
-              <HelpInfoPane v-bind:helpmessage="helpmsg" v-bind:infomessage="infomsg" v-bind:notifytext="notifytext" v-bind:notiftype="notiftype" v-bind:links="flinks" v-on:child-switchtab="selectTab"/>
-            </div>
-        </div>
-      </div>
-    </nav>
+
     <div class="columns">
       <div class="column is-one-fifth">
           <b-field>
@@ -48,7 +40,6 @@ import HelpInfoPane from './HelpInfoPane.vue';
 export default {
   name: 'TagsPane',
   props : {
-    selectedserver : String,
   },
   data: function () {
     return {
@@ -84,8 +75,7 @@ export default {
       ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
       ...mapGetters('db/tags', ['getTag', 'getTagForGlobaltag']),
       infomsg () {
-        return "Access api  "+this.selectedserver
-          +"<br> Selected tag is : "+this.selectedtag.name ;
+        return "Selected tag is : "+this.selectedtag.name ;
       }
   },
   watch: {

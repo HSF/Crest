@@ -7,7 +7,7 @@
             <a class="navbar-item" href="http://irfu.cea.fr/">
               <img src="../assets/irfu_logo.png" alt="Logo">
             </a>
-            <a class="navbar-item" href="https://atlas.web.cern.ch">
+            <a class="navbar-item" :href="siteurl">
               <img src="../assets/atlas-logo-web-V02.png" alt="Logo">
             </a>
             <div class="navbar-burger" @click="showNav = !showNav" :class="{ 'is-active': showNav }">
@@ -49,33 +49,32 @@
           Crest Manager UI
         </h1>
         <h2 class="subtitle">
-          Atlas experiment
+          {{titlemsg}}
         </h2>
       </div>
     </div>
   </section>
 </template>
 <script>
-import Connection from './Connection.vue'
 export default {
   name: 'Title',
   props : {
   },
   data: function () {
     return {
+      titlemsg: 'Atlas experiment',
+      siteicon: '../assets/atlas-logo-web-V02.png',
+      siteurl: 'https://atlas.web.cern.ch',
+//      siteicon: '../assets/svom-logo.png',
+//      siteurl: 'https://svom.fr',
       selectedserver: { host: this.apiHost, port: this.apiPort, protocol: this.apiProtocol, url: '' },
       showNav: false
     };
   },
   methods: {
-    selectServer(serverurl) {
-      console.log('Change in title server url '+serverurl);
-      this.selectedserver.url = serverurl.url;
-      this.$emit('select-server', serverurl )
-    },
+
   },
   components: {
-  Connection
   }
 };
 </script>

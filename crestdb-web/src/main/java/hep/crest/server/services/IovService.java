@@ -122,6 +122,7 @@ public class IovService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
+	@Deprecated
 	public List<IovDto> findAllIovs(Predicate qry, Pageable req) throws CdbServiceException {
 		try {
 			Iterable<Iov> entitylist = null;

@@ -24,10 +24,17 @@ export default {
 		fetchPayloadMeta({commit}, iov) {
 			const params = iov;
 			return axios
-			.get(`/crestapi/payloads/${params}/meta`)
+			.get(`${Vue.prototype.apiName}/payloads/${params}/meta`)
 			.then(response => response.data)
 			.then(payload => {commit('mergePayload', payload)})
 			.catch(error => { return Promise.reject(error) });
-		}
+		},
+		fetchPayload(iov) {
+			const params = iov;
+			return axios
+			.get(`${Vue.prototype.apiName}/payloads/${params}`)
+			.then(response => response.data)
+			.catch(error => { return Promise.reject(error) });
+		},
 	}
 }

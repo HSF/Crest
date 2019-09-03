@@ -27,12 +27,12 @@ import hep.crest.data.pojo.IovId;
 @Transactional(readOnly = true)
 public interface IovBaseRepository extends PagingAndSortingRepository<Iov, IovId>,  QuerydslPredicateExecutor<Iov> {
 
-	@Query("SELECT distinct p FROM Iov p "
+	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.tag t "
 			+ "WHERE p.id.tagid = (:id) ")
 	List<Iov> findByIdTagid(@Param("id") Long id);
 	
-	@Query("SELECT distinct p FROM Iov p "
-			+ "WHERE p.id.tagid = (:id) ")
+	@Query(value="SELECT distinct p FROM Iov p JOIN FETCH p.tag t "
+			+ "WHERE p.id.tagid = (:id) ",countQuery = "SELECT COUNT(c) FROM Iov c JOIN c.tag WHERE c.id.tagid = (:id)")
 	Page<Iov> findByIdTagid(@Param("id") Long id, Pageable pageable);
 
 	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.tag tag "

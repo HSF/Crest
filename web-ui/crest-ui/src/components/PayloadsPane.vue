@@ -25,17 +25,16 @@ export default {
   name: 'PayloadsPane',
   props : {
     selectediov : Object,
-    selectedserver : String,
   },
   data: function () {
     return {
       selectedPayload : {},
       selactiveTab : 0,
-      dowloadlink : ''
+      downloadlink : ''
     };
   },
   computed: {
-      ...mapState('gui/crest', ['selectedTag', 'selectedIov']),
+      ...mapState('gui/crest', ['selectedTag', 'selectedIov','selectedPayloadLink']),
       ...mapGetters('db/payloads', ['getPayload']),
       selectDoc() {
           if (this.selectedIov !== "") {
@@ -44,16 +43,17 @@ export default {
           }
           return false;
       }
+
   },
   methods: {
-      ...mapActions('db/payloads', ['fetchPayloadMeta']),
+      ...mapActions('db/payloads', ['fetchPayloadMeta','fetchPayload']),
       loadMetadata() {
           this.fetchPayloadMeta(this.selectedIov).then(() => {
               (this.selectedPayload = this.getPayload[this.selectedIov])
           });
       },
       download2() {
-          this.downloadlink = '/crestapi/payloads/'+this.selectedIov;
+          this.downloadlink = this.selectedPayloadLink;
       },
       show() {
           if (this.selectDoc) {

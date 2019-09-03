@@ -1,15 +1,7 @@
 <template>
   <div>
     <p class="has-text-info is-size-2">Search for Iovs</p>
-    <nav class="level">
-      <div class="level is-mobile">
-        <div class="level-left">
-          <div class="level-item">
-            <HelpInfoPane v-bind:helpmessage="helpmsg" v-bind:infomessage="infomsg" v-bind:notifytext="notifytext" v-bind:notiftype="notiftype" v-bind:links="flinks" v-on:child-switchtab="selectTab"/>
-          </div>
-        </div>
-      </div>
-    </nav>
+
     <div class="columns">
       <div class="column is-one-fifth">
         <b-field>
@@ -32,7 +24,7 @@
           <CrestIovsTable v-bind:data="iovs" v-bind:selectedtag="selectedtag"/>
         </div>
         <div v-else>
-          <IovForm v-bind:selectedserver="selectedserver" v-bind:selectedtag="selectedtag"/>
+          <IovForm v-bind:selectedtag="selectedtag"/>
         </div>
       </div>
     </div>
@@ -49,7 +41,6 @@ export default {
   name: 'IovsPane',
   props : {
     selectedtag : Object,
-    selectedserver : String,
   },
   data: function () {
     return {
@@ -95,8 +86,7 @@ export default {
       ...mapGetters('db/tags', ['getTag']),
       ...mapGetters('db/iovs', ['getIovForTag']),
       infomsg () {
-        return "Access api  "+this.selectedserver
-          +"<br> Selected tag is : "+this.selectedtag.name
+        return "Selected tag is : "+this.selectedtag.name
           +"<br> Selected iov is : "+this.selectIov.since;
       },
       iovs: function() {

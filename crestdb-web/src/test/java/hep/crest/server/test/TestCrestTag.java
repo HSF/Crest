@@ -62,15 +62,6 @@ public class TestCrestTag {
 	}
 
     @Test
-    public void testC_storeGlobalTagMap() {
-        GlobalTagMapDto mapdto = new GlobalTagMapDto().globalTagName("MY_SB_TEST").label("label").record("0").tagName("SB_TAG");
-        System.out.println("Store request: "+mapdto);
-        ResponseEntity<GlobalTagMapDto> response2 = this.testRestTemplate.postForEntity("/crestapi/globaltagmaps", mapdto, GlobalTagMapDto.class);
-        System.out.println("Received response: "+response2);
-        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-    }
-
-    @Test
     public void testC_storeTagMeta() {
         TagMetaDto dto = new TagMetaDto().description("<some>description</some>").tagName("SB_TAG").channelInfo("[{\"0\": \"achannel\"},{ \"1\":\"another_chan\"}]"
                 ).payloadInfo("{ \"col1\": \"Int\"}").chansize(2).colsize(1);
@@ -90,7 +81,7 @@ public class TestCrestTag {
 	}
 	
 	@Test
-	public void testC_updateTagMeta() {
+	public void testD_updateTagMeta() {
 		GenericMap updmeta = new GenericMap();
 		updmeta.put("description", "another desc");
 		final String url = String.format("/crestapi/tags/{id}/meta");
