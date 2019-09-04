@@ -49,7 +49,7 @@
           Crest Manager UI
         </h1>
         <h2 class="subtitle">
-          Svom experiment
+          {{this.apiTitle}}
         </h2>
       </div>
     </div>
