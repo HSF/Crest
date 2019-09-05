@@ -3,8 +3,7 @@
   <Title v-on:select-server="selectServer"/>
   <CrestTabs v-bind:selectedserver="selectedserver" v-on:info-notification="activateInfoNotification"
     v-on:error-notification="activateErrorNotification"/>
-  <p>{{msg}}: default api on {{apiHost}} and port {{apiPort}} using protocol {{apiProtocol}}</p>
-  <p>Selected server is {{ selectedserver.url }}</p>
+  <p>{{msg}}: default api {{apiName}} on {{apiUrl}} </p>
   <Footer v-bind:notiftype="thetype" v-bind:selectedserver="selectedserver" v-bind:notifytext="thenotification"/>
 
 </div>

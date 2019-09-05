@@ -1,9 +1,12 @@
+import Vue from 'vue'
+
 export default {
     namespaced: true,
     state: {
         selectedGlobalTag: "",
         selectedTag: "",
         selectedIov: "",
+        selectedPayloadLink: "",
     },
     mutations: {
         selectGlobalTag(state, name) {
@@ -13,7 +16,9 @@ export default {
             state.selectedTag = name;
         },
         selectIov(state, payloadHash) {
-            state.selectedIov = payloadHash;
+          console.log('selecting iov ',payloadHash)
+          state.selectedIov = payloadHash;
+          state.selectedPayloadLink = Vue.prototype.apiName+'/payloads/'+payloadHash;
         },
     },
     actions: {

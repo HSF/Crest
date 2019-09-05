@@ -1,35 +1,79 @@
 <template>
 <div class="">
     <p class="has-text-info is-size-2">Search for Tags</p>
-    <nav class="level">
-        <div class="level is-mobile">
-          <div class="level-left">
-            <div class="level-item">
-              <HelpInfoPane v-bind:helpmessage="helpmsg" v-bind:infomessage="infomsg" v-bind:notifytext="notifytext" v-bind:notiftype="notiftype" v-bind:links="flinks" v-on:child-switchtab="selectTab"/>
-            </div>
-        </div>
-      </div>
-    </nav>
+
     <div class="columns">
       <div class="column is-one-fifth">
-          <b-field>
-            <b-radio-button v-model="radioButton"
-                native-value="Search"
-                type="is-info">
-                <b-icon icon="magnify"></b-icon>
-                <span>Search</span>
-            </b-radio-button>
-            <b-radio-button v-model="radioButton"
-                native-value="Create"
-                type="is-success">
-                <b-icon icon="lead-pencil"></b-icon>
-                <span>Create</span>
-            </b-radio-button>
+        <b-field>
+          <b-radio-button v-model="radioButton"
+              native-value="Search"
+              type="is-info">
+              <b-icon icon="magnify"></b-icon>
+              <span>Search</span>
+          </b-radio-button>
+          <b-radio-button v-model="radioButton"
+              native-value="Create"
+              type="is-success">
+              <b-icon icon="lead-pencil"></b-icon>
+              <span>Create</span>
+          </b-radio-button>
         </b-field>
+        <b-collapse class="card" :open="isOpen" style="margin-top:20px;">
+          <div slot="trigger" slot-scope="props" class="card-header" role="button">
+            <p class="card-header-title">
+              Create global tag map
+            </p>
+            <a class="card-header-icon">
+              <b-icon :icon="props.open ? 'menu-down' : 'menu-up'">
+              </b-icon>
+            </a>
+          </div>
+          <div class="card-content">
+            <div class="content">
+              <b-collapse>
+                <div class="container">
+                  <b-field label="Global Tag name">
+                    <b-dropdown v-model="globalTagName" aria-role="menu">
+                      <a class="navbar-item" slot="trigger" role="button">
+                        <span>{{ global_tagname_list() }}</span>
+                        <b-icon icon="menu-down"></b-icon>
+                      </a>
+                      <b-dropdown-item aria-role="menuitem" v-for="globalTagname in liste_global_tagname"
+                        :value="globalTagname"
+                        :key="globalTagname">
+                          {{ globalTagname }}
+                      </b-dropdown-item>
+                    </b-dropdown>
+                  </b-field>
+                  <b-field label="Filter Tag by name">
+                    <b-autocomplete
+                      v-model="thetag"
+                      :data="filteredDataArray"
+                      placeholder="e.g. MuonAlign"
+                      icon="magnify">
+                      <template slot="empty">No results found</template>
+                    </b-autocomplete>
+                  </b-field>
+                  <b-field label="Record">
+                    <b-input v-model="savedGlobalTagMap.record"></b-input>
+                  </b-field>
+                  <b-field label="Label">
+                    <b-input v-model="savedGlobalTagMap.label"></b-input>
+                  </b-field>
+                  <b-field>
+                    <p class="control">
+                      <button class="button is-primary" v-on:click="save()">Save</button>
+                    </p>
+                  </b-field>
+                </div>
+              </b-collapse>
+            </div>
+          </div>
+        </b-collapse>
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
-          <CrestTagsTable v-on:select-tag="selectTab" />
+          <CrestTagsTable v-on:select-tag="selectTab" :globalTag="globalTagName" :tagFilter="thetag" v-on:select-row="selectRow"/>
         </div>
         <div v-else>
           <TagForm/>
@@ -61,11 +105,16 @@ export default {
           +"<p>You can use the <b>Create</b> button to create a new tag.</p>",
         notiftype : 'is-info',
         notifytext : 'Searching tags....',
-        selactiveTab : 1
+        selactiveTab : 1,
+        isOpen: false,
+        globalTagName: null,
+        tagsSelected: [],
+        thetag: ''
       };
   },
   methods: {
       ...mapActions('db/tags', ['fetchTagByName', 'fetchTagByGlobalTags']),
+      ...mapActions('db/globaltagmaps', ['createGlobalTagMap']),
     updateTag() {
       const tag = Object.entries(this.getTag);
       for (var i = 0; i < tag.length; i++){
@@ -77,13 +126,90 @@ export default {
     selectTab(nt) {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
+    },
+    save() {
+        for (var i = 0; i < this.tags.length; i++){
+            this.savedGlobalTagMap['tagName'] = this.tags[i];
+            this.createGlobalTagMap(this.savedGlobalTagMap).then(response => {
+                this.$toast.open({
+                    message: 'Saved Global tag map successfully!',
+                    type: 'is-success'
+                })},
+                error => {
+                this.$toast.open({
+                    message: 'Error saving global tag map!',
+                    type: 'is-danger'
+                })
+            });
+        }
+    },
+    global_tagname_list(){
+        if (this.globalTagName != null){
+            return this.globalTagName;
+        } else {
+            return "Select global tag name";
+        }
+    },
+    selectRow(rows){
+        this.tagsSelected = rows;
     }
   },
   computed: {
       ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
-      ...mapGetters('db/tags', ['getTag', 'getTagForGlobaltag']),
+      ...mapGetters('db/tags', ['getTag', 'getTagForGlobaltag', 'getTaglist']),
+      ...mapGetters('db/globaltags', ['getGlobalTag']),
       infomsg () {
         return "Selected tag is : "+this.selectedtag.name ;
+      },
+      savedGlobalTagMap: function() {
+          let record = '';
+          if (this.tagsSelected.length != 0) {
+              let tag = this.tagsSelected[this.tagsSelected.length - 1];
+              record = tag.name.split('_')[0];
+          }
+          return { globalTagName : this.globalTagName,
+              tagName : '',
+              record : record,
+              label : 'none'};
+      },
+      tags: function() {
+          let liste_map = [];
+          for (var i = 0; i < this.tagsSelected.length; i++){
+              liste_map.push(this.tagsSelected[i].name);
+          }
+          return liste_map;  
+      },
+      liste_global_tagname: function() {
+          let liste_globaltags = [];
+          const globaltag = Object.entries(this.getGlobalTag);
+          for (var i = 0; i < globaltag.length; i++){
+              liste_globaltags.push(globaltag[i][0]);
+          }
+          return liste_globaltags;
+      },
+      taglist: function() {
+          if (this.selectedGlobalTag != "") {
+              return this.getTagForGlobaltag(this.selectedGlobalTag);
+          } else {
+              return this.getTaglist;
+          }
+      },
+      tagnames() {
+          let result = this.taglist.map(a => a.name);
+          return result
+      },
+      filteredDataArray() {
+          return this.tagnames.filter((option) => {
+              return option
+                  .toString()
+                  .toLowerCase()
+                  .indexOf(this.thetag.toLowerCase()) >= 0
+          })
+      },
+      tagfiltereddata: {
+          get: function() {
+            return this.taglist.filter(row => (row.name.includes(this.thetag) ))
+          }
       }
   },
   watch: {

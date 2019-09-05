@@ -43,7 +43,7 @@ export default {
 	actions: {
 		fetchFolder({commit}) {
 			return axios
-			.get(`/crestapi/folders`)
+			.get(`${Vue.prototype.apiName}/folders`)
 			.then(response => response.data)
 			.then(folders_list => {commit('mergeFolders', folders_list)})
 			.catch(error => { return Promise.reject(error) });

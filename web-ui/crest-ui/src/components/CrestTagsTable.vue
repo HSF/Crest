@@ -35,6 +35,9 @@
             :selected.sync="selected"
             default-sort="name"
             @click="onClick"
+            :checkable="globalTagMap"
+            :checked-rows.sync="checkedRows"
+            :is-row-checkable="record"
             :loading="isloading">
             <template slot-scope="props">
               <b-table-column v-for="(column, index) in columns"
@@ -63,7 +66,7 @@
               <div class="content">
                 <span>{{ count(props.row.name) }} iovs</span>
                 <ul id="tagMeta">
-                  <li v-for="(val,key) in detailsTag(props.row.name)">
+                  <li v-for="(val,key) in detailsTag(props.row.name)" v-bind:key="key">
                     {{ key }} : {{ val }}
                   </li>
                 </ul>
@@ -98,7 +101,9 @@ import { mapActions, mapState, mapGetters } from 'vuex'
   export default {
     name: 'CrestTagsTable',
     props : {
-      isloading : Boolean
+      isloading : Boolean,
+      globalTag: String,
+      tagFilter: String
     },
     data: function() {
       return {
@@ -129,11 +134,15 @@ import { mapActions, mapState, mapGetters } from 'vuex'
                       sortable: true
                   },
               ],
-          thetag: ''
+          thetag: '',
+          globalTagMap: false,
+          checkedRows: [],
+          record: (row) => this.checkRecord(row),
+          selectedRow: ''
       }
     },
     methods: {
-        ...mapActions('db/tags', ['fetchTagByName', 'fetchTagMetaByTagName']),
+        ...mapActions('db/tags', ['fetchTagByName', 'fetchTagMetaByTagName', 'fetchTagByGlobalTags']),
         ...mapActions('db/iovs', ['countIovsByTag']),
       timestr (atime) {
         if (!atime) {
@@ -189,18 +198,49 @@ import { mapActions, mapState, mapGetters } from 'vuex'
               }
           }
           return liste;
+      },
+      searchGlobalTagMap(globalTag) {
+          let checked = [];
+          const globaltag = Object.entries(this.getTagForGlobaltag(globalTag));
+          for (var i = 0; i < globaltag.length; i++){
+              for (var j = 0; j < this.tagfiltereddata.length; j++){
+                  if (this.tagfiltereddata[j].name == globaltag[i][1].name) {
+                      checked.push(this.tagfiltereddata[j]);
+                  }
+              }
+          }
+          this.checkedRows = checked;
+      },
+      checkRecord(row) {
+          let res = row.name !== '';
+          for (var i = 0; i < this.selectedRow.length; i++){
+              if (row.name.split('_')[0] == this.selectedRow[i].name.split('_')[0]) {
+                  res = row.name !== row.name;
+              }
+          }
+          return (res);
       }
     },
     computed: {
         ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
         ...mapGetters('db/tags', ['getTaglist', 'getTagForGlobaltag', 'getTagMetaForTag']),
         ...mapState('db/iovs', ['nb_iovs_for_tag']),
+        ...mapGetters('db/globaltags', ['getGlobalTag']),
       numrows () {
         return (!this.taglist ? -1 : this.taglist.length)
       },
       taglist: function() {
           if (this.selectedGlobalTag != "") {
               return this.getTagForGlobaltag(this.selectedGlobalTag);
+          } else if (this.tagFilter != "") {
+              let tags = [];
+              const liste_tags = Object.entries(this.getTaglist);
+              for (var i = 0; i < liste_tags.length; i++){
+                  if (liste_tags[i][1].name.match(this.tagFilter)) {
+                      tags.push(liste_tags[i][1])
+                  }
+              }
+              return tags;
           } else {
               return this.getTaglist;
           }
@@ -226,6 +266,18 @@ import { mapActions, mapState, mapGetters } from 'vuex'
     watch: {
         selectedTag: function() {
             this.fetchTagByName(this.selectedTag);
+        },
+        globalTag: function() {
+            this.globalTagMap = true;
+            var globaltag = {'name':this.globalTag,'record':'','label':''};
+            this.fetchTagByGlobalTags(globaltag).then(() => this.searchGlobalTagMap(this.globalTag));
+        },
+        checkedRows: function() {
+            this.$emit('select-row', this.checkedRows);
+            this.selectedRow = this.checkedRows;
+        },
+        tagFilter: function() {
+            this.fetchTagByName(this.tagFilter);
         }
     },
     created() {
