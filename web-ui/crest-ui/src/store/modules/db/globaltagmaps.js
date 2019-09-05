@@ -6,7 +6,7 @@ export default {
 	state: {
 		globaltagmap: {
 			/*
-			label: {
+			tagName: {
 				"globalTagName": "string",
 				"tagName": "string",
 				"record": "string",
@@ -19,10 +19,8 @@ export default {
 	},
 	mutations: {
 		mergeNewGlobalTagMap(state, globaltagmap) {
-			let label = globaltagmap.label;
-			if (!(label in state.globaltagmap)) {
-				Vue.set(state.globaltagmap, label, globaltagmap)
-			}
+			let tagName = globaltagmap.tagName;
+			Vue.set(state.globaltagmap, tagName, globaltagmap)
 		}
 	},
 	actions: {
