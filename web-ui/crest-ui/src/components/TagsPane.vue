@@ -1,7 +1,7 @@
 <template>
 <div class="">
     <p class="has-text-info is-size-2">Search for Tags</p>
-    
+
     <div class="columns">
       <div class="column is-one-fifth">
           <b-field>
@@ -69,6 +69,33 @@ export default {
     selectTab(nt) {
       this.selactiveTab = nt
       this.$emit('select-tab', this.selactiveTab)
+    },
+    save() {
+        for (var i = 0; i < this.tags.length; i++){
+            this.savedGlobalTagMap['tagName'] = this.tags[i];
+            this.savedGlobalTagMap['record'] = this.tags[i].split('_')[0];
+            this.createGlobalTagMap(this.savedGlobalTagMap).then(response => {
+                this.$toast.open({
+                    message: 'Saved Global tag map successfully!',
+                    type: 'is-success'
+                })},
+                error => {
+                this.$toast.open({
+                    message: 'Error saving global tag map!',
+                    type: 'is-danger'
+                })
+            });
+        }
+    },
+    global_tagname_list(){
+        if (this.globalTagName != null){
+            return this.globalTagName;
+        } else {
+            return "Select global tag name";
+        }
+    },
+    selectRow(rows){
+        this.tagsSelected = rows;
     }
   },
   computed: {

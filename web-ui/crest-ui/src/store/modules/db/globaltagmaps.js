@@ -6,23 +6,48 @@ export default {
 	state: {
 		globaltagmap: {
 			/*
+<<<<<<< HEAD
 			label: {
+=======
+			globalTagName: {
+>>>>>>> bbc44e2... Add tabs with tagmeta and globaltag  in tag details
 				"globalTagName": "string",
 				"tagName": "string",
 				"record": "string",
 				"label": "string"
 			}
 			*/
-		}
+		},
+		globaltag_for_tag: {
+			/*
+    		tagname: [ ...globaltagmaps ]
+			*/
+		},
 	},
 	getters: {
+		getGlobalTagMapForTag : (state) => (tagName) => {
+            if (!tagName || !state.globaltag_for_tag.hasOwnProperty(tagName)) {
+                return [];
+            }
+            return state.globaltag_for_tag[tagName];
+        }
 	},
 	mutations: {
+		mergeGlobalTagMapForTagName(state, {name, globaltagmap_list}) {
+			if (!(name in state.globaltag_for_tag)) {
+				Vue.set(state.globaltag_for_tag, name, globaltagmap_list);
+			}
+		},
 		mergeNewGlobalTagMap(state, globaltagmap) {
+<<<<<<< HEAD
 			let label = globaltagmap.label;
 			if (!(label in state.globaltagmap)) {
 				Vue.set(state.globaltagmap, label, globaltagmap)
 			}
+=======
+			let tagName = globaltagmap.globalTagName;
+			Vue.set(state.globaltagmap, tagName, globaltagmap)
+>>>>>>> bbc44e2... Add tabs with tagmeta and globaltag  in tag details
 		}
 	},
 	actions: {
@@ -36,5 +61,13 @@ export default {
 			.then(globaltagmap => commit('mergeNewGlobalTagMap', globaltagmap))
 			.catch(error => { return Promise.reject(error) });
 		},
+		fetchGlobalTagsByTagName({commit}, name) {
+			const config = {'X-Crest-MapMode': 'BackTrace'};
+			return axios
+			.get(`${Vue.prototype.apiName}/globaltagmaps/${name}`, {headers: config})
+			.then(response => response.data)
+			.then(globaltagmap_list => {commit('mergeGlobalTagMapForTagName', {name, globaltagmap_list})})
+			.catch(error => { return Promise.reject(error) });
+		}
 	}
 }
