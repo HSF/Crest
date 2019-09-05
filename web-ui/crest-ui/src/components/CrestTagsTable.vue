@@ -102,7 +102,8 @@ import { mapActions, mapState, mapGetters } from 'vuex'
     name: 'CrestTagsTable',
     props : {
       isloading : Boolean,
-      globalTag: String
+      globalTag: String,
+      tagFilter: String
     },
     data: function() {
       return {
@@ -231,6 +232,15 @@ import { mapActions, mapState, mapGetters } from 'vuex'
       taglist: function() {
           if (this.selectedGlobalTag != "") {
               return this.getTagForGlobaltag(this.selectedGlobalTag);
+          } else if (this.tagFilter != "") {
+              let tags = [];
+              const liste_tags = Object.entries(this.getTaglist);
+              for (var i = 0; i < liste_tags.length; i++){
+                  if (liste_tags[i][1].name.match(this.tagFilter)) {
+                      tags.push(liste_tags[i][1])
+                  }
+              }
+              return tags;
           } else {
               return this.getTaglist;
           }
@@ -265,6 +275,9 @@ import { mapActions, mapState, mapGetters } from 'vuex'
         checkedRows: function() {
             this.$emit('select-row', this.checkedRows);
             this.selectedRow = this.checkedRows;
+        },
+        tagFilter: function() {
+            this.fetchTagByName(this.tagFilter);
         }
     },
     created() {

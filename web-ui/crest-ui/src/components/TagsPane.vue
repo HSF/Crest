@@ -45,6 +45,15 @@
                       </b-dropdown-item>
                     </b-dropdown>
                   </b-field>
+                  <b-field label="Filter Tag by name">
+                    <b-autocomplete
+                      v-model="thetag"
+                      :data="filteredDataArray"
+                      placeholder="e.g. MuonAlign"
+                      icon="magnify">
+                      <template slot="empty">No results found</template>
+                    </b-autocomplete>
+                  </b-field>
                   <b-field label="Record">
                     <b-input v-model="savedGlobalTagMap.record"></b-input>
                   </b-field>
@@ -64,7 +73,7 @@
       </div>
       <div class="column is-four-fifths">
         <div v-if="radioButton === 'Search'">
-          <CrestTagsTable v-on:select-tag="selectTab" :globalTag="globalTagName" v-on:select-row="selectRow"/>
+          <CrestTagsTable v-on:select-tag="selectTab" :globalTag="globalTagName" :tagFilter="thetag" v-on:select-row="selectRow"/>
         </div>
         <div v-else>
           <TagForm/>
@@ -99,7 +108,8 @@ export default {
         selactiveTab : 1,
         isOpen: false,
         globalTagName: null,
-        tagsSelected: []
+        tagsSelected: [],
+        thetag: ''
       };
   },
   methods: {
@@ -146,7 +156,7 @@ export default {
   },
   computed: {
       ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
-      ...mapGetters('db/tags', ['getTag', 'getTagForGlobaltag']),
+      ...mapGetters('db/tags', ['getTag', 'getTagForGlobaltag', 'getTaglist']),
       ...mapGetters('db/globaltags', ['getGlobalTag']),
       infomsg () {
         return "Selected tag is : "+this.selectedtag.name ;
@@ -176,6 +186,30 @@ export default {
               liste_globaltags.push(globaltag[i][0]);
           }
           return liste_globaltags;
+      },
+      taglist: function() {
+          if (this.selectedGlobalTag != "") {
+              return this.getTagForGlobaltag(this.selectedGlobalTag);
+          } else {
+              return this.getTaglist;
+          }
+      },
+      tagnames() {
+          let result = this.taglist.map(a => a.name);
+          return result
+      },
+      filteredDataArray() {
+          return this.tagnames.filter((option) => {
+              return option
+                  .toString()
+                  .toLowerCase()
+                  .indexOf(this.thetag.toLowerCase()) >= 0
+          })
+      },
+      tagfiltereddata: {
+          get: function() {
+            return this.taglist.filter(row => (row.name.includes(this.thetag) ))
+          }
       }
   },
   watch: {
@@ -183,7 +217,7 @@ export default {
           this.updateTag();
       },
       selectedGlobalTag: function() {
-          var globaltag = {'name':this.selectedGlobalTag,'record':'','label':'none'};
+          var globaltag = {'name':this.selectedGlobalTag,'record':'','label':''};
           this.fetchTagByGlobalTags(globaltag);
       }
   },
