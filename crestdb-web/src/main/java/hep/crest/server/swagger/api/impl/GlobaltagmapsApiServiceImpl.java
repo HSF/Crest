@@ -46,11 +46,16 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
 	}
 
 	@Override
-	public Response findGlobalTagMap(String name, SecurityContext securityContext, UriInfo info)
+	public Response findGlobalTagMap(String name, String xCrestMapMode, SecurityContext securityContext, UriInfo info)
 			throws NotFoundException {
 		this.log.info("GlobalTagMapRestController processing request to get map for GlobalTag name " + name);
 		try {
-			List<GlobalTagMapDto> dtolist = globaltagmapService.getTagMap(name);
+			List<GlobalTagMapDto> dtolist = null;
+			if (xCrestMapMode.equals("Trace")) {
+				dtolist = globaltagmapService.getTagMap(name);
+			} else {
+				dtolist = globaltagmapService.getTagMapByTagName(name);
+			}
 			GenericEntity<List<GlobalTagMapDto>> entitylist = new GenericEntity<List<GlobalTagMapDto>>(dtolist) {
 			};
 			return Response.ok().entity(entitylist).build();
