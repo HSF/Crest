@@ -3,7 +3,7 @@
     <div class="columns">
       <div class="column is-four-fifths">
         <ul id="pyld-info">
-          <li v-for="(val,key) in selectedPayload">
+          <li v-for="(val,key) in selectedPayload"  v-bind:key="key">
             {{ key }} : {{val}}
           </li>
         </ul>
