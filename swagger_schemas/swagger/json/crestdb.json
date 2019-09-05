@@ -519,6 +519,13 @@
 				],
 				"parameters": [
 					{
+						"in": "header",
+						"name": "X-Crest-MapMode",
+						"description": "If the mode is BackTrace then it will search for global tags containing the tag <name>",
+						"default": "Trace",
+						"type": "string"
+					},
+					{
 						"name": "name",
 						"in": "path",
 						"required": true,
