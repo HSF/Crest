@@ -38,6 +38,7 @@
             :checkable="globalTagMap"
             :checked-rows.sync="checkedRows"
             :is-row-checkable="record"
+            :header-checkable=false
             :loading="isloading">
             <template slot-scope="props">
               <b-table-column v-for="(column, index) in columns"
@@ -280,6 +281,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           return liste;
       },
       searchGlobalTagMap(globalTag) {
+          // cocher les cases si des global tag map existent, sinon decocher toutes les cases
           let checked = [];
           const globaltag = Object.entries(this.getTagForGlobaltag(globalTag));
           for (var i = 0; i < globaltag.length; i++){
@@ -310,6 +312,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           this.fetchGlobalTagsByName(globalTagName);
       },
       globaltags(tagname) {
+          // recuperer les global tags associes au tag
           let globaltags_liste = [];
           this.fetchGlobalTagMap(tagname);
           const globaltagmap = Object.entries(this.getGlobalTagMapForTag(tagname));
@@ -338,6 +341,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           if (this.selectedGlobalTag != "") {
               return this.getTagForGlobaltag(this.selectedGlobalTag);
           } else if (this.tagFilter != "") {
+              // si un filtre est renseigne, on filtre le tableau a afficher
               let tags = [];
               const liste_tags = Object.entries(this.getTaglist);
               for (var i = 0; i < liste_tags.length; i++){
@@ -375,7 +379,14 @@ import { mapActions, mapState, mapGetters } from 'vuex'
         globalTag: function() {
             this.globalTagMap = true;
             var globaltag = {'name':this.globalTag,'record':'','label':''};
-            this.fetchTagByGlobalTags(globaltag).then(() => this.searchGlobalTagMap(this.globalTag));
+            this.fetchTagByGlobalTags(globaltag).then(response => {
+                    this.searchGlobalTagMap(this.globalTag);
+                },
+                error => {
+                    // appeler la fonction meme si aucun global tag map n'existe, les cases seront toutes decochees
+                    this.searchGlobalTagMap(this.globalTag);
+                }
+            );
         },
         checkedRows: function() {
             this.$emit('select-row', this.checkedRows);
