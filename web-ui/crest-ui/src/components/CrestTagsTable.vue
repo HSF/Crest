@@ -66,41 +66,54 @@
             <template slot="detail" slot-scope="props">
               <div class="content">
                 <span>{{ count(props.row.name) }} iovs</span>
-                <b-tabs v-model="activeTab">
-                  <b-tab-item label="Meta" v-on:select-tab="selActive">
+                <b-tabs>
+                  <b-tab-item label="Meta">
                     <ul id="tagMeta">
                       <li v-for="(val,key) in detailsTag(props.row.name)" v-bind:key="key">
                         {{ key }} : {{ val }}
                       </li>
                     </ul>
                   </b-tab-item>
-                  <b-tab-item label="Global tags" v-on:select-tab="selActive">
-                  <b-table
-                  :data="globaltags(props.row.name)"
-                  :paginated="isPaginated"
-                  :per-page="perPage"
-                  :current-page.sync="currentPage"
-                  :pagination-simple="isPaginationSimple"
-                  :default-sort-direction="defaultSortDirection"
-                  :selected.sync="selected"
-                  default-sort="name"
-                  :loading="isloading">
-                  <template slot-scope="props">
-                    <b-table-column v-for="(column, index) in columnsGlobalTag"
-                        :key="index"
-                        :label="column.label"
-                        :visible="column.visible"
-                        :field="column.field"
-                        sortable>
-                        {{ props.row[column.field] }}
-                    </b-table-column>
-                    <b-table-column field="insertionTime" label="Insert Time" centered>
-                      <span class="tag is-success">
-                        {{ (props.row.insertionTime) }}
-                      </span>
-                    </b-table-column>
-                  </template>
-                  </b-table>
+                  <b-tab-item label="Global tags">
+                    <b-table
+                      :data="globaltags(props.row.name)"
+                      :paginated="isPaginated"
+                      :per-page="perPage"
+                      :current-page.sync="currentPage"
+                      :pagination-simple="isPaginationSimple"
+                      :default-sort-direction="defaultSortDirection"
+                      :selected.sync="selected"
+                      default-sort="name"
+                      :loading="isloading">
+                      <template slot-scope="props">
+                        <b-table-column v-for="(column, index) in columnsGlobalTag"
+                            :key="index"
+                            :label="column.label"
+                            :visible="column.visible"
+                            :field="column.field"
+                            sortable>
+                            {{ props.row[column.field] }}
+                        </b-table-column>
+                        <b-table-column field="insertionTime" label="Insert Time" centered>
+                          <span class="tag is-success">
+                            {{ (props.row.insertionTime) }}
+                          </span>
+                        </b-table-column>
+                      </template>
+                      <template slot="empty">
+                        <section class="section">
+                          <div class="content has-text-grey has-text-centered">
+                            <p>
+                              <b-icon
+                                  icon="emoticon-sad"
+                                  size="is-large">
+                              </b-icon>
+                            </p>
+                            <p>Nothing here.</p>
+                          </div>
+                        </section>
+                      </template>
+                    </b-table>
                   </b-tab-item>
                 </b-tabs>
               </div>
@@ -216,8 +229,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           globalTagMap: false,
           checkedRows: [],
           record: (row) => this.checkRecord(row),
-          selectedRow: '',
-          activeTab: 0
+          selectedRow: ''
       }
     },
     methods: {
@@ -301,9 +313,6 @@ import { mapActions, mapState, mapGetters } from 'vuex'
               }
           }
           return (res);
-      },
-      selActive(activetab) {
-          this.activeTab = activetab;
       },
       fetchGlobalTagMap(tagname) {
           this.fetchGlobalTagsByTagName(tagname);
