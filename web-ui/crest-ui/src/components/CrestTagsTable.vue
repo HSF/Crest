@@ -38,6 +38,7 @@
             :checkable="globalTagMap"
             :checked-rows.sync="checkedRows"
             :is-row-checkable="record"
+            :header-checkable=false
             :loading="isloading">
             <template slot-scope="props">
               <b-table-column v-for="(column, index) in columns"
@@ -65,11 +66,56 @@
             <template slot="detail" slot-scope="props">
               <div class="content">
                 <span>{{ count(props.row.name) }} iovs</span>
-                <ul id="tagMeta">
-                  <li v-for="(val,key) in detailsTag(props.row.name)" v-bind:key="key">
-                    {{ key }} : {{ val }}
-                  </li>
-                </ul>
+                <b-tabs>
+                  <b-tab-item label="Meta">
+                    <ul id="tagMeta">
+                      <li v-for="(val,key) in detailsTag(props.row.name)" v-bind:key="key">
+                        {{ key }} : {{ val }}
+                      </li>
+                    </ul>
+                  </b-tab-item>
+                  <b-tab-item label="Global tags">
+                    <b-table
+                      :data="globaltags(props.row.name)"
+                      :paginated="isPaginated"
+                      :per-page="perPage"
+                      :current-page.sync="currentPage"
+                      :pagination-simple="isPaginationSimple"
+                      :default-sort-direction="defaultSortDirection"
+                      :selected.sync="selected"
+                      default-sort="name"
+                      :loading="isloading">
+                      <template slot-scope="props">
+                        <b-table-column v-for="(column, index) in columnsGlobalTag"
+                            :key="index"
+                            :label="column.label"
+                            :visible="column.visible"
+                            :field="column.field"
+                            sortable>
+                            {{ props.row[column.field] }}
+                        </b-table-column>
+                        <b-table-column field="insertionTime" label="Insert Time" centered>
+                          <span class="tag is-success">
+                            {{ (props.row.insertionTime) }}
+                          </span>
+                        </b-table-column>
+                      </template>
+                      <template slot="empty">
+                        <section class="section">
+                          <div class="content has-text-grey has-text-centered">
+                            <p>
+                              <b-icon
+                                  icon="emoticon-sad"
+                                  size="is-large">
+                              </b-icon>
+                            </p>
+                            <p>Nothing here.</p>
+                          </div>
+                        </section>
+                      </template>
+                    </b-table>
+                  </b-tab-item>
+                </b-tabs>
               </div>
             </template>
             <template slot="empty">
@@ -134,6 +180,51 @@ import { mapActions, mapState, mapGetters } from 'vuex'
                       sortable: true
                   },
               ],
+          columnsGlobalTag : [
+              {
+                  field: 'name',
+                  label: 'Global tag name',
+                  width: '40',
+                  visible: true,
+                  sortable: true
+              },
+              {
+                  field: 'validity',
+                  label: 'Validity',
+                  visible: true,
+                  sortable: false,
+              },
+              {
+                  field: 'description',
+                  label: 'Description',
+                  visible: true,
+                  sortable: false,
+              },
+              {
+                  field: 'release',
+                  label: 'Release',
+                  visible: true,
+                  sortable: false,
+              },
+              {
+                  field: 'scenario',
+                  label: 'Scenario',
+                  visible: true,
+                  sortable: false,
+              },
+              {
+                  field: 'workflow',
+                  label: 'Workflow',
+                  visible: true,
+                  sortable: false,
+              },
+              {
+                  field: 'type',
+                  label: 'Type',
+                  visible: true,
+                  sortable: false,
+              },
+          ],
           thetag: '',
           globalTagMap: false,
           checkedRows: [],
@@ -143,6 +234,8 @@ import { mapActions, mapState, mapGetters } from 'vuex'
     },
     methods: {
         ...mapActions('db/tags', ['fetchTagByName', 'fetchTagMetaByTagName', 'fetchTagByGlobalTags']),
+        ...mapActions('db/globaltagmaps', ['fetchGlobalTagsByTagName']),
+        ...mapActions('db/globaltags', ['fetchGlobalTagsByName']),
         ...mapActions('db/iovs', ['countIovsByTag']),
       timestr (atime) {
         if (!atime) {
@@ -200,6 +293,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           return liste;
       },
       searchGlobalTagMap(globalTag) {
+          // cocher les cases si des global tag map existent, sinon decocher toutes les cases
           let checked = [];
           const globaltag = Object.entries(this.getTagForGlobaltag(globalTag));
           for (var i = 0; i < globaltag.length; i++){
@@ -219,13 +313,36 @@ import { mapActions, mapState, mapGetters } from 'vuex'
               }
           }
           return (res);
+      },
+      fetchGlobalTagMap(tagname) {
+          this.fetchGlobalTagsByTagName(tagname);
+      },
+      fetchGlobalTag(globalTagName) {
+          this.fetchGlobalTagsByName(globalTagName);
+      },
+      globaltags(tagname) {
+          // recuperer les global tags associes au tag
+          let globaltags_liste = [];
+          this.fetchGlobalTagMap(tagname);
+          const globaltagmap = Object.entries(this.getGlobalTagMapForTag(tagname));
+          for (var i = 0; i < globaltagmap.length; i++){
+              this.fetchGlobalTag(globaltagmap[i][1].globalTagName);
+              const globaltag = Object.entries(this.getGlobalTaglist);
+              for (var j = 0; j < globaltag.length; j++){
+                  if (globaltag[j][1].name == globaltagmap[i][1].globalTagName) {
+                      globaltags_liste.push(globaltag[j][1]);
+                  }
+              }
+          }
+          return globaltags_liste;
       }
     },
     computed: {
         ...mapState('gui/crest', ['selectedTag', 'selectedGlobalTag']),
         ...mapGetters('db/tags', ['getTaglist', 'getTagForGlobaltag', 'getTagMetaForTag']),
         ...mapState('db/iovs', ['nb_iovs_for_tag']),
-        ...mapGetters('db/globaltags', ['getGlobalTag']),
+        ...mapGetters('db/globaltags', ['getGlobalTaglist']),
+        ...mapGetters('db/globaltagmaps', ['getGlobalTagMapForTag']),
       numrows () {
         return (!this.taglist ? -1 : this.taglist.length)
       },
@@ -233,6 +350,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
           if (this.selectedGlobalTag != "") {
               return this.getTagForGlobaltag(this.selectedGlobalTag);
           } else if (this.tagFilter != "") {
+              // si un filtre est renseigne, on filtre le tableau a afficher
               let tags = [];
               const liste_tags = Object.entries(this.getTaglist);
               for (var i = 0; i < liste_tags.length; i++){
@@ -270,7 +388,14 @@ import { mapActions, mapState, mapGetters } from 'vuex'
         globalTag: function() {
             this.globalTagMap = true;
             var globaltag = {'name':this.globalTag,'record':'','label':''};
-            this.fetchTagByGlobalTags(globaltag).then(() => this.searchGlobalTagMap(this.globalTag));
+            this.fetchTagByGlobalTags(globaltag).then(response => {
+                    this.searchGlobalTagMap(this.globalTag);
+                },
+                error => {
+                    // appeler la fonction meme si aucun global tag map n'existe, les cases seront toutes decochees
+                    this.searchGlobalTagMap(this.globalTag);
+                }
+            );
         },
         checkedRows: function() {
             this.$emit('select-row', this.checkedRows);

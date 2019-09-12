@@ -130,6 +130,7 @@ export default {
     save() {
         for (var i = 0; i < this.tags.length; i++){
             this.savedGlobalTagMap['tagName'] = this.tags[i];
+            this.savedGlobalTagMap['record'] = this.tags[i].split('_')[0];
             this.createGlobalTagMap(this.savedGlobalTagMap).then(response => {
                 this.$toast.open({
                     message: 'Saved Global tag map successfully!',
