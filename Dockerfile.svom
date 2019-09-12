@@ -27,6 +27,7 @@ RUN  mkdir -p ${crest_dir} \
 ADD crestdb-web/build/libs/crest.war ${crest_dir}/crest.war
 ADD web ${data_dir}/web
 ADD logback.xml.crest ${data_dir}/logback.xml
+RUN mkdir -p ${data_dir}/web/dump
 
 VOLUME "${data_dir}/logs"
 VOLUME "${data_dir}/web"
