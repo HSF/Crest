@@ -39,15 +39,8 @@ export default {
 			}
 		},
 		mergeNewGlobalTagMap(state, globaltagmap) {
-<<<<<<< HEAD
-			let label = globaltagmap.label;
-			if (!(label in state.globaltagmap)) {
-				Vue.set(state.globaltagmap, label, globaltagmap)
-			}
-=======
 			let tagName = globaltagmap.globalTagName;
 			Vue.set(state.globaltagmap, tagName, globaltagmap)
->>>>>>> bbc44e2... Add tabs with tagmeta and globaltag  in tag details
 		}
 	},
 	actions: {
