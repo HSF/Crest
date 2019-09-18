@@ -16,7 +16,7 @@ caching:
 # schemaname : ATLAS_PHYS_COND or none
 # security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)
 crest:
-  dumpdir: /tmp/crest-dump/
+  dumpdir: /tmp
   schemaname: none
   security: none
   synchro: none
