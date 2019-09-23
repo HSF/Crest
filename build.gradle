@@ -72,7 +72,7 @@ Properties getProjectProperties() {
 sonarqube {
 	properties{
 		property 'sonar.coverage.exclusions', "**/hep/crest/swagger/model/*"
-        property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
+    property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
 	}
 }
 
@@ -138,4 +138,11 @@ subprojects {
 	task wrapper(type: Wrapper) {
 	   gradleVersion = '5.2.1' //version required
 	}
+	
+	task purgedb(type: Delete) {
+    	delete fileTree('/tmp') {
+        include 'crest*.db'
+    }}
+    
+    test.dependsOn purgedb
 }
