@@ -78,11 +78,11 @@ Properties getProjectProperties() {
 
 // An example for sonarqube configuration: to run the code on a local sonarqube instance you should
 // use commands like : ./gradlew sonarqube   -Dsonar.host.url=http://localhost:9000   -Dsonar.login=180fe2ea3c768359eb5fa680f7bbe6667ceeb238
-sonarqube { 
-	properties{ 
+sonarqube {
+	properties{
 		property 'sonar.coverage.exclusions', "**/hep/crest/swagger/model/*"
-        property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
-	} 
+    property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
+	}
 }
 
 subprojects {
@@ -147,4 +147,11 @@ subprojects {
 	task wrapper(type: Wrapper) {
 	   gradleVersion = '5.2.1' //version required
 	}
+
+	task purgedb(type: Delete) {
+    	delete fileTree('/tmp') {
+        include 'crest*.db'
+    }}
+
+    test.dependsOn purgedb
 }

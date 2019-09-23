@@ -89,6 +89,9 @@ public class TagsApiServiceImpl extends TagsApiService {
 					BigDecimal val = new BigDecimal(body.get(key));
 					dto.setEndOfValidity(val);
 				}
+				if (key == "synchronization") {
+					dto.setSynchronization(body.get(key));
+				}
 				if (key == "payloadSpec") {
 					dto.setPayloadSpec(body.get(key));
 				}
