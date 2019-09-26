@@ -206,11 +206,12 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 	protected long getLargeObjectId(Connection conn, InputStream is, PayloadDto entity) {
 		// Open the large object for writing
 		LargeObjectManager lobj;
+		LargeObject obj = null;
 		long oid;
 		try {
 			lobj = conn.unwrap(org.postgresql.PGConnection.class).getLargeObjectAPI();
 			oid = lobj.createLO();
-			LargeObject obj = lobj.open(oid, LargeObjectManager.WRITE);
+			obj = lobj.open(oid, LargeObjectManager.WRITE);
 
 			// Copy the data from the file to the large object
 			byte[] buf = new byte[2048];
@@ -228,6 +229,14 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			return oid;
 		} catch (SQLException | IOException e) {
 			log.error("Exception in getting large object id: {}", e.getMessage());
+		} finally {
+			if (obj!= null) {
+				try {
+					obj.close();
+				} catch (SQLException e) {
+					log.error("Error in closing LargeObject");
+				}
+			}
 		}
 		return (Long) null;
 	}
