@@ -6,7 +6,6 @@ package hep.crest.server.services;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -117,13 +116,12 @@ public class IovService {
 			throw new CdbServiceException("Cannot find iovs by tag name and pagination: " + e.getMessage());
 		}
 	}
-	
+		
 	/**
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@Deprecated
-	public List<IovDto> findAllIovs(Predicate qry, Pageable req) throws CdbServiceException {
+	public List<IovDto> findAllIovs(Tag tag, Predicate qry, Pageable req) throws CdbServiceException {
 		try {
 			Iterable<Iov> entitylist = null;
 			if (qry == null) {
@@ -131,7 +129,7 @@ public class IovService {
 			} else {
 				entitylist = iovRepository.findAll(qry, req);
 			}
-			return StreamSupport.stream(entitylist.spliterator(), false).map(s -> mapper.map(s,IovDto.class)).collect(Collectors.toList());
+			return StreamSupport.stream(entitylist.spliterator(), false).map(i -> {i.setTag(tag); return i;}).map(s -> mapper.map(s,IovDto.class)).collect(Collectors.toList());
 		} catch (Exception e) {
 			log.error("Exception in retrieving iov list using predicate and pagination...");
 			throw new CdbServiceException("Cannot find all iovs using predicate and pagination: " + e.getMessage());

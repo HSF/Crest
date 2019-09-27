@@ -1,6 +1,7 @@
 package hep.crest.server.swagger.api.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -88,19 +89,50 @@ public class IovsApiServiceImpl extends IovsApiService {
 	 * @see hep.crest.server.swagger.api.IovsApiService#findAllIovs(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
 	 */
 	@Override
-	public Response findAllIovs(String tagname, Integer page, Integer size, String sort,
+	public Response findAllIovs(String by, Integer page, Integer size, String sort, String dateformat,
 			SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		try {
-			log.debug("Search resource list using tag={}, page={}, size={}, sort={}", tagname, page, size, sort);
-			
+			log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size, sort);
+			if (dateformat == null) {
+				dateformat = "ms";
+			}
+	
 			PageRequest preq = prh.createPageRequest(page, size, sort);
 			List<IovDto> dtolist = null;
-			if (tagname.equals("none")) {
-				String message = "Bad tag argument";
+			if (!by.matches("(.*)tag.ame(.*)")) {
+				String message = "Bad search argument, you need a tagName at least.";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
+				return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+			}
+			if (by.equals("none")) {
+				String message = "Bad search argument, you need a tagName at least.";
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 				return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
 			} else {
-				dtolist = iovService.findAllIovsByTagName(tagname,preq);
+				List<SearchCriteria> params = prh.createMatcherCriteria(by,dateformat);
+				List<SearchCriteria> modparams = new ArrayList<>();
+				Tag atag = null;
+				for (SearchCriteria searchCriteria : params) {
+					if (searchCriteria.getKey().equalsIgnoreCase("tagname")) {
+						atag = tagService.findTag(searchCriteria.getValue().toString());
+						SearchCriteria sc = new SearchCriteria("tagId", ":", atag.getTagid());
+						modparams.add(sc);
+					} else {
+						modparams.add(searchCriteria);
+					}
+				}
+
+				List<BooleanExpression> expressions = filtering.createFilteringConditions(modparams);
+				BooleanExpression wherepred = null;
+
+				for (BooleanExpression exp : expressions) {
+					if (wherepred == null) {
+						wherepred = exp;
+					} else {
+						wherepred = wherepred.and(exp);
+					}
+				}
+				dtolist = iovService.findAllIovs(atag,wherepred,preq);
 			}
 			if (dtolist == null) {
 				String message = "No resource has been found";
@@ -112,8 +144,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 			return Response.ok().entity(entitylist).build();
 
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error in loading iov list : {}",e.getMessage());
 			String message = e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -138,14 +169,16 @@ public class IovsApiServiceImpl extends IovsApiService {
 			return Response.ok().entity(size).build();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error in getting iov list size: {}",e.getMessage());
 			String message = e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.IovsApiService#getSizeByTag(java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
 	@Override
 	public Response getSizeByTag(@NotNull String tagname, SecurityContext securityContext, UriInfo info)
 			throws NotFoundException {
@@ -154,8 +187,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 			return Response.ok().entity(entitylist).build();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error in getting iov list size by tag: {}",e.getMessage());
 			String message = e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
