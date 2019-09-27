@@ -7,7 +7,7 @@
 FROM anapsix/alpine-java
 MAINTAINER Andrea Formica
 
-ENV USR svom
+ENV USR crest
 
 ENV crest_version 1.1-SNAPSHOT
 ENV crest_dir /home/${USR}/swagger_crest
@@ -31,9 +31,10 @@ ADD web ${data_dir}/web
 ADD logback.xml.crest ${data_dir}/logback.xml
 COPY ./web-ui/crest-ui/dist ${data_dir}/web/crestui
 
-VOLUME "${data_dir}/web"
-VOLUME "${data_dir}/dump"
-VOLUME "${data_dir}/logs"
+#VOLUME "${data_dir}/web"
+#VOLUME "${data_dir}/dump"
+#VOLUME "${data_dir}/logs"
+VOLUME "${data_dir}"
 
 EXPOSE 8080
 
