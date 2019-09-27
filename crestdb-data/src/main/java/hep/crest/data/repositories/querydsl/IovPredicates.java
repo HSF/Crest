@@ -45,6 +45,26 @@ public class IovPredicates {
 		log.debug("hasSinceBetween: argument {} {}",since,until);
 		return  QIov.iov.id.since.between(since,until);
 	}
+
+	/**
+	 * @param since
+	 * @param until
+	 * @return
+	 */
+	public static BooleanExpression isSinceXThan(String oper, BigDecimal since) {
+		log.debug("isSinceXThan: argument {} {}",since,oper);
+		BooleanExpression pred = null;
+
+		if (oper.equals("<")) {
+			pred = QIov.iov.id.since.lt(since);
+		} else if (oper.equals(">")) {
+			pred = QIov.iov.id.since.gt(since);
+		} else if (oper.equals(":")) {
+			pred = QIov.iov.id.since.eq(since);
+		} 
+		return pred;
+	}
+
 	
 	public static BooleanExpression isInsertionTimeXThan(String oper, String num) {
 		log.debug("isInsertionTimeXThan: argument {} operation {}",num ,oper);
