@@ -38,21 +38,22 @@ public class TagFiltering implements IFilteringCriteria {
 			for (SearchCriteria searchCriteria : criteria) {
 				log.debug("search criteria " + searchCriteria.getKey() + " " + searchCriteria.getOperation() + " "
 						+ searchCriteria.getValue());
-				if (searchCriteria.getKey().equals("objectType")) {
+				String key = searchCriteria.getKey().toLowerCase();
+				if (key.equals("objecttype")) {
 					BooleanExpression objtyplike = TagPredicates.hasObjectTypeLike(searchCriteria.getValue().toString());
 					expressions.add(objtyplike);
-				} else if (searchCriteria.getKey().equals("timeType")) {
+				} else if (key.equals("timetype")) {
 					BooleanExpression timtyplike = TagPredicates.hasTimeTypeLike(searchCriteria.getValue().toString());
 					expressions.add(timtyplike);
-				} else if (searchCriteria.getKey().equals("insertionTime")) {
+				} else if (key.equals("insertiontime")) {
 					BooleanExpression insertionTimexthan = TagPredicates
 							.isInsertionTimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
 					expressions.add(insertionTimexthan);
-				} else if (searchCriteria.getKey().equals("modificationTime")) {
+				} else if (key.equals("modificationtime")) {
 					BooleanExpression modTimexthan = TagPredicates
 							.isModificationTimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
 					expressions.add(modTimexthan);
-				} else if (searchCriteria.getKey().equals("name")) {
+				} else if (key.equals("name")) {
 					BooleanExpression namelike = TagPredicates
 							.hasNameLike(searchCriteria.getValue().toString());
 					expressions.add(namelike);
