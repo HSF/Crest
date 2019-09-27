@@ -87,18 +87,23 @@ public class IovsApiServiceImpl extends IovsApiService {
 	 * @see hep.crest.server.swagger.api.IovsApiService#findAllIovs(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
 	 */
 	@Override
-	public Response findAllIovs(String tagname, Integer page, Integer size, String sort,
+	public Response findAllIovs(String by, Integer page, Integer size, String sort, String dateformat,
 			SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		try {
-			log.debug("Search resource list using tag={}, page={}, size={}, sort={}", tagname, page, size, sort);
+			log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size, sort);
 			
+			if (dateformat == null) {
+				dateformat = "ms";
+			}
 			PageRequest preq = prh.createPageRequest(page, size, sort);
 			List<IovDto> dtolist = null;
-			if (tagname.equals("none")) {
-				dtolist = iovService.findAllIovs(null, preq);
+			if (!by.matches("(.*)tag.ame(.*)")) {
+				String message = "Cannot search iovs without a tagname selection.";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
+				return Response.status(Response.Status.NOT_ACCEPTABLE).entity(resp).build();
 			} else {
-
-				List<SearchCriteria> params = prh.createCriteria("tagname",":",tagname);
+				
+				List<SearchCriteria> params = prh.createMatcherCriteria(by,dateformat);
 				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
 				BooleanExpression wherepred = null;
 
