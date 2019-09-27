@@ -737,10 +737,10 @@
 				],
 				"parameters": [
 					{
-						"name": "tagname",
+						"name": "by",
 						"in": "query",
-						"description": "tagname: the tag name {none}",
-						"required": false,
+						"description": "you need a mandatory tagname:xxxx. Additional field can be since or insertionTime rules.",
+						"required": true,
 						"type": "string",
 						"default": "none"
 					},
@@ -769,6 +769,13 @@
 						"required": false,
 						"type": "string",
 						"default": "id.since:ASC"
+					},
+					{
+						"in": "header",
+						"name": "dateformat",
+						"description": "The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison.",
+						"default": "ms",
+						"type": "string"
 					}
 				],
 				"responses": {

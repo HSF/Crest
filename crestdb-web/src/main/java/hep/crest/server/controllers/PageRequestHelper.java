@@ -3,6 +3,9 @@
  */
 package hep.crest.server.controllers;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -87,7 +90,41 @@ public class PageRequestHelper {
 		log.debug("List of search criteria: {}",params.size());
 		return params;
 	}
-	
+
+	/**
+	 * @param by
+	 * @param dateformat
+	 * 	The date format : ms or some ISO like date string yyyyMMdd'T'HHmmssX.
+	 * @return
+	 */
+	public List<SearchCriteria> createMatcherCriteria(String by, String dateformat) {
+		DateTimeFormatter dtformatter = null;
+		if (!dateformat.equals("ms")) {
+			dtformatter = DateTimeFormatter.ofPattern(dateformat);
+		}
+		Pattern pattern = Pattern.compile(QRY_PATTERN);
+		Matcher matcher = pattern.matcher(by + ",");
+		log.debug("Pattern is {}",pattern);
+		log.debug("Matcher is {}",matcher);
+		List<SearchCriteria> params = new ArrayList<>();
+		while (matcher.find()) {
+			String varname = matcher.group(1).toLowerCase();
+			String op = matcher.group(2);
+			String val = matcher.group(3);
+			val = val.replaceAll("\\*", "\\%");
+			if (dtformatter != null && (varname.contains("time"))) {
+				ZonedDateTime zdtInstanceAtOffset = ZonedDateTime.parse(val, dtformatter);
+				ZonedDateTime zdtInstanceAtUTC = zdtInstanceAtOffset.withZoneSameInstant(ZoneOffset.UTC);
+				Long tepoch = zdtInstanceAtUTC.toInstant().toEpochMilli();
+				log.info("Parsed date at UTC : {}; use epoch {}",zdtInstanceAtUTC,tepoch);
+				val = tepoch.toString();
+			}
+			params.add(new SearchCriteria(varname, op, val));
+		}
+		log.debug("List of search criteria: {}",params.size());
+		return params;
+	}
+
 	/**
 	 * @param key
 	 * @param op
