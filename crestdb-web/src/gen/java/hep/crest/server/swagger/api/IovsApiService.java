@@ -14,7 +14,6 @@ import hep.crest.server.swagger.api.NotFoundException;
 
 import java.io.InputStream;
 
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
@@ -22,10 +21,10 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import javax.validation.constraints.*;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-09-27T21:56:58.011+02:00")
 public abstract class IovsApiService {
     public abstract Response createIov(IovDto body,SecurityContext securityContext, UriInfo info) throws NotFoundException;
-    public abstract Response findAllIovs( String tagname, Integer page, Integer size, String sort,SecurityContext securityContext, UriInfo info) throws NotFoundException;
+    public abstract Response findAllIovs( @NotNull String by, Integer page, Integer size, String sort,String dateformat,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response getSize( @NotNull String tagname, Long snapshot,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response getSizeByTag( @NotNull String tagname,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response selectGroups( @NotNull String tagname, Long snapshot,SecurityContext securityContext, UriInfo info,Request request, HttpHeaders headers) throws NotFoundException;
