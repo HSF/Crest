@@ -12,7 +12,7 @@ version: '3.3'
 
 services:
   crest-http:
-    image: gitlab-registry.cern.ch/formica/swagger_crestdb:tagmeta
+    image: gitlab-registry.cern.ch/formica/swagger_crestdb:runner
     deploy:
       placement:
         constraints:
