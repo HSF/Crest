@@ -8,6 +8,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -54,6 +55,7 @@ public class ServicesConfig {
 	public ObjectMapper getJacksonMapper() {
 		ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		mapper.setSerializationInclusion(Include.NON_NULL);
 	    return mapper;
 	}
 	

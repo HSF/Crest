@@ -272,10 +272,11 @@ public class IovService {
 		log.debug("Create iov from dto {}", dto);
 		Iov tmpiov = null;
 		Iov entity = null;
+		String tagname = dto.getTagName();
 		try {
 			entity =  mapper.map(dto,Iov.class);
 			log.debug("Verify if the same IOV is already stored with the same hash....");
-			tmpiov = iovRepository.findBySinceAndTagNameAndHash(entity.getId().getTagName(), entity.getId().getSince(), entity.getPayloadHash());
+			tmpiov = iovRepository.findBySinceAndTagNameAndHash(tagname, entity.getId().getSince(), entity.getPayloadHash());
 		} catch (Exception e) {
 			log.warn("Searching iov {} has not found anything...",dto);
 		}
@@ -288,19 +289,20 @@ public class IovService {
 		}
 		try {
 			// The IOV is not yet stored. Verify that the tag exists before inserting it.
-			Optional<Tag> tg = tagRepository.findById(dto.getTagName());
+			Optional<Tag> tg = tagRepository.findById(tagname);
 			if (tg.isPresent()) {
 				Tag t = tg.get();
 		    		t.setModificationTime(null);
 				Tag updtag = tagRepository.save(t);
 				entity.setTag(updtag);
+				entity.getId().setTagName(tagname);
 				Iov saved = iovRepository.save(entity);
 				log.debug("Saved entity: {}", saved);
 				IovDto dtoentity = mapper.map(saved,IovDto.class);
 				log.debug("Returning iovDto: {}", dtoentity);
 				return dtoentity;
 			}
-			throw new CdbServiceException("Unkown tag : " +dto.getTagName());
+			throw new CdbServiceException("Unkown tag : " +tagname);
 
 		} catch (Exception e) {
 			log.error("Exception in storing iov {}", dto);

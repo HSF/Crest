@@ -217,6 +217,10 @@
 		},
 		"IovDto": {
 			"type": "object",
+			"required": [
+				"since",
+				"payloadHash"
+			],
 			"properties": {
 				"tagName": {
 					"type": "string"

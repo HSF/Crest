@@ -379,7 +379,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 				IovDto savediov = iovService.insertIov(dto);
 				log.debug("Created payload {} and iov {} ", saved, savediov);
 				return new HTTPResponse().code(Response.Status.CREATED.getStatusCode()).id(savediov.getPayloadHash())
-						.message("Iov created in tag " + savediov.getTagName() + " with time " + savediov.getSince());
+						.message("Iov created in tag " + dto.getTagName() + " with time " + savediov.getSince());
 			} catch (AlreadyExistsPojoException e) {
 				return new HTTPResponse().code(Response.Status.NOT_MODIFIED.getStatusCode()).id(dto.getPayloadHash())
 						.message("Iov already exists in tag " + dto.getTagName() + " with time " + dto.getSince());
@@ -395,7 +395,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			IovDto savediov = iovService.insertIov(dto);
 			log.debug("Create payload {} and iov {} ", saved, savediov);
 			return new HTTPResponse().code(Response.Status.CREATED.getStatusCode()).id(savediov.getPayloadHash())
-					.message("Iov created in tag " + savediov.getTagName() + " with time " + savediov.getSince());
+					.message("Iov created in tag " + dto.getTagName() + " with time " + savediov.getSince());
 		} catch (AlreadyExistsPojoException e) {
 			return new HTTPResponse().code(Response.Status.NOT_MODIFIED.getStatusCode()).id(dto.getPayloadHash())
 					.message("Iov already exists in tag " + dto.getTagName() + " with time " + dto.getSince());
