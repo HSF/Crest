@@ -47,7 +47,6 @@ import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.PayloadsApiService;
 import hep.crest.swagger.model.HTTPResponse;
 import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.IovPayloadDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
 
@@ -238,8 +237,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		try {
 			IovSetDto dto = iovsetupload.getValueAs(IovSetDto.class);
 			log.info("Batch insertion of {} iovs using file formatted in {}", dto.getNiovs(), dto.getFormat());
-			List<IovPayloadDto> iovlist = dto.getIovsList();
-			List<IovPayloadDto> savediovlist = new ArrayList<>();
+			List<IovDto> iovlist = dto.getIovsList();
+			List<IovDto> savediovlist = new ArrayList<>();
 			if (xCrestPayloadFormat == null) {
 				xCrestPayloadFormat = "FILE";
 			}
@@ -249,7 +248,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 				return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
 			}
 			if (xCrestPayloadFormat.equals("FILE")) {
-				for (IovPayloadDto piovDto : iovlist) {
+				for (IovDto piovDto : iovlist) {
 					Map<String, Object> retmap = getDocumentStream(piovDto, filesbodyparts);
 					PayloadDto pdto = new PayloadDto().objectType(dto.getFormat())
 							.streamerInfo(dto.getFormat().getBytes()).version("none");
@@ -260,9 +259,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 					IovDto iovDto = new IovDto().payloadHash(hash).since(piovDto.getSince()).tagName(tag);
 					try {
 						saveIovAndPayload(iovDto, pdto, filename);
-						IovPayloadDto sd = new IovPayloadDto().since(iovDto.getSince())
-								.payload(iovDto.getPayloadHash());
-						savediovlist.add(sd);
+						savediovlist.add(iovDto);
 					} catch (CdbServiceException e1) {
 						log.error("Cannot insert iov {}", piovDto);
 					}
@@ -304,24 +301,22 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		try {
 			IovSetDto dto = iovsetupload.getValueAs(IovSetDto.class);
 			log.info("Batch insertion of {} iovs using file formatted in {}", dto.getNiovs(), dto.getFormat());
-			List<IovPayloadDto> iovlist = dto.getIovsList();
-			List<IovPayloadDto> savediovlist = new ArrayList<>();
+			List<IovDto> iovlist = dto.getIovsList();
+			List<IovDto> savediovlist = new ArrayList<>();
 			if (xCrestPayloadFormat == null) {
 				xCrestPayloadFormat = "JSON";
 			}
 			if (xCrestPayloadFormat.equalsIgnoreCase("JSON")) {
-				for (IovPayloadDto piovDto : iovlist) {
+				for (IovDto piovDto : iovlist) {
 					PayloadDto pdto = new PayloadDto().objectType(dto.getFormat()).hash("none")
 							.streamerInfo(dto.getFormat().getBytes()).version("none")
-							.data(piovDto.getPayload().getBytes());
+							.data(piovDto.getPayloadHash().getBytes());
 					String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
 					pdto.hash(hash);
 					IovDto iovDto = new IovDto().payloadHash(hash).since(piovDto.getSince()).tagName(tag);
 					try {
 						saveIovAndPayload(iovDto, pdto, null);
-						IovPayloadDto sd = new IovPayloadDto().since(iovDto.getSince())
-								.payload(iovDto.getPayloadHash());
-						savediovlist.add(sd);
+						savediovlist.add(iovDto);
 					} catch (CdbServiceException e1) {
 						log.error("Cannot insert iov {}", piovDto);
 					}
@@ -495,13 +490,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 	 * @return
 	 * @throws CdbServiceException
 	 */
-	protected Map<String, Object> getDocumentStream(IovPayloadDto mddto, List<FormDataBodyPart> bodyParts)
+	protected Map<String, Object> getDocumentStream(IovDto mddto, List<FormDataBodyPart> bodyParts)
 			throws CdbServiceException {
-		log.debug("Extracting document BLOB for file {}", mddto.getPayload());
+		log.debug("Extracting document BLOB for file {}", mddto.getPayloadHash());
 		Map<String, Object> retmap = new HashMap<>();
-		String dtofname = mddto.getPayload();
+		String dtofname = mddto.getPayloadHash();
 		if (dtofname.startsWith("file://")) {
-			dtofname = mddto.getPayload().split("://")[1];
+			dtofname = mddto.getPayloadHash().split("://")[1];
 		}
 		for (int i = 0; i < bodyParts.size(); i++) {
 			BodyPartEntity test = (BodyPartEntity) bodyParts.get(i).getEntity();
@@ -513,7 +508,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			}
 		}
 		if (retmap.isEmpty()) {
-			throw new CdbServiceException("Cannot find file content in form data. File name = " + mddto.getPayload());
+			throw new CdbServiceException("Cannot find file content in form data. File name = " + mddto.getPayloadHash());
 		}
 		return retmap;
 	}

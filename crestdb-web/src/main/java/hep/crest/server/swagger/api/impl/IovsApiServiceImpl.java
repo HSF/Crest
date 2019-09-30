@@ -1,12 +1,12 @@
 package hep.crest.server.swagger.api.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
@@ -37,6 +37,7 @@ import hep.crest.server.swagger.api.IovsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSummaryDto;
 
@@ -83,6 +84,43 @@ public class IovsApiServiceImpl extends IovsApiService {
 		}
 	}
 
+	
+	/* (non-Javadoc)
+	 * @see hep.crest.server.swagger.api.IovsApiService#storeBatchIovMultiForm(hep.crest.swagger.model.IovSetDto, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+	 */
+	@Override
+	public Response storeBatchIovMultiForm(IovSetDto dto, SecurityContext securityContext, UriInfo info)
+			throws NotFoundException {
+		this.log.info("IovRestController processing request to upload iovs batch {}",
+				dto);
+		String tagName = dto.getTagName();
+		try {
+			log.info("Batch insertion of {} iovs using file formatted in {} for tag {}", dto.getNiovs(), dto.getFormat(),dto.getTagName());
+			List<IovDto> iovlist = dto.getIovsList();
+			List<IovDto> savedList = new ArrayList<>();
+			for (IovDto iovDto : iovlist) {
+				if (iovDto.getTagName() == null || !(iovDto.getTagName().equals(dto.getTagName()))) {
+					iovDto.setTagName(tagName);
+				}
+				IovDto saved = iovService.insertIov(iovDto);
+				savedList.add(saved);
+			}
+			IovSetDto saveddto = new IovSetDto().iovsList(savedList).tagName(tagName).niovs((long)savedList.size());
+			return Response.created(info.getRequestUri()).entity(saveddto).build();
+
+		} catch (CdbServiceException e) {
+			String msg = "Error creating multi iov resource using " + tagName + " : " + e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		} catch (Exception e) {
+			String msg = "Internal exception creating payload resource using uploadBatch " + tagName + " : "
+					+ e.getMessage();
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+		}
+	}
+
+
 	/* (non-Javadoc)
 	 * @see hep.crest.server.swagger.api.IovsApiService#findAllIovs(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
 	 */
@@ -95,6 +133,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 			if (dateformat == null) {
 				dateformat = "ms";
 			}
+			List<SearchCriteria> params = null;
 			PageRequest preq = prh.createPageRequest(page, size, sort);
 			List<IovDto> dtolist = null;
 			if (!by.matches("(.*)tag.ame(.*)")) {
@@ -103,7 +142,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 				return Response.status(Response.Status.NOT_ACCEPTABLE).entity(resp).build();
 			} else {
 				
-				List<SearchCriteria> params = prh.createMatcherCriteria(by,dateformat);
+				params = prh.createMatcherCriteria(by,dateformat);
 				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
 				BooleanExpression wherepred = null;
 
@@ -121,9 +160,11 @@ public class IovsApiServiceImpl extends IovsApiService {
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, message);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
 			}
-			GenericEntity<List<IovDto>> entitylist = new GenericEntity<List<IovDto>>(dtolist) {
-			};
-			return Response.ok().entity(entitylist).build();
+			String tagname = prh.getParam(params, "tagname");
+			IovSetDto saveddto = new IovSetDto().iovsList(dtolist).tagName(tagname).niovs((long)dtolist.size()).format("HASH");
+
+			//GenericEntity<List<IovDto>> entitylist = new GenericEntity<List<IovDto>>(dtolist) {};
+			return Response.ok().entity(saveddto).build();
 
 		} catch (CdbServiceException e) {
 			// TODO Auto-generated catch block

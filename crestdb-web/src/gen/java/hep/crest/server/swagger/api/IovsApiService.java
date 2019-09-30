@@ -24,6 +24,7 @@ import javax.validation.constraints.*;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-09-27T21:56:58.011+02:00")
 public abstract class IovsApiService {
     public abstract Response createIov(IovDto body,SecurityContext securityContext, UriInfo info) throws NotFoundException;
+    public abstract Response storeBatchIovMultiForm(IovSetDto body,SecurityContext securityContext, UriInfo info) throws NotFoundException; 
     public abstract Response findAllIovs( @NotNull String by, Integer page, Integer size, String sort,String dateformat,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response getSize( @NotNull String tagname, Long snapshot,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response getSizeByTag( @NotNull String tagname,SecurityContext securityContext, UriInfo info) throws NotFoundException;

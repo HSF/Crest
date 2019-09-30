@@ -782,10 +782,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -819,6 +816,41 @@
 						"description": "successful operation",
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+						}
+					}
+				}
+			}
+		},
+		"/iovs/storebatch": {
+			"post": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Create many IOVs in the database, associated to a tag name.",
+				"description": "This method allows to insert multiple IOVs. Arguments: tagname,end time.",
+				"operationId": "storeBatchIovMultiForm",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a IovSetDto object.",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1233,7 +1265,7 @@
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
-					}					
+					}
 				}
 			}
 		},
@@ -1286,7 +1318,7 @@
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
-					}					
+					}
 				}
 			}
 		},

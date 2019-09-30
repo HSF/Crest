@@ -91,6 +91,15 @@ public class PageRequestHelper {
 		return params;
 	}
 
+	public String getParam(List<SearchCriteria> params, String key) {
+		for (SearchCriteria searchCriteria : params) {
+			if (key.equalsIgnoreCase(searchCriteria.getKey())) {
+				return searchCriteria.getValue().toString();
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * @param by
 	 * @param dateformat

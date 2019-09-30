@@ -259,10 +259,13 @@
 				"format" : {
 					"type": "string"
 				},
+				"tagName": {
+					"type": "string"
+				},
 				"iovsList": {
 					"type": "array",
 					"items": {
-					"$ref": "#/definitions/IovPayloadDto"
+					"$ref": "#/definitions/IovDto"
 					}
 				}
 			}

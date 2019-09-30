@@ -54,13 +54,27 @@ public class IovsApi  {
     throws NotFoundException {
         return delegate.createIov(body,securityContext,info);
     }
+
+    @POST
+    @Path("/storebatch")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Create many IOVs in the database, associated to a tag name.", notes = "This method allows to insert multiple IOVs. Arguments: tagname,end time.", response = IovSetDto.class, tags={ "iovs", })
+    @io.swagger.annotations.ApiResponses(value = {
+        @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = IovSetDto.class) })
+    public Response storeBatchIovMultiForm(@ApiParam(value = "A json string that is used to construct a IovSetDto object." ,required=true) IovSetDto body
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.storeBatchIovMultiForm(body,securityContext,info);
+    }
+    
     @GET
     
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Finds a IovDtos lists.", notes = "This method allows to perform search by tagname and sorting.Arguments: tagname={a tag name}, page={ipage}, size={isize},      sort=<pattern>, where pattern is <field>:[DESC|ASC]", response = IovDto.class, responseContainer = "List", tags={ "iovs", })
+    @io.swagger.annotations.ApiOperation(value = "Finds a IovDtos lists.", notes = "This method allows to perform search by tagname and sorting.Arguments: tagname={a tag name}, page={ipage}, size={isize},      sort=<pattern>, where pattern is <field>:[DESC|ASC]", response = IovSetDto.class, tags={ "iovs", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = IovDto.class, responseContainer = "List") })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = IovSetDto.class) })
     public Response findAllIovs(@ApiParam(value = "you need a mandatory tagname:xxxx. Additional field can be since or insertionTime rules.",required=true, defaultValue="none") @DefaultValue("none") @QueryParam("by") String by
 ,@ApiParam(value = "page: the page number {0}", defaultValue="0") @DefaultValue("0") @QueryParam("page") Integer page
 ,@ApiParam(value = "size: the page size {10000}", defaultValue="10000") @DefaultValue("10000") @QueryParam("size") Integer size

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.IovDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import javax.validation.constraints.*;
 /**
  * IovSetDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-29T18:09:29.144+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-09-30T14:03:52.290+02:00")
 public class IovSetDto   {
   @JsonProperty("niovs")
   private Long niovs = null;
@@ -36,8 +36,11 @@ public class IovSetDto   {
   @JsonProperty("format")
   private String format = null;
 
+  @JsonProperty("tagName")
+  private String tagName = null;
+
   @JsonProperty("iovsList")
-  private List<IovPayloadDto> iovsList = new ArrayList<IovPayloadDto>();
+  private List<IovDto> iovsList = new ArrayList<IovDto>();
 
   public IovSetDto niovs(Long niovs) {
     this.niovs = niovs;
@@ -78,12 +81,31 @@ public class IovSetDto   {
     this.format = format;
   }
 
-  public IovSetDto iovsList(List<IovPayloadDto> iovsList) {
+  public IovSetDto tagName(String tagName) {
+    this.tagName = tagName;
+    return this;
+  }
+
+  /**
+   * Get tagName
+   * @return tagName
+   **/
+  @JsonProperty("tagName")
+  @ApiModelProperty(value = "")
+  public String getTagName() {
+    return tagName;
+  }
+
+  public void setTagName(String tagName) {
+    this.tagName = tagName;
+  }
+
+  public IovSetDto iovsList(List<IovDto> iovsList) {
     this.iovsList = iovsList;
     return this;
   }
 
-  public IovSetDto addIovsListItem(IovPayloadDto iovsListItem) {
+  public IovSetDto addIovsListItem(IovDto iovsListItem) {
     this.iovsList.add(iovsListItem);
     return this;
   }
@@ -95,11 +117,11 @@ public class IovSetDto   {
   @JsonProperty("iovsList")
   @ApiModelProperty(required = true, value = "")
   @NotNull
-  public List<IovPayloadDto> getIovsList() {
+  public List<IovDto> getIovsList() {
     return iovsList;
   }
 
-  public void setIovsList(List<IovPayloadDto> iovsList) {
+  public void setIovsList(List<IovDto> iovsList) {
     this.iovsList = iovsList;
   }
 
@@ -115,12 +137,13 @@ public class IovSetDto   {
     IovSetDto iovSetDto = (IovSetDto) o;
     return Objects.equals(this.niovs, iovSetDto.niovs) &&
         Objects.equals(this.format, iovSetDto.format) &&
+        Objects.equals(this.tagName, iovSetDto.tagName) &&
         Objects.equals(this.iovsList, iovSetDto.iovsList);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(niovs, format, iovsList);
+    return Objects.hash(niovs, format, tagName, iovsList);
   }
 
 
@@ -131,6 +154,7 @@ public class IovSetDto   {
     
     sb.append("    niovs: ").append(toIndentedString(niovs)).append("\n");
     sb.append("    format: ").append(toIndentedString(format)).append("\n");
+    sb.append("    tagName: ").append(toIndentedString(tagName)).append("\n");
     sb.append("    iovsList: ").append(toIndentedString(iovsList)).append("\n");
     sb.append("}");
     return sb.toString();
