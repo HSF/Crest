@@ -5,8 +5,10 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "svom-serve": "vue-cli-service serve --mode svom",
+    "cern-serve": "vue-cli-service serve --mode cern",
     "build": "vue-cli-service build",
     "svom-build": "vue-cli-service build --mode svom",
+    "cern-build": "vue-cli-service build --mode cern",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

@@ -8,11 +8,11 @@
 #
 #_______________________________________________________________________________
 
-version: '3.3'
+version: '3.6'
 
 services:
   crest-http:
-    image: gitlab-registry.cern.ch/formica/swagger_crestdb:runner
+    image: gitlab-registry.cern.ch/formica/swagger_crestdb:latest
     deploy:
       placement:
         constraints:
@@ -23,22 +23,24 @@ services:
       - crestnet
     configs:
     - source: crest-logs
-      target: /home/svom/logback.xml
+      target: /home/crest/logback.xml
     - source: crest-jopts
-      target: /home/svom/javaopt.properties
+      target: /home/crest/javaopt.properties
     secrets:
     - source: crest-config
-      target: /home/svom/application.properties
+      target: /home/crest/application.properties
     environment:
         - crest.server.port=8080
         - spring.profiles.active=prod
     volumes:
-        - crest_data:/home/svom/data/logs
-        - crest_data:/home/svom/data/web
-        - crest_data:/home/svom/data/dump
+        - crest_data:/home/crest/data
 
   crest-ui:
-    image: gitlab-registry.cern.ch/formica/swagger_crestui:tagmeta
+    image: gitlab-registry.cern.ch/formica/swagger_crestdb/ui:latest
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == crest-01.cern.ch
     ports:
     - "9090:80"
     networks:
