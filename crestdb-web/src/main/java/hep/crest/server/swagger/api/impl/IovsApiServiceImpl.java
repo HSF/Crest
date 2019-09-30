@@ -3,7 +3,9 @@ package hep.crest.server.swagger.api.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.CacheControl;
@@ -190,7 +192,9 @@ public class IovsApiServiceImpl extends IovsApiService {
 			} else {
 				size = iovService.getSizeByTag(tagname);
 			}
-			return Response.ok().entity(size).build();
+			Map<String,Long> entitymap = new HashMap<>();
+			entitymap.put("size", size);
+			return Response.ok().entity(entitymap).build();
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

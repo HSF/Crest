@@ -890,8 +890,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "integer",
-							"format": "int64"
+							"type": "string"
 						}
 					}
 				}
