@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -31,15 +32,15 @@ public class TestCrestTag {
 
 	@Test
 	public void testA_getAndRemoveTags() {
-		ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
-		TagDto[] taglist = response.getBody();
-		for (TagDto tagDto : taglist) {
+		ResponseEntity<TagSetDto> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagSetDto.class);
+		TagSetDto tagset = response.getBody();
+		for (TagDto tagDto : tagset.getResources()) {
 			String url = "/crestapi/admin/tags/" + tagDto.getName();
 			System.out.println("Removing tag " + url);
 			this.testRestTemplate.delete(url);
 		}
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
+		assertThat(response.getBody().getSize()).isGreaterThanOrEqualTo(0);
 	}
 
 	@Test
@@ -61,9 +62,9 @@ public class TestCrestTag {
 
 	@Test
 	public void testC_getAllTags() {
-		ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
+		ResponseEntity<TagSetDto> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagSetDto.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
+		assertThat(response.getBody().getSize()).isGreaterThanOrEqualTo(0);
 	}
 
 }

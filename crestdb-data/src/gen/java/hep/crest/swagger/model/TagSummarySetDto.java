@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.TagSummaryDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -26,22 +26,22 @@ import java.util.List;
 import javax.validation.constraints.*;
 
 /**
- * An IovSet containing IovDto objects.
+ * An Set containing TagSummaryDto objects.
  */
-@ApiModel(description = "An IovSet containing IovDto objects.")
+@ApiModel(description = "An Set containing TagSummaryDto objects.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-03T10:49:50.724+02:00")
-public class IovSetDto extends CrestBaseResponse  {
+public class TagSummarySetDto extends CrestBaseResponse  {
   @JsonProperty("resources")
-  private List<IovDto> resources = null;
+  private List<TagSummaryDto> resources = null;
 
-  public IovSetDto resources(List<IovDto> resources) {
+  public TagSummarySetDto resources(List<TagSummaryDto> resources) {
     this.resources = resources;
     return this;
   }
 
-  public IovSetDto addResourcesItem(IovDto resourcesItem) {
+  public TagSummarySetDto addResourcesItem(TagSummaryDto resourcesItem) {
     if (this.resources == null) {
-      this.resources = new ArrayList<IovDto>();
+      this.resources = new ArrayList<TagSummaryDto>();
     }
     this.resources.add(resourcesItem);
     return this;
@@ -53,11 +53,11 @@ public class IovSetDto extends CrestBaseResponse  {
    **/
   @JsonProperty("resources")
   @ApiModelProperty(value = "")
-  public List<IovDto> getResources() {
+  public List<TagSummaryDto> getResources() {
     return resources;
   }
 
-  public void setResources(List<IovDto> resources) {
+  public void setResources(List<TagSummaryDto> resources) {
     this.resources = resources;
   }
 
@@ -70,8 +70,8 @@ public class IovSetDto extends CrestBaseResponse  {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    IovSetDto iovSetDto = (IovSetDto) o;
-    return Objects.equals(this.resources, iovSetDto.resources) &&
+    TagSummarySetDto tagSummarySetDto = (TagSummarySetDto) o;
+    return Objects.equals(this.resources, tagSummarySetDto.resources) &&
         super.equals(o);
   }
 
@@ -84,7 +84,7 @@ public class IovSetDto extends CrestBaseResponse  {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class IovSetDto {\n");
+    sb.append("class TagSummarySetDto {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    resources: ").append(toIndentedString(resources)).append("\n");
     sb.append("}");

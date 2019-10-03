@@ -9,7 +9,6 @@ import io.swagger.jaxrs.*;
 import java.math.BigDecimal;
 import java.io.File;
 import hep.crest.swagger.model.HTTPResponse;
-import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
 
 import java.util.Map;
@@ -112,9 +111,9 @@ public class PayloadsApi  {
     @Path("/storebatch")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Create many Payloads in the database, associated to a given iov since list and tag name.", notes = "This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB", response = IovSetDto.class, tags={ "payloads", })
+    @io.swagger.annotations.ApiOperation(value = "Create many Payloads in the database, associated to a given iov since list and tag name.", notes = "This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB", response = IovPyldSetDto.class, tags={ "payloads", })
     @io.swagger.annotations.ApiResponses(value = {
-        @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = IovSetDto.class) })
+        @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = IovPyldSetDto.class) })
     public Response storePayloadBatchWithIovMultiForm(@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
 ,@ApiParam(value = "", required=true)@FormDataParam("iovsetupload")  FormDataBodyPart iovsetupload
 ,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
@@ -128,9 +127,9 @@ public class PayloadsApi  {
     @Path("/uploadbatch")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Create many Payloads in the database, associated to a given iov since list and tag name.", notes = "This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB", response = IovSetDto.class, tags={ "payloads", })
+    @io.swagger.annotations.ApiOperation(value = "Create many Payloads in the database, associated to a given iov since list and tag name.", notes = "This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB", response = IovPyldSetDto.class, tags={ "payloads", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = IovSetDto.class) })
+        @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = IovPyldSetDto.class) })
     public Response uploadPayloadBatchWithIovMultiForm(
             @FormDataParam("files") List<FormDataBodyPart> filesbodyparts,
             @FormDataParam("files") FormDataContentDisposition filesDetail

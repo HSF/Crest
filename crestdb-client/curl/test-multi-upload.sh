@@ -7,7 +7,7 @@ generate_post_data()
 {
   "niovs": 2,
   "format": "PYL",
-  "iovsList":[
+  "resources":[
   { "since" : $since1, "payloadHash": "file:///tmp/test-01.txt"},
   { "since" : $since2, "payloadHash": "file:///tmp/test-02.txt"}
   ]

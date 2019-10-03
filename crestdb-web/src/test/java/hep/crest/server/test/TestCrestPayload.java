@@ -147,9 +147,9 @@ public class TestCrestPayload {
 			String content2 = "This is a fake payload batch 2";
 			Files.write(Paths.get("/tmp/batch2.txt"), content2.getBytes());
 			IovSetDto sdto = new IovSetDto();
-			sdto.addIovsListItem(new IovDto().payloadHash("file:///tmp/batch1.txt").since(new BigDecimal(100)));
-			sdto.addIovsListItem(new IovDto().payloadHash("file:///tmp/batch2.txt").since(new BigDecimal(200)));
-			sdto.niovs(2L);
+			sdto.addResourcesItem(new IovDto().payloadHash("file:///tmp/batch1.txt").since(new BigDecimal(100)));
+			sdto.addResourcesItem(new IovDto().payloadHash("file:///tmp/batch2.txt").since(new BigDecimal(200)));
+			sdto.size(2L);
 			sdto.format("FILE");
 			String rooturi = this.testRestTemplate.getRootUri();
 			System.out.println("Root URI is "+rooturi);

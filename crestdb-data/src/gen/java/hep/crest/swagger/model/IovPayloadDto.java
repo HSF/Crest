@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
 /**
  * IovPayloadDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-29T17:06:31.512+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-01T12:16:06.500+02:00")
 public class IovPayloadDto   {
   @JsonProperty("since")
   private BigDecimal since = null;

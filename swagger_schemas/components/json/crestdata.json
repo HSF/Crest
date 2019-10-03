@@ -26,6 +26,28 @@
 				}
 			}
 		},
+		"CrestBaseResponse": {
+			"type": "object",
+			"discriminator" : "format",
+			"required": [
+				"format"
+			],
+			"properties": {
+				"size": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"format" : {
+					"type": "string"
+				},
+				"datatype": {
+					"type": "string"
+				},
+				"filter": {
+					"$ref": "#/definitions/GenericMap"
+				}
+			}
+		},
 		"GenericMap": {
 			"type": "object",
 			"properties": {
@@ -248,12 +270,30 @@
 				}
 			}
 		},
-		"IovSetDto": {
+		"TagSummarySetDto": {
+			"description" : "An Set containing TagSummaryDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+							"$ref": "#/definitions/TagSummaryDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"IovBaseSetDto": {
 			"type": "object",
 			"discriminator" : "format",
 			"required": [
 				"format",
-				"iovsList"
+				"tagName"
 			],
 			"properties": {
 				"niovs": {
@@ -265,14 +305,62 @@
 				},
 				"tagName": {
 					"type": "string"
-				},
-				"iovsList": {
-					"type": "array",
-					"items": {
-					"$ref": "#/definitions/IovDto"
-					}
 				}
 			}
+		},
+		"IovSetDto": {
+			"description" : "An IovSet containing IovDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/IovDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"IovPyldSetDto": {
+			"description" : "An IovSet containing IovPayloadDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/IovPayloadDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"TagSetDto": {
+			"description" : "An IovSet containing TagDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/TagDto"
+							}
+						}
+					}
+				}
+			]
 		},
 		"PayloadDto": {
 			"type": "object",

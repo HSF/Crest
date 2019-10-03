@@ -890,7 +890,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "string"
+							"$ref": "../../components/json/crestdata.json#/definitions/CrestBaseResponse"
 						}
 					}
 				}
@@ -902,7 +902,7 @@
 					"iovs"
 				],
 				"summary": "Get the number o iovs for tags matching pattern.",
-				"description": "This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}",
+				"description": "This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time is added. Arguments: tagname={a tag name}",
 				"operationId": "getSizeByTag",
 				"produces": [
 					"application/json"
@@ -921,10 +921,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/TagSummaryDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/TagSummarySetDto"
 						}
 					}
 				}
@@ -964,7 +961,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GroupDto"
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1020,10 +1017,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1063,10 +1057,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1262,7 +1253,7 @@
 					"201": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "../../components/json/crestdata.json#/definitions/IovPyldSetDto"
 						}
 					}
 				}
@@ -1315,7 +1306,7 @@
 					"201": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "../../components/json/crestdata.json#/definitions/IovPyldSetDto"
 						}
 					}
 				}
@@ -1473,10 +1464,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
 						}
 					}
 				}
@@ -1540,7 +1528,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
 						}
 					}
 				}
