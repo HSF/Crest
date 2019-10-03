@@ -121,7 +121,7 @@ public class TagsApiServiceImpl extends TagsApiService {
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,"Entity not found for name "+name);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();				
 			}
-			TagSetDto respdto = (TagSetDto) new TagSetDto().addResourcesItem(dto).size(1L).datatype("tag");
+			TagSetDto respdto = (TagSetDto) new TagSetDto().addResourcesItem(dto).size(1L).datatype("tags");
 			return Response.ok().entity(respdto).build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -161,7 +161,7 @@ public class TagsApiServiceImpl extends TagsApiService {
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,message);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();	
 			}
-			CrestBaseResponse respdto = new TagSetDto().resources(dtolist).filter(filters).size((long)dtolist.size()).datatype("iovs");
+			CrestBaseResponse respdto = new TagSetDto().resources(dtolist).filter(filters).size((long)dtolist.size()).datatype("tags");
 
 			//GenericEntity<List<TagDto>> entitylist = new GenericEntity<List<TagDto>>(dtolist) {};
 			return Response.ok().entity(respdto).build();
