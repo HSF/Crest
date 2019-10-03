@@ -236,8 +236,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		iovsetupload.setMediaType(MediaType.APPLICATION_JSON_TYPE);
 		try {
 			IovSetDto dto = iovsetupload.getValueAs(IovSetDto.class);
-			log.info("Batch insertion of {} iovs using file formatted in {}", dto.getNiovs(), dto.getFormat());
-			List<IovDto> iovlist = dto.getIovsList();
+			log.info("Batch insertion of {} iovs using file formatted in {}", dto.getSize(), dto.getFormat());
+			List<IovDto> iovlist = dto.getResources();
 			List<IovDto> savediovlist = new ArrayList<>();
 			if (xCrestPayloadFormat == null) {
 				xCrestPayloadFormat = "FILE";
@@ -264,8 +264,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 						log.error("Cannot insert iov {}", piovDto);
 					}
 				}
-				dto.niovs((long) savediovlist.size());
-				dto.iovsList(savediovlist);
+				dto.size((long) savediovlist.size());
+				dto.resources(savediovlist);
 				return Response.created(info.getRequestUri()).entity(dto).build();
 			} else {
 				throw new CdbServiceException("Wrong header parameter " + xCrestPayloadFormat);
@@ -300,8 +300,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		iovsetupload.setMediaType(MediaType.APPLICATION_JSON_TYPE);
 		try {
 			IovSetDto dto = iovsetupload.getValueAs(IovSetDto.class);
-			log.info("Batch insertion of {} iovs using file formatted in {}", dto.getNiovs(), dto.getFormat());
-			List<IovDto> iovlist = dto.getIovsList();
+			log.info("Batch insertion of {} iovs using file formatted in {}", dto.getSize(), dto.getFormat());
+			List<IovDto> iovlist = dto.getResources();
 			List<IovDto> savediovlist = new ArrayList<>();
 			if (xCrestPayloadFormat == null) {
 				xCrestPayloadFormat = "JSON";
@@ -321,8 +321,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 						log.error("Cannot insert iov {}", piovDto);
 					}
 				}
-				dto.niovs((long) savediovlist.size());
-				dto.iovsList(savediovlist);
+				dto.size((long) savediovlist.size());
+				dto.resources(savediovlist);
 				return Response.created(info.getRequestUri()).entity(dto).build();
 
 			} else {

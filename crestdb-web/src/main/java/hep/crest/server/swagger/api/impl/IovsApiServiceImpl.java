@@ -37,11 +37,14 @@ import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.IovsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSummaryDto;
+import hep.crest.swagger.model.TagSummarySetDto;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
@@ -95,19 +98,25 @@ public class IovsApiServiceImpl extends IovsApiService {
 			throws NotFoundException {
 		this.log.info("IovRestController processing request to upload iovs batch {}",
 				dto);
-		String tagName = dto.getTagName();
+		GenericMap filters = dto.getFilter();
+		if (!filters.containsKey("tagName")) {
+			String msg = "Error creating multi iov resource because tagName is not defined ";
+			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+			return Response.status(Response.Status.NOT_ACCEPTABLE).entity(resp).build();
+		}
+		String tagName = filters.get("tagName");
 		try {
-			log.info("Batch insertion of {} iovs using file formatted in {} for tag {}", dto.getNiovs(), dto.getFormat(),dto.getTagName());
-			List<IovDto> iovlist = dto.getIovsList();
+			log.info("Batch insertion of {} iovs using file formatted in {} for tag {}", dto.getSize(), dto.getFormat(),tagName);
+			List<IovDto> iovlist = dto.getResources();
 			List<IovDto> savedList = new ArrayList<>();
 			for (IovDto iovDto : iovlist) {
-				if (iovDto.getTagName() == null || !(iovDto.getTagName().equals(dto.getTagName()))) {
+				if (iovDto.getTagName() == null || !(iovDto.getTagName().equals(tagName))) {
 					iovDto.setTagName(tagName);
 				}
 				IovDto saved = iovService.insertIov(iovDto);
 				savedList.add(saved);
 			}
-			IovSetDto saveddto = new IovSetDto().iovsList(savedList).tagName(tagName).niovs((long)savedList.size());
+			CrestBaseResponse saveddto = new IovSetDto().resources(savedList).filter(filters).size((long)savedList.size()).datatype("iovs");
 			return Response.created(info.getRequestUri()).entity(saveddto).build();
 
 		} catch (CdbServiceException e) {
@@ -163,7 +172,9 @@ public class IovsApiServiceImpl extends IovsApiService {
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
 			}
 			String tagname = prh.getParam(params, "tagname");
-			IovSetDto saveddto = new IovSetDto().iovsList(dtolist).tagName(tagname).niovs((long)dtolist.size()).format("HASH");
+			GenericMap filters = new GenericMap();
+			filters.put("tagName", tagname);
+			CrestBaseResponse saveddto = new IovSetDto().resources(dtolist).filter(filters).size((long)dtolist.size()).datatype("iovs");
 
 			//GenericEntity<List<IovDto>> entitylist = new GenericEntity<List<IovDto>>(dtolist) {};
 			return Response.ok().entity(saveddto).build();
@@ -192,13 +203,15 @@ public class IovsApiServiceImpl extends IovsApiService {
 			} else {
 				size = iovService.getSizeByTag(tagname);
 			}
-			Map<String,Long> entitymap = new HashMap<>();
-			entitymap.put("size", size);
-			return Response.ok().entity(entitymap).build();
+			CrestBaseResponse respdto = new CrestBaseResponse();
+			GenericMap filters = new GenericMap();
+			filters.put("tagName", tagname);
+			filters.put("snapshot", snapshot.toString());
+			respdto.size(size).datatype("count").filter(filters);
+			return Response.ok().entity(respdto).build();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error in getting size for tagname {} : {}",tagname,e.getMessage());
 			String message = e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -210,11 +223,20 @@ public class IovsApiServiceImpl extends IovsApiService {
 			throws NotFoundException {
 		try {
 			List<TagSummaryDto> entitylist = iovService.getTagSummaryInfo(tagname);
-			return Response.ok().entity(entitylist).build();
+			TagSummarySetDto respdto = new TagSummarySetDto();
+			GenericMap filters = new GenericMap();
+			filters.put("tagName", tagname);
+			if (entitylist == null) {
+				String message = "No resource has been found";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, message);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			}
+			((TagSummarySetDto)respdto.size((long) entitylist.size()).datatype("count").filter(filters)).resources(entitylist);
+			
+			return Response.ok().entity(respdto).build();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error in getting size by tagname {} : {}",tagname,e.getMessage());
 			String message = e.getMessage();
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();

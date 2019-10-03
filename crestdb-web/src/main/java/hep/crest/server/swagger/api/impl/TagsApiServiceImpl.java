@@ -7,6 +7,7 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.crypto.dsig.spec.XPathType.Filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,11 @@ import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.TagsApiService;
+import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
+import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class TagsApiServiceImpl extends TagsApiService {
@@ -117,7 +121,8 @@ public class TagsApiServiceImpl extends TagsApiService {
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,"Entity not found for name "+name);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();				
 			}
-			return Response.ok().entity(dto).build();
+			TagSetDto respdto = (TagSetDto) new TagSetDto().addResourcesItem(dto).size(1L).datatype("tag");
+			return Response.ok().entity(respdto).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 			String message = e.getMessage();
@@ -131,6 +136,7 @@ public class TagsApiServiceImpl extends TagsApiService {
 			log.debug("Search resource list using by={}, page={}, size={}, sort={}",by,page,size,sort);
 			PageRequest preq = prh.createPageRequest(page, size, sort);
 			List<TagDto> dtolist = null;
+			GenericMap filters = new GenericMap();
 			if (by.equals("none")) {
 				dtolist = tagService.findAllTags(null, preq);
 			} else {
@@ -138,7 +144,9 @@ public class TagsApiServiceImpl extends TagsApiService {
 				List<SearchCriteria> params = prh.createMatcherCriteria(by);
 				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
 				BooleanExpression wherepred = null;
-
+				for (SearchCriteria sc : params) {
+					filters.put(sc.getKey(), sc.getValue().toString());
+				}
 				for (BooleanExpression exp : expressions) {
 					if (wherepred == null) {
 						wherepred = exp;
@@ -153,8 +161,10 @@ public class TagsApiServiceImpl extends TagsApiService {
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,message);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();	
 			}
-			GenericEntity<List<TagDto>> entitylist = new GenericEntity<List<TagDto>>(dtolist) {};
-			return Response.ok().entity(entitylist).build();
+			CrestBaseResponse respdto = new TagSetDto().resources(dtolist).filter(filters).size((long)dtolist.size()).datatype("iovs");
+
+			//GenericEntity<List<TagDto>> entitylist = new GenericEntity<List<TagDto>>(dtolist) {};
+			return Response.ok().entity(respdto).build();
 
 		} catch (CdbServiceException e) {
 			// TODO Auto-generated catch block
