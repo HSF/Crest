@@ -2,7 +2,6 @@ package hep.crest.server.swagger.api.impl;
 
 import java.util.List;
 
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
@@ -17,7 +16,10 @@ import hep.crest.server.services.GlobalTagMapService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.GlobaltagmapsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.GlobalTagMapDto;
+import hep.crest.swagger.model.GlobalTagMapSetDto;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
@@ -56,13 +58,15 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
 			} else {
 				dtolist = globaltagmapService.getTagMapByTagName(name);
 			}
-			GenericEntity<List<GlobalTagMapDto>> entitylist = new GenericEntity<List<GlobalTagMapDto>>(dtolist) {
-			};
-			return Response.ok().entity(entitylist).build();
+			GenericMap filters = new GenericMap();
+			filters.put("name", name);
+			filters.put("mode", xCrestMapMode);
+			CrestBaseResponse setdto = new GlobalTagMapSetDto().resources(dtolist).filter(filters).size((long)dtolist.size()).datatype("maps");
+			return Response.ok().entity(setdto).build();
+
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			String message = e.getMessage();
+			log.error("Internal error searching maps : {}",message);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}

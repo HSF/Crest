@@ -4,6 +4,7 @@
 package hep.crest.server.services;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +33,10 @@ import hep.crest.data.repositories.TagRepository;
 import hep.crest.server.annotations.ProfileAndLog;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagSummaryDto;
 import ma.glasnost.orika.MapperFacade;
 
@@ -151,7 +154,9 @@ public class IovService {
 			} else {
 				minsincelist =  iovgroupsrepo.selectSnapshotGroups(tagname, snapshot, groupsize);
 			}
-			
+			if (minsincelist == null) {
+				minsincelist = new ArrayList<>();
+			}
 			return minsincelist;
 		} catch (Exception e) {
 			log.error("Exception in retrieving iov groups list using tag {} and group size {}", tagname,groupsize);
@@ -167,10 +172,11 @@ public class IovService {
 	 * @throws CdbServiceException
 	 */
 	@ProfileAndLog
-	public GroupDto selectGroupDtoByTagNameAndSnapshotTime(String tagname, Date snapshot, Long groupsize) throws CdbServiceException {
+	public CrestBaseResponse selectGroupDtoByTagNameAndSnapshotTime(String tagname, Date snapshot, Long groupsize) throws CdbServiceException {
 		try {
 			List<BigDecimal> minsincelist = selectGroupsByTagNameAndSnapshotTime(tagname, snapshot, groupsize);
-			return new GroupDto().groups(minsincelist);
+			List<IovDto> iovlist = minsincelist.stream().map(s -> new IovDto().since(s)).collect(Collectors.toList());
+			return new IovSetDto().resources(iovlist).size((long) iovlist.size());
 		} catch (Exception e) {
 			log.error("Exception in retrieving iov groups list using tag and snapshot {}", tagname);
 			throw new CdbServiceException("Cannot find iov groups by tag name: " + e.getMessage());

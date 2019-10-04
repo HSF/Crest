@@ -2,7 +2,6 @@ package hep.crest.server.swagger.api.impl;
 
 import java.util.List;
 
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
@@ -26,8 +25,12 @@ import hep.crest.server.services.GlobalTagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.GlobaltagsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.GlobalTagDto;
+import hep.crest.swagger.model.GlobalTagSetDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
@@ -75,7 +78,11 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
 			}
-			return Response.ok().entity(dto).build();
+			GenericMap filters = new GenericMap();
+			filters.put("name", name);
+			CrestBaseResponse setdto = new GlobalTagSetDto().addResourcesItem(dto).filter(filters).size(1L).datatype("globaltags");
+			return Response.ok().entity(setdto).build();
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -91,16 +98,22 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
 			this.log.info("GlobalTagRestController processing request for global tag name " + name);
 			List<TagDto> dtolist = globaltagService.getGlobalTagByNameFetchTags(name,record,label);
 			log.debug("Found list of tags of length "+((dtolist==null) ? "0" : dtolist.size()));
-			GenericEntity<List<TagDto>> entitylist = new GenericEntity<List<TagDto>>(dtolist) {};
-			return Response.ok().entity(entitylist).build();
+			if (dtolist == null || dtolist.isEmpty()) {
+				String message = "No tag resource has been found";
+				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,message);
+				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();	
+			}
+			GenericMap filters = new GenericMap();
+			filters.put("name", name);
+			CrestBaseResponse setdto = new TagSetDto().resources(dtolist).filter(filters).size((long) dtolist.size()).datatype("tags");
+			return Response.ok().entity(setdto).build();
 		} catch (EmptyPojoException e) {
 			String message = "No tags are associated to "+name;
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
 			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			String message = e.getMessage();
+			log.error("Internal error when getting tag list from global tag: {}",message);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
@@ -112,11 +125,16 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
 			log.debug("Search resource list using by={}, page={}, size={}, sort={}",by,page,size,sort);
 			PageRequest preq = prh.createPageRequest(page, size, sort);
 			List<GlobalTagDto> dtolist = null;
+			List<SearchCriteria> params = null;
+			GenericMap filters = new GenericMap();
 			if (by.equals("none")) {
 				dtolist = globaltagService.findAllGlobalTags(null, preq);
 			} else {
 
-				List<SearchCriteria> params = prh.createMatcherCriteria(by);
+				params = prh.createMatcherCriteria(by);
+				for (SearchCriteria sc : params) {
+					filters.put(sc.getKey(), sc.getValue().toString());
+				}
 				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
 				BooleanExpression wherepred = null;
 
@@ -129,18 +147,20 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
 				}
 				dtolist = globaltagService.findAllGlobalTags(wherepred, preq);
 			}
-			if (dtolist == null) {
+			if (dtolist == null || dtolist.isEmpty()) {
 				String message = "No resource has been found";
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,message);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();	
 			}
-			GenericEntity<List<GlobalTagDto>> entitylist = new GenericEntity<List<GlobalTagDto>>(dtolist) {};
-			return Response.ok().entity(entitylist).build();
+			CrestBaseResponse setdto = new GlobalTagSetDto().resources(dtolist).size((long) dtolist.size()).datatype("globaltags");
+			if (!filters.isEmpty()) {
+				setdto.filter(filters);
+			}
+			return Response.ok().entity(setdto).build();
 
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			String message = e.getMessage();
+			log.error("Internal error in loading global tags : {}",message);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}

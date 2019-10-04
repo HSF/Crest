@@ -3,9 +3,7 @@ package hep.crest.server.swagger.api.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.CacheControl;
@@ -39,7 +37,6 @@ import hep.crest.server.swagger.api.IovsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagDto;
@@ -175,14 +172,11 @@ public class IovsApiServiceImpl extends IovsApiService {
 			GenericMap filters = new GenericMap();
 			filters.put("tagName", tagname);
 			CrestBaseResponse saveddto = new IovSetDto().resources(dtolist).filter(filters).size((long)dtolist.size()).datatype("iovs");
-
-			//GenericEntity<List<IovDto>> entitylist = new GenericEntity<List<IovDto>>(dtolist) {};
 			return Response.ok().entity(saveddto).build();
 
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			String message = e.getMessage();
+			log.error("Internal error searching for iovs : {}",message);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
@@ -211,8 +205,8 @@ public class IovsApiServiceImpl extends IovsApiService {
 			return Response.ok().entity(respdto).build();
 
 		} catch (Exception e) {
-			log.error("Error in getting size for tagname {} : {}",tagname,e.getMessage());
 			String message = e.getMessage();
+			log.error("Error in getting size for tagname {} : {}",tagname,message);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
@@ -248,8 +242,6 @@ public class IovsApiServiceImpl extends IovsApiService {
 			Request request, HttpHeaders headers) throws NotFoundException {
 		this.log.info("IovRestController processing request for iovs groups using tag name {}",tagname);
 		try {
-			GroupDto groups = null;
-			// Integer maxage = 60;
 			// Search for tag in order to load the time type:
 			TagDto tagentity = tagService.findOne(tagname);
 			if (tagentity == null) {
@@ -282,8 +274,13 @@ public class IovsApiServiceImpl extends IovsApiService {
 			if (snapshot != 0L) {
 				snap = new Date(snapshot);
 			}
-			groups = iovService.selectGroupDtoByTagNameAndSnapshotTime(tagname, snap, groupsize);
-			return Response.ok().entity(groups).cacheControl(cc).build();
+			CrestBaseResponse respdto = iovService.selectGroupDtoByTagNameAndSnapshotTime(tagname, snap, groupsize);
+			GenericMap filters = new GenericMap();
+			filters.put("tagName", tagname);
+			filters.put("snapshot", snapshot.toString());
+			filters.put("groupsize", groupsize.toString());
+			respdto.datatype("groups").filter(filters);
+			return Response.ok().entity(respdto).cacheControl(cc).build();
 
 		} catch (Exception e) {
 			String msg = "Error in selectGroups : " + tagname + ", " + snapshot;
@@ -334,7 +331,16 @@ public class IovsApiServiceImpl extends IovsApiService {
 			CacheControl cc = cachesvc.getIovsCacheControlForUntil(snapshot, runtil);
 			// Retrieve all iovs
 			dtolist = iovService.selectIovsByTagRangeSnapshot(tagname, rsince, runtil, snap);
-			return Response.ok().entity(dtolist).cacheControl(cc).build();
+			IovSetDto respdto = new IovSetDto();
+			((IovSetDto)respdto.datatype("iovs")).resources(dtolist).size((long) dtolist.size());
+			GenericMap filters = new GenericMap();
+			filters.put("tagName", tagname);
+			filters.put("snapshot", snapshot.toString());
+			filters.put("since", rsince.toString());
+			filters.put("until", runtil.toString());
+			respdto.filter(filters);
+			return Response.ok().entity(respdto).cacheControl(cc).build();
+
 		} catch (Exception e) {
 			String msg = "Error in selectIovs : " + tagname + ", " + snapshot;
 			log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
@@ -356,7 +362,14 @@ public class IovsApiServiceImpl extends IovsApiService {
 				snap = new Date(snapshot);
 			}
 			List<IovDto> entitylist = iovService.selectSnapshotByTag(tagname, snap);
-			return Response.ok().entity(entitylist).build();
+			IovSetDto respdto = new IovSetDto();
+			((IovSetDto)respdto).resources(entitylist).size((long) entitylist.size());
+			GenericMap filters = new GenericMap();
+			filters.put("tagName", tagname);
+			filters.put("snapshot", snapshot.toString());
+			respdto.datatype("iovs").filter(filters);
+			return Response.ok().entity(respdto).build();
+
 		} catch (Exception e) {
 			String msg = "Error in selectSnapshot : " + tagname + ", " + snapshot;
 			log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
