@@ -53,7 +53,7 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
 		this.log.info("GlobalTagMapRestController processing request to get map for GlobalTag name " + name);
 		try {
 			List<GlobalTagMapDto> dtolist = null;
-			if (xCrestMapMode.equals("Trace")) {
+			if (xCrestMapMode != null & xCrestMapMode.equals("Trace")) {
 				dtolist = globaltagmapService.getTagMap(name);
 			} else {
 				dtolist = globaltagmapService.getTagMapByTagName(name);
