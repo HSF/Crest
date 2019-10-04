@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
 import hep.crest.swagger.model.GlobalTagMapDto;
+import hep.crest.swagger.model.GlobalTagMapSetDto;
 
 import java.util.Map;
 import java.util.List;
@@ -33,7 +34,7 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the globaltagmaps API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-09-05T14:30:55.225+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-04T10:30:37.214+02:00")
 public class GlobaltagmapsApi  {
 	@Autowired
 	private GlobaltagmapsApiService delegate;
@@ -54,9 +55,9 @@ public class GlobaltagmapsApi  {
     @Path("/{name}")
     
     @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Find GlobalTagMapDto lists.", notes = "This method search for mappings using the global tag name.", response = GlobalTagMapDto.class, responseContainer = "List", tags={ "globaltagmaps", })
+    @io.swagger.annotations.ApiOperation(value = "Find GlobalTagMapDto lists.", notes = "This method search for mappings using the global tag name.", response = GlobalTagMapSetDto.class, tags={ "globaltagmaps", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagMapDto.class, responseContainer = "List") })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagMapSetDto.class) })
     public Response findGlobalTagMap(@ApiParam(value = "",required=true) @PathParam("name") String name
 ,@ApiParam(value = "If the mode is BackTrace then it will search for global tags containing the tag <name>" , defaultValue="Trace")@HeaderParam("X-Crest-MapMode") String xCrestMapMode
 ,@Context SecurityContext securityContext,@Context UriInfo info)

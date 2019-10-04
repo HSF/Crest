@@ -362,6 +362,42 @@
 				}
 			]
 		},
+		"GlobalTagMapSetDto": {
+			"description" : "An GlobalTagMapSet containing GlobalTagMapDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/GlobalTagMapDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"GlobalTagSetDto": {
+			"description" : "An GlobalTagSet containing GlobalTagDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/GlobalTagDto"
+							}
+						}
+					}
+				}
+			]
+		},
 		"PayloadDto": {
 			"type": "object",
 			"properties": {

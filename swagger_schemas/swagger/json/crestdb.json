@@ -536,10 +536,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapSetDto"
 						}
 					}
 				}
@@ -597,10 +594,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagSetDto"
 						}
 					}
 				}

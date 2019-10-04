@@ -7,8 +7,10 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
 import hep.crest.swagger.model.GlobalTagDto;
+import hep.crest.swagger.model.GlobalTagSetDto;
 import hep.crest.swagger.model.TagDto;
 
+import java.util.Map;
 import java.util.List;
 import hep.crest.server.swagger.api.NotFoundException;
 
@@ -17,23 +19,24 @@ import java.io.InputStream;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import javax.ws.rs.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.*;
 import javax.validation.constraints.*;
 
 @Path("/globaltags")
 
 
 @io.swagger.annotations.Api(description = "the globaltags API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-04T10:30:37.214+02:00")
 public class GlobaltagsApi  {
-
 	@Autowired
 	private GlobaltagsApiService delegate;
 
@@ -80,9 +83,9 @@ public class GlobaltagsApi  {
     
     
     @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Finds a GlobalTagDtos lists.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = GlobalTagDto.class, responseContainer = "List", tags={ "globaltags", })
+    @io.swagger.annotations.ApiOperation(value = "Finds a GlobalTagDtos lists.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = GlobalTagSetDto.class, tags={ "globaltags", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagDto.class, responseContainer = "List") })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagSetDto.class) })
     public Response listGlobalTags(@ApiParam(value = "by: the search pattern {none}", defaultValue="none") @DefaultValue("none") @QueryParam("by") String by
 ,@ApiParam(value = "page: the page number {0}", defaultValue="0") @DefaultValue("0") @QueryParam("page") Integer page
 ,@ApiParam(value = "size: the page size {1000}", defaultValue="1000") @DefaultValue("1000") @QueryParam("size") Integer size
