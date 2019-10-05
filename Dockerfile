@@ -32,10 +32,10 @@ ADD web ${crest_dir}/web
 #ADD logback.xml.crest ${data_dir}/logback.xml
 COPY ./web-ui/crest-ui/dist ${crest_dir}/web/crestui
 
-#VOLUME "${data_dir}/web"
-#VOLUME "${data_dir}/dump"
-#VOLUME "${data_dir}/logs"
-VOLUME "${data_dir}"
+VOLUME "${data_dir}/web"
+VOLUME "${data_dir}/dump"
+VOLUME "${data_dir}/logs"
+#VOLUME "${data_dir}"
 
 EXPOSE 8080
 
