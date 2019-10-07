@@ -3,6 +3,7 @@
  */
 package hep.crest.data.repositories.querydsl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +39,24 @@ public class IovFiltering implements IFilteringCriteria {
 			for (SearchCriteria searchCriteria : criteria) {
 				log.debug("search criteria " + searchCriteria.getKey() + " " + searchCriteria.getOperation() + " "
 						+ searchCriteria.getValue());
-				if (searchCriteria.getKey().equals("tagname")) {
+				String key = searchCriteria.getKey().toLowerCase();
+				if (key.equals("tagname")) {
 					BooleanExpression objtyplike = IovPredicates.hasTagName(searchCriteria.getValue().toString());
 					expressions.add(objtyplike);
+				} else if (key.equals("insertiontime")) {
+					BooleanExpression insertionTimexthan = IovPredicates
+							.isInsertionTimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
+					expressions.add(insertionTimexthan);
+				} else if (key.equals("since")) {
+					BigDecimal since = new BigDecimal(searchCriteria.getValue().toString());
+					BooleanExpression sincexthan = IovPredicates
+							.isSinceXThan(searchCriteria.getOperation(), since);
+					expressions.add(sincexthan);
+				} 
+				if (searchCriteria.getKey().equals("tagid")) {
+					Long tagid = new Long(searchCriteria.getValue().toString());
+					BooleanExpression objtypeq = IovPredicates.hasTagId(tagid);
+					expressions.add(objtypeq);
 				} 
 			}
 			return expressions;

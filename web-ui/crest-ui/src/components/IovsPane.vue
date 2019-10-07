@@ -1,7 +1,7 @@
 <template>
   <div>
     <p class="has-text-info is-size-2">Search for Iovs</p>
-    
+
     <div class="columns">
       <div class="column is-one-fifth">
         <b-field>

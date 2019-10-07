@@ -91,7 +91,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,PYLD_SIZE from "+tablename+" where PAYLOAD.HASH=?";
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,DATA_SIZEIZE from "+tablename+" where PAYLOAD.HASH=?";
 		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setHash(rs.getString("HASH"));
@@ -102,7 +102,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 			entity.setData(blob);
 			blob = new SerialBlob(rs.getBytes("STREAMER_INFO"));
 			entity.setStreamerInfo(blob);
-			entity.setSize(rs.getInt("PYLD_SIZE"));
+			entity.setSize(rs.getInt("DATA_SIZE"));
 
 			return entity;
 		});
@@ -153,7 +153,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 		
 		String tablename = this.tablename();
 
-		String sql = "INSERT INTO "+tablename+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
+		String sql = "INSERT INTO "+tablename+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, DATA_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
 		
@@ -183,7 +183,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 	protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws IOException {
 		String tablename = this.tablename();
 
-		String sql = "INSERT INTO "+tablename+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, PYLD_SIZE) VALUES (?,?,?,?,?,?,?)";
+		String sql = "INSERT INTO "+tablename+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, DATA_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
 		byte[] blob = payloadHandler.getBytesFromInputStream(is);
@@ -229,7 +229,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,PYLD_SIZE from "+tablename+" where PAYLOAD.HASH=?";
+		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,DATA_SIZE from "+tablename+" where PAYLOAD.HASH=?";
 		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
 			final Payload entity = new Payload();
 			entity.setHash(rs.getString("HASH"));
@@ -238,7 +238,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
 			SerialBlob blob = new SerialBlob(rs.getBytes("STREAMER_INFO"));
 			entity.setStreamerInfo(blob);
-			entity.setSize(rs.getInt("PYLD_SIZE"));
+			entity.setSize(rs.getInt("DATA_SIZE"));
 			return entity;
 		});
 

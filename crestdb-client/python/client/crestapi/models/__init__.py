@@ -28,4 +28,5 @@ from crestapi.models.payload_dto import PayloadDto
 from crestapi.models.payload_tag_info_dto import PayloadTagInfoDto
 from crestapi.models.run_lumi_info_dto import RunLumiInfoDto
 from crestapi.models.tag_dto import TagDto
+from crestapi.models.tag_meta_dto import TagMetaDto
 from crestapi.models.tag_summary_dto import TagSummaryDto

@@ -10,6 +10,7 @@ import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.TagSummaryDto;
 
+import java.util.Map;
 import java.util.List;
 import hep.crest.server.swagger.api.NotFoundException;
 
@@ -18,6 +19,7 @@ import java.io.InputStream;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
@@ -25,18 +27,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import javax.ws.rs.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.*;
 import javax.validation.constraints.*;
 
 @Path("/iovs")
 
 
 @io.swagger.annotations.Api(description = "the iovs API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-09-27T21:56:58.011+02:00")
 public class IovsApi  {
-
 	@Autowired
 	private IovsApiService delegate;
 
@@ -59,13 +61,14 @@ public class IovsApi  {
     @io.swagger.annotations.ApiOperation(value = "Finds a IovDtos lists.", notes = "This method allows to perform search by tagname and sorting.Arguments: tagname={a tag name}, page={ipage}, size={isize},      sort=<pattern>, where pattern is <field>:[DESC|ASC]", response = IovDto.class, responseContainer = "List", tags={ "iovs", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = IovDto.class, responseContainer = "List") })
-    public Response findAllIovs(@ApiParam(value = "tagname: the tag name {none}", defaultValue="none") @DefaultValue("none") @QueryParam("tagname") String tagname
+    public Response findAllIovs(@ApiParam(value = "you need a mandatory tagname:xxxx. Additional field can be since or insertionTime rules.",required=true, defaultValue="none") @DefaultValue("none") @QueryParam("by") String by
 ,@ApiParam(value = "page: the page number {0}", defaultValue="0") @DefaultValue("0") @QueryParam("page") Integer page
 ,@ApiParam(value = "size: the page size {10000}", defaultValue="10000") @DefaultValue("10000") @QueryParam("size") Integer size
 ,@ApiParam(value = "sort: the sort pattern {id.since:ASC}", defaultValue="id.since:ASC") @DefaultValue("id.since:ASC") @QueryParam("sort") String sort
+,@ApiParam(value = "The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison." , defaultValue="ms")@HeaderParam("dateformat") String dateformat
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
-        return delegate.findAllIovs(tagname,page,size,sort,securityContext,info);
+        return delegate.findAllIovs(by,page,size,sort,dateformat,securityContext,info);
     }
     @GET
     @Path("/getSize")

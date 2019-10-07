@@ -33,7 +33,16 @@ public class IovPredicates {
 	 */
 	public static BooleanExpression hasTagName(String tagname) {
 		log.debug("hasTagName: argument {}",tagname);
-		return  QIov.iov.id.tagName.eq(tagname);
+		return  QIov.iov.tag.name.eq(tagname);
+	}
+	
+	/**
+	 * @param tagid
+	 * @return
+	 */
+	public static BooleanExpression hasTagId(Long tagid) {
+		log.debug("hasTagId: argument {}",tagid);
+		return  QIov.iov.id.tagid.eq(tagid);
 	}
 
 	/**
@@ -44,6 +53,26 @@ public class IovPredicates {
 	public static BooleanExpression hasSinceBetween(BigDecimal since, BigDecimal until) {
 		log.debug("hasSinceBetween: argument {} {}",since,until);
 		return  QIov.iov.id.since.between(since,until);
+	}
+	
+
+	/**
+	 * @param since
+	 * @param until
+	 * @return
+	 */
+	public static BooleanExpression isSinceXThan(String oper, BigDecimal since) {
+		log.debug("isSinceXThan: argument {} {}",since,oper);
+		BooleanExpression pred = null;
+
+		if (oper.equals("<")) {
+			pred = QIov.iov.id.since.lt(since);
+		} else if (oper.equals(">")) {
+			pred = QIov.iov.id.since.gt(since);
+		} else if (oper.equals(":")) {
+			pred = QIov.iov.id.since.eq(since);
+		} 
+		return pred;
 	}
 	
 	public static BooleanExpression isInsertionTimeXThan(String oper, String num) {

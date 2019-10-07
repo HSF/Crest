@@ -249,9 +249,6 @@ class PayloadDto(object):
                 ))
             else:
                 result[attr] = value
-        if issubclass(PayloadDto, dict):
-            for key, value in self.items():
-                result[key] = value
 
         return result
 

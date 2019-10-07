@@ -1,6 +1,6 @@
 plugins {
   id "org.sonarqube" version "2.6"
-  id 'org.hidetake.swagger.generator' version '2.9.0'
+  id 'org.hidetake.swagger.generator' version '2.14.0'
 }
 
 apply plugin: 'java'
@@ -10,7 +10,7 @@ ext {
     swagger_annotations_version = "1.5.13"
     jackson_version = "2.7.5"
     spring_version = "4.1.4.RELEASE"
-    springboot_version = "2.0.1.RELEASE"
+    springboot_version = "2.1.0.RELEASE"
     junit_version = "4.12"
     oltu_version = "1.0.1"
     orika_version = "1.5.1"
@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.0'
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.1'
 }
 // Task to generate sources in build output directory
 swaggerSources {
@@ -38,19 +38,10 @@ swaggerSources {
     inputFile = file('swagger_schemas/swagger/json/crestdb.json')
     code {
       language = 'python'
-      templateDir = file('./templates/2.3.0/python-client/model')
-      configFile = file('swagger_schemas/swagger/json/crestdb-pyclient-config.json')
-    }
-  }
-  crestdb_oldclient {
-    inputFile = file('swagger_schemas/swagger/json/crestdb.json')
-    code {
-      language = 'python'
       //templateDir = file('./templates/2.3.0/python-client/model')
       configFile = file('swagger_schemas/swagger/json/crestdb-pyclient-config.json')
     }
   }
-
 }
 
 configurations.compile.each {
@@ -78,11 +69,11 @@ Properties getProjectProperties() {
 
 // An example for sonarqube configuration: to run the code on a local sonarqube instance you should
 // use commands like : ./gradlew sonarqube   -Dsonar.host.url=http://localhost:9000   -Dsonar.login=180fe2ea3c768359eb5fa680f7bbe6667ceeb238
-sonarqube { 
-	properties{ 
+sonarqube {
+	properties{
 		property 'sonar.coverage.exclusions', "**/hep/crest/swagger/model/*"
-        property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
-	} 
+    property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
+	}
 }
 
 subprojects {
@@ -136,8 +127,8 @@ subprojects {
 	    compile files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")
 // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
 		compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
-		compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
-		compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
+		compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
+//		compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
 		compile("com.h2database:h2")
 		compile("commons-io:commons-io:2.6")
 		compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
@@ -147,4 +138,11 @@ subprojects {
 	task wrapper(type: Wrapper) {
 	   gradleVersion = '5.2.1' //version required
 	}
+	
+	task purgedb(type: Delete) {
+    	delete fileTree('/tmp') {
+        include 'crest*.db'
+    }}
+    
+    test.dependsOn purgedb
 }

@@ -115,7 +115,7 @@ build_svom_docker_image:
   image: java:8
   script:
     - docker info
-    - docker build --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
+    - docker build --tag=$WEB_CONTAINER_IMAGE --file Dockerfile.nginx.svom ./web-ui/crest-ui/
   only:
   - svom-dc0
 
@@ -141,7 +141,7 @@ package_cern_application:
       - $REMOTE_NAME == "cern"
   image: java:8
   script:
-   - ./gradlew -g /cache/.gradle clean assemble -PwarName=crest.war
+   - ./gradlew clean assemble -PwarName=crest.war
   allow_failure: false
   artifacts:
    paths:

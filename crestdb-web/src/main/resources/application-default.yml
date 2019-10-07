@@ -20,7 +20,7 @@ crest:
   schemaname: none
   security: none
   synchro: none
-  webstaticdir: /tmp
+  webstaticdir: /tmp/data/web
   dbfile: /tmp/crestdbh2
   apiname: /crestapi
   authenticationtype: none

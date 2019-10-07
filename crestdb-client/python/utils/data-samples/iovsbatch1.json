@@ -1,0 +1,8 @@
+{
+  "niovs": 2,
+  "format": "JSON",
+  "iovsList": [
+    { "since" : 300, "payload" : "file:///tmp/map.json"},
+    { "since" : 400, "payload" : "file:///tmp/noise.json"}
+  ]
+}

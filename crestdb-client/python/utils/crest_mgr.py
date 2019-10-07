@@ -29,8 +29,8 @@ from datetime import datetime
 
 sys.path.append(os.path.join(sys.path[0],'..'))
 
-from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi
-from crestapi.models import GlobalTagDto, TagDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto, IovPayloadDto
+from crestapi.api import GlobaltagsApi, TagsApi, GlobaltagmapsApi, IovsApi, PayloadsApi, AdminApi, FoldersApi
+from crestapi.models import FolderDto, GlobalTagDto, TagDto, TagMetaDto, GlobalTagMapDto, IovDto, PayloadDto, IovSetDto, IovPayloadDto
 from crestapi import ApiClient
 from crestapi.rest import ApiException
 from crestapi.configuration import Configuration
@@ -89,13 +89,15 @@ class PhysDBDriver():
         print ("Server url is needed in order to provide the system with the base url; defaults to localhost (see below)")
         print ("Action determines which rest method to call")
         print ("Actions list:")
-        print (" - ADD <type> [json-filename] [type = tags, globaltags, ...] : add the selected resource using the json file provided in input")
+        print (" - ADD <type> [json-filename] [type = tags, globaltags, folders...] : add the selected resource using the json file provided in input")
         print ("        ex: ADD globaltags <json-filename>: add a new global tag with the content taken from json file")
+        print (" ")
+        print (" - ADDINFO <tag> [json-filename] : add metadata to tag")
         print (" ")
         print (" - INSERT <tag> <since> blob-file : add a new IOV with its payload")
         print ("        ex: INSERT my-tag 10000 myblob.blob mypayload.json: add a payload and then the iov in the correspoding tag")
-        print (" - BATCHINSERT multi-iov-file : add a new IOV LIST with its payload files included in the multi-iov-file")
-        print ("        ex: BATCHINSERT iovset.json: the internal format of the file should include the iov list")
+        print (" - BATCHINSERT <tag> <multi-iov-file> : add a new IOV LIST with its payload files included in the multi-iov-file")
+        print ("        ex: BATCHINSERT mytagname iovset.json: the internal format of the file should include the iov list")
         print (" ")
         print (" - RM <type> [id] [type = tags, globaltags, ...] : remove the selected resource")
         print ("        ex: RM globaltags MY_TEST02_GTAG : remove the global tag identified by MY_TEST02_GTAG")
@@ -190,7 +192,7 @@ class PhysDBDriver():
                     raise
                 object=self.args[0]
                 msg = ('ADD: selected object is %s ') % (object)
-                if object in [ 'globaltags', 'tags', 'maps' ]:
+                if object in [ 'globaltags', 'tags', 'maps', 'folders' ]:
                     self.printmsg(msg,'cyan')
                 else:
                     msg = ('ADD: cannot apply command to object %s ') % (object)
@@ -202,6 +204,28 @@ class PhysDBDriver():
 
             except Exception as e:
                 sys.exit("failed on action ADD: %s" % (str(e)))
+                raise
+
+        elif (self.action=='ADDINFO'):
+            try:
+                print ('Action ADDINFO is used to add metadata resources to a tag in the DB')
+                print ('Found N arguments %s' % len(self.args))
+                if len(self.args)<2:
+                    sys.exit("Number of arguments is wrong...may be you forgot tag name or file with metadata ?")
+                    raise
+                tagname=self.args[0]
+                filename = self.args[1]
+                self.add_tag_meta(tagname,filename)
+
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                print ("*** print_tb:")
+                traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+                print ("*** print_exception:")
+                traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout)
+
+                sys.exit("failed on action INSERT: %s" % (str(e)))
                 raise
 
         elif (self.action=='INSERT'):
@@ -509,9 +533,40 @@ class PhysDBDriver():
                 pprint(api_response)
             except ApiException as e:
                 print ("Exception when calling GlobaltagmapsApi->create_global_tag_map: %s\n" % e)
+
+        elif objtype == 'folders':
+            api_instance = FoldersApi(self.api_client)
+            try:
+                f = open(filename, 'r')
+                jsondtodict = f.read()
+                dtodict = json.loads(jsondtodict)
+                dto = FolderDto(dtodict['nodeFullpath'],dtodict['schemaName'],dtodict['nodeName'],dtodict['nodeDescription'],dtodict['tagPattern'],dtodict['groupRole'])
+                msg = ('Created dto resource %s ' ) % (dto.to_dict())
+                pprint(msg)
+                api_response = api_instance.create_folder(dto)
+                pprint(api_response)
+            except ApiException as e:
+                print ("Exception when calling FoldersApi->create_folder: %s\n" % e)
         else:
             print ('Cannot use resource %s' % objtype)
         return
+
+    def add_tag_meta(self,tagname,filename):
+        api_instance = TagsApi(self.api_client)
+        try:
+            f = open(filename, 'r')
+            jsondtodict = f.read()
+            print ('Loaded json from file %s' % jsondtodict)
+            dtodict = json.loads(jsondtodict)
+            print ('Create dto dictionary from json %s ' % dtodict)
+            dto = TagMetaDto(tagname,dtodict['description'],dtodict['chansize'],dtodict['colsize'],
+                               dtodict['channelInfo'],dtodict['payloadInfo'],None)
+            msg = ('Created dto resource %s ' ) % (dto.to_dict())
+            pprint(msg)
+            api_response = api_instance.create_tag_meta(tagname,dto)
+            pprint(api_response)
+        except ApiException as e:
+            print ("Exception when calling TagsApi->create_tag_meta: %s\n" % e)
 
 
     def ls(self,objtype):
@@ -539,6 +594,16 @@ class PhysDBDriver():
                 pprint(api_response)
             except ApiException as e:
                 print ("Exception when calling TagsApi->list_tags: %s\n" % e )
+
+        elif objtype == 'folders':
+            api_instance = FoldersApi(self.api_client)
+            try:
+            # Finds a TagDtos lists.
+                api_response = api_instance.list_folders(by=by, sort=sort)
+                pprint(api_response)
+            except ApiException as e:
+                print ("Exception when calling FoldersApi->list_folders: %s\n" % e )
+
         else:
             print ('Cannot use resource %s' % objtype)
         return

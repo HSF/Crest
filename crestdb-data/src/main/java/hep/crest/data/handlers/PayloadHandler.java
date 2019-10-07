@@ -29,7 +29,9 @@ import org.springframework.stereotype.Service;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.pojo.Payload;
+import hep.crest.data.pojo.TagMeta;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.TagMetaDto;
 
 @Service
 public class PayloadHandler {
@@ -316,6 +318,34 @@ public class PayloadHandler {
 			log.error("Exception : {}", e.getMessage());
 		}
 		return new byte[0];
+	}
+
+	/**
+	 * @param dataentity
+	 * @return
+	 */
+	public TagMetaDto convertToTagMetaDto(TagMeta entity) {
+		try {
+			log.debug("Retrieving binary stream from payload entity including the DATA blob");
+			byte[] chanbarr = null;
+			byte[] pyldbarr = null;
+			InputStream in = entity.getChannelInfo().getBinaryStream();
+			chanbarr = readLobs(in);
+			entity.getChannelInfo().free();
+
+			// Now get payload spec BLOB.
+			InputStream insi = entity.getPayloadInfo().getBinaryStream();
+			pyldbarr = readLobs(insi);
+			entity.getPayloadInfo().free();
+			String chinfo = new String(chanbarr);
+			String pyldinfo = new String(pyldbarr);
+			return new TagMetaDto().tagName(entity.getTagName()).description(entity.getDescription())
+					.colsize(entity.getColsize()).chansize(entity.getChansize()).channelInfo(chinfo)
+					.payloadInfo(pyldinfo).insertionTime(entity.getInsertionTime());
+		} catch (SQLException e) {
+			log.error("Exception : {}", e.getMessage());
+		}
+		return null;
 	}
 
 	/**

@@ -16,26 +16,26 @@ public class IovId implements java.io.Serializable {
 	* 
 	*/
 	private static final long serialVersionUID = -2770785371714771938L;
-	private String tagName;
+	private Long tagid;
 	private BigDecimal since;
 	private Date insertionTime;
 
 	public IovId() {
 	}
 
-	public IovId(String tagName, BigDecimal since, Date insertionTime) {
-		this.tagName = tagName;
+	public IovId(Long tagid, BigDecimal since, Date insertionTime) {
+		this.tagid = tagid;
 		this.since = since;
 		this.insertionTime = insertionTime;
 	}
 
-	@Column(name = "TAG_NAME", nullable = false, length = 255)
-	public String getTagName() {
-		return this.tagName;
+	@Column(name = "TAG_ID", nullable = false, precision = 20, scale = 0)
+	public Long getTagid() {
+		return this.tagid;
 	}
 
-	public void setTagName(String tagName) {
-		this.tagName = tagName;
+	public void setTagid(Long tagid) {
+		this.tagid = tagid;
 	}
 
 	@Column(name = "SINCE", nullable = false, precision = 38, scale = 0)
@@ -56,30 +56,47 @@ public class IovId implements java.io.Serializable {
 		this.insertionTime = insertionTime;
 	}
 
-	public boolean equals(Object other) {
-		if ((this == other))
-			return true;
-		if ((other == null))
-			return false;
-		if (!(other instanceof IovId))
-			return false;
-		IovId castOther = (IovId) other;
 
-		return ((this.getTagName() == castOther.getTagName()) || (this.getTagName() != null
-				&& castOther.getTagName() != null && this.getTagName().equals(castOther.getTagName())))
-				&& ((this.getSince() == castOther.getSince()) || (this.getSince() != null
-						&& castOther.getSince() != null && this.getSince().equals(castOther.getSince())))
-				&& ((this.getInsertionTime() == castOther.getInsertionTime())
-						|| (this.getInsertionTime() != null && castOther.getInsertionTime() != null
-								&& this.getInsertionTime().equals(castOther.getInsertionTime())));
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IovId other = (IovId) obj;
+		if (insertionTime == null) {
+			if (other.insertionTime != null)
+				return false;
+		} else if (!insertionTime.equals(other.insertionTime))
+			return false;
+		if (since == null) {
+			if (other.since != null)
+				return false;
+		} else if (!since.equals(other.since))
+			return false;
+		if (tagid == null) {
+			if (other.tagid != null)
+				return false;
+		} else if (!tagid.equals(other.tagid))
+			return false;
+		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
 	public int hashCode() {
-		int result = 17;
-
-		result = 37 * result + (getTagName() == null ? 0 : this.getTagName().hashCode());
-		result = 37 * result + (getSince() == null ? 0 : this.getSince().hashCode());
-		result = 37 * result + (getInsertionTime() == null ? 0 : this.getInsertionTime().hashCode());
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((insertionTime == null) ? 0 : insertionTime.hashCode());
+		result = prime * result + ((since == null) ? 0 : since.hashCode());
+		result = prime * result + ((tagid == null) ? 0 : tagid.hashCode());
 		return result;
 	}
 
@@ -90,7 +107,7 @@ public class IovId implements java.io.Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "IovId [tagName=" + tagName + ", since=" + since + ", insertionTime=" + insertionTime + "]";
+		return "IovId [tagid=" + tagid + ", since=" + since + ", insertionTime=" + insertionTime + "]";
 	}
 
 }

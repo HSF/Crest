@@ -6,11 +6,10 @@ export default {
 	state: {
 		globaltagmap: {
 			/*
-<<<<<<< HEAD
-			label: {
+			globalTagName: {
 =======
 			globalTagName: {
->>>>>>> bbc44e2... Add tabs with tagmeta and globaltag  in tag details
+>>>>>>> master
 				"globalTagName": "string",
 				"tagName": "string",
 				"record": "string",

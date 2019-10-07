@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -103,7 +104,7 @@ public class GlobalTagMapService {
 			log.debug("Create global tag map from dto {}",dto);
 			GlobalTagMap entity = new GlobalTagMap();
 			Optional<GlobalTag> gt = globalTagRepository.findById(dto.getGlobalTagName());
-			Optional<Tag> tg = tagRepository.findById(dto.getTagName());
+			Tag tg = tagRepository.findByName(dto.getTagName());
 			
 			GlobalTagMapId id = new GlobalTagMapId(dto.getGlobalTagName(),dto.getRecord(),dto.getLabel());
 			entity.setId(id);
@@ -114,12 +115,11 @@ public class GlobalTagMapService {
 					entity.setGlobalTag(agt);
 			    }
 			});
-			tg.ifPresent(new Consumer<Tag>() {
-			    @Override
-			    public void accept(Tag agt) {
-					entity.setTag(agt);
-			    }
-			});
+			if (tg != null) {
+				entity.setTag(tg);
+			} else {
+				throw new EntityNotFoundException();
+			}
 			
 			GlobalTagMap saved = globalTagMapRepository.save(entity);
 			log.debug("Saved entity: {}",saved);

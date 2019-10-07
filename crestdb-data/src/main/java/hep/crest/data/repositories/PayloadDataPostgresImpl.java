@@ -176,6 +176,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			try {
 				if (rs != null)
 					rs.close();
+				if (obj != null) 
+					obj.close();
 			} catch (SQLException | NullPointerException e) {
 				log.error("Error in closing result set : {}",e.getMessage());
 			}
@@ -206,11 +208,12 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 	protected long getLargeObjectId(Connection conn, InputStream is, PayloadDto entity) {
 		// Open the large object for writing
 		LargeObjectManager lobj;
+		LargeObject obj = null;
 		long oid;
 		try {
 			lobj = conn.unwrap(org.postgresql.PGConnection.class).getLargeObjectAPI();
 			oid = lobj.createLO();
-			LargeObject obj = lobj.open(oid, LargeObjectManager.WRITE);
+			obj = lobj.open(oid, LargeObjectManager.WRITE);
 
 			// Copy the data from the file to the large object
 			byte[] buf = new byte[2048];
@@ -228,6 +231,14 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			return oid;
 		} catch (SQLException | IOException e) {
 			log.error("Exception in getting large object id: {}", e.getMessage());
+		} finally {
+			if (obj!= null) {
+				try {
+					obj.close();
+				} catch (SQLException e) {
+					log.error("Error in closing LargeObject");
+				}
+			}
 		}
 		return (Long) null;
 	}
@@ -237,7 +248,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String tablename = this.tablename();
 
 		String sql = "INSERT INTO " + tablename
-				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
+				+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, DATA_SIZE) VALUES (?,?,?,?,?,?,?)";
 
 		log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
 		Calendar calendar = Calendar.getInstance();
@@ -259,10 +270,11 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setLong(4, oid);
 			ps.setLong(5, sioid);
 			ps.setDate(6, inserttime);
+			ps.setInt(7, entity.getSize());
 			log.info("Dump preparedstatement {} using sql {} and args {} {} {} {}", ps, sql,
 					entity.getHash(), entity.getObjectType(), entity.getVersion(), entity.getInsertionTime());
 			ps.execute();
-			conn.commit();
+			//conn.commit();
 			log.debug("Search for stored payload as a verification, use hash {}", entity.getHash());
 			return find(entity.getHash());
 		} catch (SQLException e) {
@@ -328,7 +340,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setInt(7, entity.getSize());
 			log.debug("Dump preparedstatement {} ", ps);
 			ps.executeUpdate();
-			conn.commit();
+			//conn.commit();
 		} catch (SQLException e) {
 			log.error("Exception from SQL during insertion: {}", e.getMessage());
 		} finally {

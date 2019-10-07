@@ -31,13 +31,13 @@ export default {
 	},
 	mutations: {
 		mergeIovsForTag(state, {tagname, iovs_list}) {
-      Vue.set(state.iovs_for_tag, tagname, iovs_list);
-    },
-    mergeNbIovs(state, {tagname, iovs_list}) {
-    	if (!(tagname in state.nb_iovs_for_tag)) {
-    		Vue.set(state.nb_iovs_for_tag, tagname, iovs_list[0]);
-    	}
-    }
+            Vue.set(state.iovs_for_tag, tagname, iovs_list);
+        },
+        mergeNbIovs(state, {tagname, iovs_list}) {
+            if (!(tagname in state.nb_iovs_for_tag)) {
+                Vue.set(state.nb_iovs_for_tag, tagname, iovs_list[0]);
+            }
+        }
 	},
 	actions: {
 		fetchIovByTagName({commit}, getIov) {
@@ -57,7 +57,6 @@ export default {
 		},
 		createIov({dispatch}, res) {
 			const config = {'X-Crest-PayloadFormat': res.iovForm.format};
-
 			const data = new FormData();
 			data.append("file", res.setIov.file);
 			data.append("tag", res.setIov.tagname);
