@@ -11,7 +11,7 @@
 version: '3.6'
 
 services:
-  crest-http:
+  http:
     image: gitlab-registry.cern.ch/formica/swagger_crestdb:latest
     deploy:
       placement:
@@ -25,7 +25,7 @@ services:
     - source: crest-logs
       target: /home/crest/logback.xml
     - source: crest-jopts
-      target: /home/crest/javaopt.properties
+      target: /home/crest/javaopts.properties
     secrets:
     - source: crest-config
       target: /home/crest/application.properties
@@ -33,16 +33,18 @@ services:
         - crest.server.port=8080
         - spring.profiles.active=prod
     volumes:
-        - crest_data:/home/crest/data
+        - crest_data_logs:/data/logs
+        - crest_data_dump:/data/dump
+        - crest_data_web:/data/web
 
-  crest-ui:
+  ui:
     image: gitlab-registry.cern.ch/formica/swagger_crestdb/ui:latest
     deploy:
       placement:
         constraints:
           - node.hostname == crest-01.cern.ch
     ports:
-    - "9090:80"
+    - "8091:80"
     networks:
       - crestnet
     environment:
@@ -64,7 +66,8 @@ secrets:
     external: true
 
 volumes:
-  crest_data:
-    external: true
+  crest_data_logs:
+  crest_data_dump:
+  crest_data_web:
 
 #______________________________________________________________________________
