@@ -14,7 +14,8 @@ EOF
 }
 host=$1
 tagdata="$(generate_post_data)"
+apiname="crestapi"
 echo "Use data $tagdata"
-curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" "${host}/crestapi/tags" --data "${tagdata}"
+curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" "${host}/${apiname}/tags" --data "${tagdata}"
 echo "Try to get back data from server"
 curl -X GET "${host}/crestapi/tags?by=name:MY"
