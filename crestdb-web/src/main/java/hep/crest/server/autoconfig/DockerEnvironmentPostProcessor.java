@@ -6,6 +6,7 @@ package hep.crest.server.autoconfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,7 +102,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 	 */
 	private String getStringFromInputStream(InputStream input) throws IOException {
 		StringWriter writer = new StringWriter();
-		IOUtils.copy(input, writer, "UTF-8");
+		IOUtils.copy(input, writer, StandardCharsets.UTF_8);
 		return writer.toString();
 	}
 

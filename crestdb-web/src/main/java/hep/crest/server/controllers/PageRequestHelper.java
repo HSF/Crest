@@ -63,7 +63,7 @@ public class PageRequestHelper {
 			orderlist.add(new Order(direc, field));
 		}
 		log.debug("Created list of sorting orders of size {}", orderlist.size());
-		Order orders[] = new Order[orderlist.size()];
+		Order[] orders = new Order[orderlist.size()];
 		int i = 0;
 		for (Order order : orderlist) {
 			log.debug("Order @ {} = {} ", i, order);
