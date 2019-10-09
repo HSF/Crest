@@ -2,7 +2,7 @@ process.env.VUE_APP_CRESTAPI_URL = (typeof process.env.VUE_APP_API_URL != 'undef
 //process.env.VUE_APP_CRESTBASE_URL = (typeof process.env.VUE_APP_BASEURL != 'undefined') ? process.env.VUE_APP_BASEURL : '/ext/web/crestui/'
 
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/ext/web/crestui/' : '/crestui',
+  publicPath: process.env.NODE_ENV === 'production' ? '/ext/web/crestui/' : '/ext/web/crestui/',
   devServer: {
     proxy: {
       '^/crestapi': {
