@@ -49,33 +49,6 @@ public class GlobalTag implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public GlobalTag(String name, BigDecimal validity, String description, String release, Date insertionTime,
-			Date snapshotTime, String scenario, String workflow, char type) {
-		this.name = name;
-		this.validity = validity;
-		this.description = description;
-		this.release = release;
-		this.insertionTime = insertionTime;
-		this.snapshotTime = snapshotTime;
-		this.scenario = scenario;
-		this.workflow = workflow;
-		this.type = type;
-	}
-
-	public GlobalTag(String name, BigDecimal validity, String description, String release, Date insertionTime,
-			Date snapshotTime, String scenario, String workflow, char type, Set<GlobalTagMap> globalTagMaps) {
-		this.name = name;
-		this.validity = validity;
-		this.description = description;
-		this.release = release;
-		this.insertionTime = insertionTime;
-		this.snapshotTime = snapshotTime;
-		this.scenario = scenario;
-		this.workflow = workflow;
-		this.type = type;
-		this.globalTagMaps = globalTagMaps;
-	}
-
 	@Id
 	@Column(name = "NAME", unique = true, nullable = false, length = 100)
 	public String getName() {

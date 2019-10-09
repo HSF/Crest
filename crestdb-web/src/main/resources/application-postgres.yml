@@ -10,9 +10,9 @@ spring:
 spring:
     profiles: postgres
     jersey:
-      application-path: /crestapi
+      application-path: ${crest.api.name}
     datasource:
-      url: jdbc:postgresql://localhost:${crest.db.port}/crestdb
+      url: ${crest.db.url}
       driverClassName: org.postgresql.Driver
       username: formica
       password: ${crest.db.password}
@@ -25,10 +25,12 @@ spring:
         hibernate.dialect: org.hibernate.dialect.PostgreSQL9Dialect
         hibernate.jdbc.fetch_size: 300
 # This should be changed for production to "validate"
-        hibernate.hbm2ddl.auto: create
+        hibernate.hbm2ddl.auto: update
         hibernate.show_sql: false
         hibernate.jdbc.use_streams_for_binary: false
         hibernate.connection.autocommit: false
+# Without this there is an exception from Postgres driver related to createBlob method.
+        hibernate.jdbc.lob.non_contextual_creation: true        
 server:
     port: 8080 
 crest:
@@ -38,5 +40,3 @@ crest:
   security: none
   synchro: none
   authenticationtype: none
-  db:
-    port: 5432

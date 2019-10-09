@@ -56,8 +56,9 @@ public class IovId implements java.io.Serializable {
 		this.insertionTime = insertionTime;
 	}
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -72,22 +73,28 @@ public class IovId implements java.io.Serializable {
 		if (insertionTime == null) {
 			if (other.insertionTime != null)
 				return false;
-		} else if (!insertionTime.equals(other.insertionTime))
+		} else if (!insertionTime.equals(other.insertionTime)) {
 			return false;
+		} 
+		
 		if (since == null) {
 			if (other.since != null)
 				return false;
-		} else if (!since.equals(other.since))
+		} else if (!since.equals(other.since)) {
 			return false;
+		}
 		if (tagid == null) {
 			if (other.tagid != null)
 				return false;
-		} else if (!tagid.equals(other.tagid))
+		} else if (!tagid.equals(other.tagid)) {
 			return false;
+		}
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override

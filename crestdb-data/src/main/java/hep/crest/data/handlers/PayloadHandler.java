@@ -95,13 +95,13 @@ public class PayloadHandler {
 			}
 			out.flush();
 		} catch (IOException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Error of IO in saveToOutStream: {}", e.getMessage());
 		} finally {
 			try {
 				uploadedInputStream.close();
 				out.close();
 			} catch (IOException e) {
-				log.error("Exception : {}", e.getMessage());
+				log.error("Error closing input stream in saveToOutStream: {}", e.getMessage());
 			}
 		}
 	}
@@ -128,7 +128,7 @@ public class PayloadHandler {
 				try {
 					uploadedInputStream.close();
 				} catch (IOException e) {
-					log.error("error closing input stream in saveToFileGetHash");
+					log.error("Error closing input stream in saveToFileGetHash");
 				}
 			}
 		}
@@ -156,7 +156,7 @@ public class PayloadHandler {
 		try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
 			StreamUtils.copy(uploadedInputStream, out);
 		} catch (IOException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Error of IO in saveStreamToFile: {}", e.getMessage());
 		}
 	}
 
@@ -169,7 +169,7 @@ public class PayloadHandler {
 			java.nio.file.Path path = Paths.get(uploadedFileLocation);
 			return Files.readAllBytes(path);
 		} catch (IOException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Error of IO in readFromFile: {}", e.getMessage());
 		}
 		return new byte[0];
 
@@ -186,7 +186,7 @@ public class PayloadHandler {
 			Files.size(path);
 			return Files.size(path);
 		} catch (IOException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Error of IO in lengthOfFile: {}", e.getMessage());
 		}
 		return 0;
 	}
@@ -208,14 +208,14 @@ public class PayloadHandler {
 			StreamUtils.copy(fstream, bstream);
 			return blob;
 		} catch (IOException | SQLException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Error of IO or SQL in createBlobFromFile: {}", e.getMessage());
 		} finally {
 			try {
 				if (bstream != null) {
 					bstream.close();
 				}
 			} catch (IOException e) {
-				log.error("Exception : {}", e.getMessage());
+				log.error("Exception closing stream in createBlobFromFile: {}", e.getMessage());
 			}
 		}
 		return blob;
@@ -235,14 +235,14 @@ public class PayloadHandler {
 			StreamUtils.copy(fstream, bstream);
 			return blob;
 		} catch (IOException | SQLException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Error of IO or SQL in createBlobFromStream: {}", e.getMessage());
 		} finally {
 			try {
 				if (bstream != null) {
 					bstream.close();
 				}
 			} catch (IOException e) {
-				log.error("Exception : {}", e.getMessage());
+				log.error("Exception in closing stream in createBlobFromStream: {}", e.getMessage());
 			}
 		}
 		return blob;
@@ -263,17 +263,15 @@ public class PayloadHandler {
 			// stream copy runs a high-speed upload across the network
 			StreamUtils.copy(fstream, bstream);
 			return blob;
-		} catch (IOException e) {
-			log.error("IO Error creating blob from bytes : {}", e.getMessage());
-		} catch (SQLException e) {
-			log.error("SQL Error creating blob from bytes : {}", e.getMessage());
+		} catch (IOException | SQLException e) {
+			log.error("Error of IO or SQL in createBlobFromByteArr: {}", e.getMessage());
 		} finally {
 			try {
 				if (bstream != null) {
 					bstream.close();
 				}
 			} catch (IOException e) {
-				log.error("Error closing stream...{}", e.getMessage());
+				log.error("Error closing stream {}", e.getMessage());
 			}
 		}
 		return blob;
@@ -297,7 +295,7 @@ public class PayloadHandler {
 			databarr = fos.toByteArray();
 			return databarr;
 		} catch (IOException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Exception in IO for readLobs : {}", e.getMessage());
 		}
 		return new byte[0];
 	}
@@ -315,7 +313,7 @@ public class PayloadHandler {
 			dataentity.getData().free();
 			return databarr;
 		} catch (SQLException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Exception in SQL for convertToByteArray : {}", e.getMessage());
 		}
 		return new byte[0];
 	}
@@ -343,7 +341,7 @@ public class PayloadHandler {
 					.colsize(entity.getColsize()).chansize(entity.getChansize()).channelInfo(chinfo)
 					.payloadInfo(pyldinfo).insertionTime(entity.getInsertionTime());
 		} catch (SQLException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Exception in SQL for convertToTagMetaDto : {}", e.getMessage());
 		}
 		return null;
 	}
@@ -370,7 +368,7 @@ public class PayloadHandler {
 					.objectType(dataentity.getObjectType()).size(dataentity.getSize()).data(databarr)
 					.streamerInfo(strinfobarr).insertionTime(dataentity.getInsertionTime());
 		} catch (SQLException e) {
-			log.error("Exception : {}", e.getMessage());
+			log.error("Exception in SQL for convertToDto : {}", e.getMessage());
 		}
 		return null;
 	}
@@ -387,11 +385,10 @@ public class PayloadHandler {
 
 			log.info("Retrieved payload: {} {} {} ", dataentity.getHash(), dataentity.getObjectType(),
 					dataentity.getVersion());
-			PayloadDto entitydto = new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
+			return new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
 					.objectType(dataentity.getObjectType()).size(dataentity.getSize()).streamerInfo(strinfobarr);
-			return entitydto;
 		} catch (SQLException e) {
-			log.error("Exception : {} ", e.getMessage());
+			log.error("Exception in SQL for convertToDto : {}", e.getMessage());
 		}
 		return null;
 	}

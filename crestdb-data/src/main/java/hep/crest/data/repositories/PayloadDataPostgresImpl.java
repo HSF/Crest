@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 
@@ -52,6 +51,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private DataSource ds;
+	private static Long long1 = null;
 
 	@Value("${crest.upload.dir:/tmp}")
 	private String serverUploadLocationFolder;
@@ -148,43 +148,9 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		});
 	}
 
-	/**
-	 * @param id
-	 * @return
+	/* (non-Javadoc)
+	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.model.PayloadDto)
 	 */
-	protected LargeObject readBlobAsStream(String id) {
-		String tablename = this.tablename();
-
-		String sql = "select DATA from " + tablename + " where HASH=?";
-
-		log.info("Read Payload data with hash {} using JDBCTEMPLATE", id);
-		ResultSet rs = null;
-		LargeObject obj = null;
-		try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
-			conn.setAutoCommit(false);
-			LargeObjectManager lobj = conn.unwrap(org.postgresql.PGConnection.class).getLargeObjectAPI();
-			ps.setString(1, id);
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				// Open the large object for reading
-				long oid = rs.getLong(1);
-				obj = lobj.open(oid, LargeObjectManager.READ);
-			}
-		} catch (SQLException e) {
-			log.error("SQL exception occurred in retrieving payload data for {}", id);
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (obj != null) 
-					obj.close();
-			} catch (SQLException | NullPointerException e) {
-				log.error("Error in closing result set : {}",e.getMessage());
-			}
-		}
-		return obj;
-	}
-
 	@Override
 	public Payload save(PayloadDto entity) throws CdbServiceException {
 		Payload savedentity = null;
@@ -240,9 +206,14 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 				}
 			}
 		}
-		return (Long) null;
+		return long1;
 	}
 
+	/**
+	 * @param entity
+	 * @return
+	 * @throws IOException
+	 */
 	protected Payload saveBlobAsBytes(PayloadDto entity) throws IOException {
 
 		String tablename = this.tablename();
@@ -274,7 +245,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			log.info("Dump preparedstatement {} using sql {} and args {} {} {} {}", ps, sql,
 					entity.getHash(), entity.getObjectType(), entity.getVersion(), entity.getInsertionTime());
 			ps.execute();
-			//conn.commit();
+			conn.commit();
 			log.debug("Search for stored payload as a verification, use hash {}", entity.getHash());
 			return find(entity.getHash());
 		} catch (SQLException e) {
@@ -340,7 +311,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setInt(7, entity.getSize());
 			log.debug("Dump preparedstatement {} ", ps);
 			ps.executeUpdate();
-			//conn.commit();
+			conn.commit();
 		} catch (SQLException e) {
 			log.error("Exception from SQL during insertion: {}", e.getMessage());
 		} finally {

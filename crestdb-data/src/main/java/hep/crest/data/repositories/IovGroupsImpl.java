@@ -95,7 +95,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 				+" group by cast(SINCE/? as int)*?"
 				+" order by min(SINCE)";
 		
-		return jdbcTemplate.queryForList(sql, BigDecimal.class, new Object[] { tagid, groupfreq, groupfreq });
+		return jdbcTemplate.queryForList(sql, BigDecimal.class, tagid, groupfreq, groupfreq);
 	}
 
 
@@ -116,7 +116,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 				+" group by cast(SINCE/? as int)*?"
 				+" order by min(SINCE)";
 		
-		return jdbcTemplate.queryForList(sql, BigDecimal.class, new Object[] { tagid, snap, groupfreq, groupfreq });
+		return jdbcTemplate.queryForList(sql, BigDecimal.class, tagid, snap, groupfreq, groupfreq);
 	}
 
 
@@ -131,7 +131,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 
 		String sql = "select COUNT(TAG_ID) from "+ tablename +" where TAG_ID=?";
 		
-		return jdbcTemplate.queryForObject(sql, Long.class, new Object[] { tagid } );
+		return jdbcTemplate.queryForObject(sql, Long.class, tagid);
 	}
 	
 	/* (non-Javadoc)
@@ -144,7 +144,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 		String tablename = this.tablename();
 
 		String sql = "select COUNT(TAG_ID) from "+ tablename +" where TAG_ID=? and INSERTION_TIME<=?";
-		return jdbcTemplate.queryForObject(sql, Long.class, new Object[] { tagid, snap} );
+		return jdbcTemplate.queryForObject(sql, Long.class, tagid, snap);
 	}
 
 

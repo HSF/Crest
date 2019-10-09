@@ -22,6 +22,10 @@ import hep.crest.data.config.DatabasePropertyConfigurator;
 public class RunLumiInfo implements java.io.Serializable {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2748272207787384292L;
+	/**
 	* 
 	*/
 	private BigDecimal since;

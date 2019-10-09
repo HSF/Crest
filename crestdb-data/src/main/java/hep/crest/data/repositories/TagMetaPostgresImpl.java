@@ -43,6 +43,7 @@ import hep.crest.swagger.model.TagMetaDto;
 public class TagMetaPostgresImpl extends TagMetaDBImpl implements TagMetaDataBaseCustom {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
+	private static Long long1 = null;
 
 	public TagMetaPostgresImpl(DataSource ds) {
 		super(ds);
@@ -86,7 +87,7 @@ public class TagMetaPostgresImpl extends TagMetaDBImpl implements TagMetaDataBas
 				}
 			}
 		}
-		return (Long) null;
+		return long1;
 	}
 
 	/**
