@@ -17,7 +17,7 @@ EOF
 host=$1
 tag=$2
 apiname="api"
-for a in {3001..4000}; do echo $a;
+for a in {3001..3200}; do echo $a;
   b=$((a + 1000))
   echo "another blob 1 is $a" > /tmp/test-01.txt
   echo "another blob 2 is $b" > /tmp/test-02.txt
