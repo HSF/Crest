@@ -53,6 +53,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
 	private DataSource ds;
 
+	private static Long long1 = null;
+	
 	@Value("${crest.upload.dir:/tmp}")
 	private String serverUploadLocationFolder;
 
@@ -231,7 +233,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		} catch (SQLException | IOException e) {
 			log.error("Exception in getting large object id: {}", e.getMessage());
 		}
-		return (Long) null;
+		return long1;
 	}
 
 	protected Payload saveBlobAsBytes(PayloadDto entity) throws IOException {
@@ -362,6 +364,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			ps.setInt(6, metainfoentity.getSize());
 			log.debug("Dump preparedstatement {}", ps);
 			ps.execute();
+			conn.commit();
 			return find(metainfoentity.getHash());
 		} catch (SQLException e) {
 			log.error("Sql Exception when saving meta info : {}",e.getMessage());
@@ -379,7 +382,6 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		return null;
 	}
 
-	// FIXME: THIS METHOD is FOR OLD SCHEMA....Should be updated...
 	@Override
 	@Transactional
 	public void delete(String id) {
@@ -387,7 +389,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 		String sql = "DELETE FROM "+ tablename + " WHERE HASH=(?)";
 		log.info("Remove payload with hash {} using JDBCTEMPLATE", id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		jdbcTemplate.update(sql, new Object[] { id });
+		jdbcTemplate.update(sql,  id );
 		log.debug("Entity removal done...");
 	}
 }

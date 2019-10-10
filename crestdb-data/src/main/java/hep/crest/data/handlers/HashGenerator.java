@@ -4,7 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -46,12 +46,7 @@ public class HashGenerator {
 	 * @throws PayloadEncodingException
 	 **/	
 	public static String md5Java(String message) throws PayloadEncodingException {
-		try {
-			return md5Java(message.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException ex) {
-			log.error(ex.getMessage());
-			throw new PayloadEncodingException(ex);
-		} 
+		return md5Java(message.getBytes(StandardCharsets.UTF_8)); 
 	}
 	
 	/**
@@ -117,13 +112,8 @@ public class HashGenerator {
 	 * 	The MD5 representation of the message string.
 	 * @throws PayloadEncodingException
 	 **/
-	public static String md5Spring(String text) throws PayloadEncodingException {
-		try {
-			return DigestUtils.md5DigestAsHex(text.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			log.error("Error in digesting the payload with md5");
-			throw new PayloadEncodingException(e);
-		}
+	public static String md5Spring(String text) {
+		return DigestUtils.md5DigestAsHex(text.getBytes(StandardCharsets.UTF_8));
 	}
 	
 	/**

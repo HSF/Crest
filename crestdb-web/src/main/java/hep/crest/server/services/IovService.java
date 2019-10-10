@@ -34,7 +34,6 @@ import hep.crest.server.annotations.ProfileAndLog;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.swagger.model.CrestBaseResponse;
-import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagSummaryDto;

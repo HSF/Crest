@@ -40,7 +40,7 @@ public class Tag implements java.io.Serializable {
 	private BigDecimal endOfValidity;
 	private Date insertionTime;
 	private Date modificationTime;
-	private Set<GlobalTagMap> globalTagMaps = new HashSet<GlobalTagMap>(0);
+	private Set<GlobalTagMap> globalTagMaps = new HashSet<>(0);
 
 	public Tag() {
 	}
@@ -49,22 +49,7 @@ public class Tag implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public Tag(String name, String timeType, String objectType, String synchronization, String description,
-			BigDecimal lastValidatedTime, BigDecimal endOfValidity, Date insertionTime, Date modificationTime) {
-		this.name = name;
-		this.timeType = timeType;
-		this.objectType = objectType;
-		this.synchronization = synchronization;
-		this.description = description;
-		this.lastValidatedTime = lastValidatedTime;
-		this.endOfValidity = endOfValidity;
-		this.insertionTime = insertionTime;
-		this.modificationTime = modificationTime;
-
-	}
-
 	@Id
-
 	@Column(name = "NAME", unique = true, nullable = false, length = 255)
 	public String getName() {
 		return this.name;

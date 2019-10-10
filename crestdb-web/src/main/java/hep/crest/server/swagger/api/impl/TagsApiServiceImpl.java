@@ -98,10 +98,11 @@ public class TagsApiServiceImpl extends TagsApiService {
 				}
 			}
 			TagDto saved = tagService.updateTag(dto);
-			return Response.created(info.getRequestUri()).entity(saved).build();
+			return Response.ok(info.getRequestUri()).entity(saved).build();
 
 		} catch (CdbServiceException e) {
 			String message = e.getMessage();
+			log.error("Exception in updateTag : {}",e.getMessage());
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
@@ -159,14 +160,11 @@ public class TagsApiServiceImpl extends TagsApiService {
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();	
 			}
 			CrestBaseResponse respdto = new TagSetDto().resources(dtolist).filter(filters).size((long)dtolist.size()).datatype("tags");
-
-			//GenericEntity<List<TagDto>> entitylist = new GenericEntity<List<TagDto>>(dtolist) {};
 			return Response.ok().entity(respdto).build();
 
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			String message = e.getMessage();
+			log.error("Exception in listTags: {}",e.getMessage());
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
