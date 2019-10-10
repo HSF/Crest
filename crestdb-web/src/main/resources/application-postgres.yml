@@ -10,11 +10,11 @@ spring:
 spring:
     profiles: postgres
     jersey:
-      application-path: /crestapi
+      application-path: ${crest.api.name}
     datasource:
-      url: jdbc:postgresql://localhost:${crest.db.port}/crestdb
+      url: ${crest.db.url}
       driverClassName: org.postgresql.Driver
-      username: formica
+      username: ${crest.db.user}
       password: ${crest.db.password}
       type: com.zaxxer.hikari.HikariDataSource
       hikari:
