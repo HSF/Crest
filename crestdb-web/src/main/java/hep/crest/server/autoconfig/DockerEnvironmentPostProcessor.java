@@ -41,7 +41,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
 
 	static {
 		secretsMap = new HashMap<>();
-		secretsMap.put("/run/secrets/vhfdb_password", "svom.service.postgres_password");
+		secretsMap.put("/run/secrets/vhfdb_password", "crest.db.password");
 	}
 	
 	/*
