@@ -21,6 +21,11 @@ module.exports = {
           Connection: 'keep-alive'
         }
       },
+      '^/crestui': {
+        target: process.env.VUE_APP_CRESTAPI_URL,
+        ws: true,
+        changeOrigin: true
+      },
       '^/ext': {
         target: process.env.VUE_APP_CRESTAPI_URL,
         ws: true,

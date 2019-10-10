@@ -149,7 +149,7 @@ public class TagMetaDBImpl implements TagMetaDataBaseCustom {
 		String sql = "DELETE FROM " + tablename + " WHERE TAG_NAME=(?)";
 		log.info("Remove tag meta with name {} using JDBCTEMPLATE", id);
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		jdbcTemplate.update(sql, new Object[] { id });
+		jdbcTemplate.update(sql, id);
 		log.debug("Entity removal done...");
 	}
 

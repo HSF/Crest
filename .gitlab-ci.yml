@@ -60,6 +60,7 @@ stages:
  - package_application
  - webui
  - build
+ - sonar_application
  - release
  - redeploy
 
@@ -96,7 +97,7 @@ webui:
     - dc0-shell
   script:
     - docker info
-    - docker build --tag=$WEB_CONTAINER_IMAGE --file Dockerfile.nginx.svom ./web-ui/crest-ui/
+    - docker build --tag=$WEB_CONTAINER_IMAGE --file ./web-ui/crest-ui/Dockerfile.nginx.svom ./web-ui/crest-ui/
   only:
   - svom-dc0
 
@@ -111,6 +112,18 @@ registry-push:
     - docker push $WEB_CONTAINER_IMAGE
   only:
   - svom-dc0
+
+sonar_application:
+  stage: sonar_application
+  tags:
+    - dc0
+  image: java:8
+  script:
+   - ./gradlew sonarqube -Dsonar.projectKey=crestdb -Dsonar.host.url=http://svom1.lal.in2p3.fr:20090 -Dsonar.login=f50918d8b780181f947ae83b42e78983ffde4bf3
+  allow_failure: false
+  only:
+     refs:
+       - stable
 
 package_cern_application:
   stage: package_application

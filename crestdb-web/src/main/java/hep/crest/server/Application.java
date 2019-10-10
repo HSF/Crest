@@ -49,16 +49,13 @@ public class Application extends SpringBootServletInitializer {
         };
     }
 	@Bean
-    public WebServerFactoryCustomizer containerCustomizer() {
-        return new WebServerFactoryCustomizer() {
-			@Override
-			public void customize(WebServerFactory factory) {
-				if (factory.getClass().isAssignableFrom(UndertowServletWebServerFactory.class)) {
-                	UndertowServletWebServerFactory undertowContainer = (UndertowServletWebServerFactory) factory;
-                    undertowContainer.addDeploymentInfoCustomizers(new ContextSecurityCustomizer());
-                }
-			}
-        };
+    public WebServerFactoryCustomizer<WebServerFactory> containerCustomizer() {
+		return factory -> {
+			if (factory.getClass().isAssignableFrom(UndertowServletWebServerFactory.class)) {
+            	UndertowServletWebServerFactory undertowContainer = (UndertowServletWebServerFactory) factory;
+                undertowContainer.addDeploymentInfoCustomizers(new ContextSecurityCustomizer());
+            }
+		};
     }
 
     private static class ContextSecurityCustomizer implements UndertowDeploymentInfoCustomizer {
