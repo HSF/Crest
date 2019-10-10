@@ -14,7 +14,7 @@ spring:
     datasource:
       url: ${crest.db.url}
       driverClassName: org.postgresql.Driver
-      username: formica
+      username: ${crest.db.user}
       password: ${crest.db.password}
       type: com.zaxxer.hikari.HikariDataSource
       hikari:

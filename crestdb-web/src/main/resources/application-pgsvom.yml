@@ -12,16 +12,16 @@ spring:
       strategy: MODE_INHERITABLETHREADLOCAL
     profiles: pgsvom
     jersey:
-      application-path: /api
+      application-path: ${crest.api.name}
     datasource:
-      url: jdbc:postgresql://${svom.service.postgres}:${svom.db.port}/${svom.service.postgres_db}
+      url: ${crest.db.url}
       driverClassName: org.postgresql.Driver
-      username: ${svom.service.postgres_user}
-      password: ${svom.service.postgres_password}
-#      type: com.zaxxer.hikari.HikariDataSource
+      username: ${crest.db.user}
+      password: ${crest.db.password}
+      type: com.zaxxer.hikari.HikariDataSource
       hikari:
         connection-test-query: SELECT 1
-        maximum-pool-size: 5
+        maximum-pool-size: 20
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.PostgreSQL9Dialect
@@ -31,9 +31,10 @@ spring:
         hibernate.show_sql: false
         hibernate.jdbc.use_streams_for_binary: false
         hibernate.connection.autocommit: false
-        hibernate.jdbc.lob.non_contextual_creation: true
+# Without this there is an exception from Postgres driver related to createBlob method.
+        hibernate.jdbc.lob.non_contextual_creation: true        
 server:
-    port: ${crest.server.port} 
+    port: ${crest.server.port}  
 crest:
   schemaname: none
   dumpdir: ${crest.dump.dir}
