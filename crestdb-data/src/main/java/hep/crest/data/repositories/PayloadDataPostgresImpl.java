@@ -176,6 +176,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 			try {
 				if (rs != null)
 					rs.close();
+				if (obj != null) 
+					obj.close();
 			} catch (SQLException | NullPointerException e) {
 				log.error("Error in closing result set : {}",e.getMessage());
 			}
