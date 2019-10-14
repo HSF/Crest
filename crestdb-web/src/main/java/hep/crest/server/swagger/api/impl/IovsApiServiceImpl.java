@@ -96,19 +96,26 @@ public class IovsApiServiceImpl extends IovsApiService {
 		this.log.info("IovRestController processing request to upload iovs batch {}",
 				dto);
 		GenericMap filters = dto.getFilter();
-		if (!filters.containsKey("tagName")) {
+		String tagName = "unknown";
+
+		if (filters != null && !filters.containsKey("tagName")) {
 			String msg = "Error creating multi iov resource because tagName is not defined ";
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.NOT_ACCEPTABLE).entity(resp).build();
+		} else if (filters != null) {
+			tagName = filters.get("tagName");
 		}
-		String tagName = filters.get("tagName");
 		try {
 			log.info("Batch insertion of {} iovs using file formatted in {} for tag {}", dto.getSize(), dto.getFormat(),tagName);
 			List<IovDto> iovlist = dto.getResources();
 			List<IovDto> savedList = new ArrayList<>();
 			for (IovDto iovDto : iovlist) {
-				if (iovDto.getTagName() == null || !(iovDto.getTagName().equals(tagName))) {
+				if (!tagName.equals("unknown") && (iovDto.getTagName() == null || !(iovDto.getTagName().equals(tagName)))) {
 					iovDto.setTagName(tagName);
+				} else if (iovDto.getTagName() == null) {
+					String msg = "Error creating multi iov resource because tagName is not defined ";
+					ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+					return Response.status(Response.Status.NOT_ACCEPTABLE).entity(resp).build();
 				}
 				IovDto saved = iovService.insertIov(iovDto);
 				savedList.add(saved);
