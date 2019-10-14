@@ -10,7 +10,7 @@ generate_globaltag_data()
 {
   "description": "A new global tag for testing",
   "validity": -1.0,
-  "name": "GT-TAG-01",
+  "name": "$1",
   "release": "v1",
   "snapshotTime": 0,
   "scenario": "data challenge",
@@ -34,6 +34,19 @@ generate_tag_data()
 }
 EOF
 }
+
+generate_mapping_data()
+{
+  cat <<EOF
+{
+  "tagName": "$1",
+   "globalTagName": "$2",
+   "record": "$3",
+   "label": "$4"
+}
+EOF
+}
+
 
 function get_data() {
   echo "Execute $1 : get data of type $2 from server using search $3"
@@ -76,6 +89,20 @@ function create_tag() {
   post_data "tags" "$tdata"
 }
 
+function create_globaltag() {
+  echo "Execute $1 : create globaltag $2 "
+  tdata="$(generate_globaltag_data  $2)"
+  echo "Upload ${tdata}"
+  post_data "globaltags" "$tdata"
+}
+
+function map_tag_to_gtag() {
+  echo "Execute $1 : add tag $2 to global tag $3 "
+  echo "Add mapping using record $4 and label $5"
+  tdata="$(generate_mapping_data $2 $3 $4 $5)"
+  post_data "globaltagmaps" "$tdata"
+}
+
 function multi_upload() {
   echo "Execute $1 : add data to tag $2 using an iov interval $3 to $4"
   tag=$2
@@ -109,6 +136,8 @@ if [ "$host" == "help" ]; then
   echo "get_data: <type> <search pattern>"
   echo "multi_upload: <tag> <iov-start> <iov-stop>"
   echo "create_tag: <tag>"
+  echo "create_globaltag: <gtag>"
+  echo "map_tag_to_gtag: <tag> <gtag> <record> <label>"
 elif [[ "x$3" == "x" ]]; then
   echo "use arg help to get help."
 else

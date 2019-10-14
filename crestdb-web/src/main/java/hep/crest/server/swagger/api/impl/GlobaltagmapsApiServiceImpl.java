@@ -38,8 +38,8 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
 
 		} catch (CdbServiceException e) {
 			String msg = "Error creating globaltagmap resource using " + body.toString();
-			e.printStackTrace();
 			String message = e.getMessage();
+			log.error("Exception in finding map: {}",message);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg + " : " + message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
@@ -51,6 +51,9 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
 		this.log.info("GlobalTagMapRestController processing request to get map for GlobalTag name " + name);
 		try {
 			List<GlobalTagMapDto> dtolist = null;
+			if (xCrestMapMode == null) {
+				xCrestMapMode = "Trace";
+			}
 			if (xCrestMapMode.equals("Trace")) {
 				dtolist = globaltagmapService.getTagMap(name);
 			} else {
@@ -60,9 +63,8 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
 			};
 			return Response.ok().entity(entitylist).build();
 		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			String message = e.getMessage();
+			log.error("Exception in finding map: {}",message);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
