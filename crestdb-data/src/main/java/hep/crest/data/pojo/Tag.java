@@ -49,7 +49,7 @@ public class Tag implements java.io.Serializable {
 	}
 
 	public Tag(String name) {
-		this.name = name;
+		this.setName(name);
 	}
 
 	@Id
@@ -76,6 +76,9 @@ public class Tag implements java.io.Serializable {
 		return this.name;
 	}
 	public void setName(String name) {
+		if (name.isEmpty()) {
+			name = "none";
+		}
 		this.name = name;
 	}
 
