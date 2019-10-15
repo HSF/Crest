@@ -25,6 +25,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -189,10 +190,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 				tag, since, format);
 		try {
 			String fdetailsname = fileDetail.getFileName();
-			if (fdetailsname == null || fdetailsname.isEmpty()) {
-				fdetailsname = ".blob";
-			}
-			String filename = cprops.getDumpdir() + SLASH + tag + "_" + since + "_" + fdetailsname;
+			String filename = dumpFilename(fdetailsname, tag, since.toString());
 			if (format == null) {
 				format = "JSON";
 			}
@@ -253,7 +251,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 					Map<String, Object> retmap = getDocumentStream(piovDto, filesbodyparts);
 					PayloadDto pdto = new PayloadDto().objectType(dto.getFormat())
 							.streamerInfo(dto.getFormat().getBytes()).version("none");
-					String filename = (String) retmap.get("file");
+					String filedetails = (String) retmap.get("file");
+					String filename = dumpFilename(filedetails, tag, piovDto.getSince().toString());
 					log.debug("Use input filename for hash generation and later storage...{}",filename);
 					String hash = getHash((InputStream) retmap.get("stream"), filename);
 					pdto.hash(hash);
@@ -276,11 +275,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
 		} catch (CdbServiceException | IOException e) {
 			String msg = "Error creating multi payload resource using " + tag.toString() + " : " + e.getMessage();
+			log.error("Exception from server : {}",msg);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		} catch (Exception e) {
 			String msg = "Internal exception creating payload resource using uploadBatch " + tag.toString() + " : "
 					+ e.getMessage();
+			log.error("General exception {}",msg);
 			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
@@ -516,6 +517,15 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 			throw new CdbServiceException("Cannot find file content in form data. File name = " + mddto.getPayload());
 		}
 		return retmap;
+	}
+	
+	protected String dumpFilename(String fdetailsname, String tag, String since) {
+		if (fdetailsname == null || fdetailsname.isEmpty()) {
+			fdetailsname = ".blob";
+		}
+		String fname = FilenameUtils.getName("fdetailsname");
+
+		return cprops.getDumpdir() + SLASH + tag + "_" + since + "_" + fname;
 	}
 
 	/**
