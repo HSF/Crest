@@ -523,7 +523,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 		if (fdetailsname == null || fdetailsname.isEmpty()) {
 			fdetailsname = ".blob";
 		}
-		String fname = FilenameUtils.getName("fdetailsname");
+		String fname = FilenameUtils.getName(fdetailsname);
 
 		return cprops.getDumpdir() + SLASH + tag + "_" + since + "_" + fname;
 	}
