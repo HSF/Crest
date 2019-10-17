@@ -45,7 +45,7 @@ public class TestCrestGlobalTag {
 
     @Test
     public void testB_storeGlobaltags() {
-    		GlobalTagDto dto = new GlobalTagDto().description("test").name("MY_SB_TEST").release("1").scenario("test").type("test").workflow("M").validity(new BigDecimal(0)).snapshotTime(new Date()).insertionTime(new Date());
+    	GlobalTagDto dto = new GlobalTagDto().description("test").name("MY_SB_TEST").release("1").scenario("test").type("test").workflow("M").validity(new BigDecimal(0)).snapshotTime(new Date()).insertionTime(new Date());
         System.out.println("Store request: "+dto);
         ResponseEntity<GlobalTagDto> response = this.testRestTemplate.postForEntity("/crestapi/globaltags", dto, GlobalTagDto.class);
         System.out.println("Received response: "+response);

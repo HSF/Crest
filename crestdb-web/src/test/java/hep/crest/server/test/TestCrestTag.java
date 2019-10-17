@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.GenericMap;
-
+import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagMetaDto;
@@ -61,7 +61,13 @@ public class TestCrestTag {
 		System.out.println("Received response: " + response);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		
-		GlobalTagMapDto mapdto = new GlobalTagMapDto().globalTagName("MY_SB_TEST").label("label").record("0").tagName("SB_TAG");
+    	GlobalTagDto gtdto = new GlobalTagDto().description("test").name("GT_TEST").release("1").scenario("test").type("test").workflow("M").validity(new BigDecimal(0)).snapshotTime(new Date()).insertionTime(new Date());
+        System.out.println("Store global tag request: "+gtdto);
+        ResponseEntity<GlobalTagDto> respgt = this.testRestTemplate.postForEntity("/crestapi/globaltags", gtdto, GlobalTagDto.class);
+        System.out.println("Received response: "+respgt);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		
+		GlobalTagMapDto mapdto = new GlobalTagMapDto().globalTagName("GT_TEST").label("label").record("record").tagName("SB_TAG");
         System.out.println("Store request: "+mapdto);
         ResponseEntity<GlobalTagMapDto> response2 = this.testRestTemplate.postForEntity("/crestapi/globaltagmaps", mapdto, GlobalTagMapDto.class);
         System.out.println("Received response: "+response2);
