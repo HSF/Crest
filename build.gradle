@@ -1,6 +1,7 @@
 plugins {
   id "org.sonarqube" version "2.6"
   id 'org.hidetake.swagger.generator' version '2.9.0'
+  id 'jacoco'
 }
 
 apply plugin: 'java'
@@ -58,9 +59,25 @@ configurations.compile.each {
 }
 
 allprojects  {
-  apply plugin: 'maven'
-  group = 'hep.crest'
-  version = '2.0-SNAPSHOT'
+	apply plugin: 'maven'
+	apply plugin: 'jacoco'
+	group = 'hep.crest'
+	version = '2.0-SNAPSHOT'
+	repositories {
+	    mavenCentral()
+	}
+	
+	jacoco {
+	    toolVersion = '0.8.4'
+	    reportsDir = file("$buildDir/reports/jacoco")    
+	}
+	jacocoTestReport {
+	    reports {
+	        xml.enabled false
+	        csv.enabled false
+	        html.destination file("${buildDir}/jacocoHtml")
+	    }
+	}	
 }
 
 // Define a project specific method

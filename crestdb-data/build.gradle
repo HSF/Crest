@@ -8,7 +8,8 @@ buildscript {
 }
 plugins {
     id 'net.ltgt.apt' version '0.18'
-    id 'net.ltgt.apt-eclipse' version '0.18'     
+    id 'net.ltgt.apt-eclipse' version '0.18'    
+  	id 'checkstyle' 
 }
 description = 'JPA package for persistency'
 
@@ -26,6 +27,26 @@ bootJar {
 
 repositories {
     mavenCentral()
+}
+
+task checkCode {
+  dependsOn 'checkstyleMain'
+}
+
+checkCode.doLast {
+  println 'Code checked !'
+}
+
+checkstyleMain {
+    setExcludes(new HashSet(['**/hep/crest/data/*/Q*java','src/gen/**','**/hep/crest/data/repositories/externals/*','**/hep/crest/swagger/**', '**/hep/crest/server/swagger/api/**']))
+}
+
+tasks.withType(Checkstyle) {
+  checkstyleTest.enabled = false
+  reports {
+    xml.enabled false
+    html.enabled true
+  }
 }
 
 sourceCompatibility = 1.8
@@ -50,14 +71,9 @@ jar {
 sourceSets {
 	main {
 		java {
-		  srcDir 'src/gen/java'
+		  srcDirs = ['src/main/java','src/gen/java','generated/java']
 		}
 	}
-    generated {
-        java {
-            srcDir "$projectDir/generated/java"
-        }
-    }
 }
 
 compileJava {
@@ -65,6 +81,10 @@ compileJava {
     options.compilerArgs << "$projectDir/generated/java"
 
     doFirst {
+    	// Remove the generated directory
+        if ( file(new File(projectDir, "/generated")).exists() ) {
+            file(new File(projectDir, "/generated")).deleteDir()
+		}
         // make sure that directory exists
         file(new File(projectDir, "/generated/java")).mkdirs()
     }
