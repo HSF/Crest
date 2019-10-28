@@ -1,8 +1,4 @@
 package hep.crest.server;
-/**
- * 
- */
-
 
 import java.util.Arrays;
 
@@ -26,58 +22,88 @@ import org.springframework.http.HttpMethod;
 import io.undertow.servlet.api.SecurityConstraint;
 import io.undertow.servlet.api.WebResourceCollection;
 
+/**
+ * @author formica
+ *
+ */
 @SpringBootApplication
 @EnableJpaRepositories("hep.crest.data")
 @EntityScan("hep.crest.data")
 @ComponentScan("hep.crest")
 public class Application extends SpringBootServletInitializer {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Bean
+    /**
+     * @param ctx
+     *            the ApplicationContext
+     * @return CommandLineRunner
+     */
+    @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
 
             log.debug("Let's inspect the beans provided by Spring Boot:");
 
-            String[] beanNames = ctx.getBeanDefinitionNames();
+            final String[] beanNames = ctx.getBeanDefinitionNames();
             Arrays.sort(beanNames);
-            for (String beanName : beanNames) {
+            for (final String beanName : beanNames) {
                 log.debug(beanName);
             }
 
         };
     }
-	@Bean
-    public WebServerFactoryCustomizer containerCustomizer() {
-        return new WebServerFactoryCustomizer() {
-			@Override
-			public void customize(WebServerFactory factory) {
-				if (factory.getClass().isAssignableFrom(UndertowServletWebServerFactory.class)) {
-                	UndertowServletWebServerFactory undertowContainer = (UndertowServletWebServerFactory) factory;
-                    undertowContainer.addDeploymentInfoCustomizers(new ContextSecurityCustomizer());
-                }
-			}
+
+    /**
+     * Customizer for Web server (undertow).
+     *
+     * @return WebServerFactoryCustomizer<WebServerFactory>
+     */
+    @Bean
+    public WebServerFactoryCustomizer<WebServerFactory> containerCustomizer() {
+        return factory -> {
+            if (factory.getClass().isAssignableFrom(UndertowServletWebServerFactory.class)) {
+                final UndertowServletWebServerFactory undertowContainer = (UndertowServletWebServerFactory) factory;
+                undertowContainer.addDeploymentInfoCustomizers(new ContextSecurityCustomizer());
+            }
         };
     }
 
+    /**
+     * A Security customizer.
+     *
+     * @author formica
+     *
+     */
     private static class ContextSecurityCustomizer implements UndertowDeploymentInfoCustomizer {
 
+        /*
+         * (non-Javadoc)
+         *
+         * @see org.springframework.boot.web.embedded.undertow.
+         * UndertowDeploymentInfoCustomizer#customize(io.undertow.servlet.api.
+         * DeploymentInfo)
+         */
         @Override
         public void customize(io.undertow.servlet.api.DeploymentInfo deploymentInfo) {
-            SecurityConstraint constraint = new SecurityConstraint();
-            WebResourceCollection traceWebresource = new WebResourceCollection();
+            final SecurityConstraint constraint = new SecurityConstraint();
+            final WebResourceCollection traceWebresource = new WebResourceCollection();
             traceWebresource.addUrlPattern("/*");
             traceWebresource.addHttpMethod(HttpMethod.TRACE.toString());
             constraint.addWebResourceCollection(traceWebresource);
             deploymentInfo.addSecurityConstraint(constraint);
         }
-
     }
 
+    /**
+     * @param args
+     *            the arguments.
+     * @return
+     */
     public static void main(String[] args) {
-    	new Application()
-		.configure(new SpringApplicationBuilder(Application.class))
-		.run(args);
+        new Application().configure(new SpringApplicationBuilder(Application.class)).run(args);
     }
 }

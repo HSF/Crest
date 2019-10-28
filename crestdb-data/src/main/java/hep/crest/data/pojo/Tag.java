@@ -73,106 +73,198 @@ public class Tag implements java.io.Serializable {
      */
     private Set<GlobalTagMap> globalTagMaps = new HashSet<>(0);
 
+    /**
+     * Default ctor.
+     */
     public Tag() {
     }
 
+    /**
+     * @param name
+     *            the String
+     */
     public Tag(String name) {
         this.name = name;
     }
 
+    /**
+     * @return String
+     */
     @Id
     @Column(name = "NAME", unique = true, nullable = false, length = 255)
     public String getName() {
         return this.name;
     }
 
+    /**
+     * @param name
+     *            the String
+     * @return
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * @return String
+     */
     @Column(name = "TIME_TYPE", nullable = false, length = 16)
     public String getTimeType() {
         return this.timeType;
     }
 
+    /**
+     * @param timeType
+     *            the String
+     * @return
+     */
     public void setTimeType(String timeType) {
         this.timeType = timeType;
     }
 
+    /**
+     * @return String
+     */
     @Column(name = "OBJECT_TYPE", nullable = false, length = 4000)
     public String getObjectType() {
         return this.objectType;
     }
 
+    /**
+     * @param objectType
+     *            the String
+     * @return
+     */
     public void setObjectType(String objectType) {
         this.objectType = objectType;
     }
 
+    /**
+     * @return String
+     */
     @Column(name = "SYNCHRONIZATION", nullable = false, length = 20)
     public String getSynchronization() {
         return this.synchronization;
     }
 
+    /**
+     * @param synchronization
+     *            the String
+     * @return
+     */
     public void setSynchronization(String synchronization) {
         this.synchronization = synchronization;
     }
 
+    /**
+     * @return String
+     */
     @Column(name = "DESCRIPTION", nullable = false, length = 4000)
     public String getDescription() {
         return this.description;
     }
 
+    /**
+     * @param description
+     *            the String
+     * @return
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /**
+     * @return BigDecimal
+     */
     @Column(name = "LAST_VALIDATED_TIME", nullable = false, precision = 38, scale = 0)
     public BigDecimal getLastValidatedTime() {
         return this.lastValidatedTime;
     }
 
+    /**
+     * @param lastValidatedTime
+     *            the BigDecimal
+     * @return
+     */
     public void setLastValidatedTime(BigDecimal lastValidatedTime) {
         this.lastValidatedTime = lastValidatedTime;
     }
 
+    /**
+     * @return BigDecimal
+     */
     @Column(name = "END_OF_VALIDITY", nullable = false, precision = 38, scale = 0)
     public BigDecimal getEndOfValidity() {
         return this.endOfValidity;
     }
 
+    /**
+     * @param endOfValidity
+     *            the BigDecimal
+     * @return
+     */
     public void setEndOfValidity(BigDecimal endOfValidity) {
         this.endOfValidity = endOfValidity;
     }
 
+    /**
+     * @return Date
+     */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "INSERTION_TIME", nullable = false, length = 11)
     public Date getInsertionTime() {
         return this.insertionTime;
     }
 
+    /**
+     * @param insertionTime
+     *            the Date
+     * @return
+     */
     public void setInsertionTime(Date insertionTime) {
         this.insertionTime = insertionTime;
     }
 
+    /**
+     * @return Date
+     */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "MODIFICATION_TIME", nullable = false, length = 11)
     public Date getModificationTime() {
         return this.modificationTime;
     }
 
+    /**
+     * @param modificationTime
+     *            the Date
+     * @return
+     */
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
     }
 
+    /**
+     * @return Set<GlobalTagMap>
+     */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "tag")
     public Set<GlobalTagMap> getGlobalTagMaps() {
         return this.globalTagMaps;
     }
 
+    /**
+     * @param globalTagMaps
+     *            the Set<GlobalTagMap>
+     * @return
+     */
     public void setGlobalTagMaps(Set<GlobalTagMap> globalTagMaps) {
         this.globalTagMaps = globalTagMaps;
     }
 
+    /**
+     * Before saving.
+     * 
+     * @return
+     */
     @PrePersist
     public void prePersist() {
         if (this.insertionTime == null) {
@@ -182,6 +274,11 @@ public class Tag implements java.io.Serializable {
         }
     }
 
+    /**
+     * Before updating.
+     *
+     * @return
+     */
     @PreUpdate
     public void preUpdate() {
         if (this.modificationTime == null) {
@@ -192,7 +289,7 @@ public class Tag implements java.io.Serializable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

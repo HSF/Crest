@@ -85,6 +85,8 @@ public class PayloadHandler {
      *            the InputStream
      * @param uploadedFileLocation
      *            the String
+     * @throws CdbServiceException
+     *             If an Exception occurred
      */
     public void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation)
             throws CdbServiceException {
@@ -138,12 +140,12 @@ public class PayloadHandler {
      * Get hash while reading the stream and saving it to a file. The internal
      * method will close the output and input stream but we also do it here just in
      * case.
-     * 
+     *
      * @param uploadedInputStream
      *            the InputStream
      * @param uploadedFileLocation
      *            the String
-     * @return
+     * @return String
      * @throws PayloadEncodingException
      *             If an Exception occurred
      */
@@ -172,7 +174,7 @@ public class PayloadHandler {
     /**
      * @param uploadedInputStream
      *            the BufferedInputStream
-     * @return
+     * @return String
      * @throws PayloadEncodingException
      *             If an Exception occurred
      */

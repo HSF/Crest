@@ -44,7 +44,7 @@ import hep.crest.swagger.model.PayloadDto;
 
 /**
  * An implementation for requests using Oracle and other database.
- * 
+ *
  * @author formica
  *
  */
@@ -130,7 +130,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
         // OID and not the byte[]
         // Temporarely, try to create a postgresql implementation of this class.
 
-        return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+        return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
             final Payload entity = new Payload();
             entity.setHash(rs.getString("HASH"));
             entity.setObjectType(rs.getString("OBJECT_TYPE"));
@@ -160,7 +160,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
             final String tablename = this.tablename();
             final String sql = PayloadRequests.getFindMetaQuery(tablename);
 
-            return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+            return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
                 final Payload entity = new Payload();
                 entity.setHash(rs.getString("HASH"));
                 entity.setObjectType(rs.getString("OBJECT_TYPE"));
@@ -181,7 +181,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
      */
@@ -194,7 +194,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
             final String tablename = this.tablename();
 
             final String sql = "select DATA from " + tablename + " where HASH=?";
-            return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+            return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
                 final Payload entity = new Payload();
                 entity.setData(rs.getBlob("DATA"));
                 return entity;
@@ -208,7 +208,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.
      * model.PayloadDto)
@@ -271,7 +271,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.
      * model.PayloadDto, java.io.InputStream)
@@ -281,7 +281,8 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
     public Payload save(PayloadDto entity, InputStream is) throws CdbServiceException {
         Payload savedentity = null;
         try {
-            if ((savedentity = findMetaInfo(entity.getHash())) != null) {
+            savedentity = findMetaInfo(entity.getHash());
+            if (savedentity != null) {
                 log.warn("The hash {} already exists...return the existing entity...",
                         entity.getHash());
                 return savedentity;
@@ -300,7 +301,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
      *            the PayloadDto
      * @param is
      *            the InputStream
-     * @throws IOException
+     * @throws CdbServiceException
      *             If an Exception occurred
      */
     protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
@@ -345,7 +346,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hep.phycdb.svc.repositories.PayloadDataBaseCustom#saveNull()
      */
     @Override
@@ -356,7 +357,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#delete(java.lang.String)
      */

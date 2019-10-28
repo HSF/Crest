@@ -4,49 +4,104 @@
 package hep.crest.data.repositories.querydsl;
 
 /**
+ * Search criteria class. Contains the needed field to create requests to the
+ * DB.
+ *
  * @author aformic
  *
  */
 public class SearchCriteria {
 
-	private String key;
-	private String operation;
-	private Object value;
-	
-	public SearchCriteria(String key, String operation, Object value) {
-		super();
-		this.key = key;
-		this.operation = operation;
-		this.value = value;
-	}
+    /**
+     * The key.
+     */
+    private String key;
+    /**
+     * The operation.
+     */
+    private String operation;
+    /**
+     * The value.
+     */
+    private Object value;
 
-	public String getKey() {
-		return key;
-	}
+    /**
+     * Default Ctor.
+     *
+     * @param key
+     *            the String
+     * @param operation
+     *            the String
+     * @param value
+     *            the Object
+     */
+    public SearchCriteria(String key, String operation, Object value) {
+        super();
+        this.key = key;
+        this.operation = operation;
+        this.value = value;
+    }
 
-	public void setKey(String key) {
-		this.key = key;
-	}
+    /**
+     * @return the key
+     */
+    public String getKey() {
+        return key;
+    }
 
-	public String getOperation() {
-		return operation;
-	}
+    /**
+     * @param key
+     *            the key to set
+     */
+    public void setKey(String key) {
+        this.key = key;
+    }
 
-	public void setOperation(String operation) {
-		this.operation = operation;
-	}
+    /**
+     * @return the operation
+     */
+    public String getOperation() {
+        return operation;
+    }
 
-	public Object getValue() {
-		return value;
-	}
+    /**
+     * @param operation
+     *            the operation to set
+     */
+    public void setOperation(String operation) {
+        this.operation = operation;
+    }
 
-	public void setValue(Object value) {
-		this.value = value;
-	}
+    /**
+     * @return the value
+     */
+    public Object getValue() {
+        return value;
+    }
 
-	@Override
-	public String toString() {
-		return "SearchCriteria [key=" + key + ", operation=" + operation + ", value=" + value + "]";
-	}
-	
+    /**
+     * @param value
+     *            the value to set
+     */
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    /**
+     * @return String
+     */
+    public String dump() {
+        return key + operation + value;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "SearchCriteria [key=" + key + ", operation=" + operation + ", value=" + value + "]";
+    }
+
 }

@@ -115,7 +115,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hep.crest.data.repositories.PayloadDataBaseCustom#find(java.lang.String)
      */
     @Override
@@ -130,7 +130,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         // OID and not the byte[] .
         // Temporarily, try to create a postgresql implementation of this class.
 
-        return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+        return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
             final Payload entity = new Payload();
             entity.setHash(rs.getString("HASH"));
             entity.setObjectType(rs.getString("OBJECT_TYPE"));
@@ -145,7 +145,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#findMetaInfo(java.lang.
      * String)
@@ -158,8 +158,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindMetaQuery(tablename);
-        
-        return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+
+        return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
             final Payload entity = new Payload();
             entity.setHash(rs.getString("HASH"));
             entity.setObjectType(rs.getString("OBJECT_TYPE"));
@@ -174,7 +174,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
      */
@@ -185,8 +185,8 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindDataHashQuery(tablename);
-        
-        return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
+
+        return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
             final Payload entity = new Payload();
             entity.setHash(rs.getString("HASH"));
             entity.setData(rs.getBlob("DATA"));
@@ -197,7 +197,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
     /**
      * @param id
      *            the String
-     * @return
+     * @return LargeObject
      */
     protected LargeObject readBlobAsStream(String id) {
         final String tablename = this.tablename();
@@ -241,7 +241,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.
      * model.PayloadDto)
@@ -262,7 +262,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
     /**
      * This method is inspired to the postgres documentation on the JDBC driver. For
      * reasons which are still not clear the select methods are working as they are.
-     * 
+     *
      * @param conn
      *            the Connection
      * @param is
@@ -355,7 +355,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.
      * model.PayloadDto, java.io.InputStream)
@@ -460,7 +460,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hep.phycdb.svc.repositories.PayloadDataBaseCustom#saveNull()
      */
     @Override
@@ -470,7 +470,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.crest.data.repositories.PayloadDataBaseCustom#delete(java.lang.String)
      */

@@ -27,100 +27,135 @@ import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
 
 /**
+ * An implementation for filesystem based storage.
+ *
  * @author formica
  *
  */
 @Service
 public class DirectoryService {
 
-	private static final Logger log = LoggerFactory.getLogger(DirectoryService.class);
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(DirectoryService.class);
 
-	@Autowired
-	private TagDirectoryImplementation fstagrepository;
-	@Autowired
-	private IovDirectoryImplementation fsiovrepository;
-	@Autowired
-	private PayloadDirectoryImplementation fspayloadrepository;
-	
-	@Autowired
-	private IovService iovservice;
-	@Autowired
-	private TagService tagservice;
-	@Autowired
-	private PayloadService pyldservice;
-	
-	@Autowired
-	private CrestProperties cprops;
+    /**
+     * Repository.
+     */
+    @Autowired
+    private TagDirectoryImplementation fstagrepository;
+    /**
+     * Repository.
+     */
+    @Autowired
+    private IovDirectoryImplementation fsiovrepository;
+    /**
+     * Repository.
+     */
+    @Autowired
+    private PayloadDirectoryImplementation fspayloadrepository;
 
-	/**
-	 * @param tagname
-	 * @return
-	 */
-	public TagDto getTag(String tagname) {
-		return fstagrepository.findOne(tagname);
-	}
-	
-	/**
-	 * @param tagname
-	 * @return
-	 */
-	public List<IovDto> listIovs(String tagname) {
-		try {
-			return fsiovrepository.findByTagName(tagname);
-		} catch (CdbServiceException e) {
-			log.error("Cannot find iov list for tag {}: {}",tagname,e.getMessage());
-		}
-		return new ArrayList<>();
-	}
-	
-	/**
-	 * @param hash
-	 * @return
-	 */
-	public PayloadDto getPayload(String hash) {
-		try {
-			return fspayloadrepository.find(hash);
-		} catch (CdbServiceException e) {
-			log.error("Cannot find payload for hash {} : {}",hash,e.getMessage());
-		}
-		return null;
-	}
-	
-	/**
-	 * @param tagname
-	 * @param snapshot
-	 * @param path
-	 * @return
-	 */
-	@Async
-	public Future<String> dumpTag(String tagname, Date snapshot, String path) {
-		String threadname = Thread.currentThread().getName();
-		log.debug("Running task in asynchronous mode for name {}",threadname);
-		String outdir = cprops.getDumpdir()+File.separator+path;
-		log.debug("Output directory is {}",outdir);
+    /**
+     * Service.
+     */
+    @Autowired
+    private IovService iovservice;
+    /**
+     * Service.
+     */
+    @Autowired
+    private TagService tagservice;
+    /**
+     * Service.
+     */
+    @Autowired
+    private PayloadService pyldservice;
 
-		DirectoryUtilities du = new DirectoryUtilities(outdir);
-		try {
-			fstagrepository.setDirtools(du);
-			fsiovrepository.setDirtools(du);
-			fspayloadrepository.setDirtools(du);
-			
-			TagDto seltag = tagservice.findOne(tagname);
-			List<IovDto> iovlist = iovservice.selectSnapshotByTag(tagname, snapshot);
-			fstagrepository.save(seltag);
-			fsiovrepository.saveAll(tagname, iovlist);
-			for (IovDto iovDto : iovlist) {
-				PayloadDto pyld = pyldservice.getPayload(iovDto.getPayloadHash());
-				fspayloadrepository.save(pyld);
-			}
-			String tarpath = cprops.getWebstaticdir()+File.separator+path;
-			String outtar = du.createTarFile(outdir,tarpath);
-			log.debug("Created output tar file {}",outtar);
-			return new AsyncResult<>("Dump a list of "+iovlist.size()+" iovs into file system...");
-		} catch (CdbServiceException e) {
-			log.error("Cannot dump tag {} in path {} : {}",tagname,path,e.getMessage());
-		}
-		return null;
-	}
-	
+    /**
+     * Properties.
+     */
+    @Autowired
+    private CrestProperties cprops;
+
+    /**
+     * @param tagname
+     *            the String
+     * @return TagDto
+     */
+    public TagDto getTag(String tagname) {
+        return fstagrepository.findOne(tagname);
+    }
+
+    /**
+     * @param tagname
+     *            the String
+     * @return List<IovDto>
+     */
+    public List<IovDto> listIovs(String tagname) {
+        try {
+            return fsiovrepository.findByTagName(tagname);
+        }
+        catch (final CdbServiceException e) {
+            log.error("Cannot find iov list for tag {}: {}", tagname, e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * @param hash
+     *            the String
+     * @return PayloadDto
+     */
+    public PayloadDto getPayload(String hash) {
+        try {
+            return fspayloadrepository.find(hash);
+        }
+        catch (final CdbServiceException e) {
+            log.error("Cannot find payload for hash {} : {}", hash, e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * @param tagname
+     *            the String
+     * @param snapshot
+     *            the Date
+     * @param path
+     *            the String
+     * @return Future<String>
+     */
+    @Async
+    public Future<String> dumpTag(String tagname, Date snapshot, String path) {
+        final String threadname = Thread.currentThread().getName();
+        log.debug("Running task in asynchronous mode for name {}", threadname);
+        final String outdir = cprops.getDumpdir() + File.separator + path;
+        log.debug("Output directory is {}", outdir);
+
+        final DirectoryUtilities du = new DirectoryUtilities(outdir);
+        try {
+            fstagrepository.setDirtools(du);
+            fsiovrepository.setDirtools(du);
+            fspayloadrepository.setDirtools(du);
+
+            final TagDto seltag = tagservice.findOne(tagname);
+            final List<IovDto> iovlist = iovservice.selectSnapshotByTag(tagname, snapshot);
+            fstagrepository.save(seltag);
+            fsiovrepository.saveAll(tagname, iovlist);
+            for (final IovDto iovDto : iovlist) {
+                final PayloadDto pyld = pyldservice.getPayload(iovDto.getPayloadHash());
+                fspayloadrepository.save(pyld);
+            }
+            final String tarpath = cprops.getWebstaticdir() + File.separator + path;
+            final String outtar = du.createTarFile(outdir, tarpath);
+            log.debug("Created output tar file {}", outtar);
+            return new AsyncResult<>(
+                    "Dump a list of " + iovlist.size() + " iovs into file system...");
+        }
+        catch (final CdbServiceException e) {
+            log.error("Cannot dump tag {} in path {} : {}", tagname, path, e.getMessage());
+        }
+        return null;
+    }
 }

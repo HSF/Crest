@@ -4,9 +4,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
+/**
+ * @author formica
+ *
+ */
 @Configuration
 @ComponentScan("hep.crest.server")
-//@//EnableLoadTimeWeaving
+// @//EnableLoadTimeWeaving
 @EnableAspectJAutoProxy
 public class AspectJConfig {
 

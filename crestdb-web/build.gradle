@@ -43,7 +43,7 @@ checkCode.doLast {
 }
 
 checkstyleMain {
-    setExcludes(new HashSet(['**/hep/crest/data/*/Q*java','src/gen/**','**/hep/crest/data/repositories/externals/*','**/hep/crest/swagger/**', '**/hep/crest/server/swagger/api/**']))
+    setExcludes(new HashSet(['**/hep/crest/data/**/Q*java','src/gen/**','**/hep/crest/data/repositories/externals/*','**/hep/crest/swagger/**', '**/hep/crest/server/swagger/api/**']))
 }
 
 tasks.withType(Checkstyle) {

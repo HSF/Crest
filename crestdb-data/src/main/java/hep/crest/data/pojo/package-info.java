@@ -5,4 +5,4 @@
  * @author formica
  *
  */
-package hep.crest.data.monitoring;
+package hep.crest.data.pojo;

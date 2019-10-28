@@ -25,34 +25,67 @@ import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.PayloadDto;
 
-
 /**
  * @author formica
  *
  */
 public interface PayloadDataBaseCustom {
-	Payload find(String id);
-	Payload findData(String id);
-	/**
-	 * The method does not access blob data.
-	 * @param id
-	 * @return The payload or null.
-	 */
-	Payload findMetaInfo(String id);
-	/**
-	 * @param entity
-	 * @return Either the entity which has been saved or null.
-	 * @throws CdbServiceException
-	 * 	It should in reality not throw any exception
-	 */
-	Payload save(PayloadDto entity) throws CdbServiceException;
-	/**
-	 * @param entity
-	 * @param is
-	 * @return Either the entity which has been saved or null.
-	 * @throws CdbServiceException
-	 */
-	Payload save(PayloadDto entity, InputStream is) throws CdbServiceException;
-	Payload saveNull() throws IOException, PayloadEncodingException;
-	void delete(String id);
+    /**
+     * @param id
+     *            the String
+     * @return Payload
+     */
+    Payload find(String id);
+
+    /**
+     * @param id
+     *            the String
+     * @return Payload
+     */
+    Payload findData(String id);
+
+    /**
+     * The method does not access blob data.
+     *
+     * @param id
+     *            the String
+     * @return The payload or null.
+     */
+    Payload findMetaInfo(String id);
+
+    /**
+     * @param entity
+     *            the PayloadDto
+     * @return Either the entity which has been saved or null.
+     * @throws CdbServiceException
+     *             It should in reality not throw any exception
+     */
+    Payload save(PayloadDto entity) throws CdbServiceException;
+
+    /**
+     * @param entity
+     *            the PayloadDto
+     * @param is
+     *            the InputStream
+     * @return Either the entity which has been saved or null.
+     * @throws CdbServiceException
+     *             If an Exception occurred
+     */
+    Payload save(PayloadDto entity, InputStream is) throws CdbServiceException;
+
+    /**
+     * @throws IOException
+     *             If an Exception occurred
+     * @throws PayloadEncodingException
+     *             If an Exception occurred
+     * @return Payload
+     */
+    Payload saveNull() throws IOException, PayloadEncodingException;
+
+    /**
+     * @param id
+     *            the String
+     * @return
+     */
+    void delete(String id);
 }

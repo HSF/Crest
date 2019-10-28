@@ -7,48 +7,94 @@ import javax.persistence.Table;
 
 import hep.crest.data.config.DatabasePropertyConfigurator;
 
+/**
+ * @author formica
+ *
+ */
 @Entity
 @Table(name = "CREST_USERS", schema = DatabasePropertyConfigurator.SCHEMA_NAME)
 public class CrestUser {
 
-	private String id;
-	private String username;
-	private String password;
+    /**
+     * The id of the user.
+     */
+    private String id;
+    /**
+     * The user name.
+     */
+    private String username;
+    /**
+     * The password.
+     */
+    private String password;
 
-	public CrestUser() {
-	}
+    /**
+     * Default ctor.
+     */
+    public CrestUser() {
+    }
 
-	public CrestUser(String username, String password) {
-		this.username = username;
-		this.password = password;
-	}
+    /**
+     * @param username
+     *            the String
+     * @param password
+     *            the String
+     */
+    public CrestUser(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
-	@Id
-	@Column(name = "CREST_USRID", unique = true, nullable = false, length = 100)
-	public String getId() {
-		return id;
-	}
+    /**
+     * @return String
+     */
+    @Id
+    @Column(name = "CREST_USRID", unique = true, nullable = false, length = 100)
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    /**
+     * @param id
+     *            the String
+     * @return
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	@Column(name = "CREST_USRNAME", unique = true, nullable = false, length = 100)
-	public String getUsername() {
-		return username;
-	}
+    /**
+     * @return String
+     */
+    @Column(name = "CREST_USRNAME", unique = true, nullable = false, length = 100)
+    public String getUsername() {
+        return username;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    /**
+     * @param username
+     *            the String
+     * @return
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	@Column(name = "CREST_USRPSS", unique = true, nullable = false, length = 100)
-	public String getPassword() {
-		return password;
-	}
+    /**
+     * @return String
+     */
+    @Column(name = "CREST_USRPSS", unique = true, nullable = false, length = 100)
+    public String getPassword() {
+        return password;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    /**
+     * @param password
+     *            the String
+     * @return
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 }

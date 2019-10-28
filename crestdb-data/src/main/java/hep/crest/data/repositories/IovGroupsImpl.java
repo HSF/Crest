@@ -35,7 +35,7 @@ import hep.crest.swagger.model.TagSummaryDto;
 
 /**
  * An implementation for groups queries.
- * 
+ *
  * @author formica
  *
  */
@@ -99,7 +99,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.phycdb.svc.repositories.IovGroupsCustom#selectGroups(java.lang.String,
      * java.lang.Long)
@@ -122,7 +122,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hep.phycdb.svc.repositories.IovGroupsCustom#selectSnapshotGroups(java.lang.
      * String, java.util.Date, java.lang.Integer)
@@ -148,7 +148,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hep.crest.data.repositories.IovGroupsCustom#getSize(java.lang.String)
      */
     @Override
@@ -195,12 +195,11 @@ public class IovGroupsImpl implements IovGroupsCustom {
 
         final String sql = "select TAG_NAME, COUNT(TAG_NAME) as NIOVS from " + tablename
                 + " where TAG_NAME like ? GROUP BY TAG_NAME";
-        return jdbcTemplate.query(sql, new Object[] { tagname }, (rs, num) -> {
+        return jdbcTemplate.query(sql, new Object[] {tagname}, (rs, num) -> {
             final TagSummaryDto entity = new TagSummaryDto();
             entity.setTagname(rs.getString("TAG_NAME"));
             entity.setNiovs(rs.getLong("NIOVS"));
             return entity;
         });
     }
-
 }

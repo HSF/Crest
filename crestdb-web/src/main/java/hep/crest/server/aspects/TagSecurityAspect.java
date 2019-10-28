@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import hep.crest.data.config.CrestProperties;
 import hep.crest.swagger.model.TagDto;
 
-
 /**
  * @author formica
  *
@@ -25,36 +24,50 @@ import hep.crest.swagger.model.TagDto;
 @Aspect
 @Component
 public class TagSecurityAspect {
-	private Logger log = LoggerFactory.getLogger(this.getClass());
-	
-	@Autowired
-	private CrestProperties cprops;
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	/**
-	 * @param dto
-	 */
-	@Before("execution(* hep.crest.server.services.TagService.insertTag(*)) && args(dto)")
-	public void checkRole(TagDto dto) {
-		log.debug("Tag insertion should verify the tag name : {}", dto.getName());
-		if (cprops.getSecurity().equals("none") || cprops.getSecurity().equals("weak")) {
-			log.warn("security checks are disabled in this configuration....");
-			return;
-		}
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth == null) {
-			log.debug("Stop execution....for the moment it only print this message...no action is taken");
-		} else {
-			UserDetails userDetails = (UserDetails) auth.getPrincipal();
-			log.debug("Tag insertion should verify the role for user : {}", ((userDetails == null) ? "none" : userDetails));
-			log.debug("For the moment we print all roles and filter on one role as an example...");
-			if (userDetails != null) {
-				userDetails.getAuthorities().stream().forEach(s -> log.debug("Role is {}",s.getAuthority()));
-			GrantedAuthority[] tagroles = userDetails.getAuthorities().stream().filter(s -> s.getAuthority().startsWith("ATLAS-CONDITIONS")).toArray(GrantedAuthority[]::new);
-			log.debug("Found list of roles of length {}",tagroles.length);
-			userDetails.getAuthorities().stream().filter(s -> s.getAuthority().startsWith("ATLAS-CONDITIONS")).forEach(s -> log.debug("Selected role is {}",s.getAuthority()));
-			}
-		}
-	}
-	
+    /**
+     * Properties.
+     */
+    @Autowired
+    private CrestProperties cprops;
+
+    /**
+     * @param dto
+     *            the TagDto
+     */
+    @Before("execution(* hep.crest.server.services.TagService.insertTag(*)) && args(dto)")
+    public void checkRole(TagDto dto) {
+        log.debug("Tag insertion should verify the tag name : {}", dto.getName());
+        if (cprops.getSecurity().equals("none") || cprops.getSecurity().equals("weak")) {
+            log.warn("security checks are disabled in this configuration....");
+            return;
+        }
+        final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            log.debug(
+                    "Stop execution....for the moment it only print this message...no action is taken");
+        }
+        else {
+            final UserDetails userDetails = (UserDetails) auth.getPrincipal();
+            log.debug("Tag insertion should verify the role for user : {}",
+                    userDetails == null ? "none" : userDetails);
+            log.debug("For the moment we print all roles and filter on one role as an example...");
+            if (userDetails != null) {
+                userDetails.getAuthorities().stream()
+                        .forEach(s -> log.debug("Role is {}", s.getAuthority()));
+                final GrantedAuthority[] tagroles = userDetails.getAuthorities().stream()
+                        .filter(s -> s.getAuthority().startsWith("ATLAS-CONDITIONS"))
+                        .toArray(GrantedAuthority[]::new);
+                log.debug("Found list of roles of length {}", tagroles.length);
+                userDetails.getAuthorities().stream()
+                        .filter(s -> s.getAuthority().startsWith("ATLAS-CONDITIONS"))
+                        .forEach(s -> log.debug("Selected role is {}", s.getAuthority()));
+            }
+        }
+    }
 
 }

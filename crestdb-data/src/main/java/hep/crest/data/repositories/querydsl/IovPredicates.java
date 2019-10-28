@@ -14,73 +14,98 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.pojo.QIov;
 
-
 /**
  * @author aformic
  *
  */
-public class IovPredicates {
+public final class IovPredicates {
 
-	private static Logger log = LoggerFactory.getLogger(IovPredicates.class);
+    /**
+     * Logger.
+     */
+    private static Logger log = LoggerFactory.getLogger(IovPredicates.class);
 
-	private IovPredicates() {
+    /**
+     * Default ctor.
+     */
+    private IovPredicates() {
 
-	}
+    }
 
-	/**
-	 * @param tagname
-	 * @return
-	 */
-	public static BooleanExpression hasTagName(String tagname) {
-		log.debug("hasTagName: argument {}",tagname);
-		return  QIov.iov.id.tagName.eq(tagname);
-	}
+    /**
+     * @param tagname
+     *            the String
+     * @return BooleanExpression
+     */
+    public static BooleanExpression hasTagName(String tagname) {
+        log.debug("hasTagName: argument {}", tagname);
+        return QIov.iov.id.tagName.eq(tagname);
+    }
 
-	/**
-	 * @param since
-	 * @param until
-	 * @return
-	 */
-	public static BooleanExpression hasSinceBetween(BigDecimal since, BigDecimal until) {
-		log.debug("hasSinceBetween: argument {} {}",since,until);
-		return  QIov.iov.id.since.between(since,until);
-	}
+    /**
+     * @param since
+     *            the BigDecimal
+     * @param until
+     *            the BigDecimal
+     * @return BooleanExpression
+     */
+    public static BooleanExpression hasSinceBetween(BigDecimal since, BigDecimal until) {
+        log.debug("hasSinceBetween: argument {} {}", since, until);
+        return QIov.iov.id.since.between(since, until);
+    }
 
-	/**
-	 * @param since
-	 * @param until
-	 * @return
-	 */
-	public static BooleanExpression isSinceXThan(String oper, BigDecimal since) {
-		log.debug("isSinceXThan: argument {} {}",since,oper);
-		BooleanExpression pred = null;
+    /**
+     * @param oper
+     *            the String
+     * @param since
+     *            the BigDecimal
+     * @return BooleanExpression
+     */
+    public static BooleanExpression isSinceXThan(String oper, BigDecimal since) {
+        log.debug("isSinceXThan: argument {} {}", since, oper);
+        BooleanExpression pred = null;
 
-		if (oper.equals("<")) {
-			pred = QIov.iov.id.since.lt(since);
-		} else if (oper.equals(">")) {
-			pred = QIov.iov.id.since.gt(since);
-		} else if (oper.equals(":")) {
-			pred = QIov.iov.id.since.eq(since);
-		} 
-		return pred;
-	}
+        if (oper.equals("<")) {
+            pred = QIov.iov.id.since.lt(since);
+        }
+        else if (oper.equals(">")) {
+            pred = QIov.iov.id.since.gt(since);
+        }
+        else if (oper.equals(":")) {
+            pred = QIov.iov.id.since.eq(since);
+        }
+        return pred;
+    }
 
-	
-	public static BooleanExpression isInsertionTimeXThan(String oper, String num) {
-		log.debug("isInsertionTimeXThan: argument {} operation {}",num ,oper);
-		BooleanExpression pred = null;
+    /**
+     * @param oper
+     *            the String
+     * @param num
+     *            the String
+     * @return BooleanExpression
+     */
+    public static BooleanExpression isInsertionTimeXThan(String oper, String num) {
+        log.debug("isInsertionTimeXThan: argument {} operation {}", num, oper);
+        BooleanExpression pred = null;
 
-		if (oper.equals("<")) {
-			pred = QIov.iov.id.insertionTime.lt(new Date(new Long(num)));
-		} else if (oper.equals(">")) {
-			pred = QIov.iov.id.insertionTime.gt(new Date(new Long(num)));
-		} else if (oper.equals(":")) {
-			pred = QIov.iov.id.insertionTime.eq(new Date(new Long(num)));
-		}
-		return pred;
-	}
+        if (oper.equals("<")) {
+            pred = QIov.iov.id.insertionTime.lt(new Date(new Long(num)));
+        }
+        else if (oper.equals(">")) {
+            pred = QIov.iov.id.insertionTime.gt(new Date(new Long(num)));
+        }
+        else if (oper.equals(":")) {
+            pred = QIov.iov.id.insertionTime.eq(new Date(new Long(num)));
+        }
+        return pred;
+    }
 
-	public static Predicate where(BooleanExpression exp) {
-		return exp;
-	}
+    /**
+     * @param exp
+     *            the BooleanExpression
+     * @return Predicate
+     */
+    public static Predicate where(BooleanExpression exp) {
+        return exp;
+    }
 }

@@ -21,22 +21,45 @@ import hep.crest.data.config.DatabasePropertyConfigurator;
 public class GlobalTagMap implements java.io.Serializable {
 
     /**
-    * 
-    */
+     * Serializer.
+     */
     private static final long serialVersionUID = -3535546379433341349L;
+    /**
+     * The global tag map ID.
+     */
     private GlobalTagMapId id;
+    /**
+     * The Tag.
+     */
     private Tag tag;
+    /**
+     * The Global Tag.
+     */
     private GlobalTag globalTag;
 
+    /**
+     * Default ctor.
+     */
     public GlobalTagMap() {
     }
 
+    /**
+     * @param id
+     *            the GlobalTagMapId
+     * @param tag
+     *            the Tag
+     * @param globalTag
+     *            the GlobalTag
+     */
     public GlobalTagMap(GlobalTagMapId id, Tag tag, GlobalTag globalTag) {
         this.id = id;
         this.tag = tag;
         this.globalTag = globalTag;
     }
 
+    /**
+     * @return GlobalTagMapId
+     */
     @EmbeddedId
 
     @AttributeOverrides({
@@ -50,26 +73,47 @@ public class GlobalTagMap implements java.io.Serializable {
         return this.id;
     }
 
+    /**
+     * @param id
+     *            the GlobalTagMapId
+     * @return
+     */
     public void setId(GlobalTagMapId id) {
         this.id = id;
     }
 
+    /**
+     * @return Tag
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TAG_NAME", nullable = false)
     public Tag getTag() {
         return this.tag;
     }
 
+    /**
+     * @param tag
+     *            the Tag
+     * @return
+     */
     public void setTag(Tag tag) {
         this.tag = tag;
     }
 
+    /**
+     * @return GlobalTag
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "GLOBAL_TAG_NAME", nullable = false, insertable = false, updatable = false)
     public GlobalTag getGlobalTag() {
         return this.globalTag;
     }
 
+    /**
+     * @param globalTag
+     *            the GlobalTag
+     * @return
+     */
     public void setGlobalTag(GlobalTag globalTag) {
         this.globalTag = globalTag;
     }

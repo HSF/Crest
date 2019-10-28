@@ -16,11 +16,11 @@ import hep.crest.data.runinfo.pojo.QRunLumiInfo;
 
 /**
  * Querydsl conditions.
- * 
+ *
  * @author aformic
  *
  */
-public class RunLumiInfoPredicates {
+public final class RunLumiInfoPredicates {
 
     /**
      * Logger.

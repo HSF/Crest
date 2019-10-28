@@ -36,7 +36,7 @@ public class DirectoryUtilities {
     /**
      * Logger.
      */
-    private static final Logger log = LoggerFactory.getLogger(DirectoryUtilities.class);
+    private final Logger log = LoggerFactory.getLogger(DirectoryUtilities.class);
 
     /**
      * Name of the tag file.
@@ -184,6 +184,8 @@ public class DirectoryUtilities {
      * @param name
      *            the String
      * @return Path
+     * @throws CdbServiceException
+     *             If an Exception occurred
      */
     public Path createIfNotexistsIov(String name) throws CdbServiceException {
         return createIfNotexistsIov(locbasedir, name);

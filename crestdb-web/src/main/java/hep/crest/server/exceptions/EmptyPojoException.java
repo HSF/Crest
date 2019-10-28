@@ -11,19 +11,27 @@ import hep.crest.data.exceptions.CdbServiceException;
  */
 public class EmptyPojoException extends CdbServiceException {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -8552538724531679765L;
+    /**
+     * Serializer.
+     */
+    private static final long serialVersionUID = -8552538724531679765L;
 
-	public EmptyPojoException(String string) {
-		super(string);
-	}
+    /**
+     * @param string
+     *            the String
+     */
+    public EmptyPojoException(String string) {
+        super(string);
+    }
 
-	@Override
-	public String getMessage() {
-		return "EmptyPojoException: " + super.getMessage();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see hep.crest.data.exceptions.CdbServiceException#getMessage()
+     */
+    @Override
+    public String getMessage() {
+        return "EmptyPojoException: " + super.getMessage();
+    }
 
-	
 }

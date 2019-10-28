@@ -23,22 +23,34 @@ package hep.crest.data.exceptions;
  */
 public class PayloadEncodingException extends Exception {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1851049463533897275L;
+    /**
+     * Serializer.
+     */
+    private static final long serialVersionUID = 1851049463533897275L;
 
-	public PayloadEncodingException(String string) {
-		super(string);
-	}
-	
-	public PayloadEncodingException(Exception e) {
-		super(e);
-	}
+    /**
+     * @param string
+     *            the String
+     */
+    public PayloadEncodingException(String string) {
+        super(string);
+    }
 
-	@Override
-	public String getMessage() {
-		return "PayloadEncoding generated exception: "+super.getMessage();
-	}
-	
+    /**
+     * @param e
+     *            the Exception
+     */
+    public PayloadEncodingException(Exception e) {
+        super(e);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Throwable#getMessage()
+     */
+    @Override
+    public String getMessage() {
+        return "PayloadEncoding generated exception: " + super.getMessage();
+    }
 }
