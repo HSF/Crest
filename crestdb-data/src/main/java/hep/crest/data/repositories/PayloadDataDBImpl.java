@@ -111,6 +111,13 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
         }
         return tablename;
     }
+        
+    /**
+     * @param payloadHandler the payloadHandler to set
+     */
+    public void setPayloadHandler(PayloadHandler payloadHandler) {
+        this.payloadHandler = payloadHandler;
+    }
 
     /*
      * (non-Javadoc)

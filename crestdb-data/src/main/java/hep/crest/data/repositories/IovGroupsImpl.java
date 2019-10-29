@@ -116,7 +116,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
         }
         final String sql = "select MIN(SINCE) from " + tablename + " where TAG_NAME=? "
                 + " group by cast(SINCE/? as int)*?" + " order by min(SINCE)";
-
+        log.debug("Execute selectGroups query {}", sql);
         return jdbcTemplate.queryForList(sql, BigDecimal.class, tagname, groupfreq, groupfreq);
     }
 
@@ -141,6 +141,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
         final String sql = "select MIN(SINCE) from " + tablename
                 + " where TAG_NAME=? and INSERTION_TIME<=?" + " group by cast(SINCE/? as int)*?"
                 + " order by min(SINCE)";
+        log.debug("Execute selectSnapshotGroups query {}", sql);
 
         return jdbcTemplate.queryForList(sql, BigDecimal.class, tagname, snap, groupfreq,
                 groupfreq);
@@ -158,7 +159,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
         final String tablename = this.tablename();
 
         final String sql = "select COUNT(TAG_NAME) from " + tablename + " where TAG_NAME=?";
-
+        log.info("Execute query {}", sql);
         return jdbcTemplate.queryForObject(sql, Long.class, tagname);
     }
 

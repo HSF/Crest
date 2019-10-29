@@ -80,19 +80,6 @@ allprojects  {
 	}	
 }
 
-// Define a project specific method
-// Load properties for later filtering
-// Functions to get project properties from local file
-Properties getProjectProperties() {
-	String propertiesfile = "${project.rootDir}/crest-filter-values.properties"
-	File generalPropertiesFile = file(propertiesfile)
-	println 'Loaded properties file: '+generalPropertiesFile.name
-	Properties mprops = new Properties()
-    mprops.load(generalPropertiesFile.newDataInputStream())
-	println 'Getting properties from main gradle script...'+mprops
-    return mprops
-}
-
 // An example for sonarqube configuration: to run the code on a local sonarqube instance you should
 // use commands like : ./gradlew sonarqube   -Dsonar.host.url=http://localhost:9000   -Dsonar.login=180fe2ea3c768359eb5fa680f7bbe6667ceeb238
 sonarqube {
@@ -165,10 +152,15 @@ subprojects {
 	   gradleVersion = '5.2.1' //version required
 	}
 
+	// Clean files and directories used for unit testing
 	task purgedb(type: Delete) {
     	delete fileTree('/tmp') {
-        include 'crest*.db'
-    }}
+	        include 'crest*.db'
+	        include 'crest*sqlite'
+	        include 'tagtar*'
+    	}
+    	delete '/tmp/cdms'
+    }
 
     test.dependsOn purgedb
 }

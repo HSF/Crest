@@ -9,6 +9,13 @@ package hep.crest.data.repositories.externals;
  */
 public final class PayloadRequests {
 
+    
+    /**
+     * Private ctor.
+     */
+    private PayloadRequests() {
+    }
+
     /**
      * @param tablename the String
      * @return String

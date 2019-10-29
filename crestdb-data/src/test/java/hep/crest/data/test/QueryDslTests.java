@@ -3,10 +3,14 @@ package hep.crest.data.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.sql.DataSource;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -15,6 +19,7 @@ import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,15 +34,25 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.GlobalTagMapId;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.IovId;
+import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.GlobalTagMapRepository;
 import hep.crest.data.repositories.GlobalTagRepository;
+import hep.crest.data.repositories.IovRepository;
+import hep.crest.data.repositories.PayloadDataDBImpl;
 import hep.crest.data.repositories.TagRepository;
 import hep.crest.data.repositories.querydsl.GlobalTagFiltering;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
+import hep.crest.data.repositories.querydsl.IovFiltering;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.data.repositories.querydsl.TagFiltering;
+import hep.crest.data.runinfo.pojo.RunLumiInfo;
+import hep.crest.data.runinfo.repositories.RunLumiInfoRepository;
+import hep.crest.data.runinfo.repositories.querydsl.RunLumiInfoFiltering;
 import hep.crest.data.test.tools.DataGenerator;
+import hep.crest.swagger.model.PayloadDto;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -57,9 +72,19 @@ public class QueryDslTests {
 
     @Autowired
     private TagRepository tagrepository;
+    
+    @Autowired
+    private IovRepository iovrepository;
 
     @Autowired
     private GlobalTagMapRepository tagmaprepository;
+
+    @Autowired
+    private RunLumiInfoRepository runrepository;
+
+    @Autowired
+    @Qualifier("dataSource") 
+    private DataSource mainDataSource;
 
 
     @Test
@@ -83,6 +108,9 @@ public class QueryDslTests {
         }
         final Page<GlobalTag> dtolist = globaltagrepository.findAll(wherepred, preq);
         assertThat(dtolist.getSize()).isGreaterThan(0);
+        
+        final GlobalTag loaded = globaltagrepository.findByName("MY-TEST-GT-01");
+        assertThat(loaded).isNotNull();
     }
     
     @Test
@@ -108,6 +136,51 @@ public class QueryDslTests {
         assertThat(dtolist.getSize()).isGreaterThan(0);
     }
 
+    @Test
+    public void testIovs() throws Exception {
+        final PayloadDataDBImpl repobean = new PayloadDataDBImpl(mainDataSource);
+        final PayloadDto dto = DataGenerator.generatePayloadDto("myhash3", "myrepodata", "mystreamer",
+                "test");
+        log.debug("Save payload {}", dto);
+        if (dto.getSize() == null) {
+            dto.setSize(dto.getData().length);
+        }
+        final Payload saved = repobean.save(dto);
+        assertThat(saved).isNotNull();
+
+        final Tag mtag = DataGenerator.generateTag("A-TEST-10", "test");
+        final Tag savedtag = tagrepository.save(mtag);
+        IovId id = new IovId("A-TEST-10",new BigDecimal(999L), new Date());
+        Iov miov = new Iov(id,savedtag,saved.getHash());
+        Iov savediov = iovrepository.save(miov);
+        log.info("Saved iov {}",savediov);
+        id = new IovId("A-TEST-10",new BigDecimal(2000L), new Date());
+        miov = new Iov(id,savedtag,saved.getHash());
+        savediov = iovrepository.save(miov);
+        log.info("Saved iov {}",savediov);
+
+        final List<Iov> iovlist = iovrepository.findByIdTagName("A-TEST-10");
+        assertThat(iovlist.size()).isGreaterThan(0);
+    
+        final IFilteringCriteria filter = new IovFiltering();
+        final PageRequest preq = createPageRequest(0, 10, "id.since:ASC");
+
+        final List<SearchCriteria> params = createMatcherCriteria("tagname:A-TEST-10,since>100,insertiontime>0");
+        final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
+        BooleanExpression wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        final Page<Iov> dtolist = iovrepository.findAll(wherepred, preq);
+        assertThat(dtolist.getSize()).isGreaterThan(0);
+
+    }
     
     @Test
     public void testMappingTags() throws Exception {
@@ -140,7 +213,32 @@ public class QueryDslTests {
         assertThat(gmlistbytag.size()).isGreaterThan(0);
 
     }
+    
+    @Test
+    public void testRunLumi() throws Exception {
+        final RunLumiInfo entity = DataGenerator.generateRunLumiInfo(new BigDecimal(99L), new BigDecimal(199L), new BigDecimal(90L));
+        
+        runrepository.save(entity);
 
+        final IFilteringCriteria filter = new RunLumiInfoFiltering();
+        final PageRequest preq = createPageRequest(0, 10, "since:ASC");
+
+        final List<SearchCriteria> params = createMatcherCriteria("run>100,since>0,insertiontime>0");
+        final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
+        BooleanExpression wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        final Page<RunLumiInfo> dtolist = runrepository.findAll(wherepred, preq);
+        assertThat(dtolist.getSize()).isGreaterThan(0);        
+    }
+    
     protected PageRequest createPageRequest(Integer page, Integer size, String sort) {
 
         final Pattern sortpattern = Pattern.compile(SORT_PATTERN);

@@ -5,6 +5,9 @@ package hep.crest.data.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -19,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import hep.crest.data.handlers.HashGenerator;
+import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.data.utils.DirectoryUtilities;
 import hep.crest.data.utils.RunIovConverter;
 
@@ -99,6 +104,18 @@ public class ToolsTests {
 
     }    
     
+    @Test
+    public void testHandlerTools() throws Exception {
+        DataGenerator.generatePayloadData("/tmp/cdms/payloaddatahash.blob", "now for hashing");
+        final File f = new File("/tmp/cdms/payloaddatahash.blob");
+        final BufferedInputStream ds = new BufferedInputStream(new FileInputStream(f));
+        final String hash = HashGenerator.hash(ds);
+        assertThat(hash).isNotNull();
+        final byte[] barr = new String("Testing some byte array").getBytes();
+        final String hash2 = HashGenerator.md5Java(barr);
+        assertThat(hash2).isNotNull();
+
+    }
 
     
 }

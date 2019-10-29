@@ -3,6 +3,9 @@
  */
 package hep.crest.data.test.tools;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
@@ -10,8 +13,11 @@ import java.util.Date;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.GlobalTagMapId;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.IovId;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
+import hep.crest.data.runinfo.pojo.RunLumiInfo;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
@@ -111,6 +117,13 @@ public class DataGenerator {
         return dto;
     }
 
+    public static Iov generateIov(String hash, String tagname, BigDecimal since) {
+        final IovId id = new IovId(tagname,since,new Date());
+        final Tag tag = new Tag(tagname);
+        final Iov entity = new Iov(id,tag,hash);
+        return entity;
+    }
+
     public static PayloadDto generatePayloadDto(String hash, String payloaddata, String stinfo, String objtype) {
         final PayloadDto dto = new PayloadDto();
         final byte[] bindata = new String(payloaddata).getBytes();
@@ -126,7 +139,17 @@ public class DataGenerator {
         dto.starttime(new BigDecimal(0L)).endtime(new BigDecimal(99L));
         return dto;
     }
-    
+
+    public static RunLumiInfo generateRunLumiInfo(BigDecimal since, BigDecimal run, BigDecimal lb) {
+        final RunLumiInfo entity = new RunLumiInfo();
+        entity.setRun(run);
+        entity.setEndtime(new BigDecimal(99L));
+        entity.setStarttime(new BigDecimal(1L));
+        entity.setLb(lb);
+        entity.setSince(since);
+        return entity;
+    }
+
     public static TagSummaryDto generateTagSummaryDto(String name, Long niovs) {
         final TagSummaryDto dto = new TagSummaryDto();
         dto.tagname(name).niovs(niovs);
@@ -144,4 +167,17 @@ public class DataGenerator {
         return dto;
     }
 
+    public static void generatePayloadData(String filename, String content) {
+        try {
+            final File file = new File(filename);
+            final FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write("This is ");
+            fileWriter.write("a test");
+            fileWriter.write(content);
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
