@@ -1247,7 +1247,7 @@
 					"201": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovPyldSetDto"
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1300,7 +1300,7 @@
 					"201": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovPyldSetDto"
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}

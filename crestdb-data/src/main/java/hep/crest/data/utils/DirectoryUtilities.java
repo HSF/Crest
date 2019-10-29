@@ -320,6 +320,10 @@ public class DirectoryUtilities {
         else {
             try {
                 Files.createDirectories(tagpath);
+                final Path tagfilepath = Paths.get(basedir, tagname, TAG_FILE);
+                if (!tagfilepath.toFile().exists()) {
+                    Files.createFile(tagfilepath);
+                }
                 return tagpath;
             }
             catch (final IOException e) {

@@ -18,31 +18,31 @@ public class CrestProperties {
     /**
      * The directory for dumping the uploaded payloads.
      */
-    private String dumpdir;
+    private String dumpdir = "/tmp";
     /**
      * The schema name.
      */
-    private String schemaname;
+    private String schemaname = "";
     /**
      * The api name.
      */
-    private String apiname;
+    private String apiname = "crestapi";
     /**
      * The security.
      */
-    private String security;
+    private String security = "none";
     /**
      * The synchronization.
      */
-    private String synchro;
+    private String synchro = "none";
     /**
      * The static web directory for web UI.
      */
-    private String webstaticdir;
+    private String webstaticdir = "/tmp";
     /**
      * The authentication level.
      */
-    private String authenticationtype;
+    private String authenticationtype = "basic";
 
     /**
      * The COOL infinity.

@@ -20,7 +20,7 @@ import org.springframework.core.env.Environment;
  *
  */
 @SpringBootApplication
-public final class Application {
+public class Application {
 
     /**
      * Logger.
@@ -44,12 +44,6 @@ public final class Application {
             log.debug("local server {}", server);
             log.debug("local server port {} ", env.getProperty("local.server.port"));
         };
-    }
-    
-    /**
-     * Default hidden ctor.
-     */
-    private Application() {
     }
 
     /**
