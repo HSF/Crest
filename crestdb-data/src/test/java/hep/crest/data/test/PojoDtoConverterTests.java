@@ -42,6 +42,7 @@ import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.PayloadTagInfoDto;
 import hep.crest.swagger.model.RunLumiInfoDto;
+import hep.crest.swagger.model.RunLumiSetDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSetDto;
 import hep.crest.swagger.model.TagSummaryDto;
@@ -265,6 +266,29 @@ public class PojoDtoConverterTests {
         assertThat(dto1.getRun()).isEqualTo(entity.getRun());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
+    }
+
+    @Test
+    public void testRunInfoSetConverter() throws Exception {
+        final RunLumiInfoDto dto1 = DataGenerator.generateRunLumiInfoDto(new BigDecimal(2000L),
+                new BigDecimal(33333L), new BigDecimal(200L));
+
+        assertThat(dto1.toString().length()).isGreaterThan(0);
+        assertThat(dto1.hashCode()).isNotNull();
+        final RunLumiSetDto setdto = new RunLumiSetDto();
+        setdto.datatype("runs").format("json");
+        setdto.addResourcesItem(dto1);
+        setdto.size(1L);
+        assertThat(setdto.toString().length()).isGreaterThan(0);
+        
+        final RunLumiSetDto setdto1 = new RunLumiSetDto();
+        setdto1.datatype("runs").format("json");
+        setdto1.addResourcesItem(dto1);
+        setdto1.size(1L);
+        
+        assertThat(setdto.equals(setdto1)).isTrue();
+        assertThat(setdto.hashCode()).isNotNull();
+
     }
 
     @Test

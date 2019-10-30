@@ -381,10 +381,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/RunLumiInfoDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/RunLumiSetDto"
 						}
 					}
 				}

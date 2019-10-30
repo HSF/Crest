@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Calendar;
 
 import javax.persistence.Table;
@@ -271,12 +270,8 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
                     entity.getHash());
             return find(entity.getHash());
         }
-        catch (final SQLException e) {
-            log.error("SQL Exception when saving blob as bytes: {} ", e.getMessage());
-            throw new CdbServiceException("SQL error " + e.getMessage());
-        }
         catch (final Exception e) {
-            log.error("Generic Exception when savinf payload as bytes: {} ", e.getMessage());
+            log.error("Generic Exception when saving payload as bytes: {} ", e.getMessage());
             throw new CdbServiceException("Error " + e.getMessage());
         }
     }
@@ -341,10 +336,6 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
             ps.setInt(7, entity.getSize());
             log.debug("Dump preparedstatement {}", ps);
             ps.execute();
-        }
-        catch (final SQLException e) {
-            log.error("Exception from SQL during insertion: {}", e.getMessage());
-            throw new CdbServiceException(e.getMessage());
         }
         catch (final Exception e) {
             log.error("Exception during payload dto insertion: {}", e.getMessage());

@@ -263,12 +263,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             return Response.created(info.getRequestUri()).entity(resp).build();
 
         }
-        catch (CdbServiceException | IOException e) {
-            final String msg = "Error creating payload resource using " + tag.toString() + " : "
-                    + e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-        }
         catch (final Exception e) {
             final String msg = "Internal exception creating payload resource using storeWithIov "
                     + tag.toString() + " : " + e.getMessage();
@@ -341,12 +335,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             }
 
         }
-        catch (CdbServiceException | IOException e) {
-            final String msg = "Error creating multi payload resource using " + tag.toString()
-                    + " : " + e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-        }
         catch (final Exception e) {
             final String msg = "Internal exception creating payload resource using uploadBatch "
                     + tag.toString() + " : " + e.getMessage();
@@ -407,12 +395,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 throw new CdbServiceException("Wrong header parameter " + xCrestPayloadFormat);
             }
 
-        }
-        catch (CdbServiceException | IOException e) {
-            final String msg = "Error creating payload resource using " + tag.toString() + " : "
-                    + e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
         catch (final Exception e) {
             final String msg = "Internal exception creating payload resource using storeBatch "

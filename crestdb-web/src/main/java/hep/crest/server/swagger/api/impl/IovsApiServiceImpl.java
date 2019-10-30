@@ -167,12 +167,6 @@ public class IovsApiServiceImpl extends IovsApiService {
             return Response.created(info.getRequestUri()).entity(saveddto).build();
 
         }
-        catch (final CdbServiceException e) {
-            final String msg = "Error creating multi iov resource using " + tagName + " : "
-                    + e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-        }
         catch (final Exception e) {
             final String msg = "Internal exception creating payload resource using uploadBatch "
                     + tagName + " : " + e.getMessage();

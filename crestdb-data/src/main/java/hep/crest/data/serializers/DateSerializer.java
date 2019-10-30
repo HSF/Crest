@@ -42,7 +42,7 @@ public class DateSerializer extends JsonSerializer<Date> {
     /**
      * The pattern: default to ISO_OFFSET_DATE_TIME.
      */
-    private final String pattern = "ISO_OFFSET_DATE_TIME";
+    private String pattern = "ISO_OFFSET_DATE_TIME";
 
     /**
      * Logger.
@@ -53,6 +53,14 @@ public class DateSerializer extends JsonSerializer<Date> {
      * Date Formatter.
      */
     private DateTimeFormatter locFormatter = null;
+
+    /**
+     * @param pattern
+     *            the pattern to set
+     */
+    public void setPattern(String pattern) {
+        this.pattern = pattern;
+    }
 
     /*
      * (non-Javadoc)
@@ -69,7 +77,8 @@ public class DateSerializer extends JsonSerializer<Date> {
             jg.writeString(this.format(ts));
         }
         catch (final Exception ex) {
-            log.error("Failed to serialize using format {}", getLocformatter());
+            log.error("Failed to serialize using format {}: {}", getLocformatter(),
+                    ex.getMessage());
         }
     }
 

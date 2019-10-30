@@ -382,9 +382,6 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
             this.saveBlobAsStream(entity, is);
             savedentity = findMetaInfo(entity.getHash());
         }
-        catch (final IOException e) {
-            log.error("IOException during payload insertion: {}", e.getMessage());
-        }
         catch (final Exception e) {
             log.error("Exception during payload insertion: {}", e.getMessage());
         }

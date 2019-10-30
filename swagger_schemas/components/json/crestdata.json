@@ -416,6 +416,24 @@
 				}
 			]
 		},
+		"RunLumiSetDto": {
+			"description" : "An RunLumiSet containing RunLumiInfoDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/RunLumiInfoDto"
+							}
+						}
+					}
+				}
+			]
+		},
 		"PayloadDto": {
 			"type": "object",
 			"properties": {

@@ -36,7 +36,7 @@ public class ServicesConfig {
     /**
      * @return JerseyConfig
      */
-    @Profile({ "prod", "wildfly", "ssl", "cmsprep", "oracle" })
+    @Profile({ "prod", "wildfly", "ssl", "cmsprep", "oracle", "test"})
     @Bean(name = "jerseyConfig")
     public JerseyConfig getJerseyResource() {
         final JerseyConfig jc = new JerseyConfig();
@@ -52,7 +52,7 @@ public class ServicesConfig {
     /**
      * @return JerseyConfig
      */
-    @Profile({ "test", "default", "dev", "h2", "sqlite", "postgres", "mysql", "pgsvom" })
+    @Profile({ "default", "dev", "h2", "sqlite", "postgres", "mysql", "pgsvom" })
     @Bean(name = "jerseyConfig")
     public JerseyConfig getJerseyDefaultResource() {
         final JerseyConfig jc = new JerseyConfig();
