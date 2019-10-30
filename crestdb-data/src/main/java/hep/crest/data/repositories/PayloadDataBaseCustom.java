@@ -22,6 +22,7 @@ import java.io.InputStream;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.PayloadDto;
 
@@ -30,6 +31,14 @@ import hep.crest.swagger.model.PayloadDto;
  *
  */
 public interface PayloadDataBaseCustom {
+
+    /**
+     * @param payloadHandler
+     *            the PayloadHandler
+     * @return
+     */
+    void setPayloadHandler(PayloadHandler payloadHandler);
+
     /**
      * @param id
      *            the String

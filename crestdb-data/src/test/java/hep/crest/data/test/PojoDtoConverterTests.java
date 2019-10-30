@@ -27,6 +27,8 @@ import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.runinfo.pojo.RunLumiInfo;
 import hep.crest.data.security.pojo.CrestFolders;
+import hep.crest.data.security.pojo.CrestRoles;
+import hep.crest.data.security.pojo.CrestUser;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.GlobalTagDto;
@@ -307,6 +309,14 @@ public class PojoDtoConverterTests {
         assertThat(ptdto.toString().length()).isGreaterThan(0);
         assertThat(ptdto.hashCode()).isNotNull();
         
+        final CrestUser user = new CrestUser("user","password");
+        user.setId("someid");
+        user.setUsername("anothername");
+        assertThat(user.toString().length()).isGreaterThan(0);
+        
+        final CrestRoles role = new CrestRoles("roleid","admin");
+        role.setRole("guest");
+        assertThat(role.toString().length()).isGreaterThan(0);
     }
 
     

@@ -1,0 +1,40 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+spring:
+ profiles:
+  include: default
+server:
+    port: 8080
+    servlet-path: /
+spring:
+    profiles: sqlite
+    jersey:
+      application-path: /crestapi
+    datasource:
+      url: jdbc:sqlite:${crest.dbfile}
+      driverClassName: org.sqlite.JDBC
+      username: 
+      password:
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.SQLiteDialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: update
+        hibernate.show_sql: false
+    hikari:
+      connection-test-query: SELECT 1 
+      maximum-pool-size: 1
+        
+crest:
+  security: none
+  dbfile: /tmp/crestdbsqlite
+  authenticationtype: database
+  dumpdir: /tmp/crest-dump/
+  schemaname: none
+  synchro: none
+  webstaticdir: /tmp
+        

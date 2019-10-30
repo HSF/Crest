@@ -8,6 +8,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -111,9 +113,18 @@ public class ToolsTests {
         final BufferedInputStream ds = new BufferedInputStream(new FileInputStream(f));
         final String hash = HashGenerator.hash(ds);
         assertThat(hash).isNotNull();
+
         final byte[] barr = new String("Testing some byte array").getBytes();
         final String hash2 = HashGenerator.md5Java(barr);
         assertThat(hash2).isNotNull();
+        
+        final String hash3 = HashGenerator.md5Java("Testing some byte array");
+        assertThat(hash3).isEqualTo(hash2);
+        
+        final OutputStream out = new FileOutputStream(new File("/tmp/cdms/payloaddatahash.blob.copy"));
+        final BufferedInputStream ds2 = new BufferedInputStream(new FileInputStream(f));
+        final String hash4 = HashGenerator.hashoutstream(ds2, out);
+        assertThat(hash).isEqualTo(hash4);
 
     }
 

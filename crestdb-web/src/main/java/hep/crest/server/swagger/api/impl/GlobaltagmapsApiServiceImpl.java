@@ -21,54 +21,96 @@ import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.GlobalTagMapSetDto;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
+/**
+ * @author formica
+ *
+ */
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen",
+        date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired
-	GlobalTagMapService globaltagmapService;
+    /**
+     * Service.
+     */
+    @Autowired
+    private GlobalTagMapService globaltagmapService;
 
-	@Override
-	public Response createGlobalTagMap(GlobalTagMapDto body, SecurityContext securityContext, UriInfo info)
-			throws NotFoundException {
-		this.log.info("GlobalTagMapRestController processing request for creating a global tag map entry " + body);
-		try {
-			GlobalTagMapDto saved = globaltagmapService.insertGlobalTagMap(body);
-			return Response.created(info.getRequestUri()).entity(saved).build();
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hep.crest.server.swagger.api.GlobaltagmapsApiService#createGlobalTagMap(hep.
+     * crest.swagger.model.GlobalTagMapDto, javax.ws.rs.core.SecurityContext,
+     * javax.ws.rs.core.UriInfo)
+     */
+    @Override
+    public Response createGlobalTagMap(GlobalTagMapDto body, SecurityContext securityContext,
+            UriInfo info) throws NotFoundException {
+        this.log.info(
+                "GlobalTagMapRestController processing request for creating a global tag map entry "
+                        + body);
+        try {
+            final GlobalTagMapDto saved = globaltagmapService.insertGlobalTagMap(body);
+            return Response.created(info.getRequestUri()).entity(saved).build();
 
-		} catch (CdbServiceException e) {
-			String msg = "Error creating globaltagmap resource using " + body.toString();
-			e.printStackTrace();
-			String message = e.getMessage();
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg + " : " + message);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-		}
-	}
+        }
+        catch (final CdbServiceException e) {
+            final String msg = "Error creating globaltagmap resource using " + body.toString();
+            e.printStackTrace();
+            final String message = e.getMessage();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    msg + " : " + message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+        }
+    }
 
-	@Override
-	public Response findGlobalTagMap(String name, String xCrestMapMode, SecurityContext securityContext, UriInfo info)
-			throws NotFoundException {
-		this.log.info("GlobalTagMapRestController processing request to get map for GlobalTag name " + name);
-		try {
-			List<GlobalTagMapDto> dtolist = null;
-			if (xCrestMapMode != null && xCrestMapMode.equals("Trace")) {
-				dtolist = globaltagmapService.getTagMap(name);
-			} else {
-				dtolist = globaltagmapService.getTagMapByTagName(name);
-			}
-			GenericMap filters = new GenericMap();
-			filters.put("name", name);
-			filters.put("mode", xCrestMapMode);
-			CrestBaseResponse setdto = new GlobalTagMapSetDto().resources(dtolist).filter(filters).size((long)dtolist.size()).datatype("maps");
-			return Response.ok().entity(setdto).build();
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hep.crest.server.swagger.api.GlobaltagmapsApiService#findGlobalTagMap(java.
+     * lang.String, java.lang.String, javax.ws.rs.core.SecurityContext,
+     * javax.ws.rs.core.UriInfo)
+     */
+    @Override
+    public Response findGlobalTagMap(String name, String xCrestMapMode,
+            SecurityContext securityContext, UriInfo info) throws NotFoundException {
+        this.log.info("GlobalTagMapRestController processing request to get map for GlobalTag name "
+                + name);
+        try {
+            List<GlobalTagMapDto> dtolist = null;
+            if (xCrestMapMode == null) {
+                xCrestMapMode = "Trace";
+            }
+            if (xCrestMapMode.equals("Trace")) {
+                dtolist = globaltagmapService.getTagMap(name);
+            }
+            else {
+                dtolist = globaltagmapService.getTagMapByTagName(name);
+            }
+            final GenericMap filters = new GenericMap();
+            filters.put("name", name);
+            filters.put("mode", xCrestMapMode);
+            final CrestBaseResponse setdto = new GlobalTagMapSetDto().resources(dtolist)
+                    .filter(filters).size((long) dtolist.size()).datatype("maps");
+            if (dtolist.size() == 0) {
+                return Response.status(Response.Status.NOT_FOUND).entity(setdto).build();
+            }
+            return Response.ok().entity(setdto).build();
 
-		} catch (CdbServiceException e) {
-			String message = e.getMessage();
-			log.error("Internal error searching maps : {}",message);
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-		}
-	}
+        }
+        catch (final CdbServiceException e) {
+            final String message = e.getMessage();
+            log.error("Internal error searching maps : {}", message);
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+        }
+    }
 }

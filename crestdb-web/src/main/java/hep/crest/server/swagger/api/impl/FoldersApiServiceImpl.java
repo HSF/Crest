@@ -2,7 +2,6 @@ package hep.crest.server.swagger.api.impl;
 
 import java.util.List;
 
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
@@ -25,80 +24,131 @@ import hep.crest.server.security.FolderService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.FoldersApiService;
 import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.FolderDto;
+import hep.crest.swagger.model.FolderSetDto;
+import hep.crest.swagger.model.GenericMap;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-05-10T14:57:11.305+02:00")
+/**
+ * @author formica
+ *
+ */
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen",
+        date = "2018-05-10T14:57:11.305+02:00")
 @Component
 public class FoldersApiServiceImpl extends FoldersApiService {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired
-	PageRequestHelper prh;
+    /**
+     * Helper.
+     */
+    @Autowired
+    private PageRequestHelper prh;
 
-	@Autowired
-	@Qualifier("folderFiltering")
-	private IFilteringCriteria filtering;
+    /**
+     * Filtering.
+     */
+    @Autowired
+    @Qualifier("folderFiltering")
+    private IFilteringCriteria filtering;
 
-	@Autowired
-	FolderService folderService;
+    /**
+     * Service.
+     */
+    @Autowired
+    private FolderService folderService;
 
-	@Override
-	public Response createFolder(FolderDto body, SecurityContext securityContext, UriInfo info)
-			throws NotFoundException {
-		log.info("FolderRestController processing request for creating a folder");
-		try {
-			FolderDto saved = folderService.insertFolder(body);
-			return Response.created(info.getRequestUri()).entity(saved).build();
-		} catch (AlreadyExistsPojoException e) {
-			return Response.status(Response.Status.SEE_OTHER).entity(body).build();
-		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			String message = e.getMessage();
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hep.crest.server.swagger.api.FoldersApiService#createFolder(hep.crest.swagger
+     * .model.FolderDto, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     */
+    @Override
+    public Response createFolder(FolderDto body, SecurityContext securityContext, UriInfo info)
+            throws NotFoundException {
+        log.info("FolderRestController processing request for creating a folder");
+        try {
+            final FolderDto saved = folderService.insertFolder(body);
+            return Response.created(info.getRequestUri()).entity(saved).build();
+        }
+        catch (final AlreadyExistsPojoException e) {
+            return Response.status(Response.Status.SEE_OTHER).entity(body).build();
+        }
+        catch (final CdbServiceException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            final String message = e.getMessage();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+        }
+    }
 
-	@Override
-	public Response listFolders(String by, String sort, SecurityContext securityContext, UriInfo info)
-			throws NotFoundException {
-		try {
-			log.debug("Search resource list using by={}, sort={}",by,sort);
-			PageRequest preq = prh.createPageRequest(0, 10000, sort);
-			List<FolderDto> dtolist = null;
-			if (by.equals("none")) {
-				dtolist = folderService.findAllFolders(null, preq);
-			} else {
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hep.crest.server.swagger.api.FoldersApiService#listFolders(java.lang.String,
+     * java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     */
+    @Override
+    public Response listFolders(String by, String sort, SecurityContext securityContext,
+            UriInfo info) throws NotFoundException {
+        try {
+            log.debug("Search resource list using by={}, sort={}", by, sort);
+            final PageRequest preq = prh.createPageRequest(0, 10000, sort);
+            List<FolderDto> dtolist = null;
+            List<SearchCriteria> params = null;
+            final GenericMap filters = new GenericMap();
+           
+            if (by.equals("none")) {
+                dtolist = folderService.findAllFolders(null, preq);
+            }
+            else {
+                params = prh.createMatcherCriteria(by);
+                for (final SearchCriteria sc : params) {
+                    filters.put(sc.getKey(), sc.getValue().toString());
+                }
+                final List<BooleanExpression> expressions = filtering
+                        .createFilteringConditions(params);
+                BooleanExpression wherepred = null;
 
-				List<SearchCriteria> params = prh.createMatcherCriteria(by);
-				List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
-				BooleanExpression wherepred = null;
+                for (final BooleanExpression exp : expressions) {
+                    if (wherepred == null) {
+                        wherepred = exp;
+                    }
+                    else {
+                        wherepred = wherepred.and(exp);
+                    }
+                }
+                dtolist = folderService.findAllFolders(wherepred, preq);
+            }
+            if (dtolist == null) {
+                final String message = "No resource has been found";
+                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
+                        message);
+                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+            }
+            final CrestBaseResponse setdto = new FolderSetDto().resources(dtolist)
+                    .size((long) dtolist.size()).datatype("folders");
+            if (!filters.isEmpty()) {
+                setdto.filter(filters);
+            }
+            return Response.ok().entity(setdto).build();
 
-				for (BooleanExpression exp : expressions) {
-					if (wherepred == null) {
-						wherepred = exp;
-					} else {
-						wherepred = wherepred.and(exp);
-					}
-				}
-				dtolist = folderService.findAllFolders(wherepred, preq);
-			}
-			if (dtolist == null) {
-				String message = "No resource has been found";
-				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,message);
-				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();	
-			}
-			GenericEntity<List<FolderDto>> entitylist = new GenericEntity<List<FolderDto>>(dtolist) {};
-			return Response.ok().entity(entitylist).build();
-
-		} catch (CdbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			String message = e.getMessage();
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,message);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-		}
-	}
+        }
+        catch (final CdbServiceException e) {
+            final String message = e.getMessage();
+            log.error("Api method listFolders got exception : {}", message);
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+        }
+    }
 }

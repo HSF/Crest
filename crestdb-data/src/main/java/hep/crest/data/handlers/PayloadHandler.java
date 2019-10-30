@@ -58,6 +58,13 @@ public class PayloadHandler {
     private static final Integer MAX_LENGTH = 1024;
 
     /**
+     * @param ds the ds to set
+     */
+    public void setDs(DataSource ds) {
+        this.ds = ds;
+    }
+
+    /**
      * @param is
      *            the InputStream
      * @return byte[]

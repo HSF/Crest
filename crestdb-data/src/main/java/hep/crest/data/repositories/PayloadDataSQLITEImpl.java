@@ -114,6 +114,18 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
     /*
      * (non-Javadoc)
      *
+     * @see
+     * hep.crest.data.repositories.PayloadDataBaseCustom#setPayloadHandler(hep.crest
+     * .data.handlers.PayloadHandler)
+     */
+    @Override
+    public void setPayloadHandler(PayloadHandler payloadHandler) {
+        this.payloadHandler = payloadHandler;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see hep.crest.data.repositories.PayloadDataBaseCustom#find(java.lang.String)
      */
     @Override

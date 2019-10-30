@@ -1,7 +1,7 @@
 /**
  * 
  */
-package hep.crest.data.test.tools;
+package hep.crest.testutils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -18,7 +18,6 @@ import hep.crest.data.pojo.IovId;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.runinfo.pojo.RunLumiInfo;
-import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
@@ -167,17 +166,6 @@ public class DataGenerator {
         dto.nodeDescription("Some node");
         dto.groupRole("TEST");
         return dto;
-    }
-
-    public static CrestFolders generateFolder(String name, String fullpath, String schema) {
-        final CrestFolders entity = new CrestFolders();
-        entity.setSchemaName(schema);
-        entity.setNodeFullpath(fullpath);
-        entity.setNodeName(name);
-        entity.setTagPattern("MY-TEST");
-        entity.setNodeDescription("Some node");
-        entity.setGroupRole("TEST");
-        return entity;
     }
 
     public static void generatePayloadData(String filename, String content) {

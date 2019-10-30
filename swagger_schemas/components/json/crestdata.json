@@ -398,6 +398,24 @@
 				}
 			]
 		},
+		"FolderSetDto": {
+			"description" : "An FolderSet containing FolderDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/FolderDto"
+							}
+						}
+					}
+				}
+			]
+		},
 		"PayloadDto": {
 			"type": "object",
 			"properties": {

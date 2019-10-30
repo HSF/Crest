@@ -6,8 +6,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,10 +36,13 @@ import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.IovGroupsImpl;
 import hep.crest.data.repositories.IovRepository;
+import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataDBImpl;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.repositories.TagRepository;
+import hep.crest.data.security.pojo.CrestFolders;
+import hep.crest.data.security.pojo.FolderRepository;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.data.utils.DirectoryUtilities;
 import hep.crest.swagger.model.IovDto;
@@ -48,11 +54,7 @@ import hep.crest.swagger.model.TagSummaryDto;
 @DataJpaTest
 @ActiveProfiles("test")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class RepositoryTests {
-
- 
-    private static final String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)([ASC|DESC]+?),";
-    private static final String QRY_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:|<|>)([a-zA-Z0-9_\\-\\/\\.\\*\\%]+?),";
+public class RepositoryDBTests {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -64,6 +66,9 @@ public class RepositoryTests {
     private IovRepository iovrepository;
 
     @Autowired
+    private FolderRepository folderRepository;
+
+    @Autowired
     @Qualifier("dataSource") 
     private DataSource mainDataSource;
     
@@ -71,8 +76,9 @@ public class RepositoryTests {
     @Test
     public void testPayload() throws Exception {
         
-        final PayloadDataDBImpl repobean = new PayloadDataDBImpl(mainDataSource);
+        final PayloadDataBaseCustom repobean = new PayloadDataDBImpl(mainDataSource);
         final PayloadHandler handler = new PayloadHandler();
+        handler.setDs(mainDataSource);
         repobean.setPayloadHandler(handler);
 
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhash1", "mydata", "mystreamer",
@@ -109,12 +115,23 @@ public class RepositoryTests {
         if (ds1 != null) {
             ds1.close();
         }
+        
+        ds = new BufferedInputStream(new FileInputStream(f));
+        final OutputStream out = new FileOutputStream(new File("/tmp/cdms/payloadatacopy.blob.copy"));
+        handler.saveToOutStream(ds, out);
+        handler.createBlobFromFile("/tmp/cdms/payloadatacopy.blob.copy");
+                
         final Payload loadedblob1 = repobean.find(savedfromblob.getHash());
         assertThat(loadedblob1.toString().length()).isGreaterThan(0);
-
+        log.info("loaded payload 1 {}",loadedblob1);
+        
         final PayloadDto pdto = handler.convertToDto(loadedblob1);
         assertThat(pdto).isNotNull();
         assertThat(pdto.getHash()).isEqualTo(loadedblob1.getHash());
+
+        final byte[] parr = handler.readFromFile("/tmp/cdms/payloadatacopy.blob.copy");
+        assertThat(parr).isNotNull();
+        assertThat(parr.length).isGreaterThan(0);
     }
     
     @Test
@@ -156,12 +173,18 @@ public class RepositoryTests {
         }
         final Long s = iovsrepobean.getSize("A-TEST-01");
         assertThat(s).isGreaterThan(0);
+
+        final Long ssnap = iovsrepobean.getSizeBySnapshot("A-TEST-01",new Date());
+        assertThat(ssnap).isGreaterThan(0);
         
         final List<TagSummaryDto> iovlist = iovsrepobean.getTagSummaryInfo("A-TEST-01");
         assertThat(iovlist.size()).isGreaterThan(0);
         
         final List<BigDecimal> groups = iovsrepobean.selectGroups("A-TEST-01", 10L);
         assertThat(groups.size()).isGreaterThan(0);
+
+        final List<BigDecimal> groupsnap = iovsrepobean.selectSnapshotGroups("A-TEST-01", new Date(), 10L);
+        assertThat(groupsnap.size()).isGreaterThan(0);
 
     }
    
@@ -179,12 +202,37 @@ public class RepositoryTests {
         final PayloadDirectoryImplementation pyldrepo = new PayloadDirectoryImplementation(new DirectoryUtilities());
         final PayloadDto pdto = DataGenerator.generatePayloadDto("anotherhash", "some content", "sinfo", "test");
         pyldrepo.save(pdto);
- 
+        
+        final PayloadDto loadedp = pyldrepo.find("anotherhash");
+        assertThat(loadedp).isNotNull();
+
         final IovDirectoryImplementation iovrepo = new IovDirectoryImplementation(new DirectoryUtilities());
         final IovDto idto = DataGenerator.generateIovDto("anotherhash", "A-TEST-02", new BigDecimal(22222L));
         iovrepo.save(idto);
         assertThat(tdto).isNotNull();
+        
+        final TagDto tdto3 = DataGenerator.generateTagDto("A-TEST-03", "test");
+        final TagDto savedtag3 = tagrepo.save(tdto3);
+        final IovDto idto1 = DataGenerator.generateIovDto("anotherhash1", "A-TEST-03", new BigDecimal(22222L));
+        final IovDto idto2 = DataGenerator.generateIovDto("anotherhash2", "A-TEST-03", new BigDecimal(32222L));
+        final List<IovDto> dtolist = new ArrayList<>();
+        dtolist.add(idto1);
+        dtolist.add(idto2);
+        final List<IovDto> idtolist = iovrepo.saveAll("A-TEST-03", dtolist);
+        assertThat(idtolist.size()).isGreaterThan(0);
     }
     
-    
+
+    @Test
+    public void testFolders() {
+        final CrestFolders entity = DataGenerator.generateFolder("RTBLOB", "/MDT/RTBLOB",
+                "COOLOFL_MDT");
+        final CrestFolders saved = folderRepository.save(entity);
+        assertThat(saved.getGroupRole()).isEqualTo(entity.getGroupRole());
+        
+        final List<CrestFolders> flist = folderRepository.findBySchemaName("COOLOFL_MDT");
+        assertThat(flist.size()).isGreaterThan(0);
+
+    }
+
 }

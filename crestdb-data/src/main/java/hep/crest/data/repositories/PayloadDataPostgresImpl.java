@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
 import hep.crest.swagger.model.PayloadDto;
@@ -111,6 +112,18 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
             tablename = this.defaultTablename + "." + tablename;
         }
         return tablename;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hep.crest.data.repositories.PayloadDataBaseCustom#setPayloadHandler(hep.crest
+     * .data.handlers.PayloadHandler)
+     */
+    @Override
+    public void setPayloadHandler(PayloadHandler payloadHandler) {
+        log.warn("Not used in this implementation...");
     }
 
     /*

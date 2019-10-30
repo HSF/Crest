@@ -62,18 +62,7 @@ public class PayloadsApi  {
     throws NotFoundException {
         return delegate.createPayloadMultiForm(fileInputStream, fileDetail,payload,securityContext,info);
     }
-    @GET
-    @Path("/{hash}/data")
-    
-    @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "Finds payload data by hash; the payload object contains the real BLOB.", notes = "Select one payload at the time, no regexp searches allowed here", response = String.class, tags={ "payloads", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = String.class) })
-    public Response getBlob(@ApiParam(value = "hash of the payload",required=true) @PathParam("hash") String hash
-,@Context SecurityContext securityContext,@Context UriInfo info)
-    throws NotFoundException {
-        return delegate.getBlob(hash,securityContext,info);
-    }
+
     @GET
     @Path("/{hash}")
     

@@ -148,6 +148,12 @@ public class GlobalTagService {
         try {
             GlobalTag entity = null;
             log.debug("Search for (record, label) specified tag list for GT: {}", globaltagname);
+            if (record.equals("none")) {
+                record = "";
+            }
+            if (label.equals("none")) {
+                label = "";
+            }
             if (record.equals("") && label.equals("")) {
                 entity = globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname);
             }

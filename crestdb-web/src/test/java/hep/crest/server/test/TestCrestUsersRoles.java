@@ -1,9 +1,13 @@
 package hep.crest.server.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -19,41 +23,51 @@ import hep.crest.data.security.pojo.UserRepository;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestCrestUsersRoles {
+    
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private UserRepository userRepository;
-   
+
     @Autowired
     private RoleRepository roleRepository;
 
     @Test
     public void testA_storeUsersRoles() {
-    		String pss = new BCryptPasswordEncoder().encode("password");
-    		CrestUser usrentity = new CrestUser("cusr",pss);
-    		usrentity.setId("cusr_1");
-        System.out.println("Store request for user: "+usrentity);
-        userRepository.save(usrentity);
-		CrestRoles rolentity = new CrestRoles("cusr_1","ROLE_user");
-        System.out.println("Store request for role: "+rolentity);
-		roleRepository.save(rolentity);
-		
-		String pssadmin = new BCryptPasswordEncoder().encode("password");
-		CrestUser adminentity = new CrestUser("adminusr",pssadmin);
-		adminentity.setId("adm_1");
-		System.out.println("Store request for user: "+adminentity);
-		userRepository.save(adminentity);
-		CrestRoles adrolentity = new CrestRoles("adm_1","ROLE_admin");
-		System.out.println("Store request for role: "+adrolentity);
-		roleRepository.save(adrolentity);
-		
-		String pssguru = new BCryptPasswordEncoder().encode("guru");
-		CrestUser gentity = new CrestUser("guruusr",pssguru);
-		gentity.setId("guru_1");
-		System.out.println("Store request for user: "+gentity);
-		userRepository.save(gentity);
-		CrestRoles grolentity = new CrestRoles("guru_1","ROLE_GURU");
-		System.out.println("Store request for role: "+grolentity);
-		roleRepository.save(grolentity);
+        final String pss = new BCryptPasswordEncoder().encode("password");
+        final CrestUser usrentity = new CrestUser("cusr", pss);
+        usrentity.setId("cusr_1");
+        log.info("Store request for user: " + usrentity);
+        CrestUser saveduser = userRepository.save(usrentity);
+        assertThat(saveduser).isNotNull();
+        
+        final CrestRoles rolentity = new CrestRoles("cusr_1", "ROLE_user");
+        log.info("Store request for role: " + rolentity);
+        CrestRoles savedrole = roleRepository.save(rolentity);
+        assertThat(savedrole).isNotNull();
+        
+        final String pssadmin = new BCryptPasswordEncoder().encode("password");
+        final CrestUser adminentity = new CrestUser("adminusr", pssadmin);
+        adminentity.setId("adm_1");
+        log.info("Store request for user: " + adminentity);
+        saveduser = userRepository.save(adminentity);
+        assertThat(saveduser).isNotNull();
+        
+        final CrestRoles adrolentity = new CrestRoles("adm_1", "ROLE_admin");
+        log.info("Store request for role: " + adrolentity);
+        savedrole = roleRepository.save(adrolentity);
+        assertThat(savedrole).isNotNull();
+        
+        final String pssguru = new BCryptPasswordEncoder().encode("guru");
+        final CrestUser gentity = new CrestUser("guruusr", pssguru);
+        gentity.setId("guru_1");
+        log.info("Store request for user: " + gentity);
+        saveduser = userRepository.save(gentity);
+        assertThat(saveduser).isNotNull();
+
+        final CrestRoles grolentity = new CrestRoles("guru_1", "ROLE_GURU");
+        log.info("Store request for role: " + grolentity);
+        roleRepository.save(grolentity);
     }
-    
 
 }

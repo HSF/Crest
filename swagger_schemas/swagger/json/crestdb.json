@@ -289,10 +289,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/FolderDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/FolderSetDto"
 						}
 					}
 				}
@@ -695,24 +692,23 @@
 						"in": "query",
 						"description": "record:  the record string {}",
 						"required": false,
-						"type": "string"
+						"type": "string",
+					    "default": "none"
 					},
 					{
 						"name": "label",
 						"in": "query",
 						"description": "label:  the label string {}",
 						"required": false,
-						"type": "string"
+						"type": "string",
+					    "default": "none"
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
 						}
 					}
 				}
@@ -1331,36 +1327,6 @@
 						"name": "hash",
 						"in": "path",
 						"description": "hash:  the hash of the payload",
-						"required": true,
-						"type": "string"
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "successful operation",
-						"schema": {
-							"type": "string"
-						}
-					}
-				}
-			}
-		},
-		"/payloads/{hash}/data": {
-			"get": {
-				"tags": [
-					"payloads"
-				],
-				"summary": "Finds payload data by hash; the payload object contains the real BLOB.",
-				"description": "Select one payload at the time, no regexp searches allowed here",
-				"operationId": "getBlob",
-				"produces": [
-					"application/octet-stream"
-				],
-				"parameters": [
-					{
-						"name": "hash",
-						"in": "path",
-						"description": "hash of the payload",
 						"required": true,
 						"type": "string"
 					}
