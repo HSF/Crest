@@ -1013,6 +1013,61 @@
 				}
 			}
 		},
+		"/iovs/lastIov": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Select last iov for a given tagname and before a given since.",
+				"description": "This method allows to select the last iov in a tag, before a given time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, snapshot={snapshot time as long}",
+				"operationId": "lastIov",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "since",
+						"in": "query",
+						"description": "since: the since time ",
+						"required": false,
+						"type": "string",
+						"default": "now"
+					},
+					{
+						"name": "snapshot",
+						"in": "query",
+						"description": "snapshot: the snapshot time {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int64"
+					},
+					{
+						"in": "header",
+						"name": "dateformat",
+						"description": "The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison.",
+						"default": "ms",
+						"type": "string"
+					}					
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+						}
+					}
+				}
+			}
+		},
 		"/iovs/selectSnapshot": {
 			"get": {
 				"tags": [

@@ -41,7 +41,6 @@ import hep.crest.server.annotations.CacheControlCdb;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.PayloadService;
-import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.PayloadsApiService;
@@ -84,11 +83,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Autowired
     private IovService iovService;
-    /**
-     * Service.
-     */
-    @Autowired
-    private TagService tagService;
     /**
      * Handler.
      */

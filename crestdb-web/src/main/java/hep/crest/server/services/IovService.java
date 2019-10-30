@@ -402,6 +402,7 @@ public class IovService {
                 final Iov saved = iovRepository.save(entity);
                 log.debug("Saved entity: {}", saved);
                 final IovDto dtoentity = mapper.map(saved, IovDto.class);
+                dtoentity.tagName(tagname);
                 log.debug("Returning iovDto: {}", dtoentity);
                 return dtoentity;
             }

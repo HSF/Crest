@@ -1,26 +1,13 @@
 package hep.crest.server.swagger.api;
 
-import hep.crest.swagger.model.*;
-import hep.crest.server.swagger.api.IovsApiService;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import hep.crest.swagger.model.CrestBaseResponse;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.IovSetDto;
-import hep.crest.swagger.model.TagSummarySetDto;
-
-import java.util.Map;
-import java.util.List;
-import hep.crest.server.swagger.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
-import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
@@ -28,11 +15,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import javax.ws.rs.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.validation.constraints.*;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovSetDto;
+import hep.crest.swagger.model.TagSummarySetDto;
+import io.swagger.annotations.ApiParam;
 
 @Path("/iovs")
 
@@ -148,5 +137,21 @@ public class IovsApi  {
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.storeBatchIovMultiForm(body,securityContext,info);
+    }
+
+    @GET
+    @Path("/lastIov")
+
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Select last iov for a given tagname and before a given since.", notes = "This method allows to select the last iov in a tag, before a given time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, snapshot={snapshot time as long}", response = IovSetDto.class, tags={ "iovs", })
+    @io.swagger.annotations.ApiResponses(value = {
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = IovSetDto.class) })
+    public Response lastIov(@ApiParam(value = "tagname: the tag name {none}", defaultValue="none") @DefaultValue("none") @QueryParam("tagname") String tagname
+,@ApiParam(value = "since: the since time ", defaultValue="now") @DefaultValue("now") @QueryParam("since") String since
+,@ApiParam(value = "snapshot: the snapshot time {0}", defaultValue="0") @DefaultValue("0") @QueryParam("snapshot") Long snapshot
+,@ApiParam(value = "The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison." , defaultValue="ms")@HeaderParam("dateformat") String dateformat
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.lastIov(tagname,since,snapshot,dateformat,securityContext,info);
     }
 }
