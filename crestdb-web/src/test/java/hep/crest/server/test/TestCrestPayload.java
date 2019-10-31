@@ -110,6 +110,49 @@ public class TestCrestPayload {
         }
 
     }
+    
+    @Test
+    public void testA_payloadfail() {
+        final PayloadDto dto = DataGenerator.generatePayloadDto("afakehashp01", "some data",
+                "some info", "test");
+        dto.hash(null);
+        log.info("Store bad payload : {}", dto);
+        final ResponseEntity<String> response = this.testRestTemplate
+                .postForEntity("/crestapi/payloads", dto, String.class);
+        log.info("Received response: " + response);
+        assertThat(response.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+        
+        // Upload payload using external file
+        final HttpHeaders headers1 = new HttpHeaders();
+        headers1.setContentType(MediaType.MULTIPART_FORM_DATA);
+        final MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        map.add("file", new String("some other data".getBytes()));
+        map.add("payload", null);
+        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
+                map, headers1);
+        final ResponseEntity<String> resp2 = this.testRestTemplate
+                .postForEntity("/crestapi/payloads/upload", request, String.class);
+        assertThat(resp2.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+
+        final String hash = "somenotexistinghash";
+        log.info("Get payload with not existing hash: {}", hash);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Crest-PayloadFormat", "JSON");
+        final HttpEntity<?> entity = new HttpEntity<>(headers);
+        final ResponseEntity<String> resp3 = this.testRestTemplate.exchange(
+                "/crestapi/payloads/" + hash, HttpMethod.GET, entity, String.class);
+        log.info("Received response: " + resp3);
+        assertThat(resp3.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+
+        log.info("Get payload meta with not existing hash: {}", hash);
+        
+        final ResponseEntity<String> resp4 = this.testRestTemplate.exchange(
+                "/crestapi/payloads/" + hash+"/meta", HttpMethod.GET, entity, String.class);
+        log.info("Received response: " + resp4);
+        assertThat(resp4.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+
+    }
+    
 
     @Test
     public void testA_payloadIovApi() throws Exception {

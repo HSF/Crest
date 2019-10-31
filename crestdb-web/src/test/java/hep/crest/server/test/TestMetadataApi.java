@@ -94,9 +94,41 @@ public class TestMetadataApi {
         }
 
     }
+    
+    @Test
+    public void testA_runinfofail() {
+        final RunLumiInfoDto dto = DataGenerator.generateRunLumiInfoDto(new BigDecimal(210000L),
+                new BigDecimal(222222L), new BigDecimal(100));
+        dto.endtime(null).run(null);
+        log.info("Store runlumi info : {} ", dto);
+        final ResponseEntity<String> response = this.testRestTemplate
+                .postForEntity("/crestapi/runinfo", dto, String.class);
+        log.info("Received response: {}", response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        
+        log.info("Find runlumi info without by : {} ");
+        final ResponseEntity<String> resp = this.testRestTemplate.exchange(
+                "/crestapi/runinfo?by=none", HttpMethod.GET, null,
+                String.class);
+        log.info("Received response: {}", resp);
+        assertThat(resp.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+        log.info("Find runlumi info without by : {} ");
+        
+        final ResponseEntity<String> resp2 = this.testRestTemplate.exchange(
+                "/crestapi/runinfo?by=some>0&sort=some:DESC", HttpMethod.GET, null,
+                String.class);
+        log.info("Received response: {}", resp2);
+        assertThat(resp2.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+
+        final ResponseEntity<String> resp3 = this.testRestTemplate.exchange(
+                "/crestapi/runinfo?by=run<1&sort=run:DESC", HttpMethod.GET, null,
+                String.class);
+        log.info("Received response: {}", resp3);
+        assertThat(resp3.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+    }
 
     @Test
-    public void testA_fsApi() throws Exception {
+    public void testB_fsApi() throws Exception {
 
         final ResponseEntity<String> response = this.testRestTemplate.exchange(
                 "/crestapi/fs/tar?tagname=SB-TAG-IOV-01", HttpMethod.POST, null, String.class);

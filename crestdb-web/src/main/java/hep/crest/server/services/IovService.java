@@ -13,6 +13,7 @@ import java.util.stream.StreamSupport;
 
 import javax.transaction.Transactional;
 
+import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
@@ -30,6 +32,8 @@ import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovRepository;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.TagRepository;
+import hep.crest.data.repositories.querydsl.IFilteringCriteria;
+import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.annotations.ProfileAndLog;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
@@ -73,6 +77,11 @@ public class IovService {
      */
     @Autowired
     private IovGroupsCustom iovgroupsrepo;
+    /**
+     * Helper.
+     */
+    @Autowired
+    private PageRequestHelper prh;
 
     /**
      * Mapper.
@@ -80,79 +89,50 @@ public class IovService {
     @Autowired
     @Qualifier("mapper")
     private MapperFacade mapper;
+    /**
+     * Filtering.
+     */
+    @Autowired
+    @Qualifier("iovFiltering")
+    private IFilteringCriteria filtering;
 
     /**
      * @param tagname
      *            the String
-     * @return List<IovDto>
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     */
-    public List<IovDto> findAllIovsByTagName(String tagname) throws CdbServiceException {
-        try {
-            log.debug("Search for iovs by tag name {}", tagname);
-            final List<Iov> entitylist = iovRepository.findByIdTagName(tagname);
-            return entitylist.stream().map(s -> mapper.map(s, IovDto.class))
-                    .collect(Collectors.toList());
-        }
-        catch (final Exception e) {
-            log.error("Exception in retrieving iov list using IdByTagName expression...{}",
-                    tagname);
-            throw new CdbServiceException("Cannot find iovs by tag name: " + e.getMessage());
-        }
-    }
-
-    /**
-     * @param tagname
+     * @param since
+     *            the String
+     * @param dateformat
      *            the String
      * @return IovDto
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public IovDto latest(String tagname) throws CdbServiceException {
-        try {
-            log.debug("Search for latest iovs by tag name {} using pagination query", tagname);
-            final PageRequestHelper prh = new PageRequestHelper();
-            final PageRequest req = prh.createPageRequest(0, 1, "stime:DESC");
-            final List<IovDto> iovlist = this.findAllIovsByTagName(tagname, req);
-            if (iovlist.isEmpty()) {
-                return null;
-            }
-            return iovlist.get(0);
-        }
-        catch (final Exception e) {
-            log.debug(
-                    "Exception in retrieving iov list using IdByTagName expression and pagination...{}",
-                    tagname);
-            throw new CdbServiceException(
-                    "Cannot find iovs by tag name and pagination: " + e.getMessage());
-        }
-    }
-
-    /**
-     * @param tagname
-     *            the String
-     * @param req
-     *            the Pageable
-     * @return List<IovDto>
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     */
-    public List<IovDto> findAllIovsByTagName(String tagname, Pageable req)
+    public IovDto latest(String tagname, String since, String dateformat)
             throws CdbServiceException {
-        try {
-            log.debug("Search for iovs by tag name {} using pagination request", tagname);
-            final List<Iov> entitylist = iovRepository.findByIdTagName(tagname, req);
-            return entitylist.stream().map(s -> mapper.map(s, IovDto.class))
-                    .collect(Collectors.toList());
+        List<SearchCriteria> params = null;
+        final PageRequest preq = prh.createPageRequest(0, 10, "id.since:DESC");
+        if (since.equals("now")) {
+            since = ((Long) Instant.now().getMillis()).toString();
         }
-        catch (final Exception e) {
-            log.debug(
-                    "Exception in retrieving iov list using IdByTagName expression and pagination...{}",
-                    tagname);
-            throw new CdbServiceException(
-                    "Cannot find iovs by tag name and pagination: " + e.getMessage());
+        final String by = "tagname:" + tagname + ",since<" + since;
+
+        params = prh.createMatcherCriteria(by, dateformat);
+        final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
+        BooleanExpression wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
         }
+        final List<IovDto> dtolist = this.findAllIovs(wherepred, preq);
+        if (dtolist != null && !dtolist.isEmpty()) {
+            return dtolist.get(0);
+        }
+        return null;
     }
 
     /**
@@ -362,40 +342,55 @@ public class IovService {
     }
 
     /**
+     * @param tagname
+     *            the String
+     * @param since
+     *            the BigDecimal
+     * @param hash
+     *            the String
+     * @return boolean
+     */
+    protected boolean existsIov(String tagname, BigDecimal since, String hash) {
+        try {
+            log.debug("Verify if the same IOV is already stored with the same hash....");
+            final Iov tmpiov = iovRepository.findBySinceAndTagNameAndHash(tagname, since, hash);
+            if (tmpiov != null) {
+                return true;
+            }
+        }
+        catch (final Exception e) {
+            log.warn("Searching iov {} {} {} has not found anything...", tagname, since, hash);
+        }
+        return false;
+    }
+
+    /**
      * @param dto
      *            the IovDto
      * @return IovDto
      * @throws CdbServiceException
      *             If an Exception occurred
+     * @throws AlreadyExistsPojoException
+     *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public IovDto insertIov(IovDto dto) throws CdbServiceException {
+    public IovDto insertIov(IovDto dto) throws CdbServiceException, AlreadyExistsPojoException {
         log.debug("Create iov from dto {}", dto);
-        Iov tmpiov = null;
         Iov entity = null;
         final String tagname = dto.getTagName();
+        final BigDecimal since = dto.getSince();
+        final String hash = dto.getPayloadHash();
+        if (existsIov(tagname, since, hash)) {
+            throw new AlreadyExistsPojoException("Iov already exists : " + dto.toString());
+        }
         try {
             entity = mapper.map(dto, Iov.class);
-            log.debug("Verify if the same IOV is already stored with the same hash....");
-            tmpiov = iovRepository.findBySinceAndTagNameAndHash(tagname, entity.getId().getSince(),
-                    entity.getPayloadHash());
-        }
-        catch (final Exception e) {
-            log.warn("Searching iov {} has not found anything...", dto);
-        }
-        if (entity == null) {
-            throw new CdbServiceException("Cannot map entity to dto " + dto);
-        }
-        if (tmpiov != null) {
-            log.debug("Found iov with the same Id and Hash...skip insertion....");
-            throw new AlreadyExistsPojoException(tmpiov.toString());
-        }
-        try {
             // The IOV is not yet stored. Verify that the tag exists before inserting it.
             final Optional<Tag> tg = tagRepository.findById(tagname);
             if (tg.isPresent()) {
                 final Tag t = tg.get();
                 t.setModificationTime(null);
+                // Update the tag modification time
                 final Tag updtag = tagRepository.save(t);
                 entity.setTag(updtag);
                 entity.getId().setTagName(tagname);
@@ -406,8 +401,9 @@ public class IovService {
                 log.debug("Returning iovDto: {}", dtoentity);
                 return dtoentity;
             }
-            throw new CdbServiceException("Unkown tag : " + tagname);
-
+            else {
+                throw new CdbServiceException("Unkown tag : " + tagname);
+            }
         }
         catch (final Exception e) {
             log.error("Exception in storing iov {}", dto);

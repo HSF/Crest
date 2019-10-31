@@ -128,6 +128,37 @@ public class TestCrestIov {
     }
 
     @Test
+    public void testA_iovfail() {
+        // Store iov for payload pdto
+        final IovDto iovdto = DataGenerator.generateIovDto(null, "SOME-TAG", new BigDecimal(1000000L));
+        log.info("Store bad iov : {}", iovdto);
+        final ResponseEntity<String> iovresp = this.testRestTemplate
+                .postForEntity("/crestapi/iovs", iovdto, String.class);
+        log.info("Received response: " + iovresp);
+        assertThat(iovresp.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+        
+        final ResponseEntity<String> resp = this.testRestTemplate
+                .exchange("/crestapi/iovs?by=tagname:NONE-01,insertiontime<0", HttpMethod.GET, null, String.class);
+        assertThat(resp.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+        final ResponseEntity<String> resp1 = this.testRestTemplate
+                .exchange("/crestapi/iovs?by=insertiontime<0", HttpMethod.GET, null, String.class);
+        assertThat(resp1.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+        final ResponseEntity<String> resp2 = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectGroups?tagname=NONR", HttpMethod.GET, null, String.class);
+        assertThat(resp2.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+        final ResponseEntity<String> resp3 = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectIovs?tagname=NONR", HttpMethod.GET, null, String.class);
+        assertThat(resp3.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+        final ResponseEntity<String> resp4 = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectSnapshot?tagname=NONR", HttpMethod.GET, null, String.class);
+        assertThat(resp4.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+        final ResponseEntity<String> resp5 = this.testRestTemplate
+                .exchange("/crestapi/iovs/lastIov?tagname=NONR", HttpMethod.GET, null, String.class);
+        assertThat(resp5.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+
+    }
+ 
+    @Test
     public void testB_findiovApi() throws Exception {
 
         final ResponseEntity<String> resp = this.testRestTemplate

@@ -75,7 +75,7 @@ public class IovSynchroAspect {
             log.warn("Can only append IOVs....");
             IovDto latest = null;
             try {
-                latest = iovService.latest(tagdto.getName());
+                latest = iovService.latest(tagdto.getName(), "now", "ms");
             }
             catch (final CdbServiceException e) {
                 log.error("Error checking SV synchronization : {}", e.getMessage());

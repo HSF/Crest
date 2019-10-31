@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +30,7 @@ import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.caching.CachingPolicyService;
 import hep.crest.server.caching.CachingProperties;
 import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
@@ -117,6 +117,13 @@ public class IovsApiServiceImpl extends IovsApiService {
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+        }
+        catch (final AlreadyExistsPojoException e) {
+            log.error("Iov already exists : {}", e.getMessage());
+            final String message = e.getMessage();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    message);
+            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
         }
     }
 
@@ -508,28 +515,9 @@ public class IovsApiServiceImpl extends IovsApiService {
             if (dateformat == null) {
                 dateformat = "ms";
             }
-            List<SearchCriteria> params = null;
-            final PageRequest preq = prh.createPageRequest(0, 10, "id.since:DESC");
-            List<IovDto> dtolist = null;
-            if (since.equals("now")) {
-                since = new Long(Instant.now().getMillis()).toString();
-            }
-            final String by = "tagname:" + tagname + ",since<" + since;
-
-            params = prh.createMatcherCriteria(by, dateformat);
-            final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
-            BooleanExpression wherepred = null;
-
-            for (final BooleanExpression exp : expressions) {
-                if (wherepred == null) {
-                    wherepred = exp;
-                }
-                else {
-                    wherepred = wherepred.and(exp);
-                }
-            }
-            dtolist = iovService.findAllIovs(wherepred, preq);
-            if (dtolist == null) {
+            
+            final IovDto last = iovService.latest(tagname, since, dateformat);
+            if (last == null) {
                 final String message = "No resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                         message);
@@ -538,8 +526,10 @@ public class IovsApiServiceImpl extends IovsApiService {
             final GenericMap filters = new GenericMap();
             filters.put("tagName", tagname);
             filters.put("since", since);
+            final List<IovDto> dtolist = new ArrayList<>();
+            dtolist.add(last);
             final CrestBaseResponse saveddto = new IovSetDto().resources(dtolist).filter(filters)
-                    .size((long) dtolist.size()).datatype("iovs");
+                    .size(1L).datatype("iovs");
             return Response.ok().entity(saveddto).build();
 
         }

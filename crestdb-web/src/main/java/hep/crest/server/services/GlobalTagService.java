@@ -97,10 +97,10 @@ public class GlobalTagService {
      * @param globaltagname
      *            the String
      * @return GlobalTagDto
-     * @throws CdbServiceException
-     *             If an Exception occurred
+     * @throws NotExistsPojoException
+     *             If object was not found
      */
-    public GlobalTagDto findOne(String globaltagname) throws CdbServiceException {
+    public GlobalTagDto findOne(String globaltagname) throws NotExistsPojoException {
         try {
             log.debug("Search for global tag by name {}", globaltagname);
             final GlobalTag entity = globalTagRepository.findByName(globaltagname);
@@ -109,7 +109,7 @@ public class GlobalTagService {
         catch (final Exception e) {
             log.debug("Exception in retrieving global tag list using ByName expression...{}",
                     globaltagname);
-            throw new CdbServiceException("Cannot find global tag by name: " + e.getMessage());
+            throw new NotExistsPojoException("Cannot find global tag by name: " + globaltagname);
         }
     }
 
@@ -183,9 +183,12 @@ public class GlobalTagService {
      * @return GlobalTagDto
      * @throws CdbServiceException
      *             If an Exception occurred
+     * @throws AlreadyExistsPojoException
+     *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public GlobalTagDto insertGlobalTag(GlobalTagDto dto) throws CdbServiceException {
+    public GlobalTagDto insertGlobalTag(GlobalTagDto dto)
+            throws CdbServiceException, AlreadyExistsPojoException {
         try {
             log.debug("Create global tag from dto {}", dto);
             final GlobalTag entity = mapper.map(dto, GlobalTag.class);
@@ -220,9 +223,12 @@ public class GlobalTagService {
      * @return GlobalTagDto
      * @throws CdbServiceException
      *             If an Exception occurred
+     * @throws NotExistsPojoException
+     *             If object was not found
      */
     @Transactional
-    public GlobalTagDto updateGlobalTag(GlobalTagDto dto) throws CdbServiceException {
+    public GlobalTagDto updateGlobalTag(GlobalTagDto dto)
+            throws CdbServiceException, NotExistsPojoException {
         try {
             log.debug("Create global tag from dto {}", dto);
             final GlobalTag entity = mapper.map(dto, GlobalTag.class);
@@ -241,8 +247,8 @@ public class GlobalTagService {
             throw e;
         }
         catch (final ConstraintViolationException e) {
-            log.error("Cannot store global tag {} : resource does not exists ? ", dto);
-            throw new NotExistsPojoException("Global tag does not exists : " + e.getMessage());
+            log.error("Cannot store global tag {} : constraint violation on resource ", dto);
+            throw new NotExistsPojoException("Global tag constraint violation : " + e.getMessage());
         }
         catch (final Exception e) {
             log.error("Exception in storing global tag {}", dto);

@@ -26,7 +26,6 @@ import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.data.utils.RunIovConverter;
 import hep.crest.server.controllers.PageRequestHelper;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.runinfo.services.RunLumiInfoService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
@@ -86,9 +85,6 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
         try {
             final RunLumiInfoDto saved = runlumiService.insertRunLumiInfo(body);
             return Response.created(info.getRequestUri()).entity(saved).build();
-        }
-        catch (final AlreadyExistsPojoException e) {
-            return Response.status(Response.Status.SEE_OTHER).entity(body).build();
         }
         catch (final CdbServiceException e) {
             final String message = e.getMessage();

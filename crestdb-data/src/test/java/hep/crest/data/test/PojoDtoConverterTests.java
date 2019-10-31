@@ -31,6 +31,7 @@ import hep.crest.data.security.pojo.CrestRoles;
 import hep.crest.data.security.pojo.CrestUser;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.FolderDto;
+import hep.crest.swagger.model.FolderSetDto;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.GlobalTagMapSetDto;
@@ -302,6 +303,28 @@ public class PojoDtoConverterTests {
         assertThat(dto1.getNodeFullpath()).isEqualTo(entity.getNodeFullpath());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
+    }
+
+    @Test
+    public void testFolderSetConverter() throws Exception {
+        final FolderDto dto1 = DataGenerator.generateFolderDto("T0BLOB", "/MDT/T0BLOB",
+                "COOLOFL_MDT");
+
+        assertThat(dto1.toString().length()).isGreaterThan(0);
+        assertThat(dto1.hashCode()).isNotNull();
+        final FolderSetDto setdto = new FolderSetDto();
+        setdto.datatype("folders").format("json");
+        setdto.addResourcesItem(dto1);
+        setdto.size(1L);
+        assertThat(setdto.toString().length()).isGreaterThan(0);
+        
+        final FolderSetDto setdto1 = new FolderSetDto();
+        setdto1.datatype("folders").format("json");
+        setdto1.addResourcesItem(dto1);
+        setdto1.size(1L);
+        
+        assertThat(setdto.equals(setdto1)).isTrue();
+        assertThat(setdto.hashCode()).isNotNull();
     }
 
     @Test

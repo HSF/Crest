@@ -3,13 +3,11 @@
  */
 package hep.crest.server.exceptions;
 
-import hep.crest.data.exceptions.CdbServiceException;
-
 /**
  * @author formica
  *
  */
-public class AlreadyExistsPojoException extends CdbServiceException {
+public class AlreadyExistsPojoException extends Exception {
 
     /**
      * Serializer.

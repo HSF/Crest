@@ -17,6 +17,7 @@ import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.PayloadDto;
 
 /**
@@ -50,19 +51,16 @@ public class PayloadService {
      * @return PayloadDto
      * @throws CdbServiceException
      *             If an Exception occurred
+     * @throws NotExistsPojoException
+     *             If object was not found
      */
     @Transactional
-    public PayloadDto getPayload(String hash) throws CdbServiceException {
-        try {
-            final Payload pyld = payloaddataRepository.find(hash);
-            if (pyld == null) {
-                throw new CdbServiceException("Cannot find payload dto for hash " + hash);
-            }
-            return payloadHandler.convertToDto(pyld);
+    public PayloadDto getPayload(String hash) throws CdbServiceException, NotExistsPojoException {
+        final Payload pyld = payloaddataRepository.find(hash);
+        if (pyld == null) {
+            throw new NotExistsPojoException("Cannot find payload dto for hash " + hash);
         }
-        catch (final Exception e) {
-            throw new CdbServiceException(e.getMessage());
-        }
+        return payloadHandler.convertToDto(pyld);
     }
 
     /**
@@ -71,19 +69,17 @@ public class PayloadService {
      * @return PayloadDto
      * @throws CdbServiceException
      *             If an Exception occurred
+     * @throws NotExistsPojoException
+     *             If object was not found
      */
     @Transactional
-    public PayloadDto getPayloadMetaInfo(String hash) throws CdbServiceException {
-        try {
-            final Payload pyld = payloaddataRepository.findMetaInfo(hash);
-            if (pyld == null) {
-                throw new CdbServiceException("Cannot find payload meta data for hash " + hash);
-            }
-            return payloadHandler.convertToDtoNoData(pyld);
+    public PayloadDto getPayloadMetaInfo(String hash)
+            throws CdbServiceException, NotExistsPojoException {
+        final Payload pyld = payloaddataRepository.findMetaInfo(hash);
+        if (pyld == null) {
+            throw new NotExistsPojoException("Cannot find payload meta data for hash " + hash);
         }
-        catch (final Exception e) {
-            throw new CdbServiceException(e.getMessage());
-        }
+        return payloadHandler.convertToDtoNoData(pyld);
     }
 
     /**
@@ -92,21 +88,19 @@ public class PayloadService {
      * @return InputStream
      * @throws CdbServiceException
      *             If an Exception occurred
+     * @throws NotExistsPojoException
+     *             If object was not found
      */
     @Transactional
-    public InputStream getPayloadData(String hash) throws CdbServiceException {
-        try {
-            final Payload pyld = payloaddataRepository.findData(hash);
-            if (pyld == null) {
-                throw new CdbServiceException("Cannot find payload data for hash " + hash);
-            }
-            final byte[] bindata = payloadHandler.convertToByteArray(pyld);
-            log.debug("Converted pojo in byte array of length {}", bindata.length);
-            return new ByteArrayInputStream(bindata);
+    public InputStream getPayloadData(String hash)
+            throws CdbServiceException, NotExistsPojoException {
+        final Payload pyld = payloaddataRepository.findData(hash);
+        if (pyld == null) {
+            throw new NotExistsPojoException("Cannot find payload data for hash " + hash);
         }
-        catch (final Exception e) {
-            throw new CdbServiceException(e.getMessage());
-        }
+        final byte[] bindata = payloadHandler.convertToByteArray(pyld);
+        log.debug("Converted pojo in byte array of length {}", bindata.length);
+        return new ByteArrayInputStream(bindata);
     }
 
     /**

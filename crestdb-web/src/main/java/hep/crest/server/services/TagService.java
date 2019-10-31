@@ -158,9 +158,11 @@ public class TagService {
      * @return TagDto
      * @throws CdbServiceException
      *             If an Exception occurred
+     * @throws AlreadyExistsPojoException
+     *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public TagDto insertTag(TagDto dto) throws CdbServiceException {
+    public TagDto insertTag(TagDto dto) throws CdbServiceException, AlreadyExistsPojoException {
         try {
             log.debug("Create tag from dto {}", dto);
             final Tag entity = mapper.map(dto, Tag.class);

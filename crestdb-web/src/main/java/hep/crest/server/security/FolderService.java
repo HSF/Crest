@@ -87,9 +87,10 @@ public class FolderService {
      * @return FolderDto
      * @throws CdbServiceException
      *             If an Exception occurred
+     * @throws AlreadyExistsPojoException If an Exception occurred because pojo exists
      */
     @Transactional
-    public FolderDto insertFolder(FolderDto dto) throws CdbServiceException {
+    public FolderDto insertFolder(FolderDto dto) throws CdbServiceException, AlreadyExistsPojoException {
         try {
             log.debug("Create global tag from dto {}", dto);
             final CrestFolders entity = mapper.map(dto, CrestFolders.class);

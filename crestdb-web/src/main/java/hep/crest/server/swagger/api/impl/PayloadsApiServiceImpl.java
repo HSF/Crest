@@ -39,6 +39,7 @@ import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.server.annotations.CacheControlCdb;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.PayloadService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
@@ -134,10 +135,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             final PayloadDto saved = payloadService.insertPayloadAndInputStream(payloaddto,
                     fileInputStream);
             return Response.created(info.getRequestUri()).entity(saved).build();
-
         }
-        catch (final CdbServiceException e) {
-            final String msg = "Error creating payload resource using " + payload.toString();
+        catch (final CdbServiceException | NullPointerException e) {
+            final String msg = "Error creating payload resource : " + e.getCause();
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
@@ -207,14 +207,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             else {
                 log.debug("Retrieve the full pojo with hash {}", hash);
                 final PayloadDto entity = payloadService.getPayload(hash);
-                if (entity == null) {
-                    final String msg = "Cannot find payload corresponding to hash " + hash;
-                    final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                            msg);
-                    return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-                }
                 return Response.ok(entity, MediaType.APPLICATION_JSON_TYPE).build();
             }
+        }
+        catch (final NotExistsPojoException e) {
+            final String msg = "Cannot find payload corresponding to hash " + hash;
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
         }
         catch (final CdbServiceException e) {
             final String msg = "Error retrieving payload from hash " + hash;
@@ -501,15 +500,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 "PayloadRestController processing request for payload meta information for {}",
                 hash);
         try {
-
             final PayloadDto entity = payloadService.getPayloadMetaInfo(hash);
-            if (entity == null) {
-                final String msg = "Cannot find payload corresponding to hash " + hash;
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                        msg);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-            }
             return Response.ok().entity(entity).build();
+        }
+        catch (final NotExistsPojoException e) {
+            final String msg = "Cannot find payload corresponding to hash " + hash;
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
         }
         catch (final CdbServiceException e) {
             final String msg = "Error retrieving payload from hash " + hash;

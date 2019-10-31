@@ -3,13 +3,11 @@
  */
 package hep.crest.server.exceptions;
 
-import hep.crest.data.exceptions.CdbServiceException;
-
 /**
  * @author formica
  *
  */
-public class NotExistsPojoException extends CdbServiceException {
+public class NotExistsPojoException extends Exception {
 
     /**
      * Serializer.
@@ -31,7 +29,7 @@ public class NotExistsPojoException extends CdbServiceException {
      */
     @Override
     public String getMessage() {
-        return "AlreadyExistsPojoException: " + super.getMessage();
+        return "NotExistsPojoException: " + super.getMessage();
     }
 
 }

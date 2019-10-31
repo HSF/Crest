@@ -120,9 +120,9 @@ public class TestCrestGlobalTag {
                 .postForEntity("/crestapi/globaltags", dto, String.class);
         log.info("Received response: {}", response2);
         assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        
-        final ResponseEntity<String> responsedelete = this.testRestTemplate
-                .exchange("/crestapi/admin/globaltags/A-GT-01", HttpMethod.DELETE, null, String.class);
+
+        final ResponseEntity<String> responsedelete = this.testRestTemplate.exchange(
+                "/crestapi/admin/globaltags/A-GT-01", HttpMethod.DELETE, null, String.class);
         log.info("Received response on delete: {}", responsedelete);
         assertThat(responsedelete.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -159,7 +159,7 @@ public class TestCrestGlobalTag {
         final ResponseEntity<String> resp1 = this.testRestTemplate.exchange(
                 "/crestapi/globaltags/" + dto1.getName(), HttpMethod.GET, null, String.class);
         {
-            log.info("Retrieved global tag {} ",dto1.getName());
+            log.info("Retrieved global tag {} ", dto1.getName());
             final String responseBody = resp1.getBody();
             assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagSetDto ok;
@@ -168,15 +168,15 @@ public class TestCrestGlobalTag {
             assertThat(ok.getSize()).isEqualTo(1);
         }
 
-        final ResponseEntity<String> resp1null = this.testRestTemplate.exchange(
-                "/crestapi/globaltags/SOME-GT", HttpMethod.GET, null, String.class);
+        final ResponseEntity<String> resp1null = this.testRestTemplate
+                .exchange("/crestapi/globaltags/SOME-GT", HttpMethod.GET, null, String.class);
         {
             log.info("Retrieved global tag SOME-GT should return null");
             assertThat(resp1null.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
 
         final ResponseEntity<String> resp2 = this.testRestTemplate
-                .exchange("/crestapi/globaltags?by=name:GT", HttpMethod.GET, null, String.class);
+                .exchange("/crestapi/globaltags?by=name:GT,release:rel%,workflow:none", HttpMethod.GET, null, String.class);
 
         {
             log.info("Retrieved global tag list " + resp2.getBody());
@@ -187,27 +187,29 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
-        
+
         // Create a tag
         final TagDto tagdto = DataGenerator.generateTagDto("B-TAGGT-02", "test");
         log.info("Store tag : {} ", tagdto);
-        final ResponseEntity<TagDto> resptag = this.testRestTemplate
-                .postForEntity("/crestapi/tags", tagdto, TagDto.class);
+        final ResponseEntity<TagDto> resptag = this.testRestTemplate.postForEntity("/crestapi/tags",
+                tagdto, TagDto.class);
         log.info("Received response: {}", resptag);
         assertThat(resptag.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        
+
         // Associate the tag B-TAGGT-02 to the global tag B-GT-02
-        final GlobalTagMapDto maptagdto = DataGenerator.generateMappingDto(tagdto.getName(), dto1.getName(), "B-TAGGT", "test");
+        final GlobalTagMapDto maptagdto = DataGenerator.generateMappingDto(tagdto.getName(),
+                dto1.getName(), "B-TAGGT", "test");
         log.info("Store global tag map : {} ", maptagdto);
         final ResponseEntity<GlobalTagMapDto> respmaptag = this.testRestTemplate
                 .postForEntity("/crestapi/globaltagmaps", maptagdto, GlobalTagMapDto.class);
         log.info("Received response: {}", respmaptag);
         assertThat(respmaptag.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        
+
         final ResponseEntity<String> resptags = this.testRestTemplate.exchange(
-                "/crestapi/globaltags/" + dto1.getName()+"/tags?record=B-TAGGT&label=none", HttpMethod.GET, null, String.class);
+                "/crestapi/globaltags/" + dto1.getName() + "/tags?record=B-TAGGT&label=none",
+                HttpMethod.GET, null, String.class);
         {
-            log.info("Retrieved associated tags for global tag {}",dto1.getName());
+            log.info("Retrieved associated tags for global tag {}", dto1.getName());
             final String responseBody = resptags.getBody();
             assertThat(resptags.getStatusCode()).isEqualTo(HttpStatus.OK);
             TagSetDto ok;
@@ -219,6 +221,22 @@ public class TestCrestGlobalTag {
     }
 
     @Test
+    public void testD_globaltagsfail() {
+        final ResponseEntity<String> resp = this.testRestTemplate
+                .exchange("/crestapi/globaltags?by=name:fff", HttpMethod.GET, null, String.class);
+
+        assertThat(resp.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+
+        final ResponseEntity<String> resp1 = this.testRestTemplate
+                .exchange("/crestapi/globaltags?by=none", HttpMethod.GET, null, String.class);
+        assertThat(resp1.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+
+        final ResponseEntity<String> resp2 = this.testRestTemplate.exchange(
+                "/crestapi/globaltags?by=none&sort=fff:DESC", HttpMethod.GET, null, String.class);
+        assertThat(resp2.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+    }
+
+    @Test
     public void testC_findGlobaltagMaps() throws Exception {
 
         final GlobalTagDto dto = DataGenerator.generateGlobalTagDto("B-GTMAP-03");
@@ -227,27 +245,29 @@ public class TestCrestGlobalTag {
                 .postForEntity("/crestapi/globaltags", dto, GlobalTagDto.class);
         log.info("Received response: {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        
+
         // Create a tag
         final TagDto tagdto = DataGenerator.generateTagDto("B-TAGGT-03", "test");
         log.info("Store tag : {} ", tagdto);
-        final ResponseEntity<TagDto> resptag = this.testRestTemplate
-                .postForEntity("/crestapi/tags", tagdto, TagDto.class);
+        final ResponseEntity<TagDto> resptag = this.testRestTemplate.postForEntity("/crestapi/tags",
+                tagdto, TagDto.class);
         log.info("Received response: {}", resptag);
         assertThat(resptag.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        
+
         // Associate the tag B-TAGGT-02 to the global tag B-GT-02
-        final GlobalTagMapDto maptagdto = DataGenerator.generateMappingDto(tagdto.getName(), dto.getName(), "B-TAGGT", "test");
+        final GlobalTagMapDto maptagdto = DataGenerator.generateMappingDto(tagdto.getName(),
+                dto.getName(), "B-TAGGT", "test");
         log.info("Store global tag map : {} ", maptagdto);
         final ResponseEntity<GlobalTagMapDto> respmaptag = this.testRestTemplate
                 .postForEntity("/crestapi/globaltagmaps", maptagdto, GlobalTagMapDto.class);
         log.info("Received response: {}", respmaptag);
         assertThat(respmaptag.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        
+
         final ResponseEntity<String> resptags = this.testRestTemplate.exchange(
-                "/crestapi/globaltags/" + dto.getName()+"/tags?record=B-TAGGT&label=none", HttpMethod.GET, null, String.class);
+                "/crestapi/globaltags/" + dto.getName() + "/tags?record=B-TAGGT&label=none",
+                HttpMethod.GET, null, String.class);
         {
-            log.info("Retrieved associated tags for global tag {}",dto.getName());
+            log.info("Retrieved associated tags for global tag {}", dto.getName());
             final String responseBody = resptags.getBody();
             assertThat(resptags.getStatusCode()).isEqualTo(HttpStatus.OK);
             TagSetDto ok;
@@ -257,7 +277,8 @@ public class TestCrestGlobalTag {
         }
 
         // Associate the tag B-TAGGT-02 to an not existing global tag
-        final GlobalTagMapDto maptagdto1 = DataGenerator.generateMappingDto(tagdto.getName(), "NOT-THERE", "B-TAGGT", "test");
+        final GlobalTagMapDto maptagdto1 = DataGenerator.generateMappingDto(tagdto.getName(),
+                "NOT-THERE", "B-TAGGT", "test");
         log.info("Store global tag map : {} ", maptagdto1);
         final ResponseEntity<String> respmaptag1 = this.testRestTemplate
                 .postForEntity("/crestapi/globaltagmaps", maptagdto1, String.class);
@@ -268,7 +289,7 @@ public class TestCrestGlobalTag {
         final ResponseEntity<String> respmaptags = this.testRestTemplate.exchange(
                 "/crestapi/globaltagmaps/" + dto.getName(), HttpMethod.GET, null, String.class);
         {
-            log.info("Retrieved associated tags for global tag {}",dto.getName());
+            log.info("Retrieved associated tags for global tag {}", dto.getName());
             final String responseBody = respmaptags.getBody();
             assertThat(respmaptags.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagMapSetDto ok;
@@ -278,8 +299,8 @@ public class TestCrestGlobalTag {
         }
 
         // Retrieve global tag maps for not existing gtag
-        final ResponseEntity<String> respmaptagsnull = this.testRestTemplate.exchange(
-                "/crestapi/globaltagmaps/NOT-THERE", HttpMethod.GET, null, String.class);
+        final ResponseEntity<String> respmaptagsnull = this.testRestTemplate
+                .exchange("/crestapi/globaltagmaps/NOT-THERE", HttpMethod.GET, null, String.class);
         assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
         // Retrieve global tag maps from tagname using backtrace
@@ -287,9 +308,10 @@ public class TestCrestGlobalTag {
         headers.add("X-Crest-MapMode", "BackTrace");
         final HttpEntity<?> entity = new HttpEntity<>(headers);
         final ResponseEntity<String> respmapbktags = this.testRestTemplate.exchange(
-                "/crestapi/globaltagmaps/" + tagdto.getName(), HttpMethod.GET, entity, String.class);
+                "/crestapi/globaltagmaps/" + tagdto.getName(), HttpMethod.GET, entity,
+                String.class);
         {
-            log.info("Retrieved associated tags for global tag {}",tagdto.getName());
+            log.info("Retrieved associated tags for global tag {}", tagdto.getName());
             final String responseBody = respmapbktags.getBody();
             assertThat(respmapbktags.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagMapSetDto ok;
@@ -300,5 +322,4 @@ public class TestCrestGlobalTag {
 
     }
 
-    
 }

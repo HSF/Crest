@@ -22,6 +22,7 @@ import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
@@ -155,6 +156,9 @@ public class DirectoryService {
         }
         catch (final CdbServiceException e) {
             log.error("Cannot dump tag {} in path {} : {}", tagname, path, e.getMessage());
+        }
+        catch (final NotExistsPojoException e) {
+            log.error("Cannot find payload  : {}", e.getMessage());
         }
         return null;
     }
