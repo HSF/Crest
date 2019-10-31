@@ -98,7 +98,7 @@ webui:
     - docker info
     - docker build --tag=$WEB_CONTAINER_IMAGE ./web-ui/crest-ui/
   only:
-  - svom-dc1
+  - svom-dc0
 
 registry-push:
   stage: release
@@ -108,7 +108,7 @@ registry-push:
   script:
     - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
     - docker push $CONTAINER_IMAGE
-    - docker push $WEB_CONTAINER_IMAGE
+##    - docker push $WEB_CONTAINER_IMAGE
   only:
   - svom-dc1
 
