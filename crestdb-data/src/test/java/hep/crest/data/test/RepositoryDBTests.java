@@ -38,6 +38,7 @@ import hep.crest.data.repositories.IovGroupsImpl;
 import hep.crest.data.repositories.IovRepository;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataDBImpl;
+import hep.crest.data.repositories.PayloadDataGeneral;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.repositories.TagRepository;
@@ -79,7 +80,7 @@ public class RepositoryDBTests {
         final PayloadDataBaseCustom repobean = new PayloadDataDBImpl(mainDataSource);
         final PayloadHandler handler = new PayloadHandler();
         handler.setDs(mainDataSource);
-        repobean.setPayloadHandler(handler);
+        ((PayloadDataGeneral)repobean).setPayloadHandler(handler);
 
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhash1", "mydata", "mystreamer",
                 "test");

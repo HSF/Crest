@@ -26,21 +26,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 
-import javax.persistence.Table;
 import javax.sql.DataSource;
 
 import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
 import hep.crest.swagger.model.PayloadDto;
@@ -51,7 +47,7 @@ import hep.crest.swagger.model.PayloadDto;
  * @author formica
  *
  */
-public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
+public class PayloadDataPostgresImpl extends PayloadDataGeneral implements PayloadDataBaseCustom {
 
     /**
      * Logger.
@@ -59,71 +55,16 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * Datasource.
+     * The null long.
      */
-    private final DataSource ds;
-
-    /**
-     * A null long.
-     */
-    private static Long long1 = null;
-
-    /**
-     * The upload directory for files.
-     */
-    @Value("${crest.upload.dir:/tmp}")
-    private String serverUploadLocationFolder;
-
-    /**
-     * Default table name.
-     */
-    private String defaultTablename = null;
+    private static final Long LONGNULL = null;
 
     /**
      * @param ds
      *            the DataSource
      */
     public PayloadDataPostgresImpl(DataSource ds) {
-        super();
-        this.ds = ds;
-    }
-
-    /**
-     * @param defaultTablename
-     *            the String
-     * @return
-     */
-    public void setDefaultTablename(String defaultTablename) {
-        if (this.defaultTablename == null) {
-            this.defaultTablename = defaultTablename;
-        }
-    }
-
-    /**
-     * @return String
-     */
-    protected String tablename() {
-        final Table ann = Payload.class.getAnnotation(Table.class);
-        String tablename = ann.name();
-        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
-        }
-        else if (this.defaultTablename != null) {
-            tablename = this.defaultTablename + "." + tablename;
-        }
-        return tablename;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.crest.data.repositories.PayloadDataBaseCustom#setPayloadHandler(hep.crest
-     * .data.handlers.PayloadHandler)
-     */
-    @Override
-    public void setPayloadHandler(PayloadHandler payloadHandler) {
-        log.warn("Not used in this implementation...");
+        super(ds);
     }
 
     /*
@@ -134,7 +75,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
     @Override
     public Payload find(String id) {
         log.info("Find payload {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindQuery(tablename);
@@ -167,7 +108,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
     @Transactional
     public Payload findMetaInfo(String id) {
         log.info("Find payload meta data only for {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindMetaQuery(tablename);
@@ -194,7 +135,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
     @Override
     public Payload findData(String id) {
         log.info("Find payload data only for {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindDataHashQuery(tablename);
@@ -220,7 +161,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         log.info("Read Payload data with hash {} using JDBCTEMPLATE", id);
         ResultSet rs = null;
         LargeObject obj = null;
-        try (Connection conn = ds.getConnection();
+        try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
             final LargeObjectManager lobj = conn.unwrap(org.postgresql.PGConnection.class)
@@ -311,7 +252,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         catch (SQLException | IOException e) {
             log.error("Exception in getting large object id: {}", e.getMessage());
         }
-        return long1;
+        return LONGNULL;
     }
 
     /**
@@ -335,7 +276,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         final InputStream is = new ByteArrayInputStream(entity.getData());
         final InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
 
-        try (Connection conn = ds.getConnection();
+        try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
             final long oid = getLargeObjectId(conn, is, entity);
@@ -410,7 +351,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         entity.setInsertionTime(calendar.getTime());
 
         final InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
-        try (Connection conn = ds.getConnection();
+        try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
             final long oid = getLargeObjectId(conn, is, entity);
@@ -448,13 +389,12 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         final String sql = PayloadRequests.getInsertMetaQuery(tablename);
 
         log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
-        try (Connection conn = ds.getConnection();
+        try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             ps.setString(1, metainfoentity.getHash());
             ps.setString(2, metainfoentity.getObjectType());
             ps.setString(3, metainfoentity.getVersion());
             ps.setBytes(4, metainfoentity.getStreamerInfo());
-            // FIXME: be careful to the insertion time...is the one provided correct ?
             ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
             ps.setInt(6, metainfoentity.getSize());
             log.debug("Dump preparedstatement {}", ps);
@@ -490,7 +430,7 @@ public class PayloadDataPostgresImpl implements PayloadDataBaseCustom {
         final String tablename = this.tablename();
         final String sql = PayloadRequests.getDeleteQuery(tablename);
         log.info("Remove payload with hash {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         jdbcTemplate.update(sql, id);
         log.debug("Entity removal done...");
     }

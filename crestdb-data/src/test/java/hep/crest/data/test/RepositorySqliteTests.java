@@ -25,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
+import hep.crest.data.repositories.PayloadDataGeneral;
 import hep.crest.data.repositories.PayloadDataSQLITEImpl;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.PayloadDto;
@@ -47,7 +48,7 @@ public class RepositorySqliteTests {
         
         final PayloadDataBaseCustom repobean = new PayloadDataSQLITEImpl(mainDataSource);
         final PayloadHandler handler = new PayloadHandler();
-        repobean.setPayloadHandler(handler);
+        ((PayloadDataGeneral)repobean).setPayloadHandler(handler);
 
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhashsqlite1", "mydata", "mystreamer",
                 "test");

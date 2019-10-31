@@ -22,21 +22,16 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import javax.persistence.Table;
 import javax.sql.DataSource;
 import javax.sql.rowset.serial.SerialBlob;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
 import hep.crest.swagger.model.PayloadDto;
@@ -47,7 +42,7 @@ import hep.crest.swagger.model.PayloadDto;
  * @author formica
  *
  */
-public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
+public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements PayloadDataBaseCustom {
 
     /**
      * Logger.
@@ -55,72 +50,11 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * Datasource.
-     */
-    private final DataSource ds;
-
-    /**
-     * Handler for payload.
-     */
-    @Autowired
-    private PayloadHandler payloadHandler;
-
-    /**
-     * The upload directory for files.
-     */
-    @Value("${crest.upload.dir:/tmp}")
-    private String serverUploadLocationFolder;
-
-    /**
-     * Default table name.
-     */
-    private String defaultTablename = null;
-
-    /**
      * @param ds
      *            the DataSource
      */
     public PayloadDataSQLITEImpl(DataSource ds) {
-        super();
-        this.ds = ds;
-    }
-
-    /**
-     * @param defaultTablename
-     *            the String
-     * @return
-     */
-    public void setDefaultTablename(String defaultTablename) {
-        if (this.defaultTablename == null) {
-            this.defaultTablename = defaultTablename;
-        }
-    }
-
-    /**
-     * @return String
-     */
-    protected String tablename() {
-        final Table ann = Payload.class.getAnnotation(Table.class);
-        String tablename = ann.name();
-        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
-        }
-        else if (this.defaultTablename != null) {
-            tablename = this.defaultTablename + "." + tablename;
-        }
-        return tablename;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.crest.data.repositories.PayloadDataBaseCustom#setPayloadHandler(hep.crest
-     * .data.handlers.PayloadHandler)
-     */
-    @Override
-    public void setPayloadHandler(PayloadHandler payloadHandler) {
-        this.payloadHandler = payloadHandler;
+        super(ds);
     }
 
     /*
@@ -132,7 +66,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
     @Transactional
     public Payload find(String id) {
         log.info("Find payload {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindQuery(tablename);
@@ -218,7 +152,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 
         log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
 
-        try (PreparedStatement ps = ds.getConnection().prepareStatement(sql);) {
+        try (PreparedStatement ps = super.getDs().getConnection().prepareStatement(sql);) {
             ps.setString(1, entity.getHash());
             ps.setString(2, entity.getObjectType());
             ps.setString(3, entity.getVersion());
@@ -251,13 +185,13 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
-        final byte[] blob = payloadHandler.getBytesFromInputStream(is);
+        final byte[] blob = super.getPayloadHandler().getBytesFromInputStream(is);
         if (blob != null) {
             entity.setSize(blob.length);
             log.debug("Read data blob of length {} and streamer info {}", blob.length,
                     entity.getStreamerInfo().length);
         }
-        try (PreparedStatement ps = ds.getConnection().prepareStatement(sql);) {
+        try (PreparedStatement ps = super.getDs().getConnection().prepareStatement(sql);) {
 
             ps.setString(1, entity.getHash());
             ps.setString(2, entity.getObjectType());
@@ -287,7 +221,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
 
         final String sql = PayloadRequests.getDeleteQuery(tablename);
         log.info("Remove payload with hash {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         jdbcTemplate.update(sql, id);
         log.info("Entity removal done...");
     }
@@ -303,7 +237,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
     @Transactional
     public Payload findMetaInfo(String id) {
         log.info("Find payload {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindMetaQuery(tablename);
@@ -330,7 +264,7 @@ public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
     @Override
     public Payload findData(String id) {
         log.info("Find payload data only for {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindDataQuery(tablename);
