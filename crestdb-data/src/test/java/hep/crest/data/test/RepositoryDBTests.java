@@ -7,15 +7,21 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +79,20 @@ public class RepositoryDBTests {
     @Qualifier("dataSource") 
     private DataSource mainDataSource;
     
-
+    @Before
+    public void setUp() {
+        final Path bpath = Paths.get("/tmp/cdms");
+        if (!bpath.toFile().exists()) {
+            try {
+                Files.createDirectories(bpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+    
     @Test
     public void testPayload() throws Exception {
         
@@ -129,10 +148,31 @@ public class RepositoryDBTests {
         final PayloadDto pdto = handler.convertToDto(loadedblob1);
         assertThat(pdto).isNotNull();
         assertThat(pdto.getHash()).isEqualTo(loadedblob1.getHash());
+        
+        final Payload loadedblob2 = repobean.find(savedfromblob.getHash());
+        assertThat(loadedblob2.toString().length()).isGreaterThan(0);
+        log.info("loaded payload 2 {}",loadedblob2);
+        final PayloadDto pdtond = handler.convertToDtoNoData(loadedblob2);
+        assertThat(pdtond).isNotNull();
+        assertThat(pdtond.getHash()).isEqualTo(loadedblob1.getHash());
 
         final byte[] parr = handler.readFromFile("/tmp/cdms/payloadatacopy.blob.copy");
         assertThat(parr).isNotNull();
         assertThat(parr.length).isGreaterThan(0);
+
+        final byte[] parr2 = handler.convertToByteArray(saved);
+        assertThat(parr2).isNotNull();
+        assertThat(parr2.length).isGreaterThan(0);
+        
+        final long fsize = handler.lengthOfFile("/tmp/cdms/payloadatacopy.blob.copy");
+        assertThat(fsize).isGreaterThan(0);
+        final Blob bldata = handler.createBlobFromByteArr(parr);
+        assertThat(bldata).isNotNull();
+        final Blob bldatastr = handler.createBlobFromStream(new BufferedInputStream(new FileInputStream(f)));
+        assertThat(bldatastr).isNotNull();
+        
+        final String fhash = handler.saveToFileGetHash(new BufferedInputStream(new FileInputStream(f)), "/tmp/cdms/payloadatacopy.blob.copy2");
+        assertThat(fhash).isNotNull();
     }
     
     @Test
