@@ -9,6 +9,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -17,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -38,6 +40,20 @@ import hep.crest.data.utils.RunIovConverter;
 public class ToolsTests {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Before
+    public void setUp() {
+        final Path bpath = Paths.get("/tmp/cdms");
+        if (!bpath.toFile().exists()) {
+            try {
+                Files.createDirectories(bpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Test
     public void testDirectoryTools() throws Exception {

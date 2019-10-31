@@ -63,11 +63,13 @@ generate_multi_upload_data()
 {
   cat <<EOF
 {
-  "niovs": 2,
+  "filter" : { "tagName" : "$1"},
+  "size": 2,
+  "datatype" : "iovs",
   "format": "PYL",
-  "iovsList":[
-  { "since" : $since1, "payload": "file:///tmp/test-01.txt"},
-  { "since" : $since2, "payload": "file:///tmp/test-02.txt"}
+  "resources":[
+  { "since" : $since1, "payloadHash": "file:///tmp/test-01.txt"},
+  { "since" : $since2, "payloadHash": "file:///tmp/test-02.txt"}
   ]
 }
 EOF
@@ -93,7 +95,7 @@ function multi_upload() {
     echo "another blob 2 is $b" >> /tmp/test-02.txt
     since1=$a
     since2=$b
-    echo $(generate_multi_upload_data)
+    echo $(generate_multi_upload_data $tag)
     resp=`curl --form tag="${tag}" --form endtime=0 --form iovsetupload="$(generate_multi_upload_data)"  --form "files=@/tmp/test-01.txt" --form "files=@/tmp/test-02.txt"  "${host}/${apiname}/payloads/uploadbatch"`
     echo "Post returned : $resp"
     #sleep 1

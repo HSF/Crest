@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Calendar;
 
 import javax.sql.DataSource;
 import javax.sql.rowset.serial.SerialBlob;
@@ -151,24 +152,9 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
+        execute(null, sql, entity);
+        return find(entity.getHash());
 
-        try (PreparedStatement ps = super.getDs().getConnection().prepareStatement(sql);) {
-            ps.setString(1, entity.getHash());
-            ps.setString(2, entity.getObjectType());
-            ps.setString(3, entity.getVersion());
-            ps.setBytes(4, entity.getData());
-            ps.setBytes(5, entity.getStreamerInfo());
-            ps.setDate(6, new java.sql.Date(entity.getInsertionTime().getTime()));
-            ps.setInt(7, entity.getSize());
-
-            log.info("Dump preparedstatement {}", ps);
-            ps.execute();
-            return find(entity.getHash());
-        }
-        catch (final SQLException e) {
-            log.error("Sql exception in saving bytes for payload : {} ", e.getMessage());
-        }
-        return null;
     }
 
     /**
@@ -185,20 +171,43 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
-        final byte[] blob = super.getPayloadHandler().getBytesFromInputStream(is);
-        if (blob != null) {
-            entity.setSize(blob.length);
-            log.debug("Read data blob of length {} and streamer info {}", blob.length,
-                    entity.getStreamerInfo().length);
+        execute(is, sql, entity);
+    }
+
+    /**
+     * @param is
+     *            the InputStream
+     * @param sql
+     *            the String
+     * @param entity
+     *            the PayloadDto
+     * @throws IOException
+     *             If an Exception occurred
+     * @return
+     */
+    protected void execute(InputStream is, String sql, PayloadDto entity) throws IOException {
+
+        final Calendar calendar = Calendar.getInstance();
+        final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
+        entity.setInsertionTime(calendar.getTime());
+
+        if (is != null) {
+            final byte[] blob = super.getPayloadHandler().getBytesFromInputStream(is);
+            if (blob != null) {
+                entity.setSize(blob.length);
+                entity.setData(blob);
+                log.debug("Read data blob of length {} and streamer info {}", blob.length,
+                        entity.getStreamerInfo().length);
+            }
         }
         try (PreparedStatement ps = super.getDs().getConnection().prepareStatement(sql);) {
 
             ps.setString(1, entity.getHash());
             ps.setString(2, entity.getObjectType());
             ps.setString(3, entity.getVersion());
-            ps.setBytes(4, blob);
+            ps.setBytes(4, entity.getData());
             ps.setBytes(5, entity.getStreamerInfo());
-            ps.setDate(6, new java.sql.Date(entity.getInsertionTime().getTime()));
+            ps.setDate(6, inserttime);
             ps.setInt(7, entity.getSize());
             log.debug("Dump preparedstatement {}", ps);
             ps.execute();

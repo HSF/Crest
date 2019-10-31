@@ -184,9 +184,39 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
+        execute(null, sql, entity);
+        return find(entity.getHash());
+
+    }
+
+    /**
+     * @param is
+     *            the InputStream
+     * @param sql
+     *            the String
+     * @param entity
+     *            the PayloadDto
+     * @throws CdbServiceException
+     *             If an Exception occurred
+     * @return
+     */
+    protected void execute(InputStream is, String sql, PayloadDto entity)
+            throws CdbServiceException {
+
         final Calendar calendar = Calendar.getInstance();
         final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
         entity.setInsertionTime(calendar.getTime());
+
+        if (is != null) {
+            final byte[] blob = super.getPayloadHandler().getBytesFromInputStream(is);
+            if (blob != null) {
+                entity.setSize(blob.length);
+                entity.setData(blob);
+                log.debug("Read data blob of length {} and streamer info {}", blob.length,
+                        entity.getStreamerInfo().length);
+            }
+        }
+
         try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             ps.setString(1, entity.getHash());
@@ -202,10 +232,9 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
             ps.execute();
             log.debug("Search for stored payload as a verification, use hash {} ",
                     entity.getHash());
-            return find(entity.getHash());
         }
         catch (final Exception e) {
-            log.error("Generic Exception when saving payload as bytes: {} ", e.getMessage());
+            log.error("Generic Exception when saving payload: {} ", e.getMessage());
             throw new CdbServiceException("Error " + e.getMessage());
         }
     }
@@ -251,34 +280,7 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
-        final byte[] blob = super.getPayloadHandler().getBytesFromInputStream(is);
-        entity.setSize(blob.length);
-        log.debug("Streamer info {}", entity.getStreamerInfo());
-        log.debug("Read data blob of length {} and streamer info {}", blob.length,
-                entity.getStreamerInfo().length);
-        final Calendar calendar = Calendar.getInstance();
-        final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
-        entity.setInsertionTime(calendar.getTime());
-        try (Connection conn = super.getDs().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);) {
-            ps.setString(1, entity.getHash());
-            ps.setString(2, entity.getObjectType());
-            ps.setString(3, entity.getVersion());
-            ps.setBytes(4, blob);
-            ps.setBytes(5, entity.getStreamerInfo());
-            ps.setDate(6, inserttime);
-            ps.setInt(7, entity.getSize());
-            log.debug("Dump preparedstatement {}", ps);
-            ps.execute();
-        }
-        catch (final Exception e) {
-            log.error("Exception during payload dto insertion: {}", e.getMessage());
-            throw new CdbServiceException(
-                    "Exception occurred during payload insertion from stream.." + e.getMessage());
-        }
-        finally {
-            log.debug("Nothing to do here ?");
-        }
+        execute(is, sql, entity);
     }
 
     /*

@@ -269,42 +269,13 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
-        final Calendar calendar = Calendar.getInstance();
-        final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
-        entity.setInsertionTime(calendar.getTime());
 
         final InputStream is = new ByteArrayInputStream(entity.getData());
         final InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
 
-        try (Connection conn = super.getDs().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);) {
-            conn.setAutoCommit(false);
-            final long oid = getLargeObjectId(conn, is, entity);
-            final long sioid = getLargeObjectId(conn, sis, null);
-
-            ps.setString(1, entity.getHash());
-            ps.setString(2, entity.getObjectType());
-            ps.setString(3, entity.getVersion());
-            ps.setLong(4, oid);
-            ps.setLong(5, sioid);
-            ps.setDate(6, inserttime);
-            ps.setInt(7, entity.getSize());
-            log.info("Dump preparedstatement {} using sql {} and args {} {} {} {}", ps, sql,
-                    entity.getHash(), entity.getObjectType(), entity.getVersion(),
-                    entity.getInsertionTime());
-            ps.execute();
-            conn.commit();
-            log.debug("Search for stored payload as a verification, use hash {}", entity.getHash());
-            return find(entity.getHash());
-        }
-        catch (final SQLException e) {
-            log.error("Exception : {}", e.getMessage());
-        }
-        finally {
-            is.close();
-            sis.close();
-        }
-        return null;
+        execute(is, sis, sql, entity);
+        log.debug("Search for stored payload as a verification, use hash {}", entity.getHash());
+        return find(entity.getHash());
     }
 
     /*
@@ -343,14 +314,31 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
-
         log.debug("Streamer info {} ", entity.getStreamerInfo());
+        final InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
 
+        execute(is, sis, sql, entity);
+    }
+
+    /**
+     * @param is
+     *            the InputStream
+     * @param sis
+     *            the InputStream
+     * @param sql
+     *            the String
+     * @param entity
+     *            the PayloadDto
+     * @throws IOException
+     *             If an Exception occurred
+     * @return
+     */
+    protected void execute(InputStream is, InputStream sis, String sql, PayloadDto entity)
+            throws IOException {
         final Calendar calendar = Calendar.getInstance();
         final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
         entity.setInsertionTime(calendar.getTime());
 
-        final InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
         try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
