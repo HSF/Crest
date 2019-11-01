@@ -293,8 +293,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             final IovSetDto dto = iovsetupload.getValueAs(IovSetDto.class);
             log.info("Batch insertion of {} iovs using file formatted in {}", dto.getSize(),
                     dto.getFormat());
-            final List<IovDto> iovlist = dto.getResources();
-            final List<IovDto> savediovlist = new ArrayList<>();
+            
             if (xCrestPayloadFormat == null) {
                 xCrestPayloadFormat = "FILE";
             }
@@ -306,28 +305,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
             }
             if (xCrestPayloadFormat.equals("FILE")) {
-                for (final IovDto piovDto : iovlist) {
-                    final Map<String, Object> retmap = getDocumentStream(piovDto, filesbodyparts);
-                    final PayloadDto pdto = new PayloadDto().objectType(dto.getFormat())
-                            .streamerInfo(dto.getFormat().getBytes()).version("none");
-                    final String filename = (String) retmap.get("file");
-                    log.debug("Use input filename for hash generation and later storage...{}",
-                            filename);
-                    final String hash = getHash((InputStream) retmap.get("stream"), filename);
-                    pdto.hash(hash);
-                    final IovDto iovDto = new IovDto().payloadHash(hash).since(piovDto.getSince())
-                            .tagName(tag);
-                    try {
-                        saveIovAndPayload(iovDto, pdto, filename);
-                        savediovlist.add(iovDto);
-                    }
-                    catch (final CdbServiceException e1) {
-                        log.error("Cannot insert iov {}", piovDto);
-                    }
-                }
-                dto.size((long) savediovlist.size());
-                dto.resources(savediovlist);
-                return Response.created(info.getRequestUri()).entity(dto).build();
+                final IovSetDto outdto = storeIovs(dto, tag, filesbodyparts);
+                return Response.created(info.getRequestUri()).entity(outdto).build();
             }
             else {
                 throw new CdbServiceException("Wrong header parameter " + xCrestPayloadFormat);
@@ -363,32 +342,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             final IovSetDto dto = iovsetupload.getValueAs(IovSetDto.class);
             log.info("Batch insertion of {} iovs using file formatted in {}", dto.getSize(),
                     dto.getFormat());
-            final List<IovDto> iovlist = dto.getResources();
-            final List<IovDto> savediovlist = new ArrayList<>();
             if (xCrestPayloadFormat == null) {
                 xCrestPayloadFormat = "JSON";
             }
             if (xCrestPayloadFormat.equalsIgnoreCase("JSON")) {
-                for (final IovDto piovDto : iovlist) {
-                    final PayloadDto pdto = new PayloadDto().objectType(dto.getFormat())
-                            .hash("none").streamerInfo(dto.getFormat().getBytes()).version("none")
-                            .data(piovDto.getPayloadHash().getBytes());
-                    final String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
-                    pdto.hash(hash);
-                    final IovDto iovDto = new IovDto().payloadHash(hash).since(piovDto.getSince())
-                            .tagName(tag);
-                    try {
-                        saveIovAndPayload(iovDto, pdto, null);
-                        savediovlist.add(iovDto);
-                    }
-                    catch (final CdbServiceException e1) {
-                        log.error("Cannot insert iov {}", piovDto);
-                    }
-                }
-                dto.size((long) savediovlist.size());
-                dto.resources(savediovlist);
-                return Response.created(info.getRequestUri()).entity(dto).build();
-
+                final IovSetDto outdto = storeIovs(dto, tag, null);
+                return Response.created(info.getRequestUri()).entity(outdto).build();
             }
             else {
                 throw new CdbServiceException("Wrong header parameter " + xCrestPayloadFormat);
@@ -401,6 +360,48 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
+    }
+    
+    /**
+     * @param dto the IovSetDto
+     * @param tag the String
+     * @param filesbodyparts the List<FormDataBodyPart> 
+     * @throws CdbServiceException If an Exception occurred
+     * @throws IOException If an Exception occurred
+     * @return IovSetDto
+     */
+    protected IovSetDto storeIovs(IovSetDto dto, String tag, List<FormDataBodyPart> filesbodyparts) throws CdbServiceException, IOException {
+        final List<IovDto> iovlist = dto.getResources();
+        final List<IovDto> savediovlist = new ArrayList<>();
+        
+        for (final IovDto piovDto : iovlist) {
+            String filename = null;
+            final PayloadDto pdto = new PayloadDto().objectType(dto.getFormat())
+                    .hash("none").streamerInfo(dto.getFormat().getBytes()).version("none")
+                    .data(piovDto.getPayloadHash().getBytes());
+            if (filesbodyparts == null) {
+                final String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
+                pdto.hash(hash);
+                pdto.data(piovDto.getPayloadHash().getBytes());
+            } else {
+                final Map<String, Object> retmap = getDocumentStream(piovDto, filesbodyparts);
+                filename = (String) retmap.get("file");
+                final String hash = getHash((InputStream) retmap.get("stream"), filename);
+                pdto.hash(hash);
+            }
+            final IovDto iovDto = new IovDto().payloadHash(pdto.getHash()).since(piovDto.getSince())
+                    .tagName(tag);
+            try {
+                saveIovAndPayload(iovDto, pdto, filename);
+                savediovlist.add(iovDto);
+            }
+            catch (final CdbServiceException e1) {
+                log.error("Cannot insert iov {}", piovDto);
+            }
+        }
+        dto.size((long) savediovlist.size());
+        dto.resources(savediovlist);
+        return dto;
     }
 
     /**
@@ -557,33 +558,37 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     protected MediaType getMediaType(String ptype) {
         MediaType media_type = MediaType.APPLICATION_OCTET_STREAM_TYPE;
-
-        if ("PNG".equalsIgnoreCase(ptype)) {
+        final String comp = ptype.toLowerCase();
+        switch (comp) {
+        case "png":
             media_type = new MediaType("image", "png");
-        }
-        else if (ptype.toLowerCase().contains("svg")) {
+            break;
+        case "svg":
             media_type = MediaType.APPLICATION_SVG_XML_TYPE;
-        }
-        else if (ptype.toLowerCase().contains("txt")) {
-            media_type = MediaType.TEXT_PLAIN_TYPE;
-        }
-        else if (ptype.toLowerCase().contains("csv")) {
-            media_type = new MediaType("text", "csv");
-        }
-        else if (ptype.toLowerCase().contains("json")) {
+            break;
+        case "json":
             media_type = MediaType.APPLICATION_JSON_TYPE;
-        }
-        else if (ptype.toLowerCase().contains("xml")) {
+            break;
+        case "xml":
             media_type = MediaType.APPLICATION_XML_TYPE;
-        }
-        else if (ptype.toLowerCase().contains("tgz")) {
+            break;
+        case "csv":
+            media_type = new MediaType("text", "csv");
+            break;
+        case "txt":
+            media_type = MediaType.TEXT_PLAIN_TYPE;
+            break;
+        case "tgz":
             media_type = new MediaType("application", "x-gtar-compressed");
-        }
-        else if (ptype.toLowerCase().contains("gz")) {
+            break;
+        case "gz":
             media_type = new MediaType("application", "gzip");
-        }
-        else if (ptype.toLowerCase().contains("pdf")) {
+            break;
+        case "pdf":
             media_type = new MediaType("application", "pdf");
+            break;
+        default:
+            break;
         }
         return media_type;
     }
@@ -597,32 +602,37 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     protected String getExtension(String ptype) {
         String extension = ".blob";
-        if ("PNG".equalsIgnoreCase(ptype)) {
+        final String comp = ptype.toLowerCase();
+        switch (comp) {
+        case "png":
             extension = "png";
-        }
-        else if (ptype.toLowerCase().contains("svg")) {
+            break;
+        case "svg":
             extension = "svg";
-        }
-        else if (ptype.toLowerCase().contains("txt")) {
-            extension = "txt";
-        }
-        else if (ptype.toLowerCase().contains("csv")) {
-            extension = "csv";
-        }
-        else if (ptype.toLowerCase().contains("json")) {
+            break;
+        case "json":
             extension = "json";
-        }
-        else if (ptype.toLowerCase().contains("xml")) {
+            break;
+        case "xml":
             extension = "xml";
-        }
-        else if (ptype.toLowerCase().contains("tgz")) {
+            break;
+        case "csv":
+            extension = "csv";
+            break;
+        case "txt":
+            extension = "txt";
+            break;
+        case "tgz":
             extension = "tgz";
-        }
-        else if (ptype.toLowerCase().contains("gz")) {
+            break;
+        case "gz":
             extension = "gz";
-        }
-        else if (ptype.toLowerCase().contains("pdf")) {
+            break;
+        case "pdf":
             extension = "pdf";
+            break;
+        default:
+            break;
         }
         return extension;
     }

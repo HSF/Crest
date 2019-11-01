@@ -79,7 +79,7 @@ public class RepositorySqliteTests {
         final Payload loaded = repobean.find("myhashsqlite1");
         assertThat(loaded.toString().length()).isGreaterThan(0);
         
-        DataGenerator.generatePayloadData("/tmp/cdms/payloadatasqlite.blob","none");
+        DataGenerator.generatePayloadData("/tmp/cdms/payloadatasqlite.blob"," for sqlite");
         final File f = new File("/tmp/cdms/payloadatasqlite.blob");
         InputStream ds = new BufferedInputStream(new FileInputStream(f));
         

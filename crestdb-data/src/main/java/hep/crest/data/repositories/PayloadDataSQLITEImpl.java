@@ -19,7 +19,9 @@ package hep.crest.data.repositories;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 
@@ -29,7 +31,6 @@ import javax.sql.rowset.serial.SerialBlob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
@@ -58,77 +59,15 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         super(ds);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hep.crest.data.repositories.PayloadDataBaseCustom#find(java.lang.String)
+    /* (non-Javadoc)
+     * @see hep.crest.data.repositories.PayloadDataGeneral#getBlob(java.sql.ResultSet, java.lang.String)
      */
     @Override
-    @Transactional
-    public Payload find(String id) {
-        log.info("Find payload {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
-        final String tablename = this.tablename();
-
-        final String sql = PayloadRequests.getFindQuery(tablename);
-
-        return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
-            final Payload entity = new Payload();
-            entity.setHash(rs.getString("HASH"));
-            entity.setObjectType(rs.getString("OBJECT_TYPE"));
-            entity.setVersion(rs.getString("VERSION"));
-            entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-            SerialBlob blob = new SerialBlob(rs.getBytes("DATA"));
-            entity.setData(blob);
-            blob = new SerialBlob(rs.getBytes("STREAMER_INFO"));
-            entity.setStreamerInfo(blob);
-            entity.setSize(rs.getInt("DATA_SIZE"));
-
-            return entity;
-        });
-
+    protected Blob getBlob(ResultSet rs, String key) throws SQLException {
+        return new SerialBlob(rs.getBytes(key));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.phycdb.svc.repositories.PayloadDataBaseCustom#save(hep.phycdb.data.pojo.
-     * Payload)
-     */
-    @Override
-    public Payload save(PayloadDto entity) throws CdbServiceException {
-        Payload savedentity = null;
-        try {
-            savedentity = this.saveBlobAsBytes(entity);
-        }
-        catch (final IOException e) {
-            log.error("Error in save paylod dto : {}", e.getMessage());
-        }
-        return savedentity;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.
-     * model.PayloadDto, java.io.InputStream)
-     */
-    @Override
-    @Transactional
-    public Payload save(PayloadDto entity, InputStream is) throws CdbServiceException {
-        Payload savedentity = null;
-        try {
-            this.saveBlobAsStream(entity, is);
-            savedentity = findMetaInfo(entity.getHash());
-        }
-        catch (final IOException e) {
-            log.error("Error in save paylod dto : {}", e.getMessage());
-        }
-        return savedentity;
-    }
-
+ 
     /*
      * (non-Javadoc)
      *
@@ -142,11 +81,12 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
     /**
      * @param entity
      *            the PayloadDto
-     * @throws IOException
+     * @throws CdbServiceException
      *             If an Exception occurred
      * @return Payload
      */
-    protected Payload saveBlobAsBytes(PayloadDto entity) throws IOException {
+    @Override
+    protected Payload saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
 
         final String tablename = this.tablename();
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
@@ -154,7 +94,6 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
         execute(null, sql, entity);
         return find(entity.getHash());
-
     }
 
     /**
@@ -165,7 +104,8 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
      * @throws IOException
      *             If an Exception occurred
      */
-    protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws IOException {
+    @Override
+    protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
@@ -185,7 +125,7 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
      *             If an Exception occurred
      * @return
      */
-    protected void execute(InputStream is, String sql, PayloadDto entity) throws IOException {
+    protected void execute(InputStream is, String sql, PayloadDto entity) {
 
         final Calendar calendar = Calendar.getInstance();
         final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
@@ -215,53 +155,16 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         catch (final SQLException e) {
             log.error("Sql exception when storing payload {}", e.getMessage());
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.crest.data.repositories.PayloadDataBaseCustom#delete(java.lang.String)
-     */
-    @Override
-    @Transactional
-    public void delete(String id) {
-        final String tablename = this.tablename();
-
-        final String sql = PayloadRequests.getDeleteQuery(tablename);
-        log.info("Remove payload with hash {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
-        jdbcTemplate.update(sql, id);
-        log.info("Entity removal done...");
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.crest.data.repositories.PayloadDataBaseCustom#findMetaInfo(java.lang.
-     * String)
-     */
-    @Override
-    @Transactional
-    public Payload findMetaInfo(String id) {
-        log.info("Find payload {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
-        final String tablename = this.tablename();
-
-        final String sql = PayloadRequests.getFindMetaQuery(tablename);
-        return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
-            final Payload entity = new Payload();
-            entity.setHash(rs.getString("HASH"));
-            entity.setObjectType(rs.getString("OBJECT_TYPE"));
-            entity.setVersion(rs.getString("VERSION"));
-            entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-            final SerialBlob blob = new SerialBlob(rs.getBytes("STREAMER_INFO"));
-            entity.setStreamerInfo(blob);
-            entity.setSize(rs.getInt("DATA_SIZE"));
-            return entity;
-        });
-
+        finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            }
+            catch (final IOException e) {
+                log.error("Error in closing streams...potential leak");
+            }
+        }
     }
 
     /*
