@@ -34,17 +34,16 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import hep.crest.data.handlers.CrestLobHandler;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.IovId;
-import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.IovGroupsImpl;
 import hep.crest.data.repositories.IovRepository;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataDBImpl;
-import hep.crest.data.repositories.PayloadDataGeneral;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.repositories.TagRepository;
@@ -97,9 +96,7 @@ public class RepositoryDBTests {
     public void testPayload() throws Exception {
         
         final PayloadDataBaseCustom repobean = new PayloadDataDBImpl(mainDataSource);
-        final PayloadHandler handler = new PayloadHandler();
-        handler.setDs(mainDataSource);
-        ((PayloadDataGeneral)repobean).setPayloadHandler(handler);
+        final CrestLobHandler lobhandler = new CrestLobHandler(mainDataSource);
 
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhash1", "mydata", "mystreamer",
                 "test");
@@ -107,9 +104,9 @@ public class RepositoryDBTests {
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
         }
-        final Payload saved = repobean.save(dto);
+        final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
-        final Payload loaded = repobean.find("myhash1");
+        final PayloadDto loaded = repobean.find("myhash1");
         assertThat(loaded.toString().length()).isGreaterThan(0);
         
         DataGenerator.generatePayloadData("/tmp/cdms/payloadata.blob","none");
@@ -117,20 +114,20 @@ public class RepositoryDBTests {
         InputStream ds = new BufferedInputStream(new FileInputStream(f));
         
         dto.hash("mynewhash1");
-        final Payload savedfromblob = repobean.save(dto,ds);
+        final PayloadDto savedfromblob = repobean.save(dto,ds);
         assertThat(savedfromblob.toString().length()).isGreaterThan(0);
         if (ds != null) {
             ds.close();
         }
-        final Payload loadedblob = repobean.findData(savedfromblob.getHash());
-        assertThat(loadedblob.toString().length()).isGreaterThan(0);
-        repobean.delete(loadedblob.getHash());
+        final InputStream loadedblob = repobean.findData(savedfromblob.getHash());
+        assertThat(loadedblob.available()).isGreaterThan(0);
+        repobean.delete(savedfromblob.getHash());
         
         ds = new BufferedInputStream(new FileInputStream(f));
-        handler.saveStreamToFile(ds, "/tmp/cdms/payloadatacopy.blob");
+        PayloadHandler.saveStreamToFile(ds, "/tmp/cdms/payloadatacopy.blob");
         final File f1 = new File("/tmp/cdms/payloadatacopy.blob");
         final InputStream ds1 = new BufferedInputStream(new FileInputStream(f1));
-        final byte[] barr = handler.getBytesFromInputStream(ds1);
+        final byte[] barr = PayloadHandler.getBytesFromInputStream(ds1);
         assertThat(barr.length).isGreaterThan(0);
         if (ds1 != null) {
             ds1.close();
@@ -138,40 +135,25 @@ public class RepositoryDBTests {
         
         ds = new BufferedInputStream(new FileInputStream(f));
         final OutputStream out = new FileOutputStream(new File("/tmp/cdms/payloadatacopy.blob.copy"));
-        handler.saveToOutStream(ds, out);
-        handler.createBlobFromFile("/tmp/cdms/payloadatacopy.blob.copy");
+        PayloadHandler.saveToOutStream(ds, out);
+        lobhandler.createBlobFromFile("/tmp/cdms/payloadatacopy.blob.copy");
                 
-        final Payload loadedblob1 = repobean.find(savedfromblob.getHash());
-        assertThat(loadedblob1.toString().length()).isGreaterThan(0);
+        final PayloadDto loadedblob1 = repobean.find(savedfromblob.getHash());
+        assertThat(loadedblob1).isNull();
         log.info("loaded payload 1 {}",loadedblob1);
-        
-        final PayloadDto pdto = handler.convertToDto(loadedblob1);
-        assertThat(pdto).isNotNull();
-        assertThat(pdto.getHash()).isEqualTo(loadedblob1.getHash());
-        
-        final Payload loadedblob2 = repobean.find(savedfromblob.getHash());
-        assertThat(loadedblob2.toString().length()).isGreaterThan(0);
-        log.info("loaded payload 2 {}",loadedblob2);
-        final PayloadDto pdtond = handler.convertToDtoNoData(loadedblob2);
-        assertThat(pdtond).isNotNull();
-        assertThat(pdtond.getHash()).isEqualTo(loadedblob1.getHash());
 
-        final byte[] parr = handler.readFromFile("/tmp/cdms/payloadatacopy.blob.copy");
+        final byte[] parr = PayloadHandler.readFromFile("/tmp/cdms/payloadatacopy.blob.copy");
         assertThat(parr).isNotNull();
         assertThat(parr.length).isGreaterThan(0);
-
-        final byte[] parr2 = handler.convertToByteArray(saved);
-        assertThat(parr2).isNotNull();
-        assertThat(parr2.length).isGreaterThan(0);
         
-        final long fsize = handler.lengthOfFile("/tmp/cdms/payloadatacopy.blob.copy");
+        final long fsize = PayloadHandler.lengthOfFile("/tmp/cdms/payloadatacopy.blob.copy");
         assertThat(fsize).isGreaterThan(0);
-        final Blob bldata = handler.createBlobFromByteArr(parr);
+        final Blob bldata = lobhandler.createBlobFromByteArr(parr);
         assertThat(bldata).isNotNull();
-        final Blob bldatastr = handler.createBlobFromStream(new BufferedInputStream(new FileInputStream(f)));
+        final Blob bldatastr = lobhandler.createBlobFromStream(new BufferedInputStream(new FileInputStream(f)));
         assertThat(bldatastr).isNotNull();
         
-        final String fhash = handler.saveToFileGetHash(new BufferedInputStream(new FileInputStream(f)), "/tmp/cdms/payloadatacopy.blob.copy2");
+        final String fhash = PayloadHandler.saveToFileGetHash(new BufferedInputStream(new FileInputStream(f)), "/tmp/cdms/payloadatacopy.blob.copy2");
         assertThat(fhash).isNotNull();
     }
     
@@ -187,9 +169,9 @@ public class RepositoryDBTests {
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
         }
-        final Payload saved = repobean.save(dto);
+        final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
-        final Payload loaded = repobean.find("myhash2");
+        final PayloadDto loaded = repobean.find("myhash2");
       
         
         final Tag mtag = DataGenerator.generateTag("A-TEST-01", "test");

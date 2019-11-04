@@ -393,7 +393,8 @@ public class IovService {
                 // Update the tag modification time
                 final Tag updtag = tagRepository.save(t);
                 entity.setTag(updtag);
-                entity.getId().setTagName(tagname);
+                entity.getId().setTagName(updtag.getName());
+                log.debug("Storing iov entity {}", entity);
                 final Iov saved = iovRepository.save(entity);
                 log.debug("Saved entity: {}", saved);
                 final IovDto dtoentity = mapper.map(saved, IovDto.class);

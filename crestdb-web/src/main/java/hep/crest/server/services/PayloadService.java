@@ -3,7 +3,6 @@
  */
 package hep.crest.server.services;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import org.slf4j.Logger;
@@ -14,8 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.handlers.PayloadHandler;
-import hep.crest.data.pojo.Payload;
+import hep.crest.data.handlers.CrestLobHandler;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.PayloadDto;
@@ -43,7 +41,7 @@ public class PayloadService {
      * Handler.
      */
     @Autowired
-    private PayloadHandler payloadHandler;
+    private CrestLobHandler lobHandler;
 
     /**
      * @param hash
@@ -56,11 +54,11 @@ public class PayloadService {
      */
     @Transactional
     public PayloadDto getPayload(String hash) throws CdbServiceException, NotExistsPojoException {
-        final Payload pyld = payloaddataRepository.find(hash);
+        final PayloadDto pyld = payloaddataRepository.find(hash);
         if (pyld == null) {
             throw new NotExistsPojoException("Cannot find payload dto for hash " + hash);
         }
-        return payloadHandler.convertToDto(pyld);
+        return pyld;
     }
 
     /**
@@ -75,11 +73,11 @@ public class PayloadService {
     @Transactional
     public PayloadDto getPayloadMetaInfo(String hash)
             throws CdbServiceException, NotExistsPojoException {
-        final Payload pyld = payloaddataRepository.findMetaInfo(hash);
+        final PayloadDto pyld = payloaddataRepository.findMetaInfo(hash);
         if (pyld == null) {
             throw new NotExistsPojoException("Cannot find payload meta data for hash " + hash);
         }
-        return payloadHandler.convertToDtoNoData(pyld);
+        return pyld;
     }
 
     /**
@@ -94,13 +92,11 @@ public class PayloadService {
     @Transactional
     public InputStream getPayloadData(String hash)
             throws CdbServiceException, NotExistsPojoException {
-        final Payload pyld = payloaddataRepository.findData(hash);
-        if (pyld == null) {
+        final InputStream is = payloaddataRepository.findData(hash);
+        if (is == null) {
             throw new NotExistsPojoException("Cannot find payload data for hash " + hash);
         }
-        final byte[] bindata = payloadHandler.convertToByteArray(pyld);
-        log.debug("Converted pojo in byte array of length {}", bindata.length);
-        return new ByteArrayInputStream(bindata);
+        return is;
     }
 
     /**
@@ -113,13 +109,13 @@ public class PayloadService {
     @Transactional
     public PayloadDto insertPayload(PayloadDto dto) throws CdbServiceException {
         try {
-            log.debug("Save payload {}", dto);
+            log.debug("Save payload dto {}", dto);
             if (dto.getSize() == null) {
                 dto.setSize(dto.getData().length);
             }
-            final Payload saved = payloaddataRepository.save(dto);
+            final PayloadDto saved = payloaddataRepository.save(dto);
             log.debug("Saved entity: {}", saved);
-            return payloadHandler.convertToDtoNoData(saved);
+            return saved;
         }
         catch (final Exception e) {
             log.error("Exception in storing payload {}", dto);
@@ -141,9 +137,9 @@ public class PayloadService {
             throws CdbServiceException {
         try {
             log.debug("Save payload {} creating blob from inputstream...", dto);
-            final Payload saved = payloaddataRepository.save(dto, is);
+            final PayloadDto saved = payloaddataRepository.save(dto, is);
             log.debug("Saved entity: {}", saved);
-            return payloadHandler.convertToDtoNoData(saved);
+            return saved;
         }
         catch (final Exception e) {
             log.debug("Exception in storing payload {}", dto);

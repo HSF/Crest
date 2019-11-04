@@ -1,7 +1,6 @@
 package hep.crest.data.repositories;
 
 import java.io.InputStream;
-import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -10,14 +9,12 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
 import hep.crest.swagger.model.PayloadDto;
@@ -38,11 +35,6 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      * The Data Source.
      */
     private final DataSource ds;
-    /**
-     * Handler for payload.
-     */
-    @Autowired
-    private PayloadHandler payloadHandler;
     /**
      * The upload directory for files.
      */
@@ -89,15 +81,6 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
     }
 
     /**
-     * @param payloadHandler
-     *            the PayloadHandler
-     * @return
-     */
-    public void setPayloadHandler(PayloadHandler payloadHandler) {
-        this.payloadHandler = payloadHandler;
-    }
-
-    /**
      * @return DataSource
      */
     protected DataSource getDs() {
@@ -119,13 +102,6 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
         this.serverUploadLocationFolder = serverUploadLocationFolder;
     }
 
-    /**
-     * @return the payloadHandler
-     */
-    protected PayloadHandler getPayloadHandler() {
-        return payloadHandler;
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -134,8 +110,8 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      * Payload)
      */
     @Override
-    public Payload save(PayloadDto entity) throws CdbServiceException {
-        Payload savedentity = null;
+    public PayloadDto save(PayloadDto entity) throws CdbServiceException {
+        PayloadDto savedentity = null;
         try {
             savedentity = this.saveBlobAsBytes(entity);
         }
@@ -153,20 +129,10 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      * model.PayloadDto, java.io.InputStream)
      */
     @Override
-    @Transactional
-    public Payload save(PayloadDto entity, InputStream is) throws CdbServiceException {
-        Payload savedentity = null;
+    public PayloadDto save(PayloadDto entity, InputStream is) throws CdbServiceException {
+        PayloadDto savedentity = null;
         try {
-            log.info("Look if hash exists...{}", entity.getHash());
-            savedentity = findMetaInfo(entity.getHash());
-            if (savedentity != null) {
-                log.warn("The hash {} already exists...return the existing entity...",
-                        entity.getHash());
-                return savedentity;
-            }
-            log.info("Hash was not found, we can insert the new one...{}", entity.getHash());
-            this.saveBlobAsStream(entity, is);
-            savedentity = findMetaInfo(entity.getHash());
+            savedentity = this.saveBlobAsStream(entity, is);
         }
         catch (final CdbServiceException e) {
             log.error("Exception during payload dto insertion: {}", e.getMessage());
@@ -197,7 +163,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      */
     @Override
     @Transactional
-    public Payload find(String id) {
+    public PayloadDto find(String id) {
         log.info("Find payload {} using JDBCTEMPLATE", id);
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
@@ -210,7 +176,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
             // Temporarely, try to create a postgresql implementation of this class.
     
             return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
-                final Payload entity = new Payload();
+                final PayloadDto entity = new PayloadDto();
                 entity.setHash(rs.getString("HASH"));
                 entity.setObjectType(rs.getString("OBJECT_TYPE"));
                 entity.setVersion(rs.getString("VERSION"));
@@ -237,7 +203,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      */
     @Override
     @Transactional
-    public Payload findMetaInfo(String id) {
+    public PayloadDto findMetaInfo(String id) {
         log.info("Find payload meta info {} using JDBCTEMPLATE", id);
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
@@ -245,7 +211,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
             final String sql = PayloadRequests.getFindMetaQuery(tablename);
 
             return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
-                final Payload entity = new Payload();
+                final PayloadDto entity = new PayloadDto();
                 entity.setHash(rs.getString("HASH"));
                 entity.setObjectType(rs.getString("OBJECT_TYPE"));
                 entity.setVersion(rs.getString("VERSION"));
@@ -267,9 +233,9 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      * @param rs the ResultSet
      * @param key the String
      * @throws SQLException If an Exception occurred
-     * @return Blob
+     * @return byte[]
      */
-    protected abstract Blob getBlob(ResultSet rs, String key) throws SQLException;
+    protected abstract byte[] getBlob(ResultSet rs, String key) throws SQLException;
     
     /**
      * @param entity
@@ -278,9 +244,9 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      *            the InputStream
      * @throws CdbServiceException
      *             If an Exception occurred
-     * @return
+     * @return PayloadDto
      */
-    protected abstract void saveBlobAsStream(PayloadDto entity, InputStream is)
+    protected abstract PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is)
             throws CdbServiceException;
 
     /**
@@ -288,7 +254,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      *            the PayloadDto
      * @throws CdbServiceException
      *             If an Exception occurred
-     * @return Payload
+     * @return PayloadDto
      */
-    protected abstract Payload saveBlobAsBytes(PayloadDto entity) throws CdbServiceException;
+    protected abstract PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException;
 }

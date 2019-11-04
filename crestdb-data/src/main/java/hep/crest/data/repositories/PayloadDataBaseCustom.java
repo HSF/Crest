@@ -37,14 +37,14 @@ public interface PayloadDataBaseCustom {
      *            the String
      * @return Payload
      */
-    Payload find(String id);
+    PayloadDto find(String id);
 
     /**
      * @param id
      *            the String
      * @return Payload
      */
-    Payload findData(String id);
+    InputStream findData(String id);
 
     /**
      * The method does not access blob data.
@@ -53,7 +53,7 @@ public interface PayloadDataBaseCustom {
      *            the String
      * @return The payload or null.
      */
-    Payload findMetaInfo(String id);
+    PayloadDto findMetaInfo(String id);
 
     /**
      * @param entity
@@ -62,7 +62,7 @@ public interface PayloadDataBaseCustom {
      * @throws CdbServiceException
      *             It should in reality not throw any exception
      */
-    Payload save(PayloadDto entity) throws CdbServiceException;
+    PayloadDto save(PayloadDto entity) throws CdbServiceException;
 
     /**
      * @param entity
@@ -73,7 +73,7 @@ public interface PayloadDataBaseCustom {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    Payload save(PayloadDto entity, InputStream is) throws CdbServiceException;
+    PayloadDto save(PayloadDto entity, InputStream is) throws CdbServiceException;
 
     /**
      * @throws IOException

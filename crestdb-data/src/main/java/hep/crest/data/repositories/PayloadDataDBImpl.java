@@ -19,7 +19,6 @@ package hep.crest.data.repositories;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
 import hep.crest.swagger.model.PayloadDto;
@@ -65,8 +65,8 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
      * @see hep.crest.data.repositories.PayloadDataGeneral#getBlob(java.sql.ResultSet, java.lang.String)
      */
     @Override
-    protected Blob getBlob(ResultSet rs, String key) throws SQLException {
-        return rs.getBlob(key);
+    protected byte[] getBlob(ResultSet rs, String key) throws SQLException {
+        return rs.getBytes(key);
     }
 
     /*
@@ -77,17 +77,15 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
      */
     @Override
     @Transactional
-    public Payload findData(String id) {
+    public InputStream findData(String id) {
         log.info("Find payload data {} using JDBCTEMPLATE", id);
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
             final String tablename = this.tablename();
 
-            final String sql = "select DATA from " + tablename + " where HASH=?";
+            final String sql = PayloadRequests.getFindDataQuery(tablename);
             return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
-                final Payload entity = new Payload();
-                entity.setData(rs.getBlob("DATA"));
-                return entity;
+                return rs.getBlob("DATA").getBinaryStream();
             });
         }
         catch (final Exception e) {
@@ -96,22 +94,15 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
         }
     }
 
-    /**
-     * @param entity
-     *            the PayloadDto
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     * @return Payload
-     */
     @Override
-    protected Payload saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
+    protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
 
         final String tablename = this.tablename();
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
         execute(null, sql, entity);
-        return find(entity.getHash());
+        return findMetaInfo(entity.getHash());
     }
 
     /**
@@ -132,7 +123,7 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
         entity.setInsertionTime(calendar.getTime());
 
         if (is != null) {
-            final byte[] blob = super.getPayloadHandler().getBytesFromInputStream(is);
+            final byte[] blob = PayloadHandler.getBytesFromInputStream(is);
             if (blob != null) {
                 entity.setSize(blob.length);
                 entity.setData(blob);
@@ -158,7 +149,7 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
                     entity.getHash());
         }
         catch (final SQLException e) {
-            log.error("Sql exception when storing payload {}", e.getMessage());
+            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
         }
         finally {
             try {
@@ -182,13 +173,14 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
      *             If an Exception occurred
      */
     @Override
-    protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
+    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
         log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
         execute(is, sql, entity);
+        return findMetaInfo(entity.getHash());
     }
 
     /*

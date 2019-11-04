@@ -36,7 +36,6 @@ import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.GlobalTagMapId;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.IovId;
-import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.GlobalTagMapRepository;
 import hep.crest.data.repositories.GlobalTagRepository;
@@ -145,7 +144,7 @@ public class QueryDslTests {
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
         }
-        final Payload saved = repobean.save(dto);
+        final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
 
         final Tag mtag = DataGenerator.generateTag("A-TEST-10", "test");

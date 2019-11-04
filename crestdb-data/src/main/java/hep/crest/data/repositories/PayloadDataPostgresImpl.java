@@ -20,7 +20,6 @@ package hep.crest.data.repositories;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,7 +32,6 @@ import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
@@ -71,8 +69,8 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
      * @see hep.crest.data.repositories.PayloadDataGeneral#getBlob(java.sql.ResultSet, java.lang.String)
      */
     @Override
-    protected Blob getBlob(ResultSet rs, String key) throws SQLException {
-        return rs.getBlob(key);
+    protected byte[] getBlob(ResultSet rs, String key) throws SQLException {
+        return rs.getBytes(key);
     }
 
     /*
@@ -82,19 +80,9 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
      * hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
      */
     @Override
-    public Payload findData(String id) {
+    public InputStream findData(String id) {
         log.info("Find payload data only for {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
-        final String tablename = this.tablename();
-
-        final String sql = PayloadRequests.getFindDataHashQuery(tablename);
-
-        return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
-            final Payload entity = new Payload();
-            entity.setHash(rs.getString("HASH"));
-            entity.setData(rs.getBlob("DATA"));
-            return entity;
-        });
+        return readBlobAsStream(id);
     }
 
     /**
@@ -102,7 +90,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
      *            the String
      * @return LargeObject
      */
-    protected LargeObject readBlobAsStream(String id) {
+    protected InputStream readBlobAsStream(String id) {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindDataQuery(tablename);
@@ -110,6 +98,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
         log.info("Read Payload data with hash {} using JDBCTEMPLATE", id);
         ResultSet rs = null;
         LargeObject obj = null;
+        byte[] buf = null;
         try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
@@ -121,7 +110,10 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                 // Open the large object for reading
                 final long oid = rs.getLong(1);
                 obj = lobj.open(oid, LargeObjectManager.READ);
+                buf = new byte[obj.size()];
+                obj.read(buf, 0, obj.size());
             }
+            return new ByteArrayInputStream(buf);
         }
         catch (final SQLException e) {
             log.error("SQL exception occurred in retrieving payload data for {}", id);
@@ -139,7 +131,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                 log.error("Error in closing result set : {}", e.getMessage());
             }
         }
-        return obj;
+        return null;
     }
 
     /**
@@ -184,15 +176,8 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
         return LONGNULL;
     }
 
-    /**
-     * @param entity
-     *            the PayloadDto
-     * @throws IOException
-     *             If an Exception occurred
-     * @return Payload
-     */
     @Override
-    protected Payload saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
+    protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
 
         final String tablename = this.tablename();
 
@@ -205,19 +190,11 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
 
         execute(is, sis, sql, entity);
         log.debug("Search for stored payload as a verification, use hash {}", entity.getHash());
-        return find(entity.getHash());
+        return findMetaInfo(entity.getHash());
     }
 
-    /**
-     * @param entity
-     *            the PayloadDto
-     * @param is
-     *            the InputStream
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     */
     @Override
-    protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
+    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
@@ -227,6 +204,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
         final InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
 
         execute(is, sis, sql, entity);
+        return findMetaInfo(entity.getHash());
     }
 
     /**
@@ -260,12 +238,12 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             ps.setLong(5, sioid);
             ps.setDate(6, inserttime);
             ps.setInt(7, entity.getSize());
-            log.debug("Dump preparedstatement {} ", ps);
+            log.info("Dump preparedstatement {} ", ps);
             ps.executeUpdate();
             conn.commit();
         }
         catch (final SQLException e) {
-            log.error("Exception from SQL during insertion: {}", e.getMessage());
+            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
         }
         finally {
             try {
@@ -283,7 +261,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
      *            the PayloadDto
      * @return Payload
      */
-    protected Payload saveMetaInfo(PayloadDto metainfoentity) {
+    protected PayloadDto saveMetaInfo(PayloadDto metainfoentity) {
 
         final String tablename = this.tablename();
 

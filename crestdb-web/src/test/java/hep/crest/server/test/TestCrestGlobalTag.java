@@ -3,6 +3,7 @@ package hep.crest.server.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.FixMethodOrder;
@@ -100,7 +101,7 @@ public class TestCrestGlobalTag {
     }
 
     @Test
-    public void testB_storeGlobaltags() {
+    public void testB_storeGlobaltags() throws Exception {
         final GlobalTagDto dto = DataGenerator.generateGlobalTagDto("A-GT-01");
         log.info("Store global tag : {} ", dto);
         final ResponseEntity<GlobalTagDto> response = this.testRestTemplate
@@ -113,6 +114,26 @@ public class TestCrestGlobalTag {
                 .postForEntity("/crestapi/globaltags", dto, GlobalTagDto.class);
         log.info("Received response: {}", response1);
         assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
+
+        log.info("Try to update global tag : {} ", dto);
+        final GlobalTagDto body = dto;
+        body.setDescription("Description has changed");
+        body.validity(new BigDecimal(1990L));
+        body.scenario("update");
+        final HttpEntity<GlobalTagDto> updrequest = new HttpEntity<GlobalTagDto>(body);
+
+        final ResponseEntity<String> respupd = this.testRestTemplate
+                .exchange("/crestapi/admin/globaltags/" + dto.getName(), HttpMethod.PUT, updrequest, String.class);
+        {
+            log.info("Update tag {} ", body.getName());
+            final String responseBody = respupd.getBody();
+            assertThat(respupd.getStatusCode()).isEqualTo(HttpStatus.OK);
+            GlobalTagDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, GlobalTagDto.class);
+            assertThat(ok).isNotNull();
+            assertThat(ok.getScenario()).isEqualTo("update");
+        }
 
         dto.name(null);
         log.info("Try to use null name in global tag again : {} ", dto);

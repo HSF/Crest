@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import hep.crest.data.handlers.CrestLobHandler;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovGroupsImpl;
@@ -121,4 +122,15 @@ public class RepositoryConfig {
         }
         return bean;
     }
+
+    /**
+     * @param mainDataSource
+     *            the DataSource
+     * @return LobHandler
+     */
+    @Bean(name = "lobhandler")
+    public CrestLobHandler loadHandler(@Qualifier("dataSource") DataSource mainDataSource) {
+        return new CrestLobHandler(mainDataSource);
+    }
+
 }

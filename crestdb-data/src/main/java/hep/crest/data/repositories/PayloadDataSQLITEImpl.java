@@ -19,7 +19,7 @@ package hep.crest.data.repositories;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,6 +34,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
 import hep.crest.swagger.model.PayloadDto;
@@ -63,8 +64,8 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
      * @see hep.crest.data.repositories.PayloadDataGeneral#getBlob(java.sql.ResultSet, java.lang.String)
      */
     @Override
-    protected Blob getBlob(ResultSet rs, String key) throws SQLException {
-        return new SerialBlob(rs.getBytes(key));
+    protected byte[] getBlob(ResultSet rs, String key) throws SQLException {
+        return rs.getBytes(key);
     }
 
  
@@ -78,40 +79,26 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         return null;
     }
 
-    /**
-     * @param entity
-     *            the PayloadDto
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     * @return Payload
-     */
     @Override
-    protected Payload saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
+    protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
 
         final String tablename = this.tablename();
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
+        log.info("Insert Payload with hash {} using saveBlobAsBytes", entity.getHash());
         execute(null, sql, entity);
-        return find(entity.getHash());
+        return findMetaInfo(entity.getHash());
     }
 
-    /**
-     * @param entity
-     *            the PayloadDto
-     * @param is
-     *            the InputStream
-     * @throws IOException
-     *             If an Exception occurred
-     */
     @Override
-    protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
+    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
+        log.info("Insert Payload with hash {} using saveBlobAsStream", entity.getHash());
         execute(is, sql, entity);
+        return findMetaInfo(entity.getHash());
     }
 
     /**
@@ -132,15 +119,17 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         entity.setInsertionTime(calendar.getTime());
 
         if (is != null) {
-            final byte[] blob = super.getPayloadHandler().getBytesFromInputStream(is);
+            final byte[] blob = PayloadHandler.getBytesFromInputStream(is);
             if (blob != null) {
                 entity.setSize(blob.length);
                 entity.setData(blob);
-                log.debug("Read data blob of length {} and streamer info {}", blob.length,
+                log.debug("Read data blob of length {} and streamer info length {}", blob.length,
                         entity.getStreamerInfo().length);
             }
         }
-        try (PreparedStatement ps = super.getDs().getConnection().prepareStatement(sql);) {
+        try (Connection conn = super.getDs().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);) {
+            log.info("Getting connection {}", conn);
 
             ps.setString(1, entity.getHash());
             ps.setString(2, entity.getObjectType());
@@ -149,11 +138,12 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
             ps.setBytes(5, entity.getStreamerInfo());
             ps.setDate(6, inserttime);
             ps.setInt(7, entity.getSize());
-            log.debug("Dump preparedstatement {}", ps);
+            log.info("Dump preparedstatement {}", ps);
             ps.execute();
+            //conn.commit();
         }
         catch (final SQLException e) {
-            log.error("Sql exception when storing payload {}", e.getMessage());
+            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
         }
         finally {
             try {
@@ -174,17 +164,15 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
      * hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
      */
     @Override
-    public Payload findData(String id) {
-        log.info("Find payload data only for {} using JDBCTEMPLATE", id);
+    public InputStream findData(String id) {
+        log.info("Find payload data for hash {}", id);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getFindDataQuery(tablename);
         return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
-            final Payload entity = new Payload();
             final SerialBlob blob = new SerialBlob(rs.getBytes("DATA"));
-            entity.setData(blob);
-            return entity;
+            return blob.getBinaryStream();
         });
     }
 

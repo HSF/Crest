@@ -146,6 +146,7 @@ public class PojoDtoConverterTests {
         final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("MY-GTAG-01");
         final GlobalTagDto dto2 = DataGenerator.generateGlobalTagDto("MY-GTAG-02");
         final GlobalTagDto dto1bis = DataGenerator.generateGlobalTagDto("MY-GTAG-01");
+        log.info("compare {} with {}",dto1,dto1bis);
         assertThat(dto1.equals(dto1bis)).isTrue();
         final GlobalTagSetDto setdto = new GlobalTagSetDto();
         setdto.datatype("globaltags");

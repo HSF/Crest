@@ -84,11 +84,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Autowired
     private IovService iovService;
-    /**
-     * Handler.
-     */
-    @Autowired
-    private PayloadHandler payloadHandler;
 
     /**
      * Properties.
@@ -419,9 +414,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             throws CdbServiceException, IOException {
         try (BufferedInputStream bis = new BufferedInputStream(fileInputStream)) {
             if (filename.equals("none")) {
-                return payloadHandler.getHashFromStream(bis);
+                return PayloadHandler.getHashFromStream(bis);
             }
-            return payloadHandler.saveToFileGetHash(bis, filename);
+            return PayloadHandler.saveToFileGetHash(bis, filename);
         }
         catch (final PayloadEncodingException e) {
             throw new CdbServiceException("Cannot compute the hash : " + e.getMessage());
