@@ -64,9 +64,13 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
     public PayloadDataPostgresImpl(DataSource ds) {
         super(ds);
     }
-    
-    /* (non-Javadoc)
-     * @see hep.crest.data.repositories.PayloadDataGeneral#getBlob(java.sql.ResultSet, java.lang.String)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * hep.crest.data.repositories.PayloadDataGeneral#getBlob(java.sql.ResultSet,
+     * java.lang.String)
      */
     @Override
     protected byte[] getBlob(ResultSet rs, String key) throws SQLException {
@@ -96,23 +100,23 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
         final String sql = PayloadRequests.getFindDataQuery(tablename);
 
         log.info("Read Payload data with hash {} using JDBCTEMPLATE", id);
-        ResultSet rs = null;
-        LargeObject obj = null;
+        final LargeObject obj = null;
         byte[] buf = null;
+        Long oid = null;
+        ResultSet rs = null;
         try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
-            final LargeObjectManager lobj = conn.unwrap(org.postgresql.PGConnection.class)
-                    .getLargeObjectAPI();
             ps.setString(1, id);
             rs = ps.executeQuery();
             while (rs.next()) {
                 // Open the large object for reading
-                final long oid = rs.getLong(1);
-                obj = lobj.open(oid, LargeObjectManager.READ);
-                buf = new byte[obj.size()];
-                obj.read(buf, 0, obj.size());
+                oid = rs.getLong(1);
             }
+            // Only one row is returned....
+            rs.close();
+            buf = getlargeObj(oid, conn);
+            conn.commit();
             return new ByteArrayInputStream(buf);
         }
         catch (final SQLException e) {
@@ -123,15 +127,45 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                 if (rs != null) {
                     rs.close();
                 }
-                if (obj != null) {
-                    obj.close();
-                }
             }
             catch (SQLException | NullPointerException e) {
                 log.error("Error in closing result set : {}", e.getMessage());
             }
         }
         return null;
+    }
+
+    /**
+     * @param oid
+     *            the Long
+     * @param conn
+     *            the Connection
+     * @throws SQLException
+     *             If an Exception occurred
+     * @return byte[]
+     */
+    protected byte[] getlargeObj(long oid, Connection conn) throws SQLException {
+        final LargeObjectManager lobj = conn.unwrap(org.postgresql.PGConnection.class)
+                .getLargeObjectAPI();
+        LargeObject obj = null;
+        byte[] buf = null;
+        try {
+            obj = lobj.open(oid, LargeObjectManager.READ);
+            buf = new byte[obj.size()];
+            obj.read(buf, 0, obj.size());
+            obj.close();
+        }
+        catch (final SQLException e) {
+            log.error("cannot read large object in postgres {} ", oid);
+        }
+        finally {
+            if (obj != null) {
+                obj.close();
+            }
+            lobj.unlink(oid);
+
+        }
+        return buf;
     }
 
     /**
@@ -148,12 +182,13 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
      */
     protected long getLargeObjectId(Connection conn, InputStream is, PayloadDto entity) {
         // Open the large object for writing
-        LargeObjectManager lobj;
+        LargeObjectManager lobj = null;
+        LargeObject obj = null;
         long oid;
         try {
             lobj = conn.unwrap(org.postgresql.PGConnection.class).getLargeObjectAPI();
             oid = lobj.createLO();
-            final LargeObject obj = lobj.open(oid, LargeObjectManager.WRITE);
+            obj = lobj.open(oid, LargeObjectManager.WRITE);
 
             // Copy the data from the file to the large object
             final byte[] buf = new byte[2048];
@@ -168,10 +203,24 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             }
             // Close the large object
             obj.close();
+            lobj.unlink(oid);
             return oid;
         }
         catch (SQLException | IOException e) {
             log.error("Exception in getting large object id: {}", e.getMessage());
+        }
+        finally {
+            try {
+                if (obj != null) {
+                    obj.close();
+                }
+                if (lobj != null) {
+                    lobj = null;
+                }
+            }
+            catch (SQLException | NullPointerException e) {
+                log.error("Error in closing result set : {}", e.getMessage());
+            }
         }
         return LONGNULL;
     }
@@ -194,7 +243,8 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
     }
 
     @Override
-    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
+    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is)
+            throws CdbServiceException {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
@@ -220,7 +270,8 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
      *             If an Exception occurred
      * @return
      */
-    protected void execute(InputStream is, InputStream sis, String sql, PayloadDto entity) throws CdbServiceException {
+    protected void execute(InputStream is, InputStream sis, String sql, PayloadDto entity)
+            throws CdbServiceException {
         final Calendar calendar = Calendar.getInstance();
         final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
         entity.setInsertionTime(calendar.getTime());
