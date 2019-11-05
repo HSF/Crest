@@ -8,20 +8,20 @@ spring:
  profiles:
   include: default
 spring:
+    profiles: pgsvom
     security:
       strategy: MODE_INHERITABLETHREADLOCAL
-    profiles: pgsvom
     jersey:
-      application-path: /api
+      application-path: ${crest.api.name}
     datasource:
-      url: jdbc:postgresql://${svom.service.postgres}:${svom.db.port}/${svom.service.postgres_db}
+      url: ${crest.db.url}
       driverClassName: org.postgresql.Driver
-      username: ${svom.service.postgres_user}
-      password: ${svom.service.postgres_password}
-#      type: com.zaxxer.hikari.HikariDataSource
+      username: ${crest.db.user}
+      password: ${crest.db.password}
+      type: com.zaxxer.hikari.HikariDataSource
       hikari:
         connection-test-query: SELECT 1
-        maximum-pool-size: 5
+        maximum-pool-size: 20
     jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.PostgreSQL9Dialect
