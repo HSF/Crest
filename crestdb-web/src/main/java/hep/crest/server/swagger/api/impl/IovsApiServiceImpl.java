@@ -170,6 +170,7 @@ public class IovsApiServiceImpl extends IovsApiService {
                 savedList.add(saved);
             }
             final CrestBaseResponse saveddto = new IovSetDto().resources(savedList).filter(filters)
+                    .format("IovSetDto")
                     .size((long) savedList.size()).datatype("iovs");
             return Response.created(info.getRequestUri()).entity(saveddto).build();
 
@@ -237,6 +238,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             final GenericMap filters = new GenericMap();
             filters.put("tagName", tagname);
             final CrestBaseResponse saveddto = new IovSetDto().resources(dtolist).filter(filters)
+                    .format("IovSetDto")
                     .size((long) dtolist.size()).datatype("iovs");
             return Response.ok().entity(saveddto).build();
 
@@ -274,6 +276,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             filters.put("tagName", tagname);
             filters.put("snapshot", snapshot.toString());
             respdto.size(size).datatype("count").filter(filters);
+            respdto.format("IovSetDto");
             return Response.ok().entity(respdto).build();
 
         }
@@ -378,6 +381,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             filters.put("snapshot", snapshot.toString());
             filters.put("groupsize", groupsize.toString());
             respdto.datatype("groups").filter(filters);
+            respdto.format("IovSetDto");
             return Response.ok().entity(respdto).cacheControl(cc).build();
 
         }
@@ -451,6 +455,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             filters.put("since", rsince.toString());
             filters.put("until", runtil.toString());
             respdto.filter(filters);
+            respdto.format("IovSetDto");
             return Response.ok().entity(respdto).cacheControl(cc).build();
 
         }
@@ -486,6 +491,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             filters.put("tagName", tagname);
             filters.put("snapshot", snapshot.toString());
             respdto.datatype("iovs").filter(filters);
+            respdto.format("IovSetDto");
             return Response.ok().entity(respdto).build();
 
         }
@@ -530,6 +536,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             dtolist.add(last);
             final CrestBaseResponse saveddto = new IovSetDto().resources(dtolist).filter(filters)
                     .size(1L).datatype("iovs");
+            saveddto.format("IovSetDto");
             return Response.ok().entity(saveddto).build();
 
         }

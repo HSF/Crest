@@ -3,7 +3,11 @@ package hep.crest.data.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +16,7 @@ import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,6 +89,30 @@ public class QueryDslTests {
     @Autowired
     @Qualifier("dataSource") 
     private DataSource mainDataSource;
+
+    @Before
+    public void setUp() {
+        final Path bpath = Paths.get("/tmp/cdms");
+        if (!bpath.toFile().exists()) {
+            try {
+                Files.createDirectories(bpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        final Path cpath = Paths.get("/tmp/crest-dump");
+        if (!cpath.toFile().exists()) {
+            try {
+                Files.createDirectories(cpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 
 
     @Test

@@ -55,12 +55,10 @@ class IovDto(object):
 
         if tag_name is not None:
             self.tag_name = tag_name
-        if since is not None:
-            self.since = since
+        self.since = since
         if insertion_time is not None:
             self.insertion_time = insertion_time
-        if payload_hash is not None:
-            self.payload_hash = payload_hash
+        self.payload_hash = payload_hash
 
     @property
     def tag_name(self):
@@ -101,6 +99,8 @@ class IovDto(object):
         :param since: The since of this IovDto.  # noqa: E501
         :type: float
         """
+        if since is None:
+            raise ValueError("Invalid value for `since`, must not be `None`")  # noqa: E501
 
         self._since = since
 
@@ -143,6 +143,8 @@ class IovDto(object):
         :param payload_hash: The payload_hash of this IovDto.  # noqa: E501
         :type: str
         """
+        if payload_hash is None:
+            raise ValueError("Invalid value for `payload_hash`, must not be `None`")  # noqa: E501
 
         self._payload_hash = payload_hash
 

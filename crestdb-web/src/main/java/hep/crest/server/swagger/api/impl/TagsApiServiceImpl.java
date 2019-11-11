@@ -223,6 +223,7 @@ public class TagsApiServiceImpl extends TagsApiService {
                 return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
             }
             final CrestBaseResponse respdto = new TagSetDto().resources(dtolist).filter(filters)
+                    .format("TagSetDto")
                     .size((long) dtolist.size()).datatype("tags");
             return Response.ok().entity(respdto).build();
 

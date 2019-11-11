@@ -78,7 +78,7 @@
 						"description": "A json string that is used to construct a GlobalTagDto object: { name: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+							"$ref": "#/definitions/GlobalTagDto"
 						}
 					}
 				],
@@ -86,7 +86,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+							"$ref": "#/definitions/GlobalTagDto"
 						}
 					}
 				}
@@ -214,7 +214,7 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/PayloadTagInfoDto"
+								"$ref": "#/definitions/PayloadTagInfoDto"
 							}
 						}
 					}
@@ -243,7 +243,7 @@
 						"description": "A json string that is used to construct a folderdto object: { node: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/FolderDto"
+							"$ref": "#/definitions/FolderDto"
 						}
 					}
 				],
@@ -289,7 +289,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/FolderSetDto"
+							"$ref": "#/definitions/FolderSetDto"
 						}
 					}
 				}
@@ -317,7 +317,7 @@
 						"description": "A json string that is used to construct a runlumiinfodto object: { run: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/RunLumiInfoDto"
+							"$ref": "#/definitions/RunLumiInfoDto"
 						}
 					}
 				],
@@ -381,7 +381,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/RunLumiSetDto"
+							"$ref": "#/definitions/RunLumiSetDto"
 						}
 					}
 				}
@@ -457,7 +457,7 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/RunLumiInfoDto"
+								"$ref": "#/definitions/RunLumiInfoDto"
 							}
 						}
 					}
@@ -485,7 +485,7 @@
 						"description": "A json string that is used to construct a globaltagmapdto object: { globaltagname: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapDto"
+							"$ref": "#/definitions/GlobalTagMapDto"
 						}
 					}
 				],
@@ -493,7 +493,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapDto"
+							"$ref": "#/definitions/GlobalTagMapDto"
 						}
 					}
 				}
@@ -530,7 +530,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapSetDto"
+							"$ref": "#/definitions/GlobalTagMapSetDto"
 						}
 					}
 				}
@@ -588,7 +588,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagSetDto"
+							"$ref": "#/definitions/GlobalTagSetDto"
 						}
 					}
 				}
@@ -613,7 +613,7 @@
 						"description": "A json string that is used to construct a globaltagdto object: { name: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+							"$ref": "#/definitions/GlobalTagDto"
 						}
 					},
 					{
@@ -629,7 +629,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+							"$ref": "#/definitions/GlobalTagDto"
 						}
 					}
 				}
@@ -659,7 +659,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
+							"$ref": "#/definitions/GlobalTagDto"
 						}
 					}
 				}
@@ -705,7 +705,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
+							"$ref": "#/definitions/TagSetDto"
 						}
 					}
 				}
@@ -769,7 +769,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -794,7 +794,7 @@
 						"description": "A json string that is used to construct a iovdto object: { name: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+							"$ref": "#/definitions/IovDto"
 						}
 					}
 				],
@@ -802,7 +802,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+							"$ref": "#/definitions/IovDto"
 						}
 					}
 				}
@@ -829,7 +829,7 @@
 						"description": "A json string that is used to construct a IovSetDto object.",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				],
@@ -837,7 +837,7 @@
 					"201": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -877,7 +877,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/CrestBaseResponse"
+							"$ref": "#/definitions/CrestBaseResponse"
 						}
 					}
 				}
@@ -908,7 +908,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagSummarySetDto"
+							"$ref": "#/definitions/TagSummarySetDto"
 						}
 					}
 				}
@@ -948,7 +948,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1004,7 +1004,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1059,7 +1059,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1099,7 +1099,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1126,7 +1126,7 @@
 						"description": "A json string that is used to construct a iovdto object: { name: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+							"$ref": "#/definitions/PayloadDto"
 						}
 					}
 				],
@@ -1134,7 +1134,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+							"$ref": "#/definitions/PayloadDto"
 						}
 					}
 				}
@@ -1174,7 +1174,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+							"$ref": "#/definitions/PayloadDto"
 						}
 					}
 				}
@@ -1235,7 +1235,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/HTTPResponse"
+							"$ref": "#/definitions/HTTPResponse"
 						}
 					}
 				}
@@ -1295,7 +1295,7 @@
 					"201": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1348,7 +1348,7 @@
 					"201": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+							"$ref": "#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1418,7 +1418,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/PayloadDto"
+							"$ref": "#/definitions/PayloadDto"
 						}
 					}
 				}
@@ -1476,7 +1476,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
+							"$ref": "#/definitions/TagSetDto"
 						}
 					}
 				}
@@ -1501,7 +1501,7 @@
 						"description": "A json string that is used to construct a tagdto object: { name: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+							"$ref": "#/definitions/TagDto"
 						}
 					}
 				],
@@ -1509,7 +1509,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+							"$ref": "#/definitions/TagDto"
 						}
 					}
 				}
@@ -1540,7 +1540,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
+							"$ref": "#/definitions/TagSetDto"
 						}
 					}
 				}
@@ -1570,7 +1570,7 @@
 						"description": "A json string that is used to construct a map of updatable fields: { description: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GenericMap"
+							"$ref": "#/definitions/GenericMap"
 						}
 					}
 				],
@@ -1578,8 +1578,501 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+							"$ref": "#/definitions/TagDto"
 						}
+					}
+				}
+			}
+		}
+	},
+	"definitions": {
+			"HTTPResponse": {
+				"description": "general response object that can be used for POST and PUT methods",
+				"type": "object",
+				"required": [
+					"message",
+					"action",
+					"code"
+				],
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"action": {
+						"type": "string",
+						"description": "Action performed by the server"
+					},
+					"code": {
+						"type": "integer",
+						"description": "Code of the response"
+					},
+					"id": {
+						"type": "string",
+						"description": "Can be used to store the ID of the generated object"
+					}
+				}
+			},
+			"CrestBaseResponse": {
+				"type": "object",
+				"discriminator" : "format",
+				"required": [
+					"format"
+				],
+				"properties": {
+					"size": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"format" : {
+						"type": "string"
+					},
+					"datatype": {
+						"type": "string"
+					},
+					"filter": {
+						"$ref": "#/definitions/GenericMap"
+					}
+				}
+			},
+			"GenericMap": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": {
+					"type": "string"
+				}
+			},
+			"FolderDto": {
+				"type": "object",
+				"properties": {
+					"nodeFullpath": {
+						"type": "string"
+					},
+					"schemaName": {
+						"type": "string"
+					},
+					"nodeName": {
+						"type": "string"
+					},
+					"nodeDescription": {
+						"type": "string"
+					},
+					"tagPattern": {
+						"type": "string"
+					},
+					"groupRole": {
+						"type": "string"
+					}
+				}
+			},
+			"PayloadTagInfoDto": {
+				"type": "object",
+				"properties": {
+					"tagname": {
+						"type": "string"
+					},
+					"niovs": {
+						"type": "integer"
+					},
+					"totvolume": {
+						"type": "number",
+						"format": "float"
+					},
+					"avgvolume": {
+						"type": "number",
+						"format": "float"
+					}
+				}
+			},
+			"RunLumiInfoDto": {
+				"type": "object",
+				"properties": {
+					"since": {
+						"type": "number"
+					},
+					"run": {
+						"type": "number"
+					},
+					"lb": {
+						"type": "number"
+					},
+					"starttime": {
+						"type": "number"
+					},
+					"endtime": {
+						"type": "number"
+					}
+				}
+			},
+			"GlobalTagMapDto": {
+				"type": "object",
+				"properties": {
+					"globalTagName": {
+						"type": "string"
+					},
+					"record": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					},
+					"tagName": {
+						"type": "string"
+					}
+				}
+			},
+			"GlobalTagDto": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"validity": {
+						"type": "number"
+					},
+					"description": {
+						"type": "string"
+					},
+					"release": {
+						"type": "string"
+					},
+					"insertionTime": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"snapshotTime": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"scenario": {
+						"type": "string"
+					},
+					"workflow": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"snapshotTimeMilli": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"insertionTimeMilli": {
+						"type": "integer",
+						"format": "int64"
+					}
+				}
+			},
+			"TagSummaryDto": {
+				"type": "object",
+				"properties": {
+					"tagname": {
+						"type": "string"
+					},
+					"niovs": {
+						"type": "integer",
+						"format": "int64"
+					}
+				}
+			},
+			"GroupDto": {
+				"type": "object",
+				"properties": {
+					"groups": {
+						"type": "array",
+						"items": {
+							"type": "number"
+						}
+					}
+				}
+			},
+			"TagDto": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"timeType": {
+						"type": "string"
+					},
+					"payloadSpec": {
+						"type": "string"
+					},
+					"synchronization": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"lastValidatedTime": {
+						"type": "number"
+					},
+					"endOfValidity": {
+						"type": "number"
+					},
+					"insertionTime": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"modificationTime": {
+						"type": "string",
+						"format": "date-time"
+					}
+				}
+			},
+			"IovDto": {
+				"type": "object",
+				"required": [
+					"since",
+					"payloadHash"
+				],
+				"properties": {
+					"tagName": {
+						"type": "string"
+					},
+					"since": {
+						"type": "number"
+					},
+					"insertionTime": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"payloadHash": {
+						"type": "string"
+					}
+				}
+			},
+			"IovPayloadDto": {
+				"type": "object",
+				"properties": {
+					"since": {
+						"type": "number"
+					},
+					"payload": {
+						"type": "string"
+					}
+				}
+			},
+			"TagSummarySetDto": {
+				"description" : "An Set containing TagSummaryDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"format" : {
+								"type": "string",
+								"default" : "TagSummarySetDto"
+							},
+							"resources": {
+								"type": "array",
+								"items": {
+								"$ref": "#/definitions/TagSummaryDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"IovSetDto": {
+				"description" : "An Set containing IovDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"format" : {
+								"type": "string",
+								"default" : "IovSetDto"
+							},
+							"resources": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/IovDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"IovPyldSetDto": {
+				"description" : "An Set containing IovPayloadDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"format" : {
+								"type": "string",
+								"default" : "IovPyldSetDto"
+							},
+							"resources": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/IovPayloadDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"TagSetDto": {
+				"description" : "An Set containing TagDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"format" : {
+								"type": "string",
+								"default" : "TagSetDto"
+							},
+							"resources": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/TagDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"PayloadSetDto": {
+				"description" : "An Set containing PayloadDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"format" : {
+								"type": "string",
+								"default" : "PayloadSetDto"
+							},
+							"resources": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/PayloadDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"GlobalTagMapSetDto": {
+				"description" : "An GlobalTagMapSet containing GlobalTagMapDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"format" : {
+								"type": "string",
+								"default" : "GlobalTagMapSetDto"
+							},
+							"resources": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/GlobalTagMapDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"GlobalTagSetDto": {
+				"description" : "An GlobalTagSet containing GlobalTagDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"format" : {
+								"type": "string",
+								"default" : "GlobalTagSetDto"
+							},
+							"resources": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/GlobalTagDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"FolderSetDto": {
+				"description" : "An FolderSet containing FolderDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"resources": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/FolderDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"RunLumiSetDto": {
+				"description" : "An RunLumiSet containing RunLumiInfoDto objects.",
+				"allOf": [
+					{
+						"$ref": "#/definitions/CrestBaseResponse"
+					},
+					{
+						"properties": {
+							"resources": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/RunLumiInfoDto"
+								}
+							}
+						}
+					}
+				]
+			},
+			"PayloadDto": {
+				"type": "object",
+				"properties": {
+					"hash": {
+						"type": "string"
+					},
+					"version": {
+						"type": "string"
+					},
+					"objectType": {
+						"type": "string"
+					},
+					"size": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"data": {
+						"type": "string",
+						"format": "byte"
+					},
+					"streamerInfo": {
+						"type": "string",
+						"format": "byte"
+					},
+					"insertionTime": {
+						"type": "string",
+						"format": "date-time"
 					}
 				}
 			}

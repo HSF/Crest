@@ -2,8 +2,13 @@ package hep.crest.server.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.PayloadSetDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.testutils.DataGenerator;
 
@@ -45,6 +51,30 @@ public class TestCrestPayload {
 
     @Autowired
     private ObjectMapper mapper;
+
+    @Before
+    public void setUp() {
+        final Path bpath = Paths.get("/tmp/cdms");
+        if (!bpath.toFile().exists()) {
+            try {
+                Files.createDirectories(bpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        final Path cpath = Paths.get("/tmp/crest-dump");
+        if (!cpath.toFile().exists()) {
+            try {
+                Files.createDirectories(cpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Test
     public void testA_payloadApi() throws Exception {
@@ -66,10 +96,10 @@ public class TestCrestPayload {
             log.info("Retrieved payload {} ", dto.getHash());
             final String responseBody = resp1.getBody();
             assertThat(resp1.getStatusCode()).isEqualTo(HttpStatus.OK);
-            PayloadDto ok;
+            PayloadSetDto ok;
             log.info("Response from server is: " + responseBody);
-            ok = mapper.readValue(responseBody, PayloadDto.class);
-            assertThat(ok.getHash()).isEqualTo("afakehashp01");
+            ok = mapper.readValue(responseBody, PayloadSetDto.class);
+            assertThat(ok.getSize()).isEqualTo(1L);
         }
 
         // Now do not set the header and retrieve the binary data only

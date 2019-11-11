@@ -278,6 +278,10 @@
 				},
 				{
 					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "TagSummarySetDto"
+						},
 						"resources": {
 							"type": "array",
 							"items": {
@@ -309,13 +313,17 @@
 			}
 		},
 		"IovSetDto": {
-			"description" : "An IovSet containing IovDto objects.",
+			"description" : "An Set containing IovDto objects.",
 			"allOf": [
 				{
 					"$ref": "#/definitions/CrestBaseResponse"
 				},
 				{
 					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "IovSetDto"
+						},
 						"resources": {
 							"type": "array",
 							"items": {
@@ -327,13 +335,17 @@
 			]
 		},
 		"IovPyldSetDto": {
-			"description" : "An IovSet containing IovPayloadDto objects.",
+			"description" : "An Set containing IovPayloadDto objects.",
 			"allOf": [
 				{
 					"$ref": "#/definitions/CrestBaseResponse"
 				},
 				{
 					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "IovPyldSetDto"
+						},
 						"resources": {
 							"type": "array",
 							"items": {
@@ -345,17 +357,43 @@
 			]
 		},
 		"TagSetDto": {
-			"description" : "An IovSet containing TagDto objects.",
+			"description" : "An Set containing TagDto objects.",
 			"allOf": [
 				{
 					"$ref": "#/definitions/CrestBaseResponse"
 				},
 				{
 					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "TagSetDto"
+						},
 						"resources": {
 							"type": "array",
 							"items": {
 								"$ref": "#/definitions/TagDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"PayloadSetDto": {
+			"description" : "An Set containing PayloadDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "PayloadSetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/PayloadDto"
 							}
 						}
 					}
@@ -370,6 +408,10 @@
 				},
 				{
 					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "GlobalTagMapSetDto"
+						},
 						"resources": {
 							"type": "array",
 							"items": {
@@ -388,6 +430,10 @@
 				},
 				{
 					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "GlobalTagSetDto"
+						},
 						"resources": {
 							"type": "array",
 							"items": {

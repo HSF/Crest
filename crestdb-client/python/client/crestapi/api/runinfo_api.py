@@ -257,7 +257,7 @@ class RuninfoApi(object):
         :param int page: page: the page number {0}
         :param int size: size: the page size {1000}
         :param str sort: sort: the sort pattern {since:ASC}
-        :return: list[RunLumiInfoDto]
+        :return: RunLumiSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -282,7 +282,7 @@ class RuninfoApi(object):
         :param int page: page: the page number {0}
         :param int size: size: the page size {1000}
         :param str sort: sort: the sort pattern {since:ASC}
-        :return: list[RunLumiInfoDto]
+        :return: RunLumiSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -338,7 +338,7 @@ class RuninfoApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[RunLumiInfoDto]',  # noqa: E501
+            response_type='RunLumiSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),

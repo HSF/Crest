@@ -132,51 +132,53 @@ class IovsApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def find_all_iovs(self, **kwargs):  # noqa: E501
+    def find_all_iovs(self, by, **kwargs):  # noqa: E501
         """Finds a IovDtos lists.  # noqa: E501
 
         This method allows to perform search by tagname and sorting.Arguments: tagname={a tag name}, page={ipage}, size={isize},      sort=<pattern>, where pattern is <field>:[DESC|ASC]  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.find_all_iovs(async_req=True)
+        >>> thread = api.find_all_iovs(by, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str tagname: tagname: the tag name {none}
+        :param str by: you need a mandatory tagname:xxxx. Additional field can be since or insertionTime rules. (required)
         :param int page: page: the page number {0}
         :param int size: size: the page size {10000}
         :param str sort: sort: the sort pattern {id.since:ASC}
-        :return: list[IovDto]
+        :param str dateformat: The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison.
+        :return: IovSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.find_all_iovs_with_http_info(**kwargs)  # noqa: E501
+            return self.find_all_iovs_with_http_info(by, **kwargs)  # noqa: E501
         else:
-            (data) = self.find_all_iovs_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.find_all_iovs_with_http_info(by, **kwargs)  # noqa: E501
             return data
 
-    def find_all_iovs_with_http_info(self, **kwargs):  # noqa: E501
+    def find_all_iovs_with_http_info(self, by, **kwargs):  # noqa: E501
         """Finds a IovDtos lists.  # noqa: E501
 
         This method allows to perform search by tagname and sorting.Arguments: tagname={a tag name}, page={ipage}, size={isize},      sort=<pattern>, where pattern is <field>:[DESC|ASC]  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.find_all_iovs_with_http_info(async_req=True)
+        >>> thread = api.find_all_iovs_with_http_info(by, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str tagname: tagname: the tag name {none}
+        :param str by: you need a mandatory tagname:xxxx. Additional field can be since or insertionTime rules. (required)
         :param int page: page: the page number {0}
         :param int size: size: the page size {10000}
         :param str sort: sort: the sort pattern {id.since:ASC}
-        :return: list[IovDto]
+        :param str dateformat: The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison.
+        :return: IovSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['tagname', 'page', 'size', 'sort']  # noqa: E501
+        all_params = ['by', 'page', 'size', 'sort', 'dateformat']  # noqa: E501
         all_params.append('async_req')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -191,14 +193,18 @@ class IovsApi(object):
                 )
             params[key] = val
         del params['kwargs']
+        # verify the required parameter 'by' is set
+        if ('by' not in params or
+                params['by'] is None):
+            raise ValueError("Missing the required parameter `by` when calling `find_all_iovs`")  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
 
         query_params = []
-        if 'tagname' in params:
-            query_params.append(('tagname', params['tagname']))  # noqa: E501
+        if 'by' in params:
+            query_params.append(('by', params['by']))  # noqa: E501
         if 'page' in params:
             query_params.append(('page', params['page']))  # noqa: E501
         if 'size' in params:
@@ -207,6 +213,8 @@ class IovsApi(object):
             query_params.append(('sort', params['sort']))  # noqa: E501
 
         header_params = {}
+        if 'dateformat' in params:
+            header_params['dateformat'] = params['dateformat']  # noqa: E501
 
         form_params = []
         local_var_files = {}
@@ -227,7 +235,7 @@ class IovsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[IovDto]',  # noqa: E501
+            response_type='IovSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -247,7 +255,7 @@ class IovsApi(object):
         :param async_req bool
         :param str tagname: tagname: the tag name {none} (required)
         :param int snapshot: snapshot: the snapshot time {0}
-        :return: int
+        :return: CrestBaseResponse
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -270,7 +278,7 @@ class IovsApi(object):
         :param async_req bool
         :param str tagname: tagname: the tag name {none} (required)
         :param int snapshot: snapshot: the snapshot time {0}
-        :return: int
+        :return: CrestBaseResponse
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -326,7 +334,7 @@ class IovsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='int',  # noqa: E501
+            response_type='CrestBaseResponse',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -337,7 +345,7 @@ class IovsApi(object):
     def get_size_by_tag(self, tagname, **kwargs):  # noqa: E501
         """Get the number o iovs for tags matching pattern.  # noqa: E501
 
-        This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}  # noqa: E501
+        This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time is added. Arguments: tagname={a tag name}  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.get_size_by_tag(tagname, async_req=True)
@@ -345,7 +353,7 @@ class IovsApi(object):
 
         :param async_req bool
         :param str tagname: tagname: the tag name {none} (required)
-        :return: list[TagSummaryDto]
+        :return: TagSummarySetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -359,7 +367,7 @@ class IovsApi(object):
     def get_size_by_tag_with_http_info(self, tagname, **kwargs):  # noqa: E501
         """Get the number o iovs for tags matching pattern.  # noqa: E501
 
-        This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}  # noqa: E501
+        This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time is added. Arguments: tagname={a tag name}  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.get_size_by_tag_with_http_info(tagname, async_req=True)
@@ -367,7 +375,7 @@ class IovsApi(object):
 
         :param async_req bool
         :param str tagname: tagname: the tag name {none} (required)
-        :return: list[TagSummaryDto]
+        :return: TagSummarySetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -421,7 +429,110 @@ class IovsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[TagSummaryDto]',  # noqa: E501
+            response_type='TagSummarySetDto',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def last_iov(self, **kwargs):  # noqa: E501
+        """Select last iov for a given tagname and before a given since.  # noqa: E501
+
+        This method allows to select the last iov in a tag, before a given time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, snapshot={snapshot time as long}  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.last_iov(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str tagname: tagname: the tag name {none}
+        :param str since: since: the since time 
+        :param int snapshot: snapshot: the snapshot time {0}
+        :param str dateformat: The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison.
+        :return: IovSetDto
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.last_iov_with_http_info(**kwargs)  # noqa: E501
+        else:
+            (data) = self.last_iov_with_http_info(**kwargs)  # noqa: E501
+            return data
+
+    def last_iov_with_http_info(self, **kwargs):  # noqa: E501
+        """Select last iov for a given tagname and before a given since.  # noqa: E501
+
+        This method allows to select the last iov in a tag, before a given time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, snapshot={snapshot time as long}  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.last_iov_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str tagname: tagname: the tag name {none}
+        :param str since: since: the since time 
+        :param int snapshot: snapshot: the snapshot time {0}
+        :param str dateformat: The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison.
+        :return: IovSetDto
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['tagname', 'since', 'snapshot', 'dateformat']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method last_iov" % key
+                )
+            params[key] = val
+        del params['kwargs']
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'tagname' in params:
+            query_params.append(('tagname', params['tagname']))  # noqa: E501
+        if 'since' in params:
+            query_params.append(('since', params['since']))  # noqa: E501
+        if 'snapshot' in params:
+            query_params.append(('snapshot', params['snapshot']))  # noqa: E501
+
+        header_params = {}
+        if 'dateformat' in params:
+            header_params['dateformat'] = params['dateformat']  # noqa: E501
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/iovs/lastIov', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='IovSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -441,7 +552,7 @@ class IovsApi(object):
         :param async_req bool
         :param str tagname: tagname: the tag name {none} (required)
         :param int snapshot: snapshot: the snapshot time {0}
-        :return: GroupDto
+        :return: IovSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -464,7 +575,7 @@ class IovsApi(object):
         :param async_req bool
         :param str tagname: tagname: the tag name {none} (required)
         :param int snapshot: snapshot: the snapshot time {0}
-        :return: GroupDto
+        :return: IovSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -520,7 +631,7 @@ class IovsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='GroupDto',  # noqa: E501
+            response_type='IovSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -542,7 +653,7 @@ class IovsApi(object):
         :param str since: since: the since time as a string {0}
         :param str until: until: the until time as a string {INF}
         :param int snapshot: snapshot: the snapshot time {0}
-        :return: list[IovDto]
+        :return: IovSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -567,7 +678,7 @@ class IovsApi(object):
         :param str since: since: the since time as a string {0}
         :param str until: until: the until time as a string {INF}
         :param int snapshot: snapshot: the snapshot time {0}
-        :return: list[IovDto]
+        :return: IovSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -623,7 +734,7 @@ class IovsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[IovDto]',  # noqa: E501
+            response_type='IovSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -643,7 +754,7 @@ class IovsApi(object):
         :param async_req bool
         :param str tagname: tagname: the tag name {none} (required)
         :param int snapshot: snapshot: the snapshot time {0} (required)
-        :return: list[IovDto]
+        :return: IovSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -666,7 +777,7 @@ class IovsApi(object):
         :param async_req bool
         :param str tagname: tagname: the tag name {none} (required)
         :param int snapshot: snapshot: the snapshot time {0} (required)
-        :return: list[IovDto]
+        :return: IovSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -726,7 +837,106 @@ class IovsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[IovDto]',  # noqa: E501
+            response_type='IovSetDto',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def store_batch_iov_multi_form(self, body, **kwargs):  # noqa: E501
+        """Create many IOVs in the database, associated to a tag name.  # noqa: E501
+
+        This method allows to insert multiple IOVs. Arguments: tagname,end time.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.store_batch_iov_multi_form(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param IovSetDto body: A json string that is used to construct a IovSetDto object. (required)
+        :return: IovSetDto
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.store_batch_iov_multi_form_with_http_info(body, **kwargs)  # noqa: E501
+        else:
+            (data) = self.store_batch_iov_multi_form_with_http_info(body, **kwargs)  # noqa: E501
+            return data
+
+    def store_batch_iov_multi_form_with_http_info(self, body, **kwargs):  # noqa: E501
+        """Create many IOVs in the database, associated to a tag name.  # noqa: E501
+
+        This method allows to insert multiple IOVs. Arguments: tagname,end time.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.store_batch_iov_multi_form_with_http_info(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param IovSetDto body: A json string that is used to construct a IovSetDto object. (required)
+        :return: IovSetDto
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method store_batch_iov_multi_form" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `store_batch_iov_multi_form`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/iovs/storebatch', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='IovSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),

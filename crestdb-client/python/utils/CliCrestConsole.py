@@ -10,6 +10,7 @@ import sys,os
 import readline
 import logging
 import atexit
+import argparse
 
 from pip._vendor.pyparsing import empty
 
@@ -26,7 +27,7 @@ historyFile = '.crestconsole_hist'
 
 from ConditionsManagementApi import CrestConsole
 
-class CrestConsole(cmd.Cmd):
+class CrestConsoleUI(cmd.Cmd):
     """Simple command processor example."""
     cm = CrestConsole()
     prompt ='(Crest): '
@@ -43,10 +44,19 @@ class CrestConsole(cmd.Cmd):
                 pass
             atexit.register( self.save_history, histfile )
 
+    def setHost(self,url):
+        self.cm.connect(url)
+
     def save_history(self, histfile):
         print ('Saving history in %s' % histfile)
         readline.write_history_file( histfile )
 
+    def do_connect(self,url):
+        """connect [url]
+        Use the url for server connections"""
+        out = self.cm.connect(url)
+        print(out)
+        
     def do_ls(self, pattern):
         """ls [tag name pattern]
         Search for tags which contain the input pattern"""
@@ -276,4 +286,31 @@ class CrestConsole(cmd.Cmd):
         print
 
 if __name__ == '__main__':
-    CrestConsole().cmdloop()
+        # Parse arguments
+    parser = argparse.ArgumentParser(description='Crest browser.')
+    parser.add_argument('--host', default='localhost',
+                        help='Host of the Crest service (default: svomtest.svom.fr)')
+    parser.add_argument('--api', default='crestapi',
+                        help='Base name of the api (default: crestapi)')
+    parser.add_argument('--port', default='8090',
+                        help='Port of the Crest service (default: 8090)')
+    parser.add_argument('--socks', action='store_true',
+                        help='Activate socks (default: false)')
+    parser.add_argument('--ssl', action='store_true',
+                        help='Activate ssl (default: false)')
+    args = parser.parse_args()
+
+    prot = "http"
+    if args.ssl:
+        prot = "https"
+    host = "{0}://{1}:{2}/{3}".format(prot,args.host,args.port,args.api)
+    log.info('The host is set to %s' % host)
+    os.environ['CDMS_HOST']=host
+    ui = CrestConsoleUI()
+    log.info('Start application')
+    ui.setHost(host)
+    if args.socks:
+        log.info("Activating socks on localhost:3129 ; if you want another address please set CDMS_SOCKS_HOST and _PORT env vars")
+        ui.socks()
+
+    ui.cmdloop()

@@ -143,7 +143,8 @@ class GlobaltagmapsApi(object):
 
         :param async_req bool
         :param str name: (required)
-        :return: list[GlobalTagMapDto]
+        :param str x_crest_map_mode: If the mode is BackTrace then it will search for global tags containing the tag <name>
+        :return: GlobalTagMapSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -165,12 +166,13 @@ class GlobaltagmapsApi(object):
 
         :param async_req bool
         :param str name: (required)
-        :return: list[GlobalTagMapDto]
+        :param str x_crest_map_mode: If the mode is BackTrace then it will search for global tags containing the tag <name>
+        :return: GlobalTagMapSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['name']  # noqa: E501
+        all_params = ['name', 'x_crest_map_mode']  # noqa: E501
         all_params.append('async_req')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -199,6 +201,8 @@ class GlobaltagmapsApi(object):
         query_params = []
 
         header_params = {}
+        if 'x_crest_map_mode' in params:
+            header_params['X-Crest-MapMode'] = params['x_crest_map_mode']  # noqa: E501
 
         form_params = []
         local_var_files = {}
@@ -219,7 +223,7 @@ class GlobaltagmapsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[GlobalTagMapDto]',  # noqa: E501
+            response_type='GlobalTagMapSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),

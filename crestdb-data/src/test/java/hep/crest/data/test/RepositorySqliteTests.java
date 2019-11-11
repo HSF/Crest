@@ -60,6 +60,16 @@ public class RepositorySqliteTests {
                 e.printStackTrace();
             }
         }
+        final Path cpath = Paths.get("/tmp/crest-dump");
+        if (!cpath.toFile().exists()) {
+            try {
+                Files.createDirectories(cpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
     @Test

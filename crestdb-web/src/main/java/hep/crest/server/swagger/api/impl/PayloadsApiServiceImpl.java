@@ -45,10 +45,12 @@ import hep.crest.server.services.PayloadService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.PayloadsApiService;
+import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.HTTPResponse;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.PayloadSetDto;
 
 /**
  * @author formica
@@ -201,8 +203,14 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             }
             else {
                 log.debug("Retrieve the full pojo with hash {}", hash);
+                final GenericMap map = new GenericMap();
+                map.put("hash", hash);
                 final PayloadDto entity = payloadService.getPayload(hash);
-                return Response.ok(entity, MediaType.APPLICATION_JSON_TYPE).build();
+                final PayloadSetDto psetdto = new PayloadSetDto().addResourcesItem(entity);
+                psetdto.datatype(entity.getObjectType()).filter(map).size(1L);
+                return Response.ok()
+                        .header("Content-type", MediaType.APPLICATION_JSON_TYPE.toString())
+                        .entity(psetdto).build();
             }
         }
         catch (final NotExistsPojoException e) {
@@ -288,7 +296,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             final IovSetDto dto = iovsetupload.getValueAs(IovSetDto.class);
             log.info("Batch insertion of {} iovs using file formatted in {}", dto.getSize(),
                     dto.getFormat());
-            
+
             if (xCrestPayloadFormat == null) {
                 xCrestPayloadFormat = "FILE";
             }
@@ -356,29 +364,36 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
     }
-    
+
     /**
-     * @param dto the IovSetDto
-     * @param tag the String
-     * @param filesbodyparts the List<FormDataBodyPart> 
-     * @throws CdbServiceException If an Exception occurred
-     * @throws IOException If an Exception occurred
+     * @param dto
+     *            the IovSetDto
+     * @param tag
+     *            the String
+     * @param filesbodyparts
+     *            the List<FormDataBodyPart>
+     * @throws CdbServiceException
+     *             If an Exception occurred
+     * @throws IOException
+     *             If an Exception occurred
      * @return IovSetDto
      */
-    protected IovSetDto storeIovs(IovSetDto dto, String tag, List<FormDataBodyPart> filesbodyparts) throws CdbServiceException, IOException {
+    protected IovSetDto storeIovs(IovSetDto dto, String tag, List<FormDataBodyPart> filesbodyparts)
+            throws CdbServiceException, IOException {
         final List<IovDto> iovlist = dto.getResources();
         final List<IovDto> savediovlist = new ArrayList<>();
-        
+
         for (final IovDto piovDto : iovlist) {
             String filename = null;
-            final PayloadDto pdto = new PayloadDto().objectType(dto.getFormat())
-                    .hash("none").streamerInfo(dto.getFormat().getBytes()).version("none")
+            final PayloadDto pdto = new PayloadDto().objectType(dto.getFormat()).hash("none")
+                    .streamerInfo(dto.getFormat().getBytes()).version("none")
                     .data(piovDto.getPayloadHash().getBytes());
             if (filesbodyparts == null) {
                 final String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
                 pdto.hash(hash);
                 pdto.data(piovDto.getPayloadHash().getBytes());
-            } else {
+            }
+            else {
                 final Map<String, Object> retmap = getDocumentStream(piovDto, filesbodyparts);
                 filename = (String) retmap.get("file");
                 final String hash = getHash((InputStream) retmap.get("stream"), filename);

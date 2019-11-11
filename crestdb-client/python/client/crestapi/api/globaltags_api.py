@@ -244,7 +244,7 @@ class GlobaltagsApi(object):
         :param str name: (required)
         :param str record: record:  the record string {}
         :param str label: label:  the label string {}
-        :return: list[TagDto]
+        :return: TagSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -268,7 +268,7 @@ class GlobaltagsApi(object):
         :param str name: (required)
         :param str record: record:  the record string {}
         :param str label: label:  the label string {}
-        :return: list[TagDto]
+        :return: TagSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -326,7 +326,7 @@ class GlobaltagsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[TagDto]',  # noqa: E501
+            response_type='TagSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -348,7 +348,7 @@ class GlobaltagsApi(object):
         :param int page: page: the page number {0}
         :param int size: size: the page size {1000}
         :param str sort: sort: the sort pattern {name:ASC}
-        :return: list[GlobalTagDto]
+        :return: GlobalTagSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -373,7 +373,7 @@ class GlobaltagsApi(object):
         :param int page: page: the page number {0}
         :param int size: size: the page size {1000}
         :param str sort: sort: the sort pattern {name:ASC}
-        :return: list[GlobalTagDto]
+        :return: GlobalTagSetDto
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -429,7 +429,7 @@ class GlobaltagsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[GlobalTagDto]',  # noqa: E501
+            response_type='GlobalTagSetDto',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
