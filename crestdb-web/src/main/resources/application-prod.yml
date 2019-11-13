@@ -10,11 +10,11 @@ spring:
 spring:
     profiles: prod
     jersey:
-      application-path: /crestapi
+      application-path: ${crest.api.name}
     datasource:
       url: ${crest.db.url}
       driverClassName: oracle.jdbc.OracleDriver
-      username: ATLAS_PHYS_COND_W
+      username: ${crest.user.name}
       password: ${crest.db.password}
       type: com.zaxxer.hikari.HikariDataSource
       hikari:
@@ -26,12 +26,12 @@ spring:
         hibernate.jdbc.fetch_size: 100
         hibernate.hbm2ddl.auto: validate
         hibernate.show_sql: false
-        hibernate.default_schema: ATLAS_PHYS_COND
+        hibernate.default_schema: ${crest.schema.name}
 server:
     port: 8080
     connection-timeout: 300s
 crest:
-  schemaname: ATLAS_PHYS_COND  
+  schemaname: ${crest.schema.name}  
   webstaticdir: ${crest.web.static}
   dumpdir: ${crest.dump.dir}
   security: none
