@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,9 +195,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 log.debug("Send back the stream....");
                 final String rettype = media_type.toString();
                 final String ext = getExtension(ptype);
+                final String fname = hash + "." + ext;
                 return Response.ok(stream) /// MediaType.APPLICATION_JSON_TYPE)
                         .header("Content-type", rettype)
-                        .header("Content-Disposition", "Inline; filename=\"" + hash + ext + "\"")
+                        .header("Content-Disposition", "Inline; filename=\"" + fname + "\"")
                         // .header("Content-Length", new
                         // Long(f.length()).toString())
                         .build();
@@ -611,38 +613,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      * @return String
      */
     protected String getExtension(String ptype) {
-        String extension = ".blob";
+        String extension = "blob";
         final String comp = ptype.toLowerCase();
-        switch (comp) {
-        case "png":
-            extension = "png";
-            break;
-        case "svg":
-            extension = "svg";
-            break;
-        case "json":
-            extension = "json";
-            break;
-        case "xml":
-            extension = "xml";
-            break;
-        case "csv":
-            extension = "csv";
-            break;
-        case "txt":
-            extension = "txt";
-            break;
-        case "tgz":
-            extension = "tgz";
-            break;
-        case "gz":
-            extension = "gz";
-            break;
-        case "pdf":
-            extension = "pdf";
-            break;
-        default:
-            break;
+        final List<String> list = Arrays.asList("png", "svg", "json", "xml", "csv", "txt", "tgz",
+                "gz", "pdf");
+        final boolean match = list.stream().anyMatch(comp::contains);
+        if (match) {
+            extension = comp;
         }
         return extension;
     }

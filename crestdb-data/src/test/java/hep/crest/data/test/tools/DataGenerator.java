@@ -61,6 +61,9 @@ public class DataGenerator {
         entity.workflow("none");
         entity.validity(new BigDecimal(0L));
         entity.snapshotTime(snapshotTime);
+        entity.insertionTime(snapshotTime);
+        entity.setInsertionTimeMilli(10L);
+        entity.setSnapshotTimeMilli(10L);
         return entity;
     }
 
@@ -126,12 +129,13 @@ public class DataGenerator {
         return entity;
     }
 
-    public static PayloadDto generatePayloadDto(String hash, String payloaddata, String stinfo, String objtype) {
+    public static PayloadDto generatePayloadDto(String hash, String payloaddata, String stinfo, String objtype, Date it) {
         final PayloadDto dto = new PayloadDto();
-        final byte[] bindata = new String(payloaddata).getBytes();
-        final byte[] binstinfo = new String(stinfo).getBytes();
-        dto.insertionTime(new Date()).data(bindata).hash(hash).objectType(objtype)
+        final byte[] bindata = payloaddata.getBytes();
+        final byte[] binstinfo = stinfo.getBytes();
+        dto.insertionTime(it).data(bindata).hash(hash).objectType(objtype)
                 .streamerInfo(binstinfo).version("v1");
+        dto.size(bindata.length);
         return dto;
     }
 

@@ -193,27 +193,17 @@ public class TagsApiServiceImpl extends TagsApiService {
                     sort);
             final PageRequest preq = prh.createPageRequest(page, size, sort);
             List<TagDto> dtolist = null;
-            final GenericMap filters = new GenericMap();
+            GenericMap filters = null;
             if (by.equals("none")) {
                 dtolist = tagService.findAllTags(null, preq);
             }
             else {
 
                 final List<SearchCriteria> params = prh.createMatcherCriteria(by);
+                filters = prh.getFilters(params);
                 final List<BooleanExpression> expressions = filtering
                         .createFilteringConditions(params);
-                BooleanExpression wherepred = null;
-                for (final SearchCriteria sc : params) {
-                    filters.put(sc.getKey(), sc.getValue().toString());
-                }
-                for (final BooleanExpression exp : expressions) {
-                    if (wherepred == null) {
-                        wherepred = exp;
-                    }
-                    else {
-                        wherepred = wherepred.and(exp);
-                    }
-                }
+                final BooleanExpression wherepred = prh.getWhere(expressions);
                 dtolist = tagService.findAllTags(wherepred, preq);
             }
             if (dtolist == null) {
@@ -222,9 +212,12 @@ public class TagsApiServiceImpl extends TagsApiService {
                         message);
                 return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
             }
-            final CrestBaseResponse respdto = new TagSetDto().resources(dtolist).filter(filters)
+            final CrestBaseResponse respdto = new TagSetDto().resources(dtolist)
                     .format("TagSetDto")
                     .size((long) dtolist.size()).datatype("tags");
+            if (filters != null) {
+                respdto.filter(filters);
+            }
             return Response.ok().entity(respdto).build();
 
         }

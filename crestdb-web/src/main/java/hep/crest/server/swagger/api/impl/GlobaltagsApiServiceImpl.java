@@ -153,28 +153,17 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             final PageRequest preq = prh.createPageRequest(page, size, sort);
             List<GlobalTagDto> dtolist = null;
             List<SearchCriteria> params = null;
-            final GenericMap filters = new GenericMap();
+            GenericMap filters = null;
             if (by.equals("none")) {
                 dtolist = globaltagService.findAllGlobalTags(null, preq);
             }
             else {
 
                 params = prh.createMatcherCriteria(by);
-                for (final SearchCriteria sc : params) {
-                    filters.put(sc.getKey(), sc.getValue().toString());
-                }
+                filters = prh.getFilters(params);
                 final List<BooleanExpression> expressions = filtering
                         .createFilteringConditions(params);
-                BooleanExpression wherepred = null;
-
-                for (final BooleanExpression exp : expressions) {
-                    if (wherepred == null) {
-                        wherepred = exp;
-                    }
-                    else {
-                        wherepred = wherepred.and(exp);
-                    }
-                }
+                final BooleanExpression wherepred = prh.getWhere(expressions);
                 dtolist = globaltagService.findAllGlobalTags(wherepred, preq);
             }
             if (dtolist == null || dtolist.isEmpty()) {
@@ -185,7 +174,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             }
             final CrestBaseResponse setdto = new GlobalTagSetDto().resources(dtolist)
                     .size((long) dtolist.size()).datatype("globaltags");
-            if (!filters.isEmpty()) {
+            if (filters != null) {
                 setdto.filter(filters);
             }
             return Response.ok().entity(setdto).build();

@@ -109,43 +109,13 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
         try {
             log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size,
                     sort);
-            final PageRequest preq = prh.createPageRequest(page, size, sort);
-            List<SearchCriteria> params = null;
-            final GenericMap filters = new GenericMap();
 
-            List<RunLumiInfoDto> dtolist = null;
-            if (by.equals("none")) {
-                dtolist = runlumiService.findAllRunLumiInfo(null, preq);
-            }
-            else {
-                params = prh.createMatcherCriteria(by);
-                for (final SearchCriteria sc : params) {
-                    filters.put(sc.getKey(), sc.getValue().toString());
-                }
-                final List<BooleanExpression> expressions = filtering
-                        .createFilteringConditions(params);
-                BooleanExpression wherepred = null;
-
-                for (final BooleanExpression exp : expressions) {
-                    if (wherepred == null) {
-                        wherepred = exp;
-                    }
-                    else {
-                        wherepred = wherepred.and(exp);
-                    }
-                }
-                dtolist = runlumiService.findAllRunLumiInfo(wherepred, preq);
-            }
-            if (dtolist == null) {
+            final CrestBaseResponse setdto = findRunInfo(by, page, size, sort);
+            if (setdto == null) {
                 final String message = "No resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                         message);
                 return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-            }
-            final CrestBaseResponse setdto = new RunLumiSetDto().resources(dtolist)
-                    .size((long) dtolist.size()).datatype("runs");
-            if (!filters.isEmpty()) {
-                setdto.filter(filters);
             }
             return Response.ok().entity(setdto).build();
 
@@ -175,11 +145,6 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             log.debug(
                     "Search resource list using from={}, to={}, format={}, page={}, size={}, sort={}",
                     from, to, format, page, size, sort);
-            final PageRequest preq = prh.createPageRequest(page, size, sort);
-            List<RunLumiInfoDto> dtolist = null;
-            List<SearchCriteria> params = null;
-            final GenericMap filters = new GenericMap();
-
             String by = "";
             if (format.equals("time")) {
                 log.debug("Using from and to as times in yyyymmddhhmiss");
@@ -210,45 +175,64 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
                 by = by + ",since<" + bto.toString();
             }
 
-            params = prh.createMatcherCriteria(by);
-            for (final SearchCriteria sc : params) {
-                filters.put(sc.getKey(), sc.getValue().toString());
-            }
-            final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
-            BooleanExpression wherepred = null;
-
-            for (final BooleanExpression exp : expressions) {
-                if (wherepred == null) {
-                    wherepred = exp;
-                }
-                else {
-                    wherepred = wherepred.and(exp);
-                }
-            }
-            dtolist = runlumiService.findAllRunLumiInfo(wherepred, preq);
-
-            if (dtolist == null) {
+            final CrestBaseResponse setdto = findRunInfo(by, page, size, sort);
+            if (setdto == null) {
                 final String message = "No resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                         message);
                 return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
             }
-            final CrestBaseResponse setdto = new RunLumiSetDto().resources(dtolist)
-                    .size((long) dtolist.size()).datatype("runs");
-            if (!filters.isEmpty()) {
-                setdto.filter(filters);
-            }
             return Response.ok().entity(setdto).build();
 
         }
         catch (final CdbServiceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
             final String message = e.getMessage();
+            log.error("findRunLumiInfo got Exception : {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
+    }
+
+    /**
+     * @param by
+     *            the String
+     * @param page
+     *            the Integer
+     * @param size
+     *            the Integer
+     * @param sort
+     *            the String
+     * @throws CdbServiceException
+     *             If an exception occurred
+     * @return CrestBaseResponse
+     */
+    protected CrestBaseResponse findRunInfo(String by, Integer page, Integer size, String sort)
+            throws CdbServiceException {
+        final PageRequest preq = prh.createPageRequest(page, size, sort);
+
+        List<RunLumiInfoDto> dtolist = null;
+        List<SearchCriteria> params = null;
+        GenericMap filters = null;
+        if (by.equals("none")) {
+            dtolist = runlumiService.findAllRunLumiInfo(null, preq);
+        }
+        else {
+            params = prh.createMatcherCriteria(by);
+            filters = prh.getFilters(params);
+            final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
+            final BooleanExpression wherepred = prh.getWhere(expressions);
+            dtolist = runlumiService.findAllRunLumiInfo(wherepred, preq);
+        }
+        if (dtolist == null) {
+            return null;
+        }
+        final CrestBaseResponse setdto = new RunLumiSetDto().resources(dtolist)
+                .size((long) dtolist.size()).datatype("runs");
+        if (filters != null) {
+            setdto.filter(filters);
+        }
+        return setdto;
     }
 
 }

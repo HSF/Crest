@@ -16,7 +16,6 @@ import hep.crest.server.annotations.CacheControlCdb;
 
 /**
  * @author formica
- * @see hep.crest.server.filters.FrontierCacheControlFilter
  */
 @Provider
 @CacheControlCdb

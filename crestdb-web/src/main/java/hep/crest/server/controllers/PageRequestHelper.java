@@ -19,7 +19,10 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+
 import hep.crest.data.repositories.querydsl.SearchCriteria;
+import hep.crest.swagger.model.GenericMap;
 
 /**
  * @author formica
@@ -179,4 +182,35 @@ public class PageRequestHelper {
         return params;
     }
 
+    /**
+     * @param expressions
+     *            the List<BooleanExpression>
+     * @return BooleanExpression
+     */
+    public BooleanExpression getWhere(List<BooleanExpression> expressions) {
+        BooleanExpression wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        return wherepred;
+    }
+
+    /**
+     * @param params
+     *            the List<SearchCriteria>
+     * @return GenericMap
+     */
+    public GenericMap getFilters(List<SearchCriteria> params) {
+        final GenericMap filters = new GenericMap();
+        for (final SearchCriteria sc : params) {
+            filters.put(sc.getKey(), sc.getValue().toString());
+        }
+        return filters;
+    }
 }

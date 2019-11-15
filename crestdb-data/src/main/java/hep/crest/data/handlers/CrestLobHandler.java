@@ -54,7 +54,8 @@ public class CrestLobHandler {
     }
 
     /**
-     * @param ds the ds to set
+     * @param ds
+     *            the ds to set
      */
     public void setDs(DataSource ds) {
         this.ds = ds;
@@ -66,32 +67,16 @@ public class CrestLobHandler {
      * @return Blob
      */
     public Blob createBlobFromFile(String filelocation) {
-        Blob blob = null;
-        BufferedOutputStream bstream = null;
         final File f = new File(filelocation);
-        try (Connection conn = ds.getConnection();
-                BufferedInputStream fstream = new BufferedInputStream(new FileInputStream(f));) {
+        try (FileInputStream fstream = new FileInputStream(f);)
+        {
+            return createBlobFromStream(fstream);
+        }
+        catch (final IOException e) {
+            log.error("Cannot find file {}", filelocation);
+        }
 
-            blob = conn.createBlob();
-            bstream = new BufferedOutputStream(blob.setBinaryStream(1));
-            // stream copy runs a high-speed upload across the network
-            StreamUtils.copy(fstream, bstream);
-            return blob;
-        }
-        catch (IOException | SQLException e) {
-            log.error("Exception in createBlobFromFile: {}", e.getMessage());
-        }
-        finally {
-            try {
-                if (bstream != null) {
-                    bstream.close();
-                }
-            }
-            catch (final IOException e) {
-                log.error("Exception in createBlobFromFile when closing : {}", e.getMessage());
-            }
-        }
-        return blob;
+        return null;
     }
 
     /**
@@ -117,6 +102,9 @@ public class CrestLobHandler {
             try {
                 if (bstream != null) {
                     bstream.close();
+                }
+                if (is != null) {
+                    is.close();
                 }
             }
             catch (final IOException e) {

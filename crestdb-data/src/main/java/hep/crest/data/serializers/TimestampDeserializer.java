@@ -19,8 +19,6 @@ package hep.crest.data.serializers;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +29,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
+import hep.crest.data.handlers.DateFormatterHandler;
+
 /**
  * @author formica
  *
@@ -38,10 +38,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 @Component
 public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 
-    /**
-     * The pattern: default to ISO_OFFSET_DATE_TIME.
-     */
-    private static String datePATTERN = "ISO_OFFSET_DATE_TIME";
 
     /**
      * Logger.
@@ -49,9 +45,9 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * The Date formatter.
+     * The Date formatter handler.
      */
-    private DateTimeFormatter locFormatter = null;
+    private final DateFormatterHandler handler = new DateFormatterHandler();
 
     /*
      * (non-Javadoc)
@@ -65,41 +61,11 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
     public Timestamp deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         try {
             final String tstampstr = jp.getText();
-            return this.format(tstampstr);
+            return handler.format(tstampstr);
         }
         catch (final Exception ex) {
-            log.error("Failed to deserialize using format {}", getLocformatter());
+            log.error("Failed to deserialize using format {}", handler.getLocformatter());
             throw new JsonParseException(jp, ex.getMessage(), jp.getCurrentLocation());
         }
-    }
-
-    /**
-     * @param tstamp
-     *            the String
-     * @return Timestamp
-     */
-    protected Timestamp format(String tstamp) {
-        log.debug("Use private version of deserializer....{}", getLocformatter());
-        final ZonedDateTime zdt = ZonedDateTime.parse(tstamp, getLocformatter());
-        return new Timestamp(zdt.toInstant().toEpochMilli());
-    }
-
-    /**
-     * @return DateTimeFormatter
-     */
-    protected DateTimeFormatter getLocformatter() {
-        if (this.locFormatter != null) {
-            return locFormatter;
-        }
-        if (datePATTERN.equals("ISO_OFFSET_DATE_TIME")) {
-            locFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-        }
-        else if (datePATTERN.equals("ISO_LOCAL_DATE_TIME")) {
-            locFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        }
-        else {
-            locFormatter = DateTimeFormatter.ofPattern(datePATTERN);
-        }
-        return locFormatter;
     }
 }

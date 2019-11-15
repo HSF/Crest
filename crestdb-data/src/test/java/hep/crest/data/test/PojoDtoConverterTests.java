@@ -6,7 +6,9 @@ package hep.crest.data.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
@@ -41,6 +43,7 @@ import hep.crest.swagger.model.HTTPResponse;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.PayloadSetDto;
 import hep.crest.swagger.model.PayloadTagInfoDto;
 import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.RunLumiSetDto;
@@ -131,8 +134,11 @@ public class PojoDtoConverterTests {
 
     @Test
     public void testPayloadConverter() throws Exception {
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhash1", "mydata", "mystreamer",
-                "test");
+                "test",time);
         final Payload entity = DataGenerator.generatePayload("myhash1", "test");
         assertThat(entity.getHash()).isEqualTo(dto.getHash());
         assertThat(entity.toString().length()).isGreaterThan(0);
@@ -327,6 +333,31 @@ public class PojoDtoConverterTests {
         assertThat(setdto.equals(setdto1)).isTrue();
         assertThat(setdto.hashCode()).isNotNull();
     }
+    
+    @Test
+    public void testPayloadDtoSetsConverter() throws Exception {
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+        final String data = "datastr";
+        final String sinfo = "streaminfo";
+        final PayloadDto dto1 = DataGenerator.generatePayloadDto("somehash", data, sinfo, "test",time);
+        final PayloadDto dto1bis = DataGenerator.generatePayloadDto("somehash", data, sinfo, "test",time);
+        log.info("compare {} with {} having hash {} and {}",dto1,dto1bis,dto1.hashCode(),dto1bis.hashCode());
+        assertThat(dto1.getHash().equals(dto1bis.getHash())).isTrue();
+        final PayloadSetDto setdto = new PayloadSetDto();
+        setdto.datatype("payloads");
+        setdto.format("JSON");
+        setdto.addResourcesItem(dto1);
+        assertThat(setdto.toString().length()).isGreaterThan(0);
+        assertThat(setdto.hashCode()).isNotNull();
+        final List<PayloadDto> resources = setdto.getResources();
+        for (final PayloadDto gtDto : resources) {
+            if (gtDto.getHash().equals("somehash")) {
+                assertThat(gtDto.equals(dto1)).isTrue();
+            }
+        }
+    }
+
 
     @Test
     public void testOtherDtos() throws Exception {

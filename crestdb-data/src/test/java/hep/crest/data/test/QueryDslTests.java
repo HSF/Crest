@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -166,9 +167,12 @@ public class QueryDslTests {
 
     @Test
     public void testIovs() throws Exception {
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+
         final PayloadDataDBImpl repobean = new PayloadDataDBImpl(mainDataSource);
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhash3", "myrepodata", "mystreamer",
-                "test");
+                "test",time);
         log.debug("Save payload {}", dto);
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
