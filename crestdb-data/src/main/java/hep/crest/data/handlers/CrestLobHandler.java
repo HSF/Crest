@@ -68,8 +68,7 @@ public class CrestLobHandler {
      */
     public Blob createBlobFromFile(String filelocation) {
         final File f = new File(filelocation);
-        try (FileInputStream fstream = new FileInputStream(f);)
-        {
+        try (FileInputStream fstream = new FileInputStream(f);) {
             return createBlobFromStream(fstream);
         }
         catch (final IOException e) {

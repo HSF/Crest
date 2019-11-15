@@ -44,7 +44,7 @@ public class TagFiltering implements IFilteringCriteria {
                 log.debug("search criteria " + searchCriteria.getKey() + " "
                         + searchCriteria.getOperation() + " " + searchCriteria.getValue());
                 final String key = searchCriteria.getKey().toLowerCase();
-                if (key.equals("objecttype")) {
+                if (key.equals("objecttype") || key.equals("payloadspec")) {
                     final BooleanExpression objtyplike = TagPredicates
                             .hasObjectTypeLike(searchCriteria.getValue().toString());
                     expressions.add(objtyplike);

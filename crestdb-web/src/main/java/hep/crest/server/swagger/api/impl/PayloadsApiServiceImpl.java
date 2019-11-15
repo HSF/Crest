@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -33,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
@@ -78,6 +81,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     private static final int MAX_FILE_UPLOAD = 1000;
 
     /**
+     * The list of payload types for download.
+     */
+    private static final List<String> payloadlist = Arrays.asList("png", "svg", "json", "xml", "csv", "txt", "tgz",
+            "gz", "pdf");
+
+    /**
      * Service.
      */
     @Autowired
@@ -87,12 +96,17 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Autowired
     private IovService iovService;
-
     /**
      * Properties.
      */
     @Autowired
     private CrestProperties cprops;
+    /**
+     * Mapper.
+     */
+    @Inject
+    private ObjectMapper jacksonMapper;
+
 
     @Override
     public Response createPayload(PayloadDto body, SecurityContext securityContext, UriInfo info)
@@ -250,15 +264,20 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             String fdetailsname = fileDetail.getFileName();
             if (fdetailsname == null || fdetailsname.isEmpty()) {
                 fdetailsname = ".blob";
+            } else {
+                final Path p = Paths.get(fdetailsname);
+                fdetailsname = "_"+p.getFileName().toString(); 
             }
-            final String filename = cprops.getDumpdir() + SLASH + tag + "_" + since + "_"
+            final String filename = cprops.getDumpdir() + SLASH + tag + "_" + since
                     + fdetailsname;
             if (format == null) {
                 format = "JSON";
             }
-
+            final Map<String,String> sinfomap = new HashMap<>();
+            sinfomap.put("filename", filename);
+            sinfomap.put("format", format);
             final PayloadDto pdto = new PayloadDto().objectType(format)
-                    .streamerInfo(format.getBytes()).version("none");
+                    .streamerInfo(jacksonMapper.writeValueAsBytes(sinfomap)).version("none");
             final String hash = getHash(fileInputStream, filename);
             pdto.hash(hash);
             final IovDto iovDto = new IovDto().payloadHash(hash).since(since).tagName(tag);
@@ -387,20 +406,27 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
         for (final IovDto piovDto : iovlist) {
             String filename = null;
+            final Map<String,String> sinfomap = new HashMap<>();
+            sinfomap.put("format", dto.getFormat());
+
             final PayloadDto pdto = new PayloadDto().objectType(dto.getFormat()).hash("none")
-                    .streamerInfo(dto.getFormat().getBytes()).version("none")
-                    .data(piovDto.getPayloadHash().getBytes());
+                    .version("none");
             if (filesbodyparts == null) {
+                // If there are no attached files, then the payloadHash contains the payload itself.
                 final String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
                 pdto.hash(hash);
+                sinfomap.put("filename", hash);
                 pdto.data(piovDto.getPayloadHash().getBytes());
             }
             else {
+                // If there are attached files, then the payload will be loaded from filename.
                 final Map<String, Object> retmap = getDocumentStream(piovDto, filesbodyparts);
                 filename = (String) retmap.get("file");
                 final String hash = getHash((InputStream) retmap.get("stream"), filename);
+                sinfomap.put("filename", filename);
                 pdto.hash(hash);
             }
+            pdto.streamerInfo(jacksonMapper.writeValueAsBytes(sinfomap));
             final IovDto iovDto = new IovDto().payloadHash(pdto.getHash()).since(piovDto.getSince())
                     .tagName(tag);
             try {
@@ -615,9 +641,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     protected String getExtension(String ptype) {
         String extension = "blob";
         final String comp = ptype.toLowerCase();
-        final List<String> list = Arrays.asList("png", "svg", "json", "xml", "csv", "txt", "tgz",
-                "gz", "pdf");
-        final boolean match = list.stream().anyMatch(comp::contains);
+        final boolean match = payloadlist.stream().anyMatch(comp::contains);
         if (match) {
             extension = comp;
         }

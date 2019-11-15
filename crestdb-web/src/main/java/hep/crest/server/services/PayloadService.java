@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.handlers.CrestLobHandler;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.PayloadDto;
@@ -36,12 +35,6 @@ public class PayloadService {
     @Autowired
     @Qualifier("payloaddatadbrepo")
     private PayloadDataBaseCustom payloaddataRepository;
-
-    /**
-     * Handler.
-     */
-    @Autowired
-    private CrestLobHandler lobHandler;
 
     /**
      * @param hash
