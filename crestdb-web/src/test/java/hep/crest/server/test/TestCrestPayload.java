@@ -241,6 +241,8 @@ public class TestCrestPayload {
         final IovSetDto setdto2 = new IovSetDto();
         setdto2.format("txt").size(2L);
         setdto2.addResourcesItem(iovdto3).addResourcesItem(iovdto4);
+       
+        log.info("Upload batch: {}", setdto2);
         
         final MultiValueMap<String, Object> map2 = new LinkedMultiValueMap<String, Object>();
         map2.add("endtime", "0");

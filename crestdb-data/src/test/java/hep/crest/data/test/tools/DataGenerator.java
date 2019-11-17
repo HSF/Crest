@@ -49,9 +49,7 @@ public class DataGenerator {
         return entity;
     }
     
-    public static GlobalTagDto generateGlobalTagDto(String name) {
-        final Instant now = Instant.now();
-        final Date snapshotTime = new Date(now.toEpochMilli());
+    public static GlobalTagDto generateGlobalTagDto(String name, Date it) {
         final GlobalTagDto entity = new GlobalTagDto();
         entity.name(name);
         entity.description("A test global tag "+name);
@@ -60,8 +58,8 @@ public class DataGenerator {
         entity.type("T");
         entity.workflow("none");
         entity.validity(new BigDecimal(0L));
-        entity.snapshotTime(snapshotTime);
-        entity.insertionTime(snapshotTime);
+        entity.snapshotTime(it);
+        entity.insertionTime(it);
         entity.setInsertionTimeMilli(10L);
         entity.setSnapshotTimeMilli(10L);
         return entity;

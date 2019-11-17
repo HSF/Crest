@@ -413,10 +413,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                     .version("none");
             if (filesbodyparts == null) {
                 // If there are no attached files, then the payloadHash contains the payload itself.
+                pdto.data(piovDto.getPayloadHash().getBytes());
                 final String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
                 pdto.hash(hash);
                 sinfomap.put("filename", hash);
-                pdto.data(piovDto.getPayloadHash().getBytes());
             }
             else {
                 // If there are attached files, then the payload will be loaded from filename.

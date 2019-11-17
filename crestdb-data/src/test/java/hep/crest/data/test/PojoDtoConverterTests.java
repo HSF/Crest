@@ -75,7 +75,10 @@ public class PojoDtoConverterTests {
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(dto.toString().length()).isGreaterThan(0);
 
-        final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("GT-02");
+        final Instant now = Instant.now();
+        final Date it = new Date(now.toEpochMilli());
+
+        final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("GT-02",it);
         assertThat(dto1.getDescription()).isEqualTo(dto.getDescription());
         assertThat(dto1.equals(dto)).isFalse(); // Should be true
         assertThat(dto1.hashCode()).isNotNull();
@@ -149,9 +152,12 @@ public class PojoDtoConverterTests {
 
     @Test
     public void testGlobalTagSetsConverter() throws Exception {
-        final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("MY-GTAG-01");
-        final GlobalTagDto dto2 = DataGenerator.generateGlobalTagDto("MY-GTAG-02");
-        final GlobalTagDto dto1bis = DataGenerator.generateGlobalTagDto("MY-GTAG-01");
+        final Instant now = Instant.now();
+        final Date it = new Date(now.toEpochMilli());
+
+        final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("MY-GTAG-01",it);
+        final GlobalTagDto dto2 = DataGenerator.generateGlobalTagDto("MY-GTAG-02",it);
+        final GlobalTagDto dto1bis = DataGenerator.generateGlobalTagDto("MY-GTAG-01",it);
         log.info("compare {} with {}",dto1,dto1bis);
         assertThat(dto1.equals(dto1bis)).isTrue();
         final GlobalTagSetDto setdto = new GlobalTagSetDto();
