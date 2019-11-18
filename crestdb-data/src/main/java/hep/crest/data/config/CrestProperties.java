@@ -2,91 +2,155 @@ package hep.crest.data.config;
 
 import java.math.BigDecimal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * Properties for crest.
+ * 
+ * @author formica
+ *
+ */
 @Component
 @ConfigurationProperties("crest")
 public class CrestProperties {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass()); 
+    /**
+     * The directory for dumping the uploaded payloads.
+     */
+    private String dumpdir = "/tmp";
+    /**
+     * The schema name.
+     */
+    private String schemaname = "";
+    /**
+     * The api name.
+     */
+    private String apiname = "crestapi";
+    /**
+     * The security.
+     */
+    private String security = "none";
+    /**
+     * The synchronization.
+     */
+    private String synchro = "none";
+    /**
+     * The static web directory for web UI.
+     */
+    private String webstaticdir = "/tmp";
+    /**
+     * The authentication level.
+     */
+    private String authenticationtype = "basic";
 
-	private String dumpdir;
-	private String schemaname;
-	private String apiname;
-	private String security;
-	private String synchro;
-	private String webstaticdir;
-	private String authenticationtype;
+    /**
+     * The COOL infinity.
+     */
+    public static final BigDecimal INFINITY = new BigDecimal("253402297199000000000");
 
-	public static final BigDecimal INFINITY = new BigDecimal("253402297199000000000");
+    /**
+     * @return the dumpdir
+     */
+    public String getDumpdir() {
+        return dumpdir;
+    }
 
-	public String getDumpdir() {
-		log.info("property dumpdir has value:{}",dumpdir);
-		return dumpdir;
-	}
+    /**
+     * @param dumpdir
+     *            the dumpdir to set
+     */
+    public void setDumpdir(String dumpdir) {
+        this.dumpdir = dumpdir;
+    }
 
-	public void setDumpdir(String dumpdir) {
-		this.dumpdir = dumpdir;
-	}
+    /**
+     * @return the schemaname
+     */
+    public String getSchemaname() {
+        return schemaname;
+    }
 
-	public String getSchemaname() {
-		log.info("property schemaname has value:{}",schemaname);
-		return schemaname;
-	}
+    /**
+     * @param schemaname
+     *            the schemaname to set
+     */
+    public void setSchemaname(String schemaname) {
+        this.schemaname = schemaname;
+    }
 
-	public void setSchemaname(String schemaname) {
-		this.schemaname = schemaname;
-	}
+    /**
+     * @return the security
+     */
+    public String getSecurity() {
+        return security;
+    }
 
-	public String getSecurity() {
-		return security;
-	}
+    /**
+     * @param security
+     *            the security to set
+     */
+    public void setSecurity(String security) {
+        this.security = security;
+    }
 
-	public void setSecurity(String security) {
-		this.security = security;
-	}
+    /**
+     * @return the synchro
+     */
+    public String getSynchro() {
+        return synchro;
+    }
 
-	public String getSynchro() {
-		return synchro;
-	}
+    /**
+     * @param synchro
+     *            the synchro to set
+     */
+    public void setSynchro(String synchro) {
+        this.synchro = synchro;
+    }
 
-	public void setSynchro(String synchro) {
-		this.synchro = synchro;
-	}
+    /**
+     * @return the webstaticdir
+     */
+    public String getWebstaticdir() {
+        return webstaticdir;
+    }
 
-	public String getWebstaticdir() {
-		return webstaticdir;
-	}
+    /**
+     * @param webstaticdir
+     *            the webstaticdir to set
+     */
+    public void setWebstaticdir(String webstaticdir) {
+        this.webstaticdir = webstaticdir;
+    }
 
-	public void setWebstaticdir(String webstaticdir) {
-		this.webstaticdir = webstaticdir;
-	}
+    /**
+     * @return the authenticationtype
+     */
+    public String getAuthenticationtype() {
+        return authenticationtype;
+    }
 
-	public String getAuthenticationtype() {
-		return this.authenticationtype;
-	}
-	
-	public void setAuthenticationtype(String authtype) {
-		this.authenticationtype = authtype;
-	}
+    /**
+     * @param authenticationtype
+     *            the authenticationtype to set
+     */
+    public void setAuthenticationtype(String authenticationtype) {
+        this.authenticationtype = authenticationtype;
+    }
 
-	/**
-	 * @return the apiname
-	 */
-	public String getApiname() {
-		return apiname;
-	}
+    /**
+     * @return the apiname
+     */
+    public String getApiname() {
+        return apiname;
+    }
 
-	/**
-	 * @param apiname the apiname to set
-	 */
-	public void setApiname(String apiname) {
-		this.apiname = apiname;
-	}
-	
-	
+    /**
+     * @param apiname
+     *            the apiname to set
+     */
+    public void setApiname(String apiname) {
+        this.apiname = apiname;
+    }
 }

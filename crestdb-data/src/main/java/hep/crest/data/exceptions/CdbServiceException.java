@@ -9,19 +9,26 @@ package hep.crest.data.exceptions;
  */
 public class CdbServiceException extends Exception {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -8552538724531679765L;
+    /**
+     * Serializer.
+     */
+    private static final long serialVersionUID = -8552538724531679765L;
 
-	public CdbServiceException(String string) {
-		super(string);
-	}
+    /**
+     * @param message
+     *            the String
+     */
+    public CdbServiceException(String message) {
+        super(message);
+    }
 
-	@Override
-	public String getMessage() {
-		return "CdbServiceException: " + super.getMessage();
-	}
-
-	
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Throwable#getMessage()
+     */
+    @Override
+    public String getMessage() {
+        return "CdbServiceException: " + super.getMessage();
+    }
 }
