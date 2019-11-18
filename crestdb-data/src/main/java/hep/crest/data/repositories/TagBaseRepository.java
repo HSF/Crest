@@ -12,19 +12,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.pojo.Tag;
 
-
-
 /**
  * @author formica
  *
  */
 @Transactional(readOnly = true)
-public interface TagBaseRepository extends PagingAndSortingRepository<Tag, Long> , QuerydslPredicateExecutor<Tag>{
+public interface TagBaseRepository
+        extends PagingAndSortingRepository<Tag, String>, QuerydslPredicateExecutor<Tag> {
 
-	Tag findByName(@Param("name") String name);
+    /**
+     * @param name
+     *            the String
+     * @return Tag
+     */
+    Tag findByName(@Param("name") String name);
 
-	boolean existsByName(@Param("name") String name);
-	
-	List<Tag> findByNameLike(@Param("name") String name);
-	
+    /**
+     * @param name
+     *            the String
+     * @return List<Tag>
+     */
+    List<Tag> findByNameLike(@Param("name") String name);
+
 }

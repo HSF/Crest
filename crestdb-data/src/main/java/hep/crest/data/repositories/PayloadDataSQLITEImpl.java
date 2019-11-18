@@ -19,246 +19,160 @@ package hep.crest.data.repositories;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 
-import javax.persistence.Table;
 import javax.sql.DataSource;
 import javax.sql.rowset.serial.SerialBlob;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 
-import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
+import hep.crest.data.repositories.externals.PayloadRequests;
 import hep.crest.swagger.model.PayloadDto;
 
 /**
+ * An implementation for requests using SQLite database.
+ *
  * @author formica
  *
  */
-public class PayloadDataSQLITEImpl implements PayloadDataBaseCustom {
+public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements PayloadDataBaseCustom {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	private DataSource ds;
+    /**
+     * @param ds
+     *            the DataSource
+     */
+    public PayloadDataSQLITEImpl(DataSource ds) {
+        super(ds);
+    }
 
-	@Value("${physconddb.upload.dir:/tmp}")
-	private String serverUploadLocationFolder;
+    /* (non-Javadoc)
+     * @see hep.crest.data.repositories.PayloadDataGeneral#getBlob(java.sql.ResultSet, java.lang.String)
+     */
+    @Override
+    protected byte[] getBlob(ResultSet rs, String key) throws SQLException {
+        return rs.getBytes(key);
+    }
 
-	@Autowired
-	private PayloadHandler payloadHandler;
+ 
+    /*
+     * (non-Javadoc)
+     *
+     * @see hep.phycdb.svc.repositories.PayloadDataBaseCustom#saveNull()
+     */
+    @Override
+    public Payload saveNull() throws IOException, PayloadEncodingException {
+        return null;
+    }
 
-	private String defaultTablename=null;
+    @Override
+    protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
 
-	public PayloadDataSQLITEImpl(DataSource ds) {
-		super();
-		this.ds = ds;
-	}
+        final String tablename = this.tablename();
+        final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-	public void setDefaultTablename(String defaultTablename) {
-		if (this.defaultTablename == null)
-			this.defaultTablename = defaultTablename;
-	}
-	
-	/**
-	 * @return
-	 */
-	protected String tablename() {
-		Table ann = Payload.class.getAnnotation(Table.class);
-		String tablename = ann.name();
-		if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-			tablename = DatabasePropertyConfigurator.SCHEMA_NAME+"."+tablename;
-		} else if (this.defaultTablename != null) {
-			tablename = this.defaultTablename + "." + tablename;
-		}
-		return tablename;
-	}
+        log.info("Insert Payload with hash {} using saveBlobAsBytes", entity.getHash());
+        execute(null, sql, entity);
+        return findMetaInfo(entity.getHash());
+    }
 
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#find(java.lang.String)
-	 */
-	@Transactional
-	public Payload find(String id) {
-		log.info("Find payload {} using JDBCTEMPLATE",id);
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		String tablename = this.tablename();
+    @Override
+    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
+        final String tablename = this.tablename();
 
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,DATA,STREAMER_INFO,DATA_SIZEIZE from "+tablename+" where PAYLOAD.HASH=?";
-		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
-			final Payload entity = new Payload();
-			entity.setHash(rs.getString("HASH"));
-			entity.setObjectType(rs.getString("OBJECT_TYPE"));
-			entity.setVersion(rs.getString("VERSION"));
-			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-			SerialBlob blob = new SerialBlob(rs.getBytes("DATA"));
-			entity.setData(blob);
-			blob = new SerialBlob(rs.getBytes("STREAMER_INFO"));
-			entity.setStreamerInfo(blob);
-			entity.setSize(rs.getInt("DATA_SIZE"));
+        final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-			return entity;
-		});
-		
-	}
+        log.info("Insert Payload with hash {} using saveBlobAsStream", entity.getHash());
+        execute(is, sql, entity);
+        return findMetaInfo(entity.getHash());
+    }
 
-	/* (non-Javadoc)
-	 * @see hep.phycdb.svc.repositories.PayloadDataBaseCustom#save(hep.phycdb.data.pojo.Payload)
-	 */
-	@Override
-	public Payload save(PayloadDto entity) throws CdbServiceException {
-		Payload savedentity = null;
-		try {
-			savedentity = this.saveBlobAsBytes(entity);
-		} catch (IOException e) {
-			log.error("Error in save paylod dto : {}",e.getMessage());
-		}
-		return savedentity;
-	}
-	
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#save(hep.crest.swagger.model.PayloadDto, java.io.InputStream)
-	 */
-	@Override
-	@Transactional
-	public Payload save(PayloadDto entity, InputStream is) throws CdbServiceException {
-		Payload savedentity = null;
-		try {
-			this.saveBlobAsStream(entity,is);
-			savedentity = findMetaInfo(entity.getHash());
-		} catch (IOException e) {
-			log.error("Error in save paylod dto : {}",e.getMessage());
-		}
-		return savedentity;
-	}
-	
+    /**
+     * @param is
+     *            the InputStream
+     * @param sql
+     *            the String
+     * @param entity
+     *            the PayloadDto
+     * @throws IOException
+     *             If an Exception occurred
+     * @return
+     */
+    protected void execute(InputStream is, String sql, PayloadDto entity) {
 
+        final Calendar calendar = Calendar.getInstance();
+        final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
+        entity.setInsertionTime(calendar.getTime());
 
-	/* (non-Javadoc)
-	 * @see hep.phycdb.svc.repositories.PayloadDataBaseCustom#saveNull()
-	 */
-	@Override
-	public Payload saveNull() throws IOException, PayloadEncodingException {
-		return null;
-	}
+        if (is != null) {
+            final byte[] blob = PayloadHandler.getBytesFromInputStream(is);
+            if (blob != null) {
+                entity.setSize(blob.length);
+                entity.setData(blob);
+                log.debug("Read data blob of length {} and streamer info length {}", blob.length,
+                        entity.getStreamerInfo().length);
+            }
+        }
+        try (Connection conn = super.getDs().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);) {
+            log.info("Getting connection {}", conn);
 
-	protected Payload saveBlobAsBytes(PayloadDto entity) throws IOException {
-		
-		String tablename = this.tablename();
-
-		String sql = "INSERT INTO "+tablename+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, DATA_SIZE) VALUES (?,?,?,?,?,?,?)";
-
-		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
-		
-		try (PreparedStatement ps = ds.getConnection().prepareStatement(sql);) {
-            ps.setString(1,entity.getHash());  
-            ps.setString(2,entity.getObjectType());  
-            ps.setString(3,entity.getVersion());  
-            ps.setBytes(4, entity.getData());  
+            ps.setString(1, entity.getHash());
+            ps.setString(2, entity.getObjectType());
+            ps.setString(3, entity.getVersion());
+            ps.setBytes(4, entity.getData());
             ps.setBytes(5, entity.getStreamerInfo());
-            ps.setDate(6, new java.sql.Date(entity.getInsertionTime().getTime()));
+            ps.setDate(6, inserttime);
             ps.setInt(7, entity.getSize());
-
-            log.info("Dump preparedstatement {}",ps);
+            log.info("Dump preparedstatement {}", ps);
             ps.execute();
-            return find(entity.getHash());
-		} catch (SQLException e) {
-			log.error("Sql exception in saving bytes for payload : {} ",e.getMessage());
-		}
-		return null;
-	}
+            //conn.commit();
+        }
+        catch (final SQLException e) {
+            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
+        }
+        finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            }
+            catch (final IOException e) {
+                log.error("Error in closing streams...potential leak");
+            }
+        }
+    }
 
-	/**
-	 * @param entity
-	 * @param is
-	 * @throws IOException
-	 */
-	protected void saveBlobAsStream(PayloadDto entity, InputStream is) throws IOException {
-		String tablename = this.tablename();
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
+     */
+    @Override
+    public InputStream findData(String id) {
+        log.info("Find payload data for hash {}", id);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
+        final String tablename = this.tablename();
 
-		String sql = "INSERT INTO "+tablename+ "(HASH, OBJECT_TYPE, VERSION, DATA, STREAMER_INFO, INSERTION_TIME, DATA_SIZE) VALUES (?,?,?,?,?,?,?)";
-
-		log.info("Insert Payload {} using JDBCTEMPLATE",entity.getHash());
-		byte[] blob = payloadHandler.getBytesFromInputStream(is);
-		if (blob != null) {
-			entity.setSize(blob.length);
-			log.debug("Read data blob of length {} and streamer info {}",blob.length,entity.getStreamerInfo().length);
-		}
-		try (PreparedStatement ps = ds.getConnection().prepareStatement(sql);){
-			
-            ps.setString(1,entity.getHash());  
-            ps.setString(2,entity.getObjectType());  
-            ps.setString(3,entity.getVersion());  
-            ps.setBytes(4, blob);  
-            ps.setBytes(5, entity.getStreamerInfo());
-            ps.setDate(6, new java.sql.Date(entity.getInsertionTime().getTime()));
-            ps.setInt(7, entity.getSize());
-            log.debug("Dump preparedstatement {}",ps);
-            ps.execute();
-		} catch (SQLException e) {
-			log.error("Sql exception when storing payload {}",e.getMessage());
-		}
-	}
-
-
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.PayloadDataBaseCustom#delete(java.lang.String)
-	 */
-	@Override
-	@Transactional
-	public void delete(String id) {
-		String tablename = this.tablename();
-
-		String sql = "DELETE FROM  "+tablename+ " WHERE HASH=(?)";
-		log.info("Remove payload with hash {} using JDBCTEMPLATE",id);
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		jdbcTemplate.update(sql, new Object[] { id });
-		log.info("Entity removal done...");
-	}
-
-	@Transactional
-	public Payload findMetaInfo(String id) {
-		log.info("Find payload {} using JDBCTEMPLATE",id);
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		String tablename = this.tablename();
-
-		String sql = "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO,DATA_SIZE from "+tablename+" where PAYLOAD.HASH=?";
-		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
-			final Payload entity = new Payload();
-			entity.setHash(rs.getString("HASH"));
-			entity.setObjectType(rs.getString("OBJECT_TYPE"));
-			entity.setVersion(rs.getString("VERSION"));
-			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-			SerialBlob blob = new SerialBlob(rs.getBytes("STREAMER_INFO"));
-			entity.setStreamerInfo(blob);
-			entity.setSize(rs.getInt("DATA_SIZE"));
-			return entity;
-		});
-
-		return dataentity;
-	}
-	
-	@Override
-	public Payload findData(String id) {
-		log.info("Find payload data only for {} using JDBCTEMPLATE",id);
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		String tablename = this.tablename();
-
-		String sql = "select DATA from "+tablename+" where PAYLOAD.HASH=?";
-		Payload dataentity = jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
-			final Payload entity = new Payload();
-			SerialBlob blob = new SerialBlob(rs.getBytes("DATA"));
-			entity.setData(blob);
-			return entity;
-		});
-		return dataentity;
-	}
-
+        final String sql = PayloadRequests.getFindDataQuery(tablename);
+        return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
+            final SerialBlob blob = new SerialBlob(rs.getBytes("DATA"));
+            return blob.getBinaryStream();
+        });
+    }
 }

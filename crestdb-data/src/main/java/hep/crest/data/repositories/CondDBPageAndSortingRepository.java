@@ -25,26 +25,60 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
-
 /**
+ * Interface for pagination and sorting.
+ * @param <T>
+ *            the template class
+ * @param <D>
+ *            the template ID
  * @author formica
  *
  */
 @NoRepositoryBean
-public interface CondDBPageAndSortingRepository<T, ID extends Serializable> extends Repository<T, ID> {
-	
-	long count();
-	
-	boolean exists(ID id);
-	
-	T findOne(ID id);  
+public interface CondDBPageAndSortingRepository<T, D extends Serializable>
+        extends Repository<T, D> {
 
-	Iterable<T> findAll();
-	
-	Iterable<T> findAll(Iterable<ID> ids);
-	
-	Page<T> findAll(Pageable pageable);
-	
-	Iterable<T> findAll(Sort sort);
-	
+    /**
+     * @return long
+     */
+    long count();
+
+    /**
+     * @param id the ID class
+     * @return boolean
+     */
+    boolean exists(D id);
+
+    /**
+     * @param id
+     *            the ID
+     * @return T the class
+     */
+    T findOne(D id);
+
+    /**
+     * @return Iterable<T>
+     */
+    Iterable<T> findAll();
+
+    /**
+     * @param ids
+     *            the list of IDs
+     * @return Iterable<T>
+     */
+    Iterable<T> findAll(Iterable<D> ids);
+
+    /**
+     * @param pageable the Pageable
+     * @return Page<T>
+     */
+    Page<T> findAll(Pageable pageable);
+
+    /**
+     * @param sort
+     *            the Sort
+     * @return Iterable<T>
+     */
+    Iterable<T> findAll(Sort sort);
+
 }

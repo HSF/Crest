@@ -8,8 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import hep.crest.data.pojo.Tag;
 
-
-
 /**
  * @author formica
  *
@@ -17,14 +15,31 @@ import hep.crest.data.pojo.Tag;
 @Repository
 public interface TagRepository extends CrudRepository<Tag, Long>, TagBaseRepository {
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.springframework.data.repository.CrudRepository#deleteById(java.lang.
+     * Object)
+     */
     @Override
     void deleteById(Long id);
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.springframework.data.repository.CrudRepository#delete(java.lang.Object)
+     */
     @Override
     void delete(Tag entity);
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.springframework.data.repository.CrudRepository#save(S)
+     */
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     Tag save(Tag entity);
 
 }
