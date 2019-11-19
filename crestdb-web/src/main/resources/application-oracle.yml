@@ -1,0 +1,53 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+spring:
+ profiles:
+  include: default
+spring:
+    profiles: oracle
+    jersey:
+      application-path: ${crest.api.name}
+    datasource:
+      url: ${crest.db.url}
+      driverClassName: oracle.jdbc.OracleDriver
+      username: ${crest.db.user}
+      password: ${crest.db.password}
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        connection-test-query: SELECT 1 FROM DUAL
+        maximum-pool-size: 20
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.show_sql: false
+        hibernate.default_schema: ${crest.db.schema}
+server:
+    port: 8080
+    connection-timeout: 300s
+crest:
+  schemaname: ${crest.db.schema}  
+  webstaticdir: ${crest.web.static}
+  dumpdir: ${crest.dump.dir}
+  security: none
+  synchro: none
+  authenticationtype: none
+caching:
+  iovsgroups_maxage: 600
+  iovsgroups_snapshot_maxage: 3600
+  iovs_maxage: 600
+  iovs_snapshot_maxage: 3600
+  payloads_maxage: 604800
+  timetype_groupsize: 3600  # expressed in seconds
+  runtype_groupsize: 100    # expressed in run numbers  
+info:
+  app:
+    name: Crest Application
+    description: Rest services for conditions data management 
+    profile: oracle
+    
+

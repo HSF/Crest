@@ -19,10 +19,6 @@ package hep.crest.data.serializers;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +28,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
+import hep.crest.data.handlers.DateFormatterHandler;
+
 /**
  * @author formica
  *
@@ -39,47 +37,33 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 @Component
 public class TimestampSerializer extends JsonSerializer<Timestamp> {
 
-	private String pattern="ISO_OFFSET_DATE_TIME";
-	
-	private Logger log = LoggerFactory.getLogger(this.getClass()); 
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	private DateTimeFormatter locFormatter = null;
-	
-	/* (non-Javadoc)
-	 * @see com.fasterxml.jackson.databind.JsonSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
-	 */
-	@Override
-	public void serialize(Timestamp ts, JsonGenerator jg,
-			SerializerProvider sp) throws IOException {
-		try {
-			log.debug("Use private version of serializer....{}",getLocformatter());
-			jg.writeString(this.format(ts));
-		} catch (Exception ex) {
-			log.error("Failed to serialize using format {}",getLocformatter());
-		}
-	}
+    /**
+     * The Date formatter handler.
+     */
+    private final DateFormatterHandler handler = new DateFormatterHandler();
 
-	/**
-	 * @param ts
-	 * @return
-	 */
-	protected String format(Timestamp ts) {
-		Instant fromEpochMilli = Instant.ofEpochMilli(ts.getTime());
-		ZonedDateTime zdt = fromEpochMilli.atZone(ZoneId.of("Z"));
-		return zdt.format(getLocformatter());
-	}
-	
-	protected DateTimeFormatter getLocformatter() {
-		if(this.locFormatter != null)
-			return locFormatter;
-		if(pattern.equals("ISO_OFFSET_DATE_TIME")){
-			locFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-		} else if(pattern.equals("ISO_LOCAL_DATE_TIME")) {
-			locFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-		}else{
-			locFormatter = DateTimeFormatter.ofPattern(pattern);
-		}
-		return locFormatter;
-	}
-
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.fasterxml.jackson.databind.JsonSerializer#serialize(java.lang.Object,
+     * com.fasterxml.jackson.core.JsonGenerator,
+     * com.fasterxml.jackson.databind.SerializerProvider)
+     */
+    @Override
+    public void serialize(Timestamp ts, JsonGenerator jg, SerializerProvider sp)
+            throws IOException {
+        try {
+            log.debug("Use private version of serializer....{}", handler.getLocformatter());
+            jg.writeString(handler.format(ts));
+        }
+        catch (final Exception ex) {
+            log.error("Failed to serialize using format {}", handler.getLocformatter());
+        }
+    }
 }

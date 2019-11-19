@@ -1,22 +1,13 @@
 package hep.crest.server.swagger.api;
 
-import hep.crest.swagger.model.*;
-import hep.crest.server.swagger.api.GlobaltagsApiService;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import hep.crest.swagger.model.GlobalTagDto;
-import hep.crest.swagger.model.TagDto;
-
-import java.util.List;
-import hep.crest.server.swagger.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -24,16 +15,17 @@ import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
+import hep.crest.swagger.model.GlobalTagDto;
+import hep.crest.swagger.model.GlobalTagSetDto;
+import hep.crest.swagger.model.TagDto;
+import io.swagger.annotations.ApiParam;
 
 @Path("/globaltags")
 
 
 @io.swagger.annotations.Api(description = "the globaltags API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-14T18:09:32.330+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-04T10:30:37.214+02:00")
 public class GlobaltagsApi  {
-
 	@Autowired
 	private GlobaltagsApiService delegate;
 
@@ -70,8 +62,8 @@ public class GlobaltagsApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = TagDto.class, responseContainer = "List") })
     public Response findGlobalTagFetchTags(@ApiParam(value = "",required=true) @PathParam("name") String name
-,@ApiParam(value = "record:  the record string {}") @QueryParam("record") String record
-,@ApiParam(value = "label:  the label string {}") @QueryParam("label") String label
+,@ApiParam(value = "record:  the record string {}", defaultValue="none") @DefaultValue("none") @QueryParam("record") String record
+,@ApiParam(value = "label:  the label string {}", defaultValue="none") @DefaultValue("none")  @QueryParam("label") String label
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.findGlobalTagFetchTags(name,record,label,securityContext,info);
@@ -80,9 +72,9 @@ public class GlobaltagsApi  {
     
     
     @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Finds a GlobalTagDtos lists.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = GlobalTagDto.class, responseContainer = "List", tags={ "globaltags", })
+    @io.swagger.annotations.ApiOperation(value = "Finds a GlobalTagDtos lists.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = GlobalTagSetDto.class, tags={ "globaltags", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagDto.class, responseContainer = "List") })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagSetDto.class) })
     public Response listGlobalTags(@ApiParam(value = "by: the search pattern {none}", defaultValue="none") @DefaultValue("none") @QueryParam("by") String by
 ,@ApiParam(value = "page: the page number {0}", defaultValue="0") @DefaultValue("0") @QueryParam("page") Integer page
 ,@ApiParam(value = "size: the page size {1000}", defaultValue="1000") @DefaultValue("1000") @QueryParam("size") Integer size

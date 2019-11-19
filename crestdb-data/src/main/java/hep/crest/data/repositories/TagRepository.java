@@ -13,7 +13,7 @@ import hep.crest.data.pojo.Tag;
  *
  */
 @Repository
-public interface TagRepository extends CrudRepository<Tag, Long>, TagBaseRepository {
+public interface TagRepository extends CrudRepository<Tag, String>, TagBaseRepository {
 
     /*
      * (non-Javadoc)
@@ -22,7 +22,7 @@ public interface TagRepository extends CrudRepository<Tag, Long>, TagBaseReposit
      * Object)
      */
     @Override
-    void deleteById(Long id);
+    void deleteById(String id);
 
     /*
      * (non-Javadoc)

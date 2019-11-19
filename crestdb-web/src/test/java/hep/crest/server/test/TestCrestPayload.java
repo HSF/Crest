@@ -2,198 +2,259 @@ package hep.crest.server.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.IovPayloadDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.PayloadSetDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.testutils.DataGenerator;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ActiveProfiles("default")
 public class TestCrestPayload {
-	@Autowired
-	private TestRestTemplate testRestTemplate;
 
-	@Autowired
-	private ObjectMapper jacksonMapper;
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Test
-	public void testA_storeTags() {
-		TagDto dto = new TagDto().description("test").name("SB_TAG-PYLD").endOfValidity(new BigDecimal(1))
-				.lastValidatedTime(new BigDecimal(1)).payloadSpec("test").synchronization("BLK").timeType("run")
-				.modificationTime(new Date()).insertionTime(new Date());
-		System.out.println("Store request: " + dto);
-		ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
-		System.out.println("Received response: " + response);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
+    @Autowired
+    private TestRestTemplate testRestTemplate;
 
-	@Test
-	public void testB_storePayload() {
-		byte[] bindata = new String("This is a fake payload").getBytes();
-		PayloadDto dto = new PayloadDto().insertionTime(new Date()).data(bindata).hash("AFAKEHASH").objectType("FAKE")
-				.streamerInfo(bindata).version("1");
-		System.out.println("Store payload request: " + dto);
-		ResponseEntity<PayloadDto> response = this.testRestTemplate.postForEntity("/crestapi/payloads", dto,
-				PayloadDto.class);
-		System.out.println("Received response: " + response);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
+    @Autowired
+    private ObjectMapper mapper;
 
-	@Test
-	public void testC_storeIov() {
-		IovDto dto = new IovDto().insertionTime(new Date()).since(new BigDecimal("100")).payloadHash("AFAKEHASH")
-				.tagName("SB_TAG-PYLD");
-		System.out.println("Store iov request: " + dto);
-		ResponseEntity<IovDto> response = this.testRestTemplate.postForEntity("/crestapi/iovs", dto, IovDto.class);
-		System.out.println("Received response: " + response);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
+    @Before
+    public void setUp() {
+        final Path bpath = Paths.get("/tmp/cdms");
+        if (!bpath.toFile().exists()) {
+            try {
+                Files.createDirectories(bpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        final Path cpath = Paths.get("/tmp/crest-dump");
+        if (!cpath.toFile().exists()) {
+            try {
+                Files.createDirectories(cpath);
+            }
+            catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 
-	@Test
-	public void testD_storePayload() {
-		byte[] bindata = new String("This is another fake payload").getBytes();
+    @Test
+    public void testA_payloadApi() throws Exception {
+        final PayloadDto dto = DataGenerator.generatePayloadDto("afakehashp01", "some data",
+                "some info", "test");
+        log.info("Store payload : {}", dto);
+        final ResponseEntity<PayloadDto> response = this.testRestTemplate
+                .postForEntity("/crestapi/payloads", dto, PayloadDto.class);
+        log.info("Received response: " + response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-		PayloadDto dto = new PayloadDto().insertionTime(new Date()).hash("ANOTHERFAKEHASH").objectType("FAKE")
-				.streamerInfo(bindata).version("1");
-		String jsondto = "";
-		try {
-			jsondto = jacksonMapper.writeValueAsString(dto);
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("Upload payload: use json body " + jsondto);
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.add("file", new String(bindata));
-		map.add("payload", jsondto);
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-		ResponseEntity<String> response = this.testRestTemplate.postForEntity("/crestapi/payloads/upload", request,
-				String.class);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Crest-PayloadFormat", "JSON");
+        final HttpEntity<?> entity = new HttpEntity<>(headers);
 
-		System.out.println("Upload request gave response: " + response);
+        final ResponseEntity<String> resp1 = this.testRestTemplate.exchange(
+                "/crestapi/payloads/" + dto.getHash(), HttpMethod.GET, entity, String.class);
+        {
+            log.info("Retrieved payload {} ", dto.getHash());
+            final String responseBody = resp1.getBody();
+            assertThat(resp1.getStatusCode()).isEqualTo(HttpStatus.OK);
+            PayloadSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, PayloadSetDto.class);
+            assertThat(ok.getSize()).isEqualTo(1L);
+        }
 
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
+        // Now do not set the header and retrieve the binary data only
+        final ResponseEntity<String> resp2 = this.testRestTemplate.exchange(
+                "/crestapi/payloads/" + dto.getHash(), HttpMethod.GET, null, String.class);
+        {
+            log.info("Retrieved binary payload {} ", dto.getHash());
+            assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
 
-	@Test
-	public void testD_storePayloadWithIov() {
-		byte[] bindata = new String("This is yet another fake payload").getBytes();
+        // Upload payload using external file
+        final HttpHeaders headers1 = new HttpHeaders();
+        headers1.setContentType(MediaType.MULTIPART_FORM_DATA);
+        final PayloadDto dto1 = DataGenerator.generatePayloadDto("afakehashp02", "",
+                "some other info", "test");
+        log.info("Store payload : {}", dto1);
+        String jsondto = "";
+        jsondto = mapper.writeValueAsString(dto1);
+        log.info("Upload payload: use json body {}", jsondto);
+        final MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        map.add("file", new String("some other data".getBytes()));
+        map.add("payload", jsondto);
+        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
+                map, headers1);
+        final ResponseEntity<String> resp3 = this.testRestTemplate
+                .postForEntity("/crestapi/payloads/upload", request, String.class);
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-		String tagname = "SB_TAG-PYLD";
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.add("file", new String(bindata));
-		map.add("since", "1000000");
-		map.add("endtime", "0");
-		map.add("tag", tagname);
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-		ResponseEntity<String> response = this.testRestTemplate.postForEntity("/crestapi/payloads/store", request,
-				String.class);
+        log.info("Upload request gave response: {}", resp3);
+        assertThat(resp3.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-		System.out.println("Upload request gave response: " + response);
+        // Now retrieve metadata only
+        final ResponseEntity<String> resp4 = this.testRestTemplate.exchange(
+                "/crestapi/payloads/" + dto1.getHash() + "/meta", HttpMethod.GET, null,
+                String.class);
+        {
+            log.info("Retrieved meta payload {} ", dto1.getHash());
+            assertThat(resp4.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
 
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
+    }
+    
+    @Test
+    public void testA_payloadfail() {
+        final PayloadDto dto = DataGenerator.generatePayloadDto("afakehashp01", "some data",
+                "some info", "test");
+        dto.hash(null);
+        log.info("Store bad payload : {}", dto);
+        final ResponseEntity<String> response = this.testRestTemplate
+                .postForEntity("/crestapi/payloads", dto, String.class);
+        log.info("Received response: " + response);
+        assertThat(response.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+        
+        // Upload payload using external file
+        final HttpHeaders headers1 = new HttpHeaders();
+        headers1.setContentType(MediaType.MULTIPART_FORM_DATA);
+        final MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        map.add("file", new String("some other data".getBytes()));
+        map.add("payload", null);
+        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
+                map, headers1);
+        final ResponseEntity<String> resp2 = this.testRestTemplate
+                .postForEntity("/crestapi/payloads/upload", request, String.class);
+        assertThat(resp2.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
 
-	@Test
-	public void testE_storeBatchPayloadWithIov() {
-		try {
-			String content1 = "This is a fake payload batch 1";
-			Files.write(Paths.get("/tmp/batch1.txt"), content1.getBytes());
-			String content2 = "This is a fake payload batch 2";
-			Files.write(Paths.get("/tmp/batch2.txt"), content2.getBytes());
-			IovSetDto sdto = new IovSetDto();
-			sdto.addIovsListItem(new IovPayloadDto().payload("file:///tmp/batch1.txt").since(new BigDecimal(100)));
-			sdto.addIovsListItem(new IovPayloadDto().payload("file:///tmp/batch2.txt").since(new BigDecimal(200)));
-			sdto.niovs(2L);
-			sdto.format("FILE");
-			String rooturi = this.testRestTemplate.getRootUri();
-			System.out.println("Root URI is "+rooturi);
-			String json = jacksonMapper.writeValueAsString(sdto);
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-			String tagname = "SB_TAG-PYLD";
-			File f1 = new File("/tmp/batch1.txt");
-			File f2 = new File("/tmp/batch2.txt");
-			FileDataBodyPart filePart1 = new FileDataBodyPart("file", f1);
-			FileDataBodyPart filePart2 = new FileDataBodyPart("file", f2);
-			List<FormDataBodyPart> bodyParts = new ArrayList<>();
-			bodyParts.add(filePart1);
-			bodyParts.add(filePart2);
+        final String hash = "somenotexistinghash";
+        log.info("Get payload with not existing hash: {}", hash);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Crest-PayloadFormat", "JSON");
+        final HttpEntity<?> entity = new HttpEntity<>(headers);
+        final ResponseEntity<String> resp3 = this.testRestTemplate.exchange(
+                "/crestapi/payloads/" + hash, HttpMethod.GET, entity, String.class);
+        log.info("Received response: " + resp3);
+        assertThat(resp3.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
 
-			CloseableHttpClient client = HttpClients.createDefault();
-			HttpPost post = new HttpPost(rooturi+"/crestapi/payloads/uploadbatch");
+        log.info("Get payload meta with not existing hash: {}", hash);
+        
+        final ResponseEntity<String> resp4 = this.testRestTemplate.exchange(
+                "/crestapi/payloads/" + hash+"/meta", HttpMethod.GET, entity, String.class);
+        log.info("Received response: " + resp4);
+        assertThat(resp4.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
 
-			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-			
-			//MultipartBodyBuilder builder = new MultipartBodyBuilder();
-			builder.addBinaryBody("files", f1, ContentType.DEFAULT_BINARY, "/tmp/batch1.txt");
-			builder.addBinaryBody("files", f2, ContentType.DEFAULT_BINARY, "/tmp/batch2.txt");
-			builder.addTextBody("tag", tagname);
-			builder.addTextBody("iovsetupload", json);
-			builder.addTextBody("endtime", "0");
-			
-			org.apache.http.HttpEntity entity = builder.build();
-			post.setEntity(entity);
-			HttpResponse response = client.execute(post);
+    }
+    
 
-			System.out.println("Upload batch request gave response: " + response);
+    @Test
+    public void testA_payloadIovApi() throws Exception {
+        final TagDto dto = DataGenerator.generateTagDto("SB-TAG-PYLD-01", "run");
+        log.info("Store tag for payload request: {}", dto);
+        final ResponseEntity<TagDto> response = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto, TagDto.class);
+        log.info("Received response: " + response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.CREATED.value());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        final byte[] bindata = new String("This is yet another fake payload").getBytes();
 
-	}
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        final String tagname = "SB-TAG-PYLD-01";
+        final MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        map.add("file", new String(bindata));
+        map.add("since", "1000000");
+        map.add("endtime", "0");
+        map.add("tag", tagname);
+        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
+                map, headers);
+        final ResponseEntity<String> resp1 = this.testRestTemplate
+                .postForEntity("/crestapi/payloads/store", request, String.class);
+
+        log.info("Upload request gave response: {}", resp1);
+        assertThat(resp1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        // Upload batch using external files
+        final IovDto iovdto1 = DataGenerator.generateIovDto("file:///tmp/pyld1.json", tagname, new BigDecimal(2000000L));
+        final IovDto iovdto2 = DataGenerator.generateIovDto("file:///tmp/pyld2.json", tagname, new BigDecimal(2100000L));
+        final IovSetDto setdto = new IovSetDto();
+        setdto.format("json").size(2L);
+        setdto.addResourcesItem(iovdto1).addResourcesItem(iovdto2);
+        
+        DataGenerator.generatePayloadData("/tmp/pyld1.json", "some content for file1");
+        DataGenerator.generatePayloadData("/tmp/pyld2.json", "some content for file2 which will be different");
+        final MultiValueMap<String, Object> map1 = new LinkedMultiValueMap<String, Object>();
+        final FileSystemResource f1 = new FileSystemResource("/tmp/pyld1.json");
+        final FileSystemResource f2 = new FileSystemResource("/tmp/pyld2.json");
+        map1.add("files", f1);
+        map1.add("files", f2);
+        map1.add("endtime", "0");
+        map1.add("tag", tagname);
+        final String jsonset = mapper.writeValueAsString(setdto);
+        map1.add("iovsetupload", jsonset);
+        final HttpEntity<MultiValueMap<String, Object>> request1 = new HttpEntity<MultiValueMap<String, Object>>(
+                map1, headers);
+        final ResponseEntity<String> resp2 = this.testRestTemplate
+                .postForEntity("/crestapi/payloads/uploadbatch", request1, String.class);
+        assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        // Upload batch using payload inserted in iovdto instead of payload hash.
+        final IovDto iovdto3 = DataGenerator.generateIovDto("This will become a payload", tagname, new BigDecimal(3000000L));
+        final IovDto iovdto4 = DataGenerator.generateIovDto("This will become another payload", tagname, new BigDecimal(3100000L));
+        final IovSetDto setdto2 = new IovSetDto();
+        setdto2.format("txt").size(2L);
+        setdto2.addResourcesItem(iovdto3).addResourcesItem(iovdto4);
+       
+        log.info("Upload batch: {}", setdto2);
+        
+        final MultiValueMap<String, Object> map2 = new LinkedMultiValueMap<String, Object>();
+        map2.add("endtime", "0");
+        map2.add("tag", tagname);
+        final String jsonset2 = mapper.writeValueAsString(setdto2);
+        map2.add("iovsetupload", jsonset2);
+        final HttpEntity<MultiValueMap<String, Object>> request2 = new HttpEntity<MultiValueMap<String, Object>>(
+                map2, headers);
+        final ResponseEntity<String> resp3 = this.testRestTemplate
+                .postForEntity("/crestapi/payloads/storebatch", request2, String.class);
+        assertThat(resp3.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        
+    }
 
 }

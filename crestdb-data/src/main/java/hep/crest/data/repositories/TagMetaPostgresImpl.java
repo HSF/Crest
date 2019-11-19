@@ -20,8 +20,10 @@ package hep.crest.data.repositories;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 
@@ -33,132 +35,209 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.pojo.TagMeta;
+import hep.crest.data.repositories.externals.PayloadRequests;
+import hep.crest.data.repositories.externals.TagMetaRequests;
 import hep.crest.swagger.model.TagMetaDto;
 
 /**
  * @author formica
  *
  */
-public class TagMetaPostgresImpl extends TagMetaDBImpl implements TagMetaDataBaseCustom {
+public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBaseCustom {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private static Long long1 = null;
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public TagMetaPostgresImpl(DataSource ds) {
-		super(ds);
-	}
+    /**
+     * The null long.
+     */
+    private static final Long LONGNULL = null;
 
-	/**
-	 * This method is inspired to the postgres documentation on the JDBC driver. For
-	 * reasons which are still not clear the select methods are working as they are.
-	 * 
-	 * @param conn
-	 * @param is
-	 * @return
-	 */
-	protected long getLargeObjectId(Connection conn, InputStream is) {
-		// Open the large object for writing
-		LargeObjectManager lobj;
-		LargeObject obj = null;
-		long oid;
-		try {
-			lobj = conn.unwrap(org.postgresql.PGConnection.class).getLargeObjectAPI();
-			oid = lobj.createLO();
-			obj = lobj.open(oid, LargeObjectManager.WRITE);
+    /**
+     * @param ds
+     *            the DataSource
+     */
+    public TagMetaPostgresImpl(DataSource ds) {
+        super(ds);
+    }
 
-			// Copy the data from the file to the large object
-			byte[] buf = new byte[2048];
-			int s = 0;
-			while ((s = is.read(buf, 0, 2048)) > 0) {
-				obj.write(buf, 0, s);
-			}
-			// Close the large object
-			obj.close();
-			return oid;
-		} catch (SQLException | IOException e) {
-			log.error("Exception in getting large object id: {}", e.getMessage());
-		} finally {
-			if (obj!= null) {
-				try {
-					obj.close();
-				} catch (SQLException e) {
-					log.error("Error in closing LargeObject");
-				}
-			}
-		}
-		return long1;
-	}
+    
+    /* (non-Javadoc)
+     * @see hep.crest.data.repositories.TagMetaGeneral#getBlob(java.sql.ResultSet, java.lang.String)
+     */
+    @Override
+    protected String getBlob(ResultSet rs, String key) throws SQLException {
+        return new String(rs.getBytes(key));
+    }
 
-	/**
-	 * @param entity
-	 * @return 
-	 * @throws IOException
-	 */
-	@Override
-	protected void saveBlobAsBytes(TagMetaDto entity) throws CdbServiceException {
-		String tablename = this.tablename();
+    /**
+     * @param oid
+     *            the Long
+     * @param conn
+     *            the Connection
+     * @throws SQLException
+     *             If an Exception occurred
+     * @return byte[]
+     */
+    protected byte[] getlargeObj(long oid, Connection conn) throws SQLException {
+        final LargeObjectManager lobj = conn.unwrap(org.postgresql.PGConnection.class)
+                .getLargeObjectAPI();
+        LargeObject obj = null;
+        byte[] buf = null;
+        try {
+            obj = lobj.open(oid, LargeObjectManager.READ);
+            buf = new byte[obj.size()];
+            obj.read(buf, 0, obj.size());
+            obj.close();
+        }
+        catch (final SQLException e) {
+            log.error("cannot read large object in postgres {} ", oid);
+        }
+        finally {
+            if (obj != null) {
+                obj.close();
+            }
+            lobj.unlink(oid);
 
-		String sql = "INSERT INTO " + tablename
-				+ "(TAG_NAME, DESCRIPTION, CHANNEL_SIZE,COLUMN_SIZE, INSERTION_TIME, CHANNEL_INFO, PAYLOAD_INFO) VALUES (?,?,?,?,?,?,?)";
+        }
+        return buf;
+    }
 
-		log.info("Insert TagMeta {} using JDBCTEMPLATE", entity.getTagName());
-		log.debug("Channel info {}", entity.getChannelInfo());
-		log.debug("Read data blob of length {} and streamer info {}", entity.getChannelInfo().getBytes().length, entity.getPayloadInfo().getBytes().length);
-		Calendar calendar = Calendar.getInstance();
-		java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
-		entity.setInsertionTime(calendar.getTime());
-		
-		InputStream cis = new ByteArrayInputStream(entity.getChannelInfo().getBytes());
-		InputStream pis = new ByteArrayInputStream(entity.getPayloadInfo().getBytes());
+    /**
+     * This method is inspired to the postgres documentation on the JDBC driver. For
+     * reasons which are still not clear the select methods are working as they are.
+     *
+     * @param conn
+     *            the Connection
+     * @param is
+     *            the InputStream
+     * @param entity
+     *            the PayloadDto
+     * @return long
+     */
+    protected long getLargeObjectId(Connection conn, InputStream is, TagMetaDto entity) {
+        // Open the large object for writing
+        LargeObjectManager lobj = null;
+        LargeObject obj = null;
+        long oid;
+        try {
+            lobj = conn.unwrap(org.postgresql.PGConnection.class).getLargeObjectAPI();
+            oid = lobj.createLO();
+            obj = lobj.open(oid, LargeObjectManager.WRITE);
 
-		try (Connection conn = ds.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql);) {
-			conn.setAutoCommit(false);
-			long cid = getLargeObjectId(conn, cis);
-			long pid = getLargeObjectId(conn, pis);
+            // Copy the data from the file to the large object
+            final byte[] buf = new byte[2048];
+            int s = 0;
+            int tl = 0;
+            while ((s = is.read(buf, 0, 2048)) > 0) {
+                obj.write(buf, 0, s);
+                tl += s;
+            }
+            // Close the large object
+            obj.close();
+            lobj.unlink(oid);
+            return oid;
+        }
+        catch (SQLException | IOException e) {
+            log.error("Exception in getting large object id: {}", e.getMessage());
+        }
+        finally {
+            try {
+                if (obj != null) {
+                    obj.close();
+                }
+                if (lobj != null) {
+                    lobj = null;
+                }
+            }
+            catch (SQLException | NullPointerException e) {
+                log.error("Error in closing result set : {}", e.getMessage());
+            }
+        }
+        return LONGNULL;
+    }
 
-			ps.setString(1, entity.getTagName());
-			ps.setString(2, entity.getDescription());
-			ps.setInt(3, entity.getChansize());
-			ps.setInt(4, entity.getColsize());
-			ps.setDate(5, inserttime);
-			ps.setLong(6, cid);
-			ps.setLong(7, pid);
-			log.info("Dump preparedstatement {} using sql {} and args {} {} {}", ps, sql,
-					entity.getTagName(), entity.getDescription(), entity.getInsertionTime());
-			ps.execute();
-			conn.commit();
-		} catch (SQLException e) {
-			log.error("Exception from SQL during insertion: {}", e.getMessage());
-			throw new CdbServiceException(e.getMessage());
-		} catch (Exception e) {
-			log.error("Exception during tagmeta dto insertion: {}", e.getMessage());
-			throw new CdbServiceException("Exception occurred during tagmeta insertion.."+e.getMessage());
-		} finally {
-			try {
-				cis.close();
-				pis.close();
-			} catch (IOException e) {
-				log.error("Error in closing input streams for blobs...");
-			}
-			log.debug("closed streams...");
-		}
-	}
+    /**
+     * @param cis
+     *            the InputStream
+     * @param pis
+     *            the InputStream
+     * @param sql
+     *            the String
+     * @param entity
+     *            the TagMetaDto
+     * @throws CdbServiceException
+     *             If an Exception occurred
+     * @return
+     */
+    protected void execute(InputStream cis, InputStream pis, String sql, TagMetaDto entity)
+            throws CdbServiceException {
+        final Calendar calendar = Calendar.getInstance();
+        final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
+        entity.setInsertionTime(calendar.getTime());
+
+        try (Connection conn = super.getDs().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);) {
+            conn.setAutoCommit(false);
+            final long cid = getLargeObjectId(conn, cis, entity);
+            final long pid = getLargeObjectId(conn, pis, null);
+
+            ps.setString(1, entity.getTagName());
+            ps.setString(2, entity.getDescription());
+            ps.setInt(3, entity.getChansize());
+            ps.setInt(4, entity.getColsize());
+            ps.setDate(5, inserttime);
+            ps.setLong(6, cid);
+            ps.setLong(7, pid);
+            log.info("Dump preparedstatement {} ", ps);
+            ps.executeUpdate();
+            conn.commit();
+        }
+        catch (final SQLException e) {
+            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
+        }
+        finally {
+            try {
+                cis.close();
+                pis.close();
+            }
+            catch (final IOException e) {
+                log.error("Error in closing streams...potential leak");
+            }
+        }
+    }
+
+    @Override
+    protected TagMetaDto saveBlobAsBytes(TagMetaDto entity) throws CdbServiceException {
+
+        final String tablename = this.tablename();
+
+        final String sql = PayloadRequests.getInsertAllQuery(tablename);
+
+        log.info("Insert Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
+
+        final InputStream is = new ByteArrayInputStream(entity.getChannelInfo().getBytes(StandardCharsets.UTF_8));
+        final InputStream sis = new ByteArrayInputStream(entity.getPayloadInfo().getBytes(StandardCharsets.UTF_8));
+
+        execute(is, sis, sql, entity);
+        log.debug("Search for stored tag meta as a verification, use tag {}", entity.getTagName());
+        return findMetaInfo(entity.getTagName());
+    }
 
 
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.TagMetaDBImpl#save(hep.crest.swagger.model.TagMetaDto)
-	 */
-	@Override
-	public TagMeta save(TagMetaDto entity) throws CdbServiceException {
-		TagMeta savedentity = null;
-		try {
-			this.saveBlobAsBytes(entity);
-			savedentity = find(entity.getTagName());
-		} catch (CdbServiceException e) {
-			log.error("Exception in save() : {}", e.getMessage());
-		}
-		return savedentity;
-	}
+    @Override
+    protected TagMetaDto updateAsBytes(TagMetaDto entity) throws CdbServiceException {
+        final String tablename = this.tablename();
+        final String sql = TagMetaRequests.getUpdateQuery(tablename);
+
+        log.info("Update Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
+        final InputStream is = new ByteArrayInputStream(entity.getChannelInfo().getBytes(StandardCharsets.UTF_8));
+        final InputStream sis = new ByteArrayInputStream(entity.getPayloadInfo().getBytes(StandardCharsets.UTF_8));
+
+        execute(is, sis, sql, entity);
+        log.debug("Search for stored tag meta as a verification, use tag {}", entity.getTagName());
+        return findMetaInfo(entity.getTagName());
+    }
 }

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package hep.crest.server.security;
 
 import org.slf4j.Logger;
@@ -32,137 +29,196 @@ import hep.crest.data.config.CrestProperties;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired
-	private CrestProperties cprops;
+    /**
+     * Properties.
+     */
+    @Autowired
+    private CrestProperties cprops;
 
-	@Autowired
-	private UserDetailsService userDetailsService;
+    /**
+     * Service.
+     */
+    @Autowired
+    private UserDetailsService userDetailsService;
 
-	@Value("${USER_SEARCH_BASE}")
-	private String userSearchBase;
-	@Value("${USER_DN_PATTERNS}")
-	private String userDnPatterns;
-	@Value("${USER_SEARCH_FILTER}")
-	private String userSearchFilter;
+    /**
+     * The user search base for LDAP.
+     */
+    @Value("${USER_SEARCH_BASE}")
+    private String userSearchBase;
+    /**
+     * The user dn patterns for LDAP.
+     */
+    @Value("${USER_DN_PATTERNS}")
+    private String userDnPatterns;
+    /**
+     * The user search filter for LDAP.
+     */
+    @Value("${USER_SEARCH_FILTER}")
+    private String userSearchFilter;
 
-	@Value("${GROUP_SEARCH_BASE}")
-	private String groupSearchBase;
-	@Value("${GROUP_SEARCH_FILTER}")
-	private String groupSearchFilter;
-	@Value("${GROUP_ROLE_ATTRIBUTE}")
-	private String groupRoleAttribute;
-	@Value("${MANAGER_DN}")
-	private String managerDn;
-	@Value("${MANAGER_PASSWORD}")
-	private String managerPassword;
-	@Value("${LDAP_AUTHENTICATOR_URL}")
-	private String url;
-	@Value("${ACCESS}")
-	private String access;
+    /**
+     * The group search base for LDAP.
+     */
+    @Value("${GROUP_SEARCH_BASE}")
+    private String groupSearchBase;
+    /**
+     * The group search filter for LDAP.
+     */
+    @Value("${GROUP_SEARCH_FILTER}")
+    private String groupSearchFilter;
+    /**
+     * The group role attribute for LDAP.
+     */
+    @Value("${GROUP_ROLE_ATTRIBUTE}")
+    private String groupRoleAttribute;
+    /**
+     * The manager dn for LDAP.
+     */
+    @Value("${MANAGER_DN}")
+    private String managerDn;
+    /**
+     * The manager dn password for LDAP.
+     */
+    @Value("${MANAGER_PASSWORD}")
+    private String managerPassword;
+    /**
+     * The url for the authentication for LDAP.
+     */
+    @Value("${LDAP_AUTHENTICATOR_URL}")
+    private String url;
+    /**
+     * The access.
+     */
+    @Value("${ACCESS}")
+    private String access;
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		log.debug("Configure http security rules");
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.springframework.security.config.annotation.web.configuration.
+     * WebSecurityConfigurerAdapter#configure(org.springframework.security.config.
+     * annotation.web.builders.HttpSecurity)
+     */
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        log.debug("Configure http security rules");
 
-		if (cprops.getSecurity().equals("active")) {
-			http.authorizeRequests().antMatchers(HttpMethod.GET, "/**").permitAll().antMatchers(HttpMethod.POST, "/**")
-					.access("hasAuthority('ATLAS-CONDITIONS')")
-					.antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU").and().httpBasic().and()
-					.csrf().disable();			
-			
-		} else if (cprops.getSecurity().equals("none")) {
-			log.info("No security enabled for this server....");
-			http.authorizeRequests().antMatchers("/**").permitAll().and().httpBasic().and().csrf().disable();
-		} else if (cprops.getSecurity().equals("reco")) {
-			http.authorizeRequests().antMatchers(HttpMethod.POST, "/**").denyAll()
-								   .antMatchers(HttpMethod.PUT, "/**").denyAll()
-								   .antMatchers(HttpMethod.DELETE, "/**").denyAll()
-								   .and().httpBasic().and().csrf()
-					.disable();
-		} else if (cprops.getSecurity().equals("weak")) {
-			log.info("Low security enabled for this server....");
-			http.authorizeRequests().antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU")
-					.antMatchers(HttpMethod.OPTIONS, "/**").permitAll().antMatchers(HttpMethod.HEAD, "/**").permitAll()
-					.antMatchers(HttpMethod.GET, "/**").permitAll().antMatchers(HttpMethod.POST, "/**").permitAll()
-					.antMatchers(HttpMethod.DELETE, "/admin/**").hasRole("GURU")
-					.antMatchers(HttpMethod.PUT, "/admin/**").hasRole("GURU").and().httpBasic().and().csrf().disable();
-		}
-	}
+        if (cprops.getSecurity().equals("active")) {
+            http.authorizeRequests().antMatchers(HttpMethod.GET, "/**").permitAll()
+                    .antMatchers(HttpMethod.POST, "/**").access("hasAuthority('ATLAS-CONDITIONS')")
+                    .antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU").and().httpBasic().and()
+                    .csrf().disable();
 
-	/**
-	 * @param auth
-	 * @throws Exception
-	 */
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		log.debug("Configure authentication manager");
-		if (cprops.getAuthenticationtype().equals("database")) {
-			auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-		} else if (cprops.getAuthenticationtype().equals("ldap")) {
-			// here put LDAP
-			log.debug("Use ldap authentication: {} {} {} {} ",url,managerDn,userSearchBase,userDnPatterns);
-	        LdapAuthoritiesPopulator ldapAuthoritiesPopulator = authoritiesPopulator(contextSource());
-			auth.ldapAuthentication()
-					.ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
-					.contextSource(contextSource())
-					.userSearchBase(userSearchBase).userDnPatterns(userDnPatterns).userSearchFilter(userSearchFilter)
-					.rolePrefix("")
-					;
-		} else {
-			auth.inMemoryAuthentication().withUser("userusr").password("password").roles("user").and().withUser("adminusr")
-					.password("password").roles("admin", "user").and().withUser("guru").password("guru")
-					.roles("admin", "user", "GURU");
-		}
-		// for this check
-		// http://www.programming-free.com/2015/09/spring-security-password-encryption.html?showComment=1502891898256
-		// auth.userDetailsService(accountRepository)
+        }
+        else if (cprops.getSecurity().equals("none")) {
+            log.info("No security enabled for this server....");
+            http.authorizeRequests().antMatchers("/**").permitAll().and().httpBasic().and().csrf()
+                    .disable();
+        }
+        else if (cprops.getSecurity().equals("reco")) {
+            http.authorizeRequests().antMatchers(HttpMethod.POST, "/**").denyAll()
+                    .antMatchers(HttpMethod.PUT, "/**").denyAll()
+                    .antMatchers(HttpMethod.DELETE, "/**").denyAll().and().httpBasic().and().csrf()
+                    .disable();
+        }
+        else if (cprops.getSecurity().equals("weak")) {
+            log.info("Low security enabled for this server....");
+            http.authorizeRequests().antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU")
+                    .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .antMatchers(HttpMethod.HEAD, "/**").permitAll()
+                    .antMatchers(HttpMethod.GET, "/**").permitAll()
+                    .antMatchers(HttpMethod.POST, "/**").permitAll()
+                    .antMatchers(HttpMethod.DELETE, "/admin/**").hasRole("GURU")
+                    .antMatchers(HttpMethod.PUT, "/admin/**").hasRole("GURU").and().httpBasic()
+                    .and().csrf().disable();
+        }
+    }
 
-	}
-	
-	/**
-	 * @return
-	 */
-	@Bean
-	public LdapContextSource contextSource() {
-        String ldapurl = url;
-        DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(ldapurl);
+    /**
+     * @param auth
+     *            the AuthenticationManagerBuilder
+     * @throws Exception
+     *             If an Exception occurred
+     */
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        log.debug("Configure authentication manager");
+        if (cprops.getAuthenticationtype().equals("database")) {
+            auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        }
+        else if (cprops.getAuthenticationtype().equals("ldap")) {
+            // here put LDAP
+            log.debug("Use ldap authentication: {} {} {} {} ", url, managerDn, userSearchBase,
+                    userDnPatterns);
+            final LdapAuthoritiesPopulator ldapAuthoritiesPopulator = authoritiesPopulator(
+                    contextSource());
+            auth.ldapAuthentication().ldapAuthoritiesPopulator(ldapAuthoritiesPopulator)
+                    .contextSource(contextSource()).userSearchBase(userSearchBase)
+                    .userDnPatterns(userDnPatterns).userSearchFilter(userSearchFilter)
+                    .rolePrefix("");
+        }
+        else {
+            auth.inMemoryAuthentication().withUser("userusr").password("password").roles("user")
+                    .and().withUser("adminusr").password("password").roles("admin", "user").and()
+                    .withUser("guru").password("guru").roles("admin", "user", "GURU");
+        }
+        // for this check
+        // http://www.programming-free.com/2015/09/spring-security-password-encryption.html?showComment=1502891898256
+        // auth.userDetailsService(accountRepository)
+
+    }
+
+    /**
+     * @return LdapContextSource
+     */
+    @Bean
+    public LdapContextSource contextSource() {
+        final String ldapurl = url;
+        final DefaultSpringSecurityContextSource context = new DefaultSpringSecurityContextSource(
+                ldapurl);
         context.setUserDn(managerDn);
         context.setPassword(managerPassword);
         context.setReferral("follow");
         context.afterPropertiesSet();
         return context;
-	}
-	
-	/**
-	 * @return
-	 */
-	@Bean
-	public LdapTemplate ldapTemplate() {
-	    return new LdapTemplate(contextSource());
-	}
-	
-	/**
-	 * @param context
-	 * @return
-	 */
-	@Bean(name="ldapAuthoritiesPopulator")
-	public LdapAuthoritiesPopulator authoritiesPopulator(ContextSource context) {
-		log.debug("Instantiate authorities populator....");
-        LdapAuthoritiesPopulator ldp = new DefaultLdapAuthoritiesPopulator(context, groupSearchBase);
-        ((DefaultLdapAuthoritiesPopulator)ldp).setSearchSubtree(true);
-        ((DefaultLdapAuthoritiesPopulator)ldp).setGroupRoleAttribute(groupRoleAttribute);
-        ((DefaultLdapAuthoritiesPopulator)ldp).setGroupSearchFilter(groupSearchFilter);
-        ((DefaultLdapAuthoritiesPopulator)ldp).setRolePrefix("");
-        return ldp;
-	}
+    }
 
-	/**
-	 * @return
-	 */
-	@Bean(name = "dbPasswordEncoder")
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    /**
+     * @return LdapTemplate
+     */
+    @Bean
+    public LdapTemplate ldapTemplate() {
+        return new LdapTemplate(contextSource());
+    }
+
+    /**
+     * @param context
+     *            the ContextSource
+     * @return LdapAuthoritiesPopulator
+     */
+    @Bean(name = "ldapAuthoritiesPopulator")
+    public LdapAuthoritiesPopulator authoritiesPopulator(ContextSource context) {
+        log.debug("Instantiate authorities populator....");
+        final LdapAuthoritiesPopulator ldp = new DefaultLdapAuthoritiesPopulator(context,
+                groupSearchBase);
+        ((DefaultLdapAuthoritiesPopulator) ldp).setSearchSubtree(true);
+        ((DefaultLdapAuthoritiesPopulator) ldp).setGroupRoleAttribute(groupRoleAttribute);
+        ((DefaultLdapAuthoritiesPopulator) ldp).setGroupSearchFilter(groupSearchFilter);
+        ((DefaultLdapAuthoritiesPopulator) ldp).setRolePrefix("");
+        return ldp;
+    }
+
+    /**
+     * @return PasswordEncoder
+     */
+    @Bean(name = "dbPasswordEncoder")
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

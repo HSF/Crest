@@ -289,10 +289,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/FolderDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/FolderSetDto"
 						}
 					}
 				}
@@ -384,10 +381,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/RunLumiInfoDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/RunLumiSetDto"
 						}
 					}
 				}
@@ -536,10 +530,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagMapSetDto"
 						}
 					}
 				}
@@ -597,10 +588,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/GlobalTagSetDto"
 						}
 					}
 				}
@@ -701,24 +689,23 @@
 						"in": "query",
 						"description": "record:  the record string {}",
 						"required": false,
-						"type": "string"
+						"type": "string",
+					    "default": "none"
 					},
 					{
 						"name": "label",
 						"in": "query",
 						"description": "label:  the label string {}",
 						"required": false,
-						"type": "string"
+						"type": "string",
+					    "default": "none"
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
 						}
 					}
 				}
@@ -782,10 +769,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -819,6 +803,41 @@
 						"description": "successful operation",
 						"schema": {
 							"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
+						}
+					}
+				}
+			}
+		},
+		"/iovs/storebatch": {
+			"post": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Create many IOVs in the database, associated to a tag name.",
+				"description": "This method allows to insert multiple IOVs. Arguments: tagname,end time.",
+				"operationId": "storeBatchIovMultiForm",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "A json string that is used to construct a IovSetDto object.",
+						"required": true,
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -858,8 +877,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "integer",
-							"format": "int64"
+							"$ref": "../../components/json/crestdata.json#/definitions/CrestBaseResponse"
 						}
 					}
 				}
@@ -871,7 +889,7 @@
 					"iovs"
 				],
 				"summary": "Get the number o iovs for tags matching pattern.",
-				"description": "This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}",
+				"description": "This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time is added. Arguments: tagname={a tag name}",
 				"operationId": "getSizeByTag",
 				"produces": [
 					"application/json"
@@ -890,10 +908,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/TagSummaryDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/TagSummarySetDto"
 						}
 					}
 				}
@@ -933,7 +948,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/GroupDto"
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -989,10 +1004,62 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
+						}
+					}
+				}
+			}
+		},
+		"/iovs/lastIov": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Select last iov for a given tagname and before a given since.",
+				"description": "This method allows to select the last iov in a tag, before a given time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, snapshot={snapshot time as long}",
+				"operationId": "lastIov",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "since",
+						"in": "query",
+						"description": "since: the since time ",
+						"required": false,
+						"type": "string",
+						"default": "now"
+					},
+					{
+						"name": "snapshot",
+						"in": "query",
+						"description": "snapshot: the snapshot time {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int64"
+					},
+					{
+						"in": "header",
+						"name": "dateformat",
+						"description": "The format of the input time fields: {yyyyMMdd'T'HHmmssX | ms} DEFAULT: ms (so it is a long). Used for insertionTime comparaison.",
+						"default": "ms",
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1032,10 +1099,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/IovDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/IovSetDto"
 						}
 					}
 				}
@@ -1329,36 +1393,6 @@
 				}
 			}
 		},
-		"/payloads/{hash}/data": {
-			"get": {
-				"tags": [
-					"payloads"
-				],
-				"summary": "Finds payload data by hash; the payload object contains the real BLOB.",
-				"description": "Select one payload at the time, no regexp searches allowed here",
-				"operationId": "getBlob",
-				"produces": [
-					"application/octet-stream"
-				],
-				"parameters": [
-					{
-						"name": "hash",
-						"in": "path",
-						"description": "hash of the payload",
-						"required": true,
-						"type": "string"
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "successful operation",
-						"schema": {
-							"type": "string"
-						}
-					}
-				}
-			}
-		},
 		"/payloads/{hash}/meta": {
 			"get": {
 				"tags": [
@@ -1442,10 +1476,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
-							}
+							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
 						}
 					}
 				}
@@ -1509,7 +1540,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "../../components/json/crestdata.json#/definitions/TagDto"
+							"$ref": "../../components/json/crestdata.json#/definitions/TagSetDto"
 						}
 					}
 				}

@@ -8,9 +8,9 @@ spring:
  profiles:
   include: default
 spring:
+    profiles: pgsvom
     security:
       strategy: MODE_INHERITABLETHREADLOCAL
-    profiles: pgsvom
     jersey:
       application-path: ${crest.api.name}
     datasource:

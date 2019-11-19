@@ -18,38 +18,52 @@
 package hep.crest.data.repositories;
 
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.pojo.TagMeta;
 import hep.crest.swagger.model.TagMetaDto;
-
 
 /**
  * @author formica
  *
  */
 public interface TagMetaDataBaseCustom {
-	TagMeta find(String id);
-	/**
-	 * The method does not access blob data.
-	 * @param id
-	 * @return The tag metadata or null.
-	 */
-	TagMeta findMetaInfo(String id);
 
-	/**
-	 * @param entity
-	 * @return Either the entity which has been saved or null.
-	 * @throws CdbServiceException
-	 * 	It should in reality not throw any exception
-	 */
-	TagMeta save(TagMetaDto entity) throws CdbServiceException;
-	
-	/**
-	 * @param entity
-	 * @return Either the entity which has been updated or null.
-	 * @throws CdbServiceException
-	 * 	It should in reality not throw any exception
-	 */
-	TagMeta update(TagMetaDto entity) throws CdbServiceException;
-	
-	void delete(String id);
+    /**
+     * @param id
+     *            the String
+     * @return TagMetaDto
+     */
+    TagMetaDto find(String id);
+
+    /**
+     * The method does not access blob data.
+     *
+     * @param id
+     *            the String
+     * @return The tag metadata or null.
+     */
+    TagMetaDto findMetaInfo(String id);
+
+    /**
+     * @param entity
+     *            the TagMetaDto
+     * @return Either the entity which has been saved or null.
+     * @throws CdbServiceException
+     *             It should in reality not throw any exception
+     */
+    TagMetaDto save(TagMetaDto entity) throws CdbServiceException;
+
+    /**
+     * @param entity
+     *            the TagMetaDto
+     * @return Either the entity which has been updated or null.
+     * @throws CdbServiceException
+     *             It should in reality not throw any exception
+     */
+    TagMetaDto update(TagMetaDto entity) throws CdbServiceException;
+
+    /**
+     * @param id
+     *            the String
+     * @return
+     */
+    void delete(String id);
 }

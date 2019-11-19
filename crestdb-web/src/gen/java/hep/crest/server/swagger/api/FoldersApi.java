@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
 import hep.crest.swagger.model.FolderDto;
+import hep.crest.swagger.model.FolderSetDto;
 
 import java.util.Map;
 import java.util.List;
@@ -33,7 +34,7 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the folders API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-07T17:03:27.462+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-30T12:08:37.171+01:00")
 public class FoldersApi  {
 	@Autowired
 	private FoldersApiService delegate;
@@ -54,9 +55,9 @@ public class FoldersApi  {
     
     
     @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Finds a FolderDto list.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = FolderDto.class, responseContainer = "List", tags={ "folders", })
+    @io.swagger.annotations.ApiOperation(value = "Finds a FolderDto list.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = FolderSetDto.class, tags={ "folders", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = FolderDto.class, responseContainer = "List") })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = FolderSetDto.class) })
     public Response listFolders(@ApiParam(value = "by: the search pattern {none}", defaultValue="none") @DefaultValue("none") @QueryParam("by") String by
 ,@ApiParam(value = "sort: the sort pattern {nodeFullpath:ASC}", defaultValue="nodeFullpath:ASC") @DefaultValue("nodeFullpath:ASC") @QueryParam("sort") String sort
 ,@Context SecurityContext securityContext,@Context UriInfo info)

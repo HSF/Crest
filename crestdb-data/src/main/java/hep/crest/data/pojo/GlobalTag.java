@@ -271,6 +271,9 @@ public class GlobalTag implements java.io.Serializable {
             final Timestamp now = new Timestamp(new Date().getTime());
             this.insertionTime = now;
         }
+        if (this.snapshotTime == null) {
+            this.snapshotTime = new Date(this.insertionTime.getTime());
+        }
     }
 
     /*

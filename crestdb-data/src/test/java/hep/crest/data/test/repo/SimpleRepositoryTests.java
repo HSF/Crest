@@ -32,7 +32,7 @@ import hep.crest.data.repositories.TagRepository;
 @ActiveProfiles("test")
 public class SimpleRepositoryTests {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private TestEntityManager entityManager;
@@ -45,14 +45,15 @@ public class SimpleRepositoryTests {
 
 	@Test
 	public void testGlobalTag() throws Exception {
-		GlobalTag entity = new GlobalTag("GT-TEST-XX");
+		final GlobalTag entity = new GlobalTag("GT-TEST-XX");
 		entity.setDescription("A test gtag");
 		entity.setRelease("v1");
 		entity.setWorkflow("test");
 		entity.setScenario("test");
 		entity.setValidity(new BigDecimal(2000L));
+		//entity.setSnapshotTime(new Date(0L));
 		this.entityManager.persist(entity);
-		Optional<GlobalTag> gt = this.gtrepo.findById("GT-TEST-XX");
+		final Optional<GlobalTag> gt = this.gtrepo.findById("GT-TEST-XX");
 		if (gt.isPresent()) {
 			log.info("Found global tag " + gt.get());
 		} else {
@@ -65,7 +66,7 @@ public class SimpleRepositoryTests {
 
 	@Test
 	public void testTag() throws Exception {
-		Tag entity = new Tag("TAG-TEST-XX");
+		final Tag entity = new Tag("TAG-TEST-XX");
 		entity.setDescription("A test tag");
 		entity.setEndOfValidity(new BigDecimal(1000L));
 		entity.setObjectType("test");
@@ -73,7 +74,7 @@ public class SimpleRepositoryTests {
 		entity.setLastValidatedTime(new BigDecimal(2000L));
 		entity.setTimeType("time");
 		this.entityManager.persist(entity);
-		Tag gt = this.trepo.findByName("TAG-TEST-XX");
+		final Tag gt = this.trepo.findByName("TAG-TEST-XX");
 		if (gt != null) {
 			log.info("Found tag " + gt);
 		} else {

@@ -18,13 +18,9 @@
 package hep.crest.data.repositories;
 
 import javax.sql.DataSource;
-import javax.sql.rowset.serial.SerialBlob;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import hep.crest.data.pojo.TagMeta;
 
 /**
  * @author formica
@@ -32,42 +28,19 @@ import hep.crest.data.pojo.TagMeta;
  */
 public class TagMetaSQLITEImpl extends TagMetaDBImpl implements TagMetaDataBaseCustom {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * The logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public TagMetaSQLITEImpl(DataSource ds) {
-		super(ds);
-	}
-
-	/* (non-Javadoc)
-	 * @see hep.crest.data.repositories.TagMetaDataBaseCustom#find(java.lang.String)
-	 */
-	@Override
-	public TagMeta find(String id) {
-		log.info("Find tag meta {} using JDBCTEMPLATE", id);
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-		String tablename = this.tablename();
-
-		String sql = "select TAG_NAME,DESCRIPTION,CHANNEL_SIZE,COLUMN_SIZE,INSERTION_TIME,CHANNEL_INFO,PAYLOAD_INFO from " + tablename
-				+ " where TAG_NAME=?";
-
-		// Be careful, this seems not to work with Postgres: probably getBlob loads an
-		// OID and not the byte[]
-		// Temporarely, try to create a postgresql implementation of this class.
-
-		return jdbcTemplate.queryForObject(sql, new Object[] { id }, (rs, num) -> {
-			final TagMeta entity = new TagMeta();
-			entity.setTagName(rs.getString("TAG_NAME"));
-			entity.setDescription(rs.getString("DESCRIPTION"));
-			entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-			SerialBlob blob = new SerialBlob(rs.getBytes("CHANNEL_INFO"));
-			entity.setChannelInfo(blob);
-			blob = new SerialBlob(rs.getBytes("PAYLOAD_INFO"));
-			entity.setPayloadInfo(blob);
-			entity.setChansize(rs.getInt("CHANNEL_SIZE"));
-			entity.setColsize(rs.getInt("COLUMN_SIZE"));
-
-			return entity;
-		});
-	}
+    /**
+     * Default ctor.
+     *
+     * @param ds
+     *            the DataSource
+     */
+    public TagMetaSQLITEImpl(DataSource ds) {
+        super(ds);
+    }
 
 }

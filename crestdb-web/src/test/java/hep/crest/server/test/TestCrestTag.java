@@ -3,117 +3,185 @@ package hep.crest.server.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import hep.crest.swagger.model.FolderDto;
-import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.GlobalTagDto;
-import hep.crest.swagger.model.GlobalTagMapDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import hep.crest.swagger.model.TagDto;
-import hep.crest.swagger.model.TagMetaDto;
+import hep.crest.swagger.model.TagSetDto;
+import hep.crest.testutils.DataGenerator;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ActiveProfiles("default")
 public class TestCrestTag {
-	@Autowired
-	private TestRestTemplate testRestTemplate;
 
-	@Test
-	public void testA_getAndRemoveTags() {
-		ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
-		TagDto[] taglist = response.getBody();
-		for (TagDto tagDto : taglist) {
-			String url = "/crestapi/admin/tags/" + tagDto.getName();
-			System.out.println("Removing tag " + url);
-			this.testRestTemplate.delete(url);
-		}
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
-	}
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Test
-	public void testB_storeTags() {
-		TagDto dto = new TagDto().description("test").name("SB_TAG").endOfValidity(new BigDecimal(1))
-				.lastValidatedTime(new BigDecimal(1)).payloadSpec("test").synchronization("BLK").timeType("run")
-				.modificationTime(new Date()).insertionTime(new Date());
-		System.out.println("Store request: " + dto);
-		ResponseEntity<TagDto> response = this.testRestTemplate.postForEntity("/crestapi/tags", dto, TagDto.class);
-		System.out.println("Received response: " + response);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		
-    	GlobalTagDto gtdto = new GlobalTagDto().description("test").name("GT_TEST").release("1").scenario("test").type("test").workflow("M").validity(new BigDecimal(0)).snapshotTime(new Date()).insertionTime(new Date());
-        System.out.println("Store global tag request: "+gtdto);
-        ResponseEntity<GlobalTagDto> respgt = this.testRestTemplate.postForEntity("/crestapi/globaltags", gtdto, GlobalTagDto.class);
-        System.out.println("Received response: "+respgt);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		
-		GlobalTagMapDto mapdto = new GlobalTagMapDto().globalTagName("GT_TEST").label("label").record("record").tagName("SB_TAG");
-        System.out.println("Store request: "+mapdto);
-        ResponseEntity<GlobalTagMapDto> response2 = this.testRestTemplate.postForEntity("/crestapi/globaltagmaps", mapdto, GlobalTagMapDto.class);
-        System.out.println("Received response: "+response2);
-        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
+    @Autowired
+    private TestRestTemplate testRestTemplate;
+
+    @Autowired
+    @Qualifier("jacksonMapper")
+    private ObjectMapper mapper;
 
     @Test
-    public void testC_storeTagMeta() {
-        TagMetaDto dto = new TagMetaDto().description("<some>description</some>").tagName("SB_TAG").channelInfo("[{\"0\": \"achannel\"},{ \"1\":\"another_chan\"}]"
-                ).payloadInfo("{ \"col1\": \"Int\"}").chansize(2).colsize(1);
-        System.out.println("Store tag meta request: " + dto);
-        ResponseEntity<TagMetaDto> response = this.testRestTemplate.postForEntity("/crestapi/tags/SB_TAG/meta", dto, TagMetaDto.class);
-        System.out.println("Received response: " + response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    public void testA_getAndRemoveTags() {
+        final ResponseEntity<TagSetDto> response = this.testRestTemplate
+                .getForEntity("/crestapi/tags", TagSetDto.class);
+        log.info("Found response {}", response.getBody().toString());
+        final TagSetDto tagset = response.getBody();
+        for (final TagDto tagDto : tagset.getResources()) {
+            final String url = "/crestapi/admin/tags/" + tagDto.getName();
+            log.info("Removing tag {}", url);
+            this.testRestTemplate.delete(url);
+        }
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getSize()).isGreaterThanOrEqualTo(0);
     }
 
-	@Test
-	public void testC_storeFolder() {
-        FolderDto folderdto = new FolderDto().nodeFullpath("test").nodeDescription("description").groupRole("groupe").nodeName("node").schemaName("schema").tagPattern("tag");
-        System.out.println("Store request: "+folderdto);
-        ResponseEntity<FolderDto> response3 = this.testRestTemplate.postForEntity("/crestapi/folders", folderdto, FolderDto.class);
-        System.out.println("Received response: "+response3);
-        assertThat(response3.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
-	
-	@Test
-	public void testD_updateTagMeta() {
-		GenericMap updmeta = new GenericMap();
-		updmeta.put("description", "another desc");
-		final String url = String.format("/crestapi/tags/{id}/meta");
-		//String url = "/crestapi/tags/SB_TAG/meta";
-	    Map<String, String> param = new HashMap<String, String>();
-	    param.put("id","SB_TAG");
-	    HttpHeaders headers = new HttpHeaders();
+    @Test
+    public void testB_storeTags() {
+        final TagDto dto = DataGenerator.generateTagDto("B-TAG-02", "test");
+        log.info("Store tag : {} ", dto);
+        final ResponseEntity<TagDto> response = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto, TagDto.class);
+        log.info("Received response: {}", response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-	    HttpEntity<GenericMap> requestEntity = new HttpEntity<GenericMap>(updmeta,headers);
-	    ResponseEntity<TagMetaDto> response = this.testRestTemplate.exchange(url, HttpMethod.PUT, requestEntity, TagMetaDto.class, param);
-		System.out.println("Received response: " + response);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
+        log.info("Try to store tag again : {} ", dto);
+        final ResponseEntity<TagDto> response1 = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto, TagDto.class);
+        log.info("Received response: {}", response1);
+        assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 
-	@Test
-	public void testD_getAllTags() {
-		ResponseEntity<TagDto[]> response = this.testRestTemplate.getForEntity("/crestapi/tags", TagDto[].class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody().length).isGreaterThanOrEqualTo(0);
-	}
+        dto.name(null);
+        log.info("Try to use null name in tag again : {} ", dto);
+        final ResponseEntity<String> response2 = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto, String.class);
+        log.info("Received response: {}", response2);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        
+        final ResponseEntity<String> responsedelete = this.testRestTemplate
+                .exchange("/crestapi/admin/tags/B-TAG-02", HttpMethod.DELETE, null, String.class);
+        log.info("Received response on delete: {}", responsedelete);
+        assertThat(responsedelete.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+    }
+
+    @Test
+    public void testC_getAllTags() {
+        final ResponseEntity<TagSetDto> response = this.testRestTemplate
+                .getForEntity("/crestapi/tags", TagSetDto.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getSize()).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
+    public void testC_findTags() throws Exception {
+        final TagDto dto = DataGenerator.generateTagDto("B-TAG-03", "test");
+        log.info("Store tag : {} ", dto);
+        final ResponseEntity<TagDto> response = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto, TagDto.class);
+        log.info("Received response: {}", response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final TagDto dto1 = DataGenerator.generateTagDto("B-TAG-04", "test");
+        log.info("Store tag : {} ", dto);
+        final ResponseEntity<TagDto> response1 = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto1, TagDto.class);
+        log.info("Received response: {}", response1);
+        assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final ResponseEntity<String> resp = this.testRestTemplate.exchange("/crestapi/tags",
+                HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved all tags {} ", resp.getBody());
+            final String responseBody = resp.getBody();
+            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+            TagSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, TagSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
+        final ResponseEntity<String> resp1 = this.testRestTemplate
+                .exchange("/crestapi/tags/" + dto1.getName(), HttpMethod.GET, null, String.class);
+        {
+            log.info("Retrieved tag {} ", dto1.getName());
+            final String responseBody = resp1.getBody();
+            assertThat(resp1.getStatusCode()).isEqualTo(HttpStatus.OK);
+            TagSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, TagSetDto.class);
+            assertThat(ok.getSize()).isEqualTo(1);
+        }
+
+        final TagDto body = dto1;
+        body.setDescription("another description updated");
+        body.endOfValidity(new BigDecimal(1000L));
+        body.synchronization("blkp");
+        body.payloadSpec("newspec");
+        final HttpEntity<TagDto> updrequest = new HttpEntity<TagDto>(body);
+
+        final ResponseEntity<String> respupd = this.testRestTemplate
+                .exchange("/crestapi/tags/" + dto1.getName(), HttpMethod.PUT, updrequest, String.class);
+        {
+            log.info("Update tag {} ", body.getName());
+            final String responseBody = respupd.getBody();
+            assertThat(respupd.getStatusCode()).isEqualTo(HttpStatus.OK);
+            TagDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, TagDto.class);
+            assertThat(ok).isNotNull();
+            assertThat(ok.getSynchronization()).isEqualTo("blkp");
+        }
+        final ResponseEntity<String> respupdnull = this.testRestTemplate
+                .exchange("/crestapi/tags/" + dto1.getName(), HttpMethod.PUT, null, String.class);
+        assertThat(respupdnull.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        final ResponseEntity<String> respupdnotexist = this.testRestTemplate
+                .exchange("/crestapi/tags/NOT-THERE", HttpMethod.PUT, null, String.class);
+        assertThat(respupdnotexist.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        final ResponseEntity<String> resp1null = this.testRestTemplate
+                .exchange("/crestapi/tags/SOME-T", HttpMethod.GET, null, String.class);
+        {
+            log.info("Retrieved tag SOME-T should return null");
+            assertThat(resp1null.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        final ResponseEntity<String> resp2 = this.testRestTemplate
+                .exchange("/crestapi/tags?by=name:TAG,insertiontime>0", HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved global tag list " + resp2.getBody());
+            final String responseBody = resp2.getBody();
+            assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.OK);
+            TagSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, TagSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
+    }
 }

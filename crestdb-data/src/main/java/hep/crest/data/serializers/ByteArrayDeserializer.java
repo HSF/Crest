@@ -36,18 +36,29 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 @Component
 public class ByteArrayDeserializer extends JsonDeserializer<byte[]> {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass()); 
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Override
-	public byte[]  deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException {
-		try {
-			log.debug("Trying to deserialize json parser {}",jp);
-			String blobstr = new String(jp.getTextCharacters());
-			return Base64.getDecoder().decode(blobstr);
-		} catch (Exception ex) {
-			log.error("Failed to deserialize byte array {}",jp.getText());
-			throw new JsonParseException(jp,ex.getMessage());
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.
+     * jackson.core.JsonParser,
+     * com.fasterxml.jackson.databind.DeserializationContext)
+     */
+    @Override
+    public byte[] deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+        try {
+            log.debug("Trying to deserialize json parser {}", jp);
+            final String blobstr = new String(jp.getTextCharacters());
+            return Base64.getDecoder().decode(blobstr);
+        }
+        catch (final Exception ex) {
+            log.error("Failed to deserialize byte array {}", jp.getText());
+            throw new JsonParseException(jp, ex.getMessage());
+        }
+    }
 }

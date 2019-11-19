@@ -19,7 +19,10 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+
 import hep.crest.data.repositories.querydsl.SearchCriteria;
+import hep.crest.swagger.model.GenericMap;
 
 /**
  * @author formica
@@ -28,114 +31,186 @@ import hep.crest.data.repositories.querydsl.SearchCriteria;
 @Component
 public class PageRequestHelper {
 
-	private static final String QRY_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:|<|>)([a-zA-Z0-9_\\-\\/\\.]+?),";
-	private static final String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)([ASC|DESC]+?),";
+    /**
+     * The query pattern.
+     */
+    private static final String QRY_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:|<|>)([a-zA-Z0-9_\\-\\/\\.]+?),";
+    /**
+     * The sort pattern.
+     */
+    private static final String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)([ASC|DESC]+?),";
 
-	private static final Integer MAX_PAGE_SIZE = 10000;
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * Maximum page size.
+     */
+    private static final Integer MAX_PAGE_SIZE = 10000;
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public PageRequestHelper() {
-		super();
-	}
+    /**
+     * Default ctor.
+     */
+    public PageRequestHelper() {
+        super();
+    }
 
-	/**
-	 * @param page
-	 * @param size
-	 * @param sort
-	 * @return
-	 */
-	public PageRequest createPageRequest(Integer page, Integer size, String sort) {
+    /**
+     * @param page
+     *            the Integer
+     * @param size
+     *            the Integer
+     * @param sort
+     *            the Integer
+     * @return PageRequest
+     */
+    public PageRequest createPageRequest(Integer page, Integer size, String sort) {
 
-		if (size > MAX_PAGE_SIZE) {
-			log.warn("Requested size exceed maximum page size...change it to {}",MAX_PAGE_SIZE);
-			size = MAX_PAGE_SIZE;
-		}
-		Pattern sortpattern = Pattern.compile(SORT_PATTERN);
-		Matcher sortmatcher = sortpattern.matcher(sort + ",");
-		List<Order> orderlist = new ArrayList<>();
-		while (sortmatcher.find()) {
-			Direction direc = Direction.ASC;
-			if (sortmatcher.group(3).equals("DESC")) {
-				direc = Direction.DESC;
-			}
-			String field = sortmatcher.group(1);
-			log.debug("Creating new order: {} {}", direc, field);
-			orderlist.add(new Order(direc, field));
-		}
-		log.debug("Created list of sorting orders of size {}", orderlist.size());
-		Order[] orders = new Order[orderlist.size()];
-		int i = 0;
-		for (Order order : orderlist) {
-			log.debug("Order @ {} = {} ", i, order);
-			orders[i++] = order;
-		}
-		Sort msort = Sort.by(orders);
-		return PageRequest.of(page, size, msort);
-	}
+        if (size > MAX_PAGE_SIZE) {
+            log.warn("Requested size exceed maximum page size...change it to {}", MAX_PAGE_SIZE);
+            size = MAX_PAGE_SIZE;
+        }
+        final Pattern sortpattern = Pattern.compile(SORT_PATTERN);
+        final Matcher sortmatcher = sortpattern.matcher(sort + ",");
+        final List<Order> orderlist = new ArrayList<>();
+        while (sortmatcher.find()) {
+            Direction direc = Direction.ASC;
+            if (sortmatcher.group(3).equals("DESC")) {
+                direc = Direction.DESC;
+            }
+            final String field = sortmatcher.group(1);
+            log.debug("Creating new order: {} {}", direc, field);
+            orderlist.add(new Order(direc, field));
+        }
+        log.debug("Created list of sorting orders of size {}", orderlist.size());
+        final Order[] orders = new Order[orderlist.size()];
+        int i = 0;
+        for (final Order order : orderlist) {
+            log.debug("Order @ {} = {} ", i, order);
+            orders[i++] = order;
+        }
+        final Sort msort = Sort.by(orders);
+        return PageRequest.of(page, size, msort);
+    }
 
-	/**
-	 * @param by
-	 * @return
-	 */
-	public List<SearchCriteria> createMatcherCriteria(String by) {
+    /**
+     * @param by
+     *            the String
+     * @return List<SearchCriteria>
+     */
+    public List<SearchCriteria> createMatcherCriteria(String by) {
 
-		Pattern pattern = Pattern.compile(QRY_PATTERN);
-		Matcher matcher = pattern.matcher(by + ",");
-		log.debug("Pattern is {}",pattern);
-		log.debug("Matcher is {}",matcher);
-		List<SearchCriteria> params = new ArrayList<>();
-		while (matcher.find()) {
-			params.add(new SearchCriteria(matcher.group(1), matcher.group(2), matcher.group(3)));
-		}
-		log.debug("List of search criteria: {}",params.size());
-		return params;
-	}
+        final Pattern pattern = Pattern.compile(QRY_PATTERN);
+        final Matcher matcher = pattern.matcher(by + ",");
+        log.debug("Pattern is {}", pattern);
+        log.debug("Matcher is {}", matcher);
+        final List<SearchCriteria> params = new ArrayList<>();
+        while (matcher.find()) {
+            params.add(new SearchCriteria(matcher.group(1), matcher.group(2), matcher.group(3)));
+        }
+        log.debug("List of search criteria: {}", params.size());
+        return params;
+    }
 
-	/**
-	 * @param by
-	 * @param dateformat
-	 * 	The date format : ms or some ISO like date string yyyyMMdd'T'HHmmssX.
-	 * @return
-	 */
-	public List<SearchCriteria> createMatcherCriteria(String by, String dateformat) {
-		DateTimeFormatter dtformatter = null;
-		if (!dateformat.equals("ms")) {
-			dtformatter = DateTimeFormatter.ofPattern(dateformat);
-		}
-		Pattern pattern = Pattern.compile(QRY_PATTERN);
-		Matcher matcher = pattern.matcher(by + ",");
-		log.debug("Pattern is {}",pattern);
-		log.debug("Matcher is {}",matcher);
-		List<SearchCriteria> params = new ArrayList<>();
-		while (matcher.find()) {
-			String varname = matcher.group(1).toLowerCase();
-			String op = matcher.group(2);
-			String val = matcher.group(3);
-			val = val.replaceAll("\\*", "\\%");
-			if (dtformatter != null && (varname.contains("time"))) {
-				ZonedDateTime zdtInstanceAtOffset = ZonedDateTime.parse(val, dtformatter);
-				ZonedDateTime zdtInstanceAtUTC = zdtInstanceAtOffset.withZoneSameInstant(ZoneOffset.UTC);
-				Long tepoch = zdtInstanceAtUTC.toInstant().toEpochMilli();
-				log.info("Parsed date at UTC : {}; use epoch {}",zdtInstanceAtUTC,tepoch);
-				val = tepoch.toString();
-			}
-			params.add(new SearchCriteria(varname, op, val));
-		}
-		log.debug("List of search criteria: {}",params.size());
-		return params;
-	}
+    /**
+     * @param params
+     *            the List<SearchCriteria>
+     * @param key
+     *            the String
+     * @return String
+     */
+    public String getParam(List<SearchCriteria> params, String key) {
+        for (final SearchCriteria searchCriteria : params) {
+            if (key.equalsIgnoreCase(searchCriteria.getKey())) {
+                return searchCriteria.getValue().toString();
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * @param key
-	 * @param op
-	 * @param val
-	 * @return
-	 */
-	public List<SearchCriteria> createCriteria(String key, String op, String val) {
+    /**
+     * @param by
+     *            the String
+     * @param dateformat
+     *            The date format : ms or some ISO like date string
+     *            yyyyMMdd'T'HHmmssX.
+     * @return List<SearchCriteria>
+     */
+    public List<SearchCriteria> createMatcherCriteria(String by, String dateformat) {
+        DateTimeFormatter dtformatter = null;
+        if (!dateformat.equals("ms")) {
+            dtformatter = DateTimeFormatter.ofPattern(dateformat);
+        }
+        final Pattern pattern = Pattern.compile(QRY_PATTERN);
+        final Matcher matcher = pattern.matcher(by + ",");
+        log.debug("Pattern is {}", pattern);
+        log.debug("Matcher is {}", matcher);
+        final List<SearchCriteria> params = new ArrayList<>();
+        while (matcher.find()) {
+            final String varname = matcher.group(1).toLowerCase();
+            final String op = matcher.group(2);
+            String val = matcher.group(3);
+            val = val.replaceAll("\\*", "\\%");
+            if (dtformatter != null && varname.contains("time")) {
+                final ZonedDateTime zdtInstanceAtOffset = ZonedDateTime.parse(val, dtformatter);
+                final ZonedDateTime zdtInstanceAtUTC = zdtInstanceAtOffset
+                        .withZoneSameInstant(ZoneOffset.UTC);
+                final Long tepoch = zdtInstanceAtUTC.toInstant().toEpochMilli();
+                log.info("Parsed date at UTC : {}; use epoch {}", zdtInstanceAtUTC, tepoch);
+                val = tepoch.toString();
+            }
+            params.add(new SearchCriteria(varname, op, val));
+        }
+        log.debug("List of search criteria: {}", params.size());
+        return params;
+    }
 
-		List<SearchCriteria> params = new ArrayList<>();
-		params.add(new SearchCriteria(key,op,val));
-		return params;
-	}
+    /**
+     * @param key
+     *            the String
+     * @param op
+     *            the String
+     * @param val
+     *            the String
+     * @return List<SearchCriteria>
+     */
+    public List<SearchCriteria> createCriteria(String key, String op, String val) {
 
+        final List<SearchCriteria> params = new ArrayList<>();
+        params.add(new SearchCriteria(key, op, val));
+        return params;
+    }
+
+    /**
+     * @param expressions
+     *            the List<BooleanExpression>
+     * @return BooleanExpression
+     */
+    public BooleanExpression getWhere(List<BooleanExpression> expressions) {
+        BooleanExpression wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        return wherepred;
+    }
+
+    /**
+     * @param params
+     *            the List<SearchCriteria>
+     * @return GenericMap
+     */
+    public GenericMap getFilters(List<SearchCriteria> params) {
+        final GenericMap filters = new GenericMap();
+        for (final SearchCriteria sc : params) {
+            filters.put(sc.getKey(), sc.getValue().toString());
+        }
+        return filters;
+    }
 }

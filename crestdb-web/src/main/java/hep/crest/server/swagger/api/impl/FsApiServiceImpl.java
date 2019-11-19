@@ -39,8 +39,8 @@ public class FsApiServiceImpl extends FsApiService {
 			TagDto dto = tagService.findOne(tagname);
 			String reqid = request.getSession().getId() + new Date().getTime();
 			if (dto == null) {
-				log.debug("Entity Not Found for name " + tagname);
-				String msg = "Entity not found exception ";
+				log.error("Entity not found for tag " + tagname);
+				String msg = "Cannot find tag "+tagname;
 				ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
 			}
@@ -49,6 +49,7 @@ public class FsApiServiceImpl extends FsApiService {
 			if (snapshot != 0L) {
 				snap = new Date(snapshot);
 			}
+			@SuppressWarnings("unused")
 			Future<String> future = dirsvc.dumpTag(tagname, snap, reqid);
 			return Response.ok("Launched task for tar creation: tar will be available at "+reqid).build();
 		

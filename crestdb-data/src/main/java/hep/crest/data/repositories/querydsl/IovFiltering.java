@@ -15,7 +15,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.exceptions.CdbServiceException;
 
-
 /**
  * @author aformic
  *
@@ -23,46 +22,48 @@ import hep.crest.data.exceptions.CdbServiceException;
 @Component("iovFiltering")
 public class IovFiltering implements IFilteringCriteria {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * hep.phycdb.svc.querydsl.IFilteringCriteria#createFilteringConditions(java
-	 * .util.List, java.lang.Object)
-	 */
-	@Override
-	public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria) throws CdbServiceException {
-		try {
-			List<BooleanExpression> expressions = new ArrayList<>();
-			for (SearchCriteria searchCriteria : criteria) {
-				log.debug("search criteria " + searchCriteria.getKey() + " " + searchCriteria.getOperation() + " "
-						+ searchCriteria.getValue());
-				String key = searchCriteria.getKey().toLowerCase();
-				if (key.equals("tagname")) {
-					BooleanExpression objtyplike = IovPredicates.hasTagName(searchCriteria.getValue().toString());
-					expressions.add(objtyplike);
-				} else if (key.equals("insertiontime")) {
-					BooleanExpression insertionTimexthan = IovPredicates
-							.isInsertionTimeXThan(searchCriteria.getOperation(), searchCriteria.getValue().toString());
-					expressions.add(insertionTimexthan);
-				} else if (key.equals("since")) {
-					BigDecimal since = new BigDecimal(searchCriteria.getValue().toString());
-					BooleanExpression sincexthan = IovPredicates
-							.isSinceXThan(searchCriteria.getOperation(), since);
-					expressions.add(sincexthan);
-				} 
-				if (searchCriteria.getKey().equals("tagid")) {
-					Long tagid = new Long(searchCriteria.getValue().toString());
-					BooleanExpression objtypeq = IovPredicates.hasTagId(tagid);
-					expressions.add(objtypeq);
-				} 
-			}
-			return expressions;
-		} catch (Exception e) {
-			throw new CdbServiceException(e.getMessage());
-		}
-	}
-
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hep.phycdb.svc.querydsl.IFilteringCriteria#createFilteringConditions(java
+     * .util.List, java.lang.Object)
+     */
+    @Override
+    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria)
+            throws CdbServiceException {
+        try {
+            final List<BooleanExpression> expressions = new ArrayList<>();
+            for (final SearchCriteria searchCriteria : criteria) {
+                log.debug("search criteria " + searchCriteria.getKey() + " "
+                        + searchCriteria.getOperation() + " " + searchCriteria.getValue());
+                final String key = searchCriteria.getKey().toLowerCase();
+                if (key.equals("tagname")) {
+                    final BooleanExpression objtyplike = IovPredicates
+                            .hasTagName(searchCriteria.getValue().toString());
+                    expressions.add(objtyplike);
+                }
+                else if (key.equals("insertiontime")) {
+                    final BooleanExpression insertionTimexthan = IovPredicates.isInsertionTimeXThan(
+                            searchCriteria.getOperation(), searchCriteria.getValue().toString());
+                    expressions.add(insertionTimexthan);
+                }
+                else if (key.equals("since")) {
+                    final BigDecimal since = new BigDecimal(searchCriteria.getValue().toString());
+                    final BooleanExpression sincexthan = IovPredicates
+                            .isSinceXThan(searchCriteria.getOperation(), since);
+                    expressions.add(sincexthan);
+                }
+            }
+            return expressions;
+        }
+        catch (final Exception e) {
+            throw new CdbServiceException(e.getMessage());
+        }
+    }
 }

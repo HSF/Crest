@@ -77,20 +77,21 @@ public class RepositoryConfig {
         }
         return bean;
     }
-    
+
     /**
      * @param mainDataSource
      *            the DataSource
      * @return TagMetaDataBaseCustom
      */
-    @Profile({"test","default","prod","h2","wildfly","ssl","dev","mysql"})
+    @Profile({ "test", "default", "prod", "h2", "wildfly", "ssl", "dev", "mysql" })
     @Bean(name = "tagmetarepo")
-    public TagMetaDataBaseCustom tagmetaDefaultRepository(@Qualifier("dataSource") DataSource mainDataSource) {
-    	final TagMetaDBImpl bean = new TagMetaDBImpl(mainDataSource);
-		if (!cprops.getSchemaname().equals("none")) {
-			bean.setDefaultTablename(cprops.getSchemaname());
-		}
-		return bean;
+    public TagMetaDataBaseCustom tagmetaDefaultRepository(
+            @Qualifier("dataSource") DataSource mainDataSource) {
+        final TagMetaDBImpl bean = new TagMetaDBImpl(mainDataSource);
+        if (!cprops.getSchemaname().equals("none")) {
+            bean.setDefaultTablename(cprops.getSchemaname());
+        }
+        return bean;
     }
 
     /**
@@ -98,29 +99,31 @@ public class RepositoryConfig {
      *            the DataSource
      * @return TagMetaDataBaseCustom
      */
-    @Profile({"postgres"})
+    @Profile({ "postgres" })
     @Bean(name = "tagmetarepo")
-    public TagMetaDataBaseCustom tagmetaPostgresRepository(@Qualifier("dataSource") DataSource mainDataSource) {
-    	final TagMetaPostgresImpl bean = new TagMetaPostgresImpl(mainDataSource);
-		if (!cprops.getSchemaname().equals("none")) {
-			bean.setDefaultTablename(cprops.getSchemaname());
-		}
-		return bean;
+    public TagMetaDataBaseCustom tagmetaPostgresRepository(
+            @Qualifier("dataSource") DataSource mainDataSource) {
+        final TagMetaPostgresImpl bean = new TagMetaPostgresImpl(mainDataSource);
+        if (!cprops.getSchemaname().equals("none")) {
+            bean.setDefaultTablename(cprops.getSchemaname());
+        }
+        return bean;
     }
-    
+
     /**
      * @param mainDataSource
      *            the DataSource
      * @return TagMetaDataBaseCustom
      */
-    @Profile({"sqlite"})
+    @Profile({ "sqlite" })
     @Bean(name = "tagmetarepo")
-    public TagMetaDataBaseCustom tagmetaSqliteRepository(@Qualifier("dataSource") DataSource mainDataSource) {
-    	final TagMetaSQLITEImpl bean = new TagMetaSQLITEImpl(mainDataSource);
-		if (!cprops.getSchemaname().equals("none")) {
-			bean.setDefaultTablename(cprops.getSchemaname());
-		}
-		return bean;
+    public TagMetaDataBaseCustom tagmetaSqliteRepository(
+            @Qualifier("dataSource") DataSource mainDataSource) {
+        final TagMetaSQLITEImpl bean = new TagMetaSQLITEImpl(mainDataSource);
+        if (!cprops.getSchemaname().equals("none")) {
+            bean.setDefaultTablename(cprops.getSchemaname());
+        }
+        return bean;
     }
 
     /**

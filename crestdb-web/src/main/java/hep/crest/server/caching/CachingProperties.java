@@ -5,84 +5,172 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * The caching properties.
+ *
+ * @author formica
+ *
+ */
 @Component
 @ConfigurationProperties("caching")
 public class CachingProperties {
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * Logger.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public static final Integer DEFAULT_CACHE_TIME = 60; // number of seconds
+    /**
+     * The default cache in seconds.
+     */
+    public static final Integer DEFAULT_CACHE_TIME = 60; // number of seconds
 
-	private Integer iovsgroupsMaxage = 120; // number of seconds
-	
-	private Integer iovsgroupsSnapshotMaxage = 600; // number of seconds
-	
-	private Integer iovsMaxage = 600; // number of seconds
+    /**
+     * The iov group max age.
+     */
+    private Integer iovsgroupsMaxage = 120; // number of seconds
 
-	private Integer iovsSnapshotMaxage = 1200;
-	
-	private Integer payloadsMaxage = 1200;
-	
-	private Integer timetypeGroupsize = 1000;
-	
-	private Integer runtypeGroupsize = 10;
+    /**
+     * The iov group snapshot max age.
+     */
+    private Integer iovsgroupsSnapshotMaxage = 600; // number of seconds
 
-	public Integer getIovsgroupsMaxage() {
-		log.info("property iovsgroups_maxage has value: {}",iovsgroupsMaxage);
-		return iovsgroupsMaxage;
-	}
+    /**
+     * The iov max age.
+     */
+    private Integer iovsMaxage = 600; // number of seconds
 
-	public Integer getIovsgroupsSnapshotMaxage() {
-		return iovsgroupsSnapshotMaxage;
-	}
+    /**
+     * The iov snapshot max age.
+     */
+    private Integer iovsSnapshotMaxage = 1200;
 
-	public Integer getIovsMaxage() {
-		return iovsMaxage;
-	}
+    /**
+     * The payload max age.
+     */
+    private Integer payloadsMaxage = 1200;
 
-	public Integer getIovsSnapshotMaxage() {
-		return iovsSnapshotMaxage;
-	}
+    /**
+     * The group size for time based folders.
+     */
+    private Integer timetypeGroupsize = 1000;
 
-	public Integer getPayloadsMaxage() {
-		return payloadsMaxage;
-	}
+    /**
+     * The group size for run based folders.
+     */
+    private Integer runtypeGroupsize = 10;
 
-	public Integer getTimetypeGroupsize() {
-		return timetypeGroupsize;
-	}
+    /**
+     * @return Integer
+     */
+    public Integer getIovsgroupsMaxage() {
+        log.info("property iovsgroups_maxage has value: {}", iovsgroupsMaxage);
+        return iovsgroupsMaxage;
+    }
 
-	public Integer getRuntypeGroupsize() {
-		return runtypeGroupsize;
-	}
+    /**
+     * @return Integer
+     */
+    public Integer getIovsgroupsSnapshotMaxage() {
+        return iovsgroupsSnapshotMaxage;
+    }
 
-	public void setIovsgroupsMaxage(Integer iovsgroupsmaxage) {
-		this.iovsgroupsMaxage = iovsgroupsmaxage;
-	}
+    /**
+     * @return Integer
+     */
+    public Integer getIovsMaxage() {
+        return iovsMaxage;
+    }
 
-	public void setIovsgroupsSnapshotMaxage(Integer iovsgroupssnapshotmaxage) {
-		this.iovsgroupsSnapshotMaxage = iovsgroupssnapshotmaxage;
-	}
+    /**
+     * @return Integer
+     */
+    public Integer getIovsSnapshotMaxage() {
+        return iovsSnapshotMaxage;
+    }
 
-	public void setIovsMaxage(Integer iovsmaxage) {
-		this.iovsMaxage = iovsmaxage;
-	}
+    /**
+     * @return Integer
+     */
+    public Integer getPayloadsMaxage() {
+        return payloadsMaxage;
+    }
 
-	public void setIovsSnapshotMaxage(Integer iovssnapshotmaxage) {
-		this.iovsSnapshotMaxage = iovssnapshotmaxage;
-	}
+    /**
+     * @return Integer
+     */
+    public Integer getTimetypeGroupsize() {
+        return timetypeGroupsize;
+    }
 
-	public void setPayloadsMaxage(Integer payloadsmaxage) {
-		this.payloadsMaxage = payloadsmaxage;
-	}
+    /**
+     * @return Integer
+     */
+    public Integer getRuntypeGroupsize() {
+        return runtypeGroupsize;
+    }
 
-	public void setTimetypeGroupsize(Integer timetypegroupsize) {
-		this.timetypeGroupsize = timetypegroupsize;
-	}
+    /**
+     * @param iovsgroupsmaxage
+     *            the Integer
+     * @return
+     */
+    public void setIovsgroupsMaxage(Integer iovsgroupsmaxage) {
+        this.iovsgroupsMaxage = iovsgroupsmaxage;
+    }
 
-	public void setRuntypeGroupsize(Integer runtypegroupsize) {
-		this.runtypeGroupsize = runtypegroupsize;
-	}
-	
+    /**
+     * @param iovsgroupssnapshotmaxage
+     *            the Integer
+     * @return
+     */
+    public void setIovsgroupsSnapshotMaxage(Integer iovsgroupssnapshotmaxage) {
+        this.iovsgroupsSnapshotMaxage = iovsgroupssnapshotmaxage;
+    }
+
+    /**
+     * @param iovsmaxage
+     *            the Integer
+     * @return
+     */
+    public void setIovsMaxage(Integer iovsmaxage) {
+        this.iovsMaxage = iovsmaxage;
+    }
+
+    /**
+     * @param iovssnapshotmaxage
+     *            the Integer
+     * @return
+     */
+    public void setIovsSnapshotMaxage(Integer iovssnapshotmaxage) {
+        this.iovsSnapshotMaxage = iovssnapshotmaxage;
+    }
+
+    /**
+     * @param payloadsmaxage
+     *            the Integer
+     * @return
+     */
+    public void setPayloadsMaxage(Integer payloadsmaxage) {
+        this.payloadsMaxage = payloadsmaxage;
+    }
+
+    /**
+     * @param timetypegroupsize
+     *            the Integer
+     * @return
+     */
+    public void setTimetypeGroupsize(Integer timetypegroupsize) {
+        this.timetypeGroupsize = timetypegroupsize;
+    }
+
+    /**
+     * @param runtypegroupsize
+     *            the Integer
+     * @return
+     */
+    public void setRuntypeGroupsize(Integer runtypegroupsize) {
+        this.runtypeGroupsize = runtypegroupsize;
+    }
+
 }

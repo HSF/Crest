@@ -1,38 +1,30 @@
 package hep.crest.server.swagger.api;
 
-import hep.crest.swagger.model.*;
-import hep.crest.server.swagger.api.PayloadsApiService;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import java.math.BigDecimal;
-import java.io.File;
-import hep.crest.swagger.model.HTTPResponse;
-import hep.crest.swagger.model.IovSetDto;
-import hep.crest.swagger.model.PayloadDto;
-
-import java.util.Map;
-import java.util.List;
-import hep.crest.server.swagger.api.NotFoundException;
-
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.List;
 
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
-import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import javax.ws.rs.*;
-
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.validation.constraints.*;
+import hep.crest.swagger.model.HTTPResponse;
+import hep.crest.swagger.model.IovSetDto;
+import hep.crest.swagger.model.PayloadDto;
+import io.swagger.annotations.ApiParam;
 
 @Path("/payloads")
 
@@ -70,18 +62,7 @@ public class PayloadsApi  {
     throws NotFoundException {
         return delegate.createPayloadMultiForm(fileInputStream, fileDetail,payload,securityContext,info);
     }
-    @GET
-    @Path("/{hash}/data")
-    
-    @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "Finds payload data by hash; the payload object contains the real BLOB.", notes = "Select one payload at the time, no regexp searches allowed here", response = String.class, tags={ "payloads", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = String.class) })
-    public Response getBlob(@ApiParam(value = "hash of the payload",required=true) @PathParam("hash") String hash
-,@Context SecurityContext securityContext,@Context UriInfo info)
-    throws NotFoundException {
-        return delegate.getBlob(hash,securityContext,info);
-    }
+
     @GET
     @Path("/{hash}")
     

@@ -16,9 +16,9 @@ package hep.crest.swagger.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.GenericMap;
+import hep.crest.swagger.model.IovDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -26,81 +26,39 @@ import java.util.List;
 import javax.validation.constraints.*;
 
 /**
- * IovSetDto
+ * An IovSet containing IovDto objects.
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-03-29T18:09:29.144+01:00")
-public class IovSetDto   {
-  @JsonProperty("niovs")
-  private Long niovs = null;
+@ApiModel(description = "An IovSet containing IovDto objects.")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-03T10:49:50.724+02:00")
+public class IovSetDto extends CrestBaseResponse  {
+  @JsonProperty("resources")
+  private List<IovDto> resources = null;
 
-  @JsonProperty("format")
-  private String format = null;
+  public IovSetDto resources(List<IovDto> resources) {
+    this.resources = resources;
+    return this;
+  }
 
-  @JsonProperty("iovsList")
-  private List<IovPayloadDto> iovsList = new ArrayList<IovPayloadDto>();
-
-  public IovSetDto niovs(Long niovs) {
-    this.niovs = niovs;
+  public IovSetDto addResourcesItem(IovDto resourcesItem) {
+    if (this.resources == null) {
+      this.resources = new ArrayList<IovDto>();
+    }
+    this.resources.add(resourcesItem);
     return this;
   }
 
   /**
-   * Get niovs
-   * @return niovs
+   * Get resources
+   * @return resources
    **/
-  @JsonProperty("niovs")
+  @JsonProperty("resources")
   @ApiModelProperty(value = "")
-  public Long getNiovs() {
-    return niovs;
+  public List<IovDto> getResources() {
+    return resources;
   }
 
-  public void setNiovs(Long niovs) {
-    this.niovs = niovs;
-  }
-
-  public IovSetDto format(String format) {
-    this.format = format;
-    return this;
-  }
-
-  /**
-   * Get format
-   * @return format
-   **/
-  @JsonProperty("format")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public String getFormat() {
-    return format;
-  }
-
-  public void setFormat(String format) {
-    this.format = format;
-  }
-
-  public IovSetDto iovsList(List<IovPayloadDto> iovsList) {
-    this.iovsList = iovsList;
-    return this;
-  }
-
-  public IovSetDto addIovsListItem(IovPayloadDto iovsListItem) {
-    this.iovsList.add(iovsListItem);
-    return this;
-  }
-
-  /**
-   * Get iovsList
-   * @return iovsList
-   **/
-  @JsonProperty("iovsList")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public List<IovPayloadDto> getIovsList() {
-    return iovsList;
-  }
-
-  public void setIovsList(List<IovPayloadDto> iovsList) {
-    this.iovsList = iovsList;
+  public void setResources(List<IovDto> resources) {
+    this.resources = resources;
   }
 
 
@@ -113,14 +71,13 @@ public class IovSetDto   {
       return false;
     }
     IovSetDto iovSetDto = (IovSetDto) o;
-    return Objects.equals(this.niovs, iovSetDto.niovs) &&
-        Objects.equals(this.format, iovSetDto.format) &&
-        Objects.equals(this.iovsList, iovSetDto.iovsList);
+    return Objects.equals(this.resources, iovSetDto.resources) &&
+        super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(niovs, format, iovsList);
+    return Objects.hash(resources, super.hashCode());
   }
 
 
@@ -128,10 +85,8 @@ public class IovSetDto   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class IovSetDto {\n");
-    
-    sb.append("    niovs: ").append(toIndentedString(niovs)).append("\n");
-    sb.append("    format: ").append(toIndentedString(format)).append("\n");
-    sb.append("    iovsList: ").append(toIndentedString(iovsList)).append("\n");
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    resources: ").append(toIndentedString(resources)).append("\n");
     sb.append("}");
     return sb.toString();
   }

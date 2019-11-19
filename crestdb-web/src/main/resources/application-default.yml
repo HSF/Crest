@@ -24,7 +24,6 @@ crest:
   dbfile: /tmp/crestdbh2
   apiname: /crestapi
   authenticationtype: none
-  
 server:
     port: 8090
     servlet.path: /    

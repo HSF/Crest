@@ -26,6 +26,28 @@
 				}
 			}
 		},
+		"CrestBaseResponse": {
+			"type": "object",
+			"discriminator" : "format",
+			"required": [
+				"format"
+			],
+			"properties": {
+				"size": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"format" : {
+					"type": "string"
+				},
+				"datatype": {
+					"type": "string"
+				},
+				"filter": {
+					"$ref": "#/definitions/GenericMap"
+				}
+			}
+		},
 		"GenericMap": {
 			"type": "object",
 			"properties": {
@@ -246,6 +268,10 @@
 		},
 		"IovDto": {
 			"type": "object",
+			"required": [
+				"since",
+				"payloadHash"
+			],
 			"properties": {
 				"tagName": {
 					"type": "string"
@@ -273,12 +299,34 @@
 				}
 			}
 		},
-		"IovSetDto": {
+		"TagSummarySetDto": {
+			"description" : "An Set containing TagSummaryDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "TagSummarySetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+							"$ref": "#/definitions/TagSummaryDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"IovBaseSetDto": {
 			"type": "object",
 			"discriminator" : "format",
 			"required": [
 				"format",
-				"iovsList"
+				"tagName"
 			],
 			"properties": {
 				"niovs": {
@@ -288,13 +336,178 @@
 				"format" : {
 					"type": "string"
 				},
-				"iovsList": {
-					"type": "array",
-					"items": {
-					"$ref": "#/definitions/IovPayloadDto"
-					}
+				"tagName": {
+					"type": "string"
 				}
 			}
+		},
+		"IovSetDto": {
+			"description" : "An Set containing IovDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "IovSetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/IovDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"IovPyldSetDto": {
+			"description" : "An Set containing IovPayloadDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "IovPyldSetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/IovPayloadDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"TagSetDto": {
+			"description" : "An Set containing TagDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "TagSetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/TagDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"PayloadSetDto": {
+			"description" : "An Set containing PayloadDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "PayloadSetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/PayloadDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"GlobalTagMapSetDto": {
+			"description" : "An GlobalTagMapSet containing GlobalTagMapDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "GlobalTagMapSetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/GlobalTagMapDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"GlobalTagSetDto": {
+			"description" : "An GlobalTagSet containing GlobalTagDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "GlobalTagSetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/GlobalTagDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"FolderSetDto": {
+			"description" : "An FolderSet containing FolderDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/FolderDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"RunLumiSetDto": {
+			"description" : "An RunLumiSet containing RunLumiInfoDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/RunLumiInfoDto"
+							}
+						}
+					}
+				}
+			]
 		},
 		"PayloadDto": {
 			"type": "object",
