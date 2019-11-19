@@ -15,6 +15,7 @@ host=$1
 pylddata="$(generate_post_data)"
 apiname="api"
 echo "Use data $pylddata"
-curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" "${host}/${apiname}/payloads" --data "${pylddata}"
+resp=`curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" "${host}/${apiname}/payloads" --data "${pylddata}"`
+echo "Received response $resp"
 echo "Try to get back data from server"
 curl -H "X-Crest-PayloadFormat: DTO" -X GET "${host}/${apiname}/payloads/somehash"

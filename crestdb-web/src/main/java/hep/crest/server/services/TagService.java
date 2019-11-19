@@ -275,10 +275,6 @@ public class TagService {
             return saved;
 
         }
-        catch (final AlreadyExistsPojoException e) {
-            log.error("Exception in storing tag meta {}: resource already exists", dto);
-            throw e;
-        }
         catch (final Exception e) {
             log.error("Exception in storing tag meta {}", dto);
             log.error(e.getMessage());
@@ -299,12 +295,6 @@ public class TagService {
     public TagMetaDto updateTagMeta(TagMetaDto dto) throws CdbServiceException {
         try {
             log.debug("Update tag meta from dto {}", dto);
-            final TagMetaDto tmpt = tagmetaRepository.find(dto.getTagName());
-            if (tmpt == null) {
-                log.debug("Cannot store tag meta {} : resource does not exists.. ", dto);
-                throw new AlreadyExistsPojoException(
-                        "Tag meta does not exists for name " + dto.getTagName());
-            }
             final TagMetaDto saved = tagmetaRepository.update(dto);
             log.debug("Updated entity: {}", saved);
             return saved;

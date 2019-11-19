@@ -77,7 +77,7 @@ package_svom_application:
     - ./crestdb-web/build/libs/crest.war
     expire_in: 1 week
   only:
-  - svom-dc0
+  - svom-dc1
 
 build_svom_docker_image:
   stage: build
@@ -89,7 +89,7 @@ build_svom_docker_image:
     - docker info
     - docker build --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
   only:
-  - svom-dc0
+  - svom-dc1
 
 webui:
   stage: webui
@@ -109,9 +109,9 @@ registry-push:
   script:
     - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
     - docker push $CONTAINER_IMAGE
-    - docker push $WEB_CONTAINER_IMAGE
+##    - docker push $WEB_CONTAINER_IMAGE
   only:
-  - svom-dc0
+  - svom-dc1
 
 sonar_application:
   stage: sonar_application

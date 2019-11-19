@@ -3,5 +3,5 @@ metastore_db
 crestdb-client/python/urllib3
 crestdb-client/qt5cpp
 temp
-tmp
 web-ui/tmp-ui
+tmp

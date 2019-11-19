@@ -26,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import hep.crest.server.services.TagService;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagMetaDto;
 import hep.crest.swagger.model.TagMetaSetDto;
@@ -42,6 +43,9 @@ public class TestCrestTag {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
+
+    @Autowired 
+    private TagService tagservice;
 
     @Autowired
     @Qualifier("jacksonMapper")
@@ -187,6 +191,13 @@ public class TestCrestTag {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
+        // Now use tag service
+        final long ntags = tagservice.count();
+        assertThat(ntags).isGreaterThan(0);
+
+        final boolean istag = tagservice.exists(dto1.getName());
+        assertThat(istag).isTrue();
+
     }
     
     @Test
@@ -207,6 +218,13 @@ public class TestCrestTag {
                 .postForEntity("/crestapi/tags/"+dto.getName()+"/meta", dto1, TagMetaDto.class);
         log.info("Received response: {}", response1);
         assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final TagMetaDto dto2 = DataGenerator.generateTagMetaDto("SOME-THING", data, time);
+        log.info("Store tag meta : {} ", dto1);
+        final ResponseEntity<String> response2 = this.testRestTemplate
+                .postForEntity("/crestapi/tags/SOME-THING/meta", dto2, String.class);
+        log.info("Received response: {}", response2);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
         final ResponseEntity<String> resp1 = this.testRestTemplate
                 .exchange("/crestapi/tags/" + dto1.getTagName()+"/meta", HttpMethod.GET, null, String.class);
@@ -237,5 +255,13 @@ public class TestCrestTag {
             assertThat(ok).isNotNull();
             assertThat(ok.getChansize()).isEqualTo(10);
         }    
+        
+        final ResponseEntity<String> respupdnull = this.testRestTemplate
+                .exchange("/crestapi/tags/NOT-THERE/meta", HttpMethod.PUT, updrequest, String.class);
+        {
+            final String responseBody = respupdnull.getBody();
+            assertThat(respupdnull.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }    
+
     }
 }
