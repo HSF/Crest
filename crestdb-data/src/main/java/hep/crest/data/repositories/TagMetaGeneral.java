@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.pojo.Payload;
+import hep.crest.data.pojo.TagMeta;
 import hep.crest.data.repositories.externals.TagMetaRequests;
 import hep.crest.swagger.model.TagMetaDto;
 
@@ -68,7 +68,7 @@ public abstract class TagMetaGeneral implements TagMetaDataBaseCustom {
      * @return String
      */
     protected String tablename() {
-        final Table ann = Payload.class.getAnnotation(Table.class);
+        final Table ann = TagMeta.class.getAnnotation(Table.class);
         String tablename = ann.name();
         if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
             tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
@@ -146,7 +146,7 @@ public abstract class TagMetaGeneral implements TagMetaDataBaseCustom {
             final String tablename = this.tablename();
 
             final String sql = TagMetaRequests.getFindQuery(tablename);
-
+            log.info("Use sql request {}", sql);
             // Be careful, this seems not to work with Postgres: probably getBlob loads an
             // OID and not the byte[]
             // Temporarely, try to create a postgresql implementation of this class.
@@ -158,9 +158,7 @@ public abstract class TagMetaGeneral implements TagMetaDataBaseCustom {
                 entity.setChansize(rs.getInt("CHANNEL_SIZE"));
                 entity.setColsize(rs.getInt("COLUMN_SIZE"));
                 entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
-                entity.setChannelInfo(getBlob(rs, "CHANNEL_INFO"));
-                entity.setPayloadInfo(getBlob(rs, "PAYLOAD_INFO"));
-
+                entity.setTagInfo(getBlob(rs, "TAG_INFO"));
                 return entity;
             });
         }
@@ -191,7 +189,7 @@ public abstract class TagMetaGeneral implements TagMetaDataBaseCustom {
             });
         }
         catch (final Exception e) {
-            log.warn("Could not find entry for hash {}", id);
+            log.warn("Could not find entry for tag {}", id);
         }
         return null;
     }

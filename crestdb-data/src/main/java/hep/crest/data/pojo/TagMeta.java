@@ -46,13 +46,9 @@ public class TagMeta implements java.io.Serializable {
      */
     private Integer colsize;
     /**
-     * The channel list.
+     * The tag info json.
      */
-    private Blob channelInfo;
-    /**
-     * The payload specifications.
-     */
-    private Blob payloadInfo;
+    private Blob tagInfo;
     /**
      * The insertion time.
      */
@@ -73,20 +69,17 @@ public class TagMeta implements java.io.Serializable {
      *            the Integer
      * @param colsize
      *            the Integer
-     * @param channelInfo
-     *            the Blob
-     * @param payloadInfo
+     * @param tagInfo
      *            the Blob
      */
     public TagMeta(String tagName, String description, Integer chansize, Integer colsize,
-            Blob channelInfo, Blob payloadInfo) {
+            Blob tagInfo) {
         super();
         this.tagName = tagName;
         this.description = description;
         this.chansize = chansize;
         this.colsize = colsize;
-        this.channelInfo = channelInfo;
-        this.payloadInfo = payloadInfo;
+        this.tagInfo = tagInfo;
     }
 
     /**
@@ -174,39 +167,20 @@ public class TagMeta implements java.io.Serializable {
     /**
      * @return Blob
      */
-    @Column(name = "CHANNEL_INFO", nullable = false)
+    @Column(name = "TAG_INFO", nullable = false)
     @Lob
     @Type(type = "org.hibernate.type.BlobType")
-    public Blob getChannelInfo() {
-        return this.channelInfo;
+    public Blob getTagInfo() {
+        return this.tagInfo;
     }
 
     /**
-     * @param channelInfo
+     * @param tagInfo
      *            the Blob
      * @return
      */
-    public void setChannelInfo(Blob channelInfo) {
-        this.channelInfo = channelInfo;
-    }
-
-    /**
-     * @return Blob
-     */
-    @Column(name = "PAYLOAD_INFO", nullable = false)
-    @Lob
-    @Type(type = "org.hibernate.type.BlobType")
-    public Blob getPayloadInfo() {
-        return this.payloadInfo;
-    }
-
-    /**
-     * @param payloadInfo
-     *            the Blob
-     * @return
-     */
-    public void setPayloadInfo(Blob payloadInfo) {
-        this.payloadInfo = payloadInfo;
+    public void setTagInfo(Blob tagInfo) {
+        this.tagInfo = tagInfo;
     }
 
     /**

@@ -26,6 +26,7 @@ import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagMetaDto;
 import hep.crest.swagger.model.TagSummaryDto;
 
 /**
@@ -134,6 +135,13 @@ public class DataGenerator {
         dto.insertionTime(it).data(bindata).hash(hash).objectType(objtype)
                 .streamerInfo(binstinfo).version("v1");
         dto.size(bindata.length);
+        return dto;
+    }
+
+    public static TagMetaDto generateTagMetaDto(String tagname, String taginfodata, Date it) {
+        final TagMetaDto dto = new TagMetaDto();
+        dto.tagName(tagname).chansize(1).colsize(5).tagInfo(taginfodata).insertionTime(it);
+        dto.description("Test tag meta");
         return dto;
     }
 

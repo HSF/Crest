@@ -46,6 +46,7 @@ import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataDBImpl;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
+import hep.crest.data.repositories.TagMetaDBImpl;
 import hep.crest.data.repositories.TagRepository;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.data.security.pojo.FolderRepository;
@@ -54,6 +55,7 @@ import hep.crest.data.utils.DirectoryUtilities;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagMetaDto;
 import hep.crest.swagger.model.TagSummaryDto;
 
 @RunWith(SpringRunner.class)
@@ -171,7 +173,23 @@ public class RepositoryDBTests {
                 "/tmp/cdms/payloadatacopy.blob.copy2");
         assertThat(fhash).isNotNull();
     }
+    
+    @Test
+    public void testTags() throws Exception {
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
 
+        final TagMetaDBImpl metarepo = new TagMetaDBImpl(mainDataSource);
+        final Tag mtag = DataGenerator.generateTag("A-TEST-FOR-META", "test");
+        final Tag savedtag = tagrepository.save(mtag);
+        final TagMetaDto metadto = DataGenerator.generateTagMetaDto("A-TEST-FOR-META", "{ \"key\" : \"val\" }", time);
+        final TagMetaDto savedmeta = metarepo.save(metadto);
+        assertThat(savedmeta).isNotNull();
+        assertThat(savedmeta.toString().length()).isGreaterThan(0);
+        assertThat(savedmeta.getTagName()).isEqualTo(savedtag.getName());
+
+    }
+    
     @Test
     public void testIovs() throws Exception {
 

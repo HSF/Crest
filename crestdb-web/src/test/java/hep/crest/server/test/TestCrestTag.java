@@ -3,6 +3,8 @@ package hep.crest.server.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -25,6 +27,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagMetaDto;
+import hep.crest.swagger.model.TagMetaSetDto;
 import hep.crest.swagger.model.TagSetDto;
 import hep.crest.testutils.DataGenerator;
 
@@ -183,5 +187,55 @@ public class TestCrestTag {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
+    }
+    
+    @Test
+    public void testTagMeta() throws Exception {
+        final TagDto dto = DataGenerator.generateTagDto("TAG-FOR-META-01", "test");
+        log.info("Store tag : {} ", dto);
+        final ResponseEntity<TagDto> response = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto, TagDto.class);
+        log.info("Received response: {}", response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+        final String data = "{ \"key\" : \"value\" }";
+        final TagMetaDto dto1 = DataGenerator.generateTagMetaDto("TAG-FOR-META-01", data, time);
+        log.info("Store tag meta : {} ", dto1);
+        final ResponseEntity<TagMetaDto> response1 = this.testRestTemplate
+                .postForEntity("/crestapi/tags/"+dto.getName()+"/meta", dto1, TagMetaDto.class);
+        log.info("Received response: {}", response1);
+        assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final ResponseEntity<String> resp1 = this.testRestTemplate
+                .exchange("/crestapi/tags/" + dto1.getTagName()+"/meta", HttpMethod.GET, null, String.class);
+        {
+            log.info("Retrieved tag meta for {} ", dto1.getTagName());
+            final String responseBody = resp1.getBody();
+            assertThat(resp1.getStatusCode()).isEqualTo(HttpStatus.OK);
+            TagMetaSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, TagMetaSetDto.class);
+            assertThat(ok.getSize()).isEqualTo(1);
+        }
+
+        final TagMetaDto body = dto1;
+        body.setDescription("another description updated");
+        body.setChansize(10);
+        final HttpEntity<TagMetaDto> updrequest = new HttpEntity<TagMetaDto>(body);
+
+        final ResponseEntity<String> respupd = this.testRestTemplate
+                .exchange("/crestapi/tags/" + dto1.getTagName()+"/meta", HttpMethod.PUT, updrequest, String.class);
+        {
+            log.info("Update tag meta for {} ", body.getTagName());
+            final String responseBody = respupd.getBody();
+            assertThat(respupd.getStatusCode()).isEqualTo(HttpStatus.OK);
+            TagMetaDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, TagMetaDto.class);
+            assertThat(ok).isNotNull();
+            assertThat(ok.getChansize()).isEqualTo(10);
+        }    
     }
 }

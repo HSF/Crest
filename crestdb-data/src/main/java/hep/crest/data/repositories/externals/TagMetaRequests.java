@@ -21,7 +21,7 @@ public final class TagMetaRequests {
      * @return String
      */
     public static final String getFindQuery(String tablename) {
-        return "select TAG_NAME,DESCRIPTION, CHANNEL_SIZE, COLUMN_SIZE,INSERTION_TIME,CHANNEL_INFO,PAYLOAD_INFO,CHANNEL_SIZE from "
+        return "select TAG_NAME,DESCRIPTION, CHANNEL_SIZE, COLUMN_SIZE,INSERTION_TIME,TAG_INFO,CHANNEL_SIZE from "
                 + tablename + " where TAG_NAME=?";
     }
 
@@ -31,7 +31,7 @@ public final class TagMetaRequests {
      */
     public static final String getInsertAllQuery(String tablename) {
         return "INSERT INTO " + tablename
-                + " (TAG_NAME, DESCRIPTION, CHANNEL_SIZE, COLUMN_SIZE, CHANNEL_INFO, PAYLOAD_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?,?)";
+                + " (TAG_NAME, DESCRIPTION, CHANNEL_SIZE, COLUMN_SIZE, TAG_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
 
     }
 
@@ -50,7 +50,7 @@ public final class TagMetaRequests {
      */
     public static final String getUpdateQuery(String tablename) {
         return "UPDATE " + tablename
-                + " SET DESCRIPTION=?, CHANNEL_SIZE=?, COLUMN_SIZE=?, CHANNEL_INFO=?, PAYLOAD_INFO=? WHERE TAG_NAME=?";
+                + " SET DESCRIPTION=?, CHANNEL_SIZE=?, COLUMN_SIZE=?, TAG_INFO=?, INSERTION_TIME=? WHERE TAG_NAME=?";
 
     }
 

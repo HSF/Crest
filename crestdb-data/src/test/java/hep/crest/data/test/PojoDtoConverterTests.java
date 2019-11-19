@@ -48,6 +48,8 @@ import hep.crest.swagger.model.PayloadTagInfoDto;
 import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.RunLumiSetDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagMetaDto;
+import hep.crest.swagger.model.TagMetaSetDto;
 import hep.crest.swagger.model.TagSetDto;
 import hep.crest.swagger.model.TagSummaryDto;
 import hep.crest.swagger.model.TagSummarySetDto;
@@ -364,6 +366,28 @@ public class PojoDtoConverterTests {
         }
     }
 
+    @Test
+    public void testTagMetaDtoSetsConverter() throws Exception {
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+        final String data = "{ \"key\" : \"value\" }";
+        final TagMetaDto dto1 = DataGenerator.generateTagMetaDto("A_TAG", data, time);
+        final TagMetaDto dto1bis = DataGenerator.generateTagMetaDto("A_TAG", data, time);
+        log.info("compare {} with {} having hash code {} and {}",dto1,dto1bis,dto1.hashCode(),dto1bis.hashCode());
+        assertThat(dto1.getTagName().equals(dto1bis.getTagName())).isTrue();
+        final TagMetaSetDto setdto = new TagMetaSetDto();
+        setdto.datatype("TagMetaSetDto");
+        setdto.format("tagmetas");
+        setdto.addResourcesItem(dto1);
+        assertThat(setdto.toString().length()).isGreaterThan(0);
+        assertThat(setdto.hashCode()).isNotNull();
+        final List<TagMetaDto> resources = setdto.getResources();
+        for (final TagMetaDto gtDto : resources) {
+            if (gtDto.getTagName().equals("A_TAG")) {
+                assertThat(gtDto.equals(dto1)).isTrue();
+            }
+        }
+    }
 
     @Test
     public void testOtherDtos() throws Exception {

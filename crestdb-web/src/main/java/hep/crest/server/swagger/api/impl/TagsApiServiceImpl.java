@@ -29,6 +29,7 @@ import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagMetaDto;
+import hep.crest.swagger.model.TagMetaSetDto;
 import hep.crest.swagger.model.TagSetDto;
 
 /**
@@ -272,7 +273,10 @@ public class TagsApiServiceImpl extends TagsApiService {
 				final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,"Entity not found for name "+name);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();				
 			}
-			return Response.ok().entity(dto).build();
+            final TagMetaSetDto respdto = (TagMetaSetDto) new TagMetaSetDto().addResourcesItem(dto).size(1L)
+                    .datatype("tagmetas");
+            return Response.ok().entity(respdto).build();
+			
 		} catch (final Exception e) {
 			e.printStackTrace();
 			final String message = e.getMessage();
@@ -310,19 +314,13 @@ public class TagsApiServiceImpl extends TagsApiService {
 				if (key == "colsize") {
 					dto.setColsize(new Integer(body.get(key)));
 				}
-				if (key == "channelInfo") {
+				if (key == "tagInfo") {
 					// The field is a string ... this is mandatory for the moment....
-					final byte[] val = body.get(key).getBytes();
-					dto.setChannelInfo(new String(val));
-				}
-				if (key == "payloadInfo") {
-					// The field is a string ... this is mandatory for the moment....
-					final byte[] val = body.get(key).getBytes();
-					dto.setPayloadInfo(new String(val));
+					dto.setTagInfo(body.get(key));
 				}
 			}
 			final TagMetaDto saved = tagService.updateTagMeta(dto);
-			return Response.created(info.getRequestUri()).entity(saved).build();
+			return Response.ok(info.getRequestUri()).entity(saved).build();
 
 		} catch (final CdbServiceException e) {
 			final String message = e.getMessage();

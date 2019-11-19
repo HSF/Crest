@@ -130,10 +130,8 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
             // Copy the data from the file to the large object
             final byte[] buf = new byte[2048];
             int s = 0;
-            int tl = 0;
             while ((s = is.read(buf, 0, 2048)) > 0) {
                 obj.write(buf, 0, s);
-                tl += s;
             }
             // Close the large object
             obj.close();
@@ -160,9 +158,7 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
     }
 
     /**
-     * @param cis
-     *            the InputStream
-     * @param pis
+     * @param tis
      *            the InputStream
      * @param sql
      *            the String
@@ -172,7 +168,7 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
      *             If an Exception occurred
      * @return
      */
-    protected void execute(InputStream cis, InputStream pis, String sql, TagMetaDto entity)
+    protected void execute(InputStream tis, String sql, TagMetaDto entity)
             throws CdbServiceException {
         final Calendar calendar = Calendar.getInstance();
         final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
@@ -181,16 +177,14 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
         try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
-            final long cid = getLargeObjectId(conn, cis, entity);
-            final long pid = getLargeObjectId(conn, pis, null);
+            final long tid = getLargeObjectId(conn, tis, entity);
 
             ps.setString(1, entity.getTagName());
             ps.setString(2, entity.getDescription());
             ps.setInt(3, entity.getChansize());
             ps.setInt(4, entity.getColsize());
-            ps.setDate(5, inserttime);
-            ps.setLong(6, cid);
-            ps.setLong(7, pid);
+            ps.setLong(5, tid);
+            ps.setDate(6, inserttime);
             log.info("Dump preparedstatement {} ", ps);
             ps.executeUpdate();
             conn.commit();
@@ -200,8 +194,53 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
         }
         finally {
             try {
-                cis.close();
-                pis.close();
+                tis.close();
+            }
+            catch (final IOException e) {
+                log.error("Error in closing streams...potential leak");
+            }
+        }
+    }
+
+    /**
+     * @param tis
+     *            the InputStream
+     * @param sql
+     *            the String
+     * @param entity
+     *            the TagMetaDto
+     * @throws CdbServiceException
+     *             If an Exception occurred
+     * @return
+     */
+    protected void update(InputStream tis, String sql, TagMetaDto entity) {
+
+        final Calendar calendar = Calendar.getInstance();
+        final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
+        entity.setInsertionTime(calendar.getTime());
+
+        try (Connection conn = super.getDs().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);) {
+            conn.setAutoCommit(false);
+            final long tid = getLargeObjectId(conn, tis, entity);
+            ps.setString(1, entity.getDescription());
+            ps.setInt(2, entity.getChansize());
+            ps.setInt(3, entity.getColsize());
+            ps.setLong(4, tid);
+            ps.setDate(5, inserttime);
+            // Now we set the update where condition.
+            ps.setString(6, entity.getTagName());
+            log.debug("Dump preparedstatement {}", ps);
+            ps.execute();
+            log.debug("Search for stored tag meta as a verification, use tag name {} ",
+                    entity.getTagName());
+        }
+        catch (final SQLException e) {
+            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
+        }
+        finally {
+            try {
+                tis.close();
             }
             catch (final IOException e) {
                 log.error("Error in closing streams...potential leak");
@@ -218,10 +257,9 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
 
         log.info("Insert Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
 
-        final InputStream is = new ByteArrayInputStream(entity.getChannelInfo().getBytes(StandardCharsets.UTF_8));
-        final InputStream sis = new ByteArrayInputStream(entity.getPayloadInfo().getBytes(StandardCharsets.UTF_8));
+        final InputStream is = new ByteArrayInputStream(entity.getTagInfo().getBytes(StandardCharsets.UTF_8));
 
-        execute(is, sis, sql, entity);
+        execute(is, sql, entity);
         log.debug("Search for stored tag meta as a verification, use tag {}", entity.getTagName());
         return findMetaInfo(entity.getTagName());
     }
@@ -233,10 +271,9 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
         final String sql = TagMetaRequests.getUpdateQuery(tablename);
 
         log.info("Update Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
-        final InputStream is = new ByteArrayInputStream(entity.getChannelInfo().getBytes(StandardCharsets.UTF_8));
-        final InputStream sis = new ByteArrayInputStream(entity.getPayloadInfo().getBytes(StandardCharsets.UTF_8));
+        final InputStream is = new ByteArrayInputStream(entity.getTagInfo().getBytes(StandardCharsets.UTF_8));
 
-        execute(is, sis, sql, entity);
+        update(is, sql, entity);
         log.debug("Search for stored tag meta as a verification, use tag {}", entity.getTagName());
         return findMetaInfo(entity.getTagName());
     }

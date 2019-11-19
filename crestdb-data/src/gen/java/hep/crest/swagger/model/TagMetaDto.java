@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
 /**
  * TagMetaDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-08-06T20:34:48.558+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-11-19T18:24:52.914+01:00")
 public class TagMetaDto   {
   @JsonProperty("tagName")
   private String tagName = null;
@@ -38,11 +38,8 @@ public class TagMetaDto   {
   @JsonProperty("colsize")
   private Integer colsize = null;
 
-  @JsonProperty("channelInfo")
-  private String channelInfo = null;
-
-  @JsonProperty("payloadInfo")
-  private String payloadInfo = null;
+  @JsonProperty("tagInfo")
+  private String tagInfo = null;
 
   @JsonProperty("insertionTime")
   private Date insertionTime = null;
@@ -123,42 +120,23 @@ public class TagMetaDto   {
     this.colsize = colsize;
   }
 
-  public TagMetaDto channelInfo(String channelInfo) {
-    this.channelInfo = channelInfo;
+  public TagMetaDto tagInfo(String tagInfo) {
+    this.tagInfo = tagInfo;
     return this;
   }
 
   /**
-   * Get channelInfo
-   * @return channelInfo
+   * Get tagInfo
+   * @return tagInfo
    **/
-  @JsonProperty("channelInfo")
+  @JsonProperty("tagInfo")
   @ApiModelProperty(value = "")
-  public String getChannelInfo() {
-    return channelInfo;
+  public String getTagInfo() {
+    return tagInfo;
   }
 
-  public void setChannelInfo(String channelInfo) {
-    this.channelInfo = channelInfo;
-  }
-
-  public TagMetaDto payloadInfo(String payloadInfo) {
-    this.payloadInfo = payloadInfo;
-    return this;
-  }
-
-  /**
-   * Get payloadInfo
-   * @return payloadInfo
-   **/
-  @JsonProperty("payloadInfo")
-  @ApiModelProperty(value = "")
-  public String getPayloadInfo() {
-    return payloadInfo;
-  }
-
-  public void setPayloadInfo(String payloadInfo) {
-    this.payloadInfo = payloadInfo;
+  public void setTagInfo(String tagInfo) {
+    this.tagInfo = tagInfo;
   }
 
   public TagMetaDto insertionTime(Date insertionTime) {
@@ -194,14 +172,13 @@ public class TagMetaDto   {
         Objects.equals(this.description, tagMetaDto.description) &&
         Objects.equals(this.chansize, tagMetaDto.chansize) &&
         Objects.equals(this.colsize, tagMetaDto.colsize) &&
-        Objects.equals(this.channelInfo, tagMetaDto.channelInfo) &&
-        Objects.equals(this.payloadInfo, tagMetaDto.payloadInfo) &&
+        Objects.equals(this.tagInfo, tagMetaDto.tagInfo) &&
         Objects.equals(this.insertionTime, tagMetaDto.insertionTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tagName, description, chansize, colsize, channelInfo, payloadInfo, insertionTime);
+    return Objects.hash(tagName, description, chansize, colsize, tagInfo, insertionTime);
   }
 
 
@@ -214,8 +191,7 @@ public class TagMetaDto   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    chansize: ").append(toIndentedString(chansize)).append("\n");
     sb.append("    colsize: ").append(toIndentedString(colsize)).append("\n");
-    sb.append("    channelInfo: ").append(toIndentedString(channelInfo)).append("\n");
-    sb.append("    payloadInfo: ").append(toIndentedString(payloadInfo)).append("\n");
+    sb.append("    tagInfo: ").append(toIndentedString(tagInfo)).append("\n");
     sb.append("    insertionTime: ").append(toIndentedString(insertionTime)).append("\n");
     sb.append("}");
     return sb.toString();

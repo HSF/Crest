@@ -56,9 +56,11 @@ public class TagMetaDBImpl extends TagMetaGeneral implements TagMetaDataBaseCust
         super(ds);
     }
 
-    
-    /* (non-Javadoc)
-     * @see hep.crest.data.repositories.TagMetaGeneral#getBlob(java.sql.ResultSet, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see hep.crest.data.repositories.TagMetaGeneral#getBlob(java.sql.ResultSet,
+     * java.lang.String)
      */
     @Override
     protected String getBlob(ResultSet rs, String key) throws SQLException {
@@ -75,7 +77,7 @@ public class TagMetaDBImpl extends TagMetaGeneral implements TagMetaDataBaseCust
         execute(null, sql, entity);
         return findMetaInfo(entity.getTagName());
     }
-    
+
     @Override
     protected TagMetaDto updateAsBytes(TagMetaDto entity) throws CdbServiceException {
 
@@ -83,7 +85,7 @@ public class TagMetaDBImpl extends TagMetaGeneral implements TagMetaDataBaseCust
         final String sql = TagMetaRequests.getUpdateQuery(tablename);
 
         log.info("Update Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
-        execute(null, sql, entity);
+        update(null, sql, entity);
         return findMetaInfo(entity.getTagName());
     }
 
@@ -107,7 +109,7 @@ public class TagMetaDBImpl extends TagMetaGeneral implements TagMetaDataBaseCust
         if (is != null) {
             final byte[] blob = PayloadHandler.getBytesFromInputStream(is);
             if (blob != null) {
-                entity.setChannelInfo(new String(blob));
+                entity.setTagInfo(new String(blob));
                 log.debug("Read channel info blob of length {} ", blob.length);
             }
         }
@@ -118,9 +120,8 @@ public class TagMetaDBImpl extends TagMetaGeneral implements TagMetaDataBaseCust
             ps.setString(2, entity.getDescription());
             ps.setInt(3, entity.getChansize());
             ps.setInt(4, entity.getColsize());
-            ps.setBytes(5, entity.getChannelInfo().getBytes());
-            ps.setBytes(6, entity.getPayloadInfo().getBytes());
-            ps.setDate(7, inserttime);
+            ps.setBytes(5, entity.getTagInfo().getBytes());
+            ps.setDate(6, inserttime);
             log.debug("Dump preparedstatement {}", ps);
             ps.execute();
             log.debug("Search for stored tag meta as a verification, use tag name {} ",
@@ -140,4 +141,59 @@ public class TagMetaDBImpl extends TagMetaGeneral implements TagMetaDataBaseCust
             }
         }
     }
+    
+    /**
+     * @param is
+     *            the InputStream
+     * @param sql
+     *            the String
+     * @param entity
+     *            the TagMetaDto
+     * @throws CdbServiceException
+     *             If an Exception occurred
+     * @return
+     */
+    protected void update(InputStream is, String sql, TagMetaDto entity) {
+
+        final Calendar calendar = Calendar.getInstance();
+        final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
+        entity.setInsertionTime(calendar.getTime());
+
+        if (is != null) {
+            final byte[] blob = PayloadHandler.getBytesFromInputStream(is);
+            if (blob != null) {
+                entity.setTagInfo(new String(blob));
+                log.debug("Read channel info blob of length {} ", blob.length);
+            }
+        }
+
+        try (Connection conn = super.getDs().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);) {
+            ps.setString(1, entity.getDescription());
+            ps.setInt(2, entity.getChansize());
+            ps.setInt(3, entity.getColsize());
+            ps.setBytes(4, entity.getTagInfo().getBytes());
+            ps.setDate(5, inserttime);
+            // Now we set the update where condition.
+            ps.setString(6, entity.getTagName());
+            log.debug("Dump preparedstatement {}", ps);
+            ps.execute();
+            log.debug("Search for stored tag meta as a verification, use tag name {} ",
+                    entity.getTagName());
+        }
+        catch (final SQLException e) {
+            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
+        }
+        finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            }
+            catch (final IOException e) {
+                log.error("Error in closing streams...potential leak");
+            }
+        }
+    }
+    
 }

@@ -100,7 +100,6 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
         final String sql = PayloadRequests.getFindDataQuery(tablename);
 
         log.info("Read Payload data with hash {} using JDBCTEMPLATE", id);
-        final LargeObject obj = null;
         byte[] buf = null;
         Long oid = null;
         ResultSet rs = null;
