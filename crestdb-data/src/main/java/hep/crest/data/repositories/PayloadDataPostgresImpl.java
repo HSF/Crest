@@ -115,7 +115,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             // Only one row is returned....
             rs.close();
             buf = getlargeObj(oid, conn);
-            conn.commit();
+            //conn.commit();
             return new ByteArrayInputStream(buf);
         }
         catch (final SQLException e) {
