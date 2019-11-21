@@ -2,12 +2,14 @@ package hep.crest.data.pojo;
 // Generated Aug 2, 2016 3:50:25 PM by Hibernate Tools 3.2.2.GA
 
 import java.sql.Blob;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -22,7 +24,6 @@ import hep.crest.data.config.DatabasePropertyConfigurator;
 @Entity
 @Table(name = "PAYLOAD", schema = DatabasePropertyConfigurator.SCHEMA_NAME)
 public class Payload implements java.io.Serializable {
-
     /**
      * Serializer.
      */
@@ -210,6 +211,19 @@ public class Payload implements java.io.Serializable {
         this.insertionTime = insertionTime;
     }
 
+    /**
+     * Before saving the object.
+     *
+     * @return
+     */
+    @PrePersist
+    public void prePersist() {
+        if (this.insertionTime == null) {
+            final Timestamp now = new Timestamp(new Date().getTime());
+            this.insertionTime = now;
+        }
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -220,5 +234,4 @@ public class Payload implements java.io.Serializable {
         return "Payload [hash=" + hash + ", version=" + version + ", objectType=" + objectType
                 + ", size=" + size + ", insertionTime=" + insertionTime + "]";
     }
-
 }

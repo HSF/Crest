@@ -28,7 +28,6 @@ import hep.crest.data.config.DatabasePropertyConfigurator;
 @Entity
 @Table(name = "GLOBAL_TAG", schema = DatabasePropertyConfigurator.SCHEMA_NAME)
 public class GlobalTag implements java.io.Serializable {
-
     /**
      * Serializer.
      */
@@ -271,6 +270,9 @@ public class GlobalTag implements java.io.Serializable {
         if (this.insertionTime == null) {
             final Timestamp now = new Timestamp(new Date().getTime());
             this.insertionTime = now;
+        }
+        if (this.snapshotTime == null) {
+            this.snapshotTime = new Date(this.insertionTime.getTime());
         }
     }
 

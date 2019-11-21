@@ -89,8 +89,6 @@ public interface IovBaseRepository
             + "ORDER BY p.id.since ASC, p.id.insertionTime DESC")
     List<Iov> selectSnapshotByGroup(@Param("name") String name, @Param("since") BigDecimal since,
             @Param("until") BigDecimal until, @Param("snap") Date snapshot);
-
-    // FIXME : complete as NATIVE request: @Query(nativeQuery = true)
     /**
      * Native query example: select * from IOV where TAG_NAME =
      * 'MuonAlignMDTBarrelAlign-RUN2-BA_ROLLING_11-BLKP-UPD4-00' AND since = (
@@ -113,6 +111,27 @@ public interface IovBaseRepository
             + "WHERE pt.name = (:name) AND pi.id.since <= :since AND pi.id.insertionTime <= :snap) "
             + "ORDER BY p.id.since ASC, p.id.insertionTime DESC")
     List<Iov> selectAtTime(@Param("name") String name, @Param("since") BigDecimal since,
+            @Param("snap") Date snapshot);
+
+    /**
+     * @param name
+     *            the String
+     * @param since
+     *            the BigDecimal
+     * @param until
+     *            the BigDecimal
+     * @param snapshot
+     *            the Date
+     * @return List<Iov>
+     */
+    @Query("SELECT distinct p FROM Iov p JOIN FETCH p.tag tag "
+            + "WHERE tag.name = (:name) AND p.id.since >= ("
+            + "SELECT max(pi.id.since) FROM Iov pi JOIN pi.tag pt "
+            + "WHERE pt.name = (:name) AND pi.id.since <= :since AND pi.id.insertionTime <= :snap) "
+            + "AND p.id.since <= :until AND p.id.insertionTime <= :snap "
+            + "ORDER BY p.id.since ASC, p.id.insertionTime DESC")
+    List<Iov> getRange(@Param("name") String name, @Param("since") BigDecimal since,
+            @Param("until") BigDecimal until,
             @Param("snap") Date snapshot);
 
     /**
