@@ -56,7 +56,7 @@ export default {
 			const params = `by=name:` + name;
 			return axios
 			.get(`${Vue.prototype.apiName}/globaltags?${params}`)
-			.then(response => response.data)
+			.then(response => response.data.resources)
 			.then(globaltags_list => {commit('mergeGlobalTags', globaltags_list)})
 			.catch(error => { return Promise.reject(error) });
 		},

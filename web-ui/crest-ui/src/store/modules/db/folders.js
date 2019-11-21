@@ -44,7 +44,7 @@ export default {
 		fetchFolder({commit}) {
 			return axios
 			.get(`${Vue.prototype.apiName}/folders`)
-			.then(response => response.data)
+			.then(response => response.data.resources)
 			.then(folders_list => {commit('mergeFolders', folders_list)})
 			.catch(error => { return Promise.reject(error) });
 		}

@@ -49,7 +49,7 @@
           Crest Manager UI
         </h1>
         <h2 class="subtitle">
-          {{this.apiTitle}}
+          {{titlemsg}}
         </h2>
       </div>
     </div>
@@ -62,11 +62,12 @@ export default {
   },
   data: function () {
     return {
-      titlemsg: this.apiTitle,
+      titlemsg: 'Atlas experiment',
       siteicon: '../assets/atlas-logo-web-V02.png',
       siteurl: 'https://atlas.web.cern.ch',
 //      siteicon: '../assets/svom-logo.png',
 //      siteurl: 'https://svom.fr',
+      selectedserver: { host: this.apiHost, port: this.apiPort, protocol: this.apiProtocol, url: '' },
       showNav: false
     };
   },

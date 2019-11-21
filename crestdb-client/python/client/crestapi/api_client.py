@@ -152,6 +152,7 @@ class ApiClient(object):
             _preload_content=_preload_content,
             _request_timeout=_request_timeout)
 
+        print('Request %s %s %s %s has returned %s of type %s' % (method,url,query_params,body,response_data.data,response_type))
         self.last_response = response_data
 
         return_data = response_data
@@ -244,6 +245,7 @@ class ApiClient(object):
             return None
 
         if type(klass) == str:
+            #print('Deserialize %s using %s' % (data,klass))
             if klass.startswith('list['):
                 sub_kls = re.match('list\[(.*)\]', klass).group(1)
                 return [self.__deserialize(sub_data, sub_kls)
@@ -261,14 +263,19 @@ class ApiClient(object):
                 klass = getattr(crestapi.models, klass)
 
         if klass in self.PRIMITIVE_TYPES:
+            #print('Deserialize as primitive %s using %s' % (data,klass))
             return self.__deserialize_primitive(data, klass)
         elif klass == object:
+            #print('Deserialize as object %s using %s' % (data,klass))
             return self.__deserialize_object(data)
         elif klass == datetime.date:
+            #print('Deserialize as date %s using %s' % (data,klass))
             return self.__deserialize_date(data)
         elif klass == datetime.datetime:
+            #print('Deserialize as datetime %s using %s' % (data,klass))
             return self.__deserialize_datatime(data)
         else:
+            #print('Deserialize as model %s using %s' % (data,klass))
             return self.__deserialize_model(data, klass)
 
     def call_api(self, resource_path, method,
@@ -614,8 +621,11 @@ class ApiClient(object):
 
         instance = klass(**kwargs)
 
-        if hasattr(instance, 'get_real_child_model'):
-            klass_name = instance.get_real_child_model(data)
-            if klass_name:
-                instance = self.__deserialize(data, klass_name)
+        # if hasattr(instance, 'get_real_child_model'):
+        #     klass_name = instance.get_real_child_model(data)
+        #     print('__deserialize_model %s using %s' % (instance,klass_name))
+            # if klass_name:
+            #     instance = self.__deserialize(data, klass_name)
+        #print('__deserialize_model return instance %s ' % (instance))
+
         return instance
