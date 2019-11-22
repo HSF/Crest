@@ -25,7 +25,7 @@ spring:
         hibernate.dialect: org.hibernate.dialect.PostgreSQL9Dialect
         hibernate.jdbc.fetch_size: 300
 # This should be changed for production to "validate"
-        hibernate.hbm2ddl.auto: create
+        hibernate.hbm2ddl.auto: update
         hibernate.show_sql: false
         hibernate.jdbc.use_streams_for_binary: false
         hibernate.connection.autocommit: false
