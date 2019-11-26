@@ -73,6 +73,9 @@ public interface IovBaseRepository
             @Param("until") BigDecimal until);
 
     /**
+     * This method is like the getRange method, but it does not include the IOV before the given since.
+     * It will provide the same result as getRange only if the since time provided is equivalent
+     * to the first since selected in the DB. For other cases it will not contain the first IOV.
      * @param name
      *            the String
      * @param since

@@ -967,6 +967,13 @@
 				],
 				"parameters": [
 					{
+						"in": "header",
+						"name": "X-Crest-Query",
+						"description": "The query type. The header parameter X-Crest-Query can be : groups (default) or ranges (include previous since).",
+						"default": "groups",
+						"type": "string"
+					},
+					{
 						"name": "tagname",
 						"in": "query",
 						"description": "tagname: the tag name {none}",
