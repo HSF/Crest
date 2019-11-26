@@ -1,10 +1,11 @@
 """
- distutils file to install the python NATS communication wrapper natsio
+ distutils file to install the python Crest and Http communication wrapper httpio
 
  The resulting module is called natsio and can be used in python:
-       * from svom.messaging.natsio import NatsIo
+       * from crest.io import CrestDbIo
 
  Henri Louvin - henri.louvin@cea.fr
+ Andrea Formica - andrea.formica@cern.ch
 """
 from setuptools import setup, find_namespace_packages
 

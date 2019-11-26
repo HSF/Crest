@@ -34,6 +34,11 @@ class CrestConsoleUI(cmd.Cmd):
     histfile = os.path.join( homehist, historyFile)
     host=None
     loc_parser=None
+    import re
+    rr = r"""
+        ([<|>|:]+)  # match one of the symbols
+    """
+    rr = re.compile(rr, re.VERBOSE)
 
     def init_history(self, histfile):
         readline.parse_and_bind( "tab: complete" )
@@ -92,20 +97,25 @@ class CrestConsoleUI(cmd.Cmd):
         crest_print(out,format=fmt)
 
     def do_iovs(self, line):
-        """iovs -t sometag [-c since=<1000 insertionTime=>123456]
+        """iovs -t sometag [-c since=<1000,insertionTime=>123456]
         Search for iovs in the given tag, other parameters can be added using --cut"""
         out = None
         fmt = 'short'
         if line:
             log.info ("Searching iovs using %s " % line)
             args = self.get_args(line)
+            if args.help:
+                self.loc_parser.print_help()
+                return
             fmt = args.format
             if args.cut:
-                cutstringarr = args.cut.split()
+                cutstringarr = args.cut.split(',')
                 cdic = {}
                 for el in cutstringarr:
-                    (k,v) = el.split('=')
-                    cdic[k] = v
+                    ss = self.rr.findall(el)
+                    ##print(el,ss)
+                    (k,v) = el.split(ss[0])
+                    cdic[k] = f'{ss[0]}{v}'
                 log.info('use cut params : %s' % cdic)
                 out = self.cm.search_iovs(tagname=args.tag,**cdic)
             else:
