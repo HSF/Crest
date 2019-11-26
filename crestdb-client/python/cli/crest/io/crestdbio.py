@@ -86,6 +86,32 @@ class CrestDbIo(HttpIo):
         resp = self.get(self.iovs_endpoint, params=criteria)
         return resp.json()
 
+    def select(self, cmd='groups', tagname=None, **kwargs):
+        """
+        request and export iovs or groups data from the database in json format
+        usage example: select(tagname='SVOM', snapshot='1574429040079')
+        ?tagname=SVOM&snapshot=1574429040079
+        """
+        # define output fields
+        valid_filters = ['snapshot', 'since', 'until']
+
+        # check request validity
+        if not set(kwargs.keys()).issubset(valid_filters):
+            log.error('Requested filters should be in %s', valid_filters)
+
+        # prepare request arguments
+        criteria = {'tagname': tagname }
+        for key, val in kwargs.items():
+            criteria[key] = val
+        cmddic = { 'groups' : '/selectGroups', 'iovs' : '/selectIovs', 'ranges' : '/selectIovs'}
+        # send request
+        loc_headers = {"X-Crest-Query" : "iovs"}
+        if cmd == 'ranges':
+            loc_headers = {"X-Crest-Query" : "ranges"}
+
+        resp = self.get(self.iovs_endpoint+cmddic[cmd], params=criteria, headers=loc_headers)
+        return resp.json()
+
     def create_tags(self, name=None, **kwargs):
         """
         request and export data from the database in json format
