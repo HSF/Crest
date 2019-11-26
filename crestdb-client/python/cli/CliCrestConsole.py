@@ -11,7 +11,7 @@ import readline
 import logging
 import atexit
 import argparse
-from svom.messaging import CrestDbIo
+from crest.io import CrestDbIo
 
 from pip._vendor.pyparsing import empty
 
