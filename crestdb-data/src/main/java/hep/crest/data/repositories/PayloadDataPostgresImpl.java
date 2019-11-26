@@ -113,8 +113,8 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                 oid = rs.getLong(1);
             }
             // Only one row is returned....
-            rs.close();
             buf = getlargeObj(oid, conn);
+            rs.close();
             conn.commit();
             return new ByteArrayInputStream(buf);
         }
@@ -155,7 +155,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             obj.close();
         }
         catch (final SQLException e) {
-            log.error("cannot read large object in postgres {} ", oid);
+            log.error("cannot read large object in postgres {} : {}", oid, e.getMessage());
         }
         finally {
             if (obj != null) {
@@ -193,15 +193,17 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             int s = 0;
             int tl = 0;
             while ((s = is.read(buf, 0, 2048)) > 0) {
+                log.trace("Write into LargeObject ID {} nbytes {} ", oid, s);
                 obj.write(buf, 0, s);
                 tl += s;
             }
             if (entity != null) {
+                log.trace("Written size {} ", tl);
                 entity.setSize(tl);
             }
             // Close the large object
             obj.close();
-            lobj.unlink(oid);
+            // This seems to be not needed or harmful: lobj . unlink( oid )
             return oid;
         }
         catch (SQLException | IOException e) {

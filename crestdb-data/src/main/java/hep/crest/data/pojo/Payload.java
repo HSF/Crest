@@ -24,7 +24,6 @@ import hep.crest.data.config.DatabasePropertyConfigurator;
 @Entity
 @Table(name = "PAYLOAD", schema = DatabasePropertyConfigurator.SCHEMA_NAME)
 public class Payload implements java.io.Serializable {
-
     /**
      * Serializer.
      */
@@ -234,5 +233,4 @@ public class Payload implements java.io.Serializable {
         return "Payload [hash=" + hash + ", version=" + version + ", objectType=" + objectType
                 + ", size=" + size + ", insertionTime=" + insertionTime + "]";
     }
-
 }
