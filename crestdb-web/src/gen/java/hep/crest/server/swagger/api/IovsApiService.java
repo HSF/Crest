@@ -16,7 +16,7 @@ public abstract class IovsApiService {
     public abstract Response getSize( @NotNull String tagname, Long snapshot,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response getSizeByTag( @NotNull String tagname,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response selectGroups( @NotNull String tagname, Long snapshot,SecurityContext securityContext, UriInfo info, Request request, HttpHeaders headers) throws NotFoundException;
-    public abstract Response selectIovs( String tagname, String since, String until, Long snapshot,SecurityContext securityContext, UriInfo info,Request request, HttpHeaders headers) throws NotFoundException;
+    public abstract Response selectIovs(String xCrestQuery, String tagname, String since, String until, Long snapshot,SecurityContext securityContext, UriInfo info,Request request, HttpHeaders headers) throws NotFoundException;
     public abstract Response selectSnapshot( @NotNull String tagname, @NotNull Long snapshot,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response storeBatchIovMultiForm(IovSetDto body,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response lastIov(String tagname, String since, Long snapshot, String dateformat, SecurityContext securityContext, UriInfo info)  throws NotFoundException;

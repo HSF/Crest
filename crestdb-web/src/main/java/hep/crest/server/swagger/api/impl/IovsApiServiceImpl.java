@@ -170,8 +170,7 @@ public class IovsApiServiceImpl extends IovsApiService {
                 savedList.add(saved);
             }
             final CrestBaseResponse saveddto = new IovSetDto().resources(savedList).filter(filters)
-                    .format("IovSetDto")
-                    .size((long) savedList.size()).datatype("iovs");
+                    .format("IovSetDto").size((long) savedList.size()).datatype("iovs");
             return Response.created(info.getRequestUri()).entity(saveddto).build();
 
         }
@@ -238,8 +237,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             final GenericMap filters = new GenericMap();
             filters.put("tagName", tagname);
             final CrestBaseResponse saveddto = new IovSetDto().resources(dtolist).filter(filters)
-                    .format("IovSetDto")
-                    .size((long) dtolist.size()).datatype("iovs");
+                    .format("IovSetDto").size((long) dtolist.size()).datatype("iovs");
             return Response.ok().entity(saveddto).build();
 
         }
@@ -400,12 +398,12 @@ public class IovsApiServiceImpl extends IovsApiService {
      * (non-Javadoc)
      * 
      * @see hep.crest.server.swagger.api.IovsApiService#selectIovs(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Long,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Long,
      * javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo,
      * javax.ws.rs.core.Request, javax.ws.rs.core.HttpHeaders)
      */
     @Override
-    public Response selectIovs(String tagname, String since, String until, Long snapshot,
+    public Response selectIovs(String xCrestQuery, String tagname, String since, String until, Long snapshot,
             SecurityContext securityContext, UriInfo info, Request request, HttpHeaders headers)
             throws NotFoundException {
         log.info(
@@ -446,7 +444,10 @@ public class IovsApiServiceImpl extends IovsApiService {
             // this is filling a mag-age parameter in the header
             final CacheControl cc = cachesvc.getIovsCacheControlForUntil(snapshot, runtil);
             // Retrieve all iovs
-            dtolist = iovService.selectIovsByTagRangeSnapshot(tagname, rsince, runtil, snap);
+            if (xCrestQuery == null) {
+                xCrestQuery = "groups";
+            }
+            dtolist = iovService.selectIovsByTagRangeSnapshot(tagname, rsince, runtil, snap, xCrestQuery);
             final IovSetDto respdto = new IovSetDto();
             ((IovSetDto) respdto.datatype("iovs")).resources(dtolist).size((long) dtolist.size());
             final GenericMap filters = new GenericMap();
@@ -521,7 +522,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             if (dateformat == null) {
                 dateformat = "ms";
             }
-            
+
             final IovDto last = iovService.latest(tagname, since, dateformat);
             if (last == null) {
                 final String message = "No resource has been found";

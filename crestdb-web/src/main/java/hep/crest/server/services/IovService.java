@@ -234,21 +234,33 @@ public class IovService {
      *            the BigDecimal
      * @param snapshot
      *            the Date
+     * @param flag
+     *            the String
      * @return List<IovDto>
      * @throws CdbServiceException
      *             If an Exception occurred
      */
     public List<IovDto> selectIovsByTagRangeSnapshot(String tagname, BigDecimal since,
-            BigDecimal until, Date snapshot) throws CdbServiceException {
+            BigDecimal until, Date snapshot, String flag) throws CdbServiceException {
         try {
             log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
                     tagname, since, until, snapshot);
             Iterable<Iov> entities = null;
-            if (snapshot == null) {
+            if (snapshot == null && flag.equals("groups")) {
                 entities = iovRepository.selectLatestByGroup(tagname, since, until);
             }
-            else {
+            else if (flag.equals("groups")) {
                 entities = iovRepository.selectSnapshotByGroup(tagname, since, until, snapshot);
+            }
+            else if (flag.equals("ranges")) {
+                if (snapshot == null) {
+                    snapshot = Instant.now().toDate();
+                }
+                entities = iovRepository.getRange(tagname, since, until, snapshot);
+            }
+            if (entities == null) {
+                log.warn("Cannot find iovs for tag {} ",tagname);
+                return new ArrayList<>();
             }
             return StreamSupport.stream(entities.spliterator(), false)
                     .map(s -> mapper.map(s, IovDto.class)).collect(Collectors.toList());
