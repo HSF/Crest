@@ -33,6 +33,8 @@ class CrestConsoleUI(cmd.Cmd):
     homehist = os.getenv('CDMS_HISTORY_HOME', os.environ["HOME"])
     histfile = os.path.join( homehist, historyFile)
     host=None
+    loc_parser=None
+
     def init_history(self, histfile):
         readline.parse_and_bind( "tab: complete" )
         readline.set_history_length( 100 )
@@ -44,23 +46,24 @@ class CrestConsoleUI(cmd.Cmd):
             atexit.register( self.save_history, histfile )
 
     def save_history(self, histfile):
-        print ('Saving history in %s' % histfile)
+        log.info ('Saving history in %s' % histfile)
         readline.write_history_file( histfile )
     def set_host(self, url):
         self.host = url
 
     def get_args(self, line=None):
         argv=line.split()
-        parser = argparse.ArgumentParser(description="parser options for cli")
-        group = parser.add_mutually_exclusive_group()
+        self.loc_parser = argparse.ArgumentParser(description="parser options for cli",add_help=False)
+        group = self.loc_parser.add_mutually_exclusive_group()
         group.add_argument("-v", "--verbose", action="store_true")
         group.add_argument("-q", "--quiet", action="store_true")
-        parser.add_argument("-t", "--tag", help="the tag name")
-        parser.add_argument("-f", "--format", default="short", help="the output format")
-        parser.add_argument("-p", "--hash", help="the payload hash")
-        parser.add_argument("-c", "--cut", help="additional selection parameters")
-        parser.add_argument("-H", "--header", default="BLOB", help="set header request for payload: BLOB, JSON, ...")
-        return parser.parse_args(argv)
+        self.loc_parser.add_argument('-h', '--help', action="store_true", help='show this help message')
+        self.loc_parser.add_argument("-t", "--tag", help="the tag name")
+        self.loc_parser.add_argument("-f", "--format", default="short", help="the output format")
+        self.loc_parser.add_argument("-p", "--hash", help="the payload hash")
+        self.loc_parser.add_argument("-c", "--cut", help="additional selection parameters")
+        self.loc_parser.add_argument("-H", "--header", default="BLOB", help="set header request for payload: BLOB, JSON, ...")
+        return self.loc_parser.parse_args(argv)
 
     def do_connect(self,url=None):
         """connect [url]
@@ -68,30 +71,33 @@ class CrestConsoleUI(cmd.Cmd):
         if not url:
             url = self.host
         self.cm = CrestDbIo(server_url=url)
-        print(f'Connected to {url}')
+        log.info(f'Connected to {url}')
 
     def do_ls(self, pattern):
-        """ls [tag name pattern]
-        Search for tags which contain the input pattern"""
+        """ls -h
+        Search for tags which contain the input pattern provided via option --tag ATAG"""
         out = None
         fmt = 'short'
         if pattern:
-            print ("Searching tags %s " % pattern)
+            log.info ("Searching tags %s " % pattern)
             args = self.get_args(pattern)
+            if args.help:
+                self.loc_parser.print_help()
+                return
             fmt = args.format
             out = self.cm.search_tags(name=args.tag)
         else:
-            print ('Search all tags')
+            log.info ('Search all tags')
             out = self.cm.search_tags()
         crest_print(out,format=fmt)
 
     def do_iovs(self, line):
-        """iovs [-t sometag ...]
-        Search for iovs in the given tag and eventually other parameters"""
+        """iovs -t sometag [-c since=<1000 insertionTime=>123456]
+        Search for iovs in the given tag, other parameters can be added using --cut"""
         out = None
         fmt = 'short'
         if line:
-            print ("Searching iovs using %s " % line)
+            log.info ("Searching iovs using %s " % line)
             args = self.get_args(line)
             fmt = args.format
             if args.cut:
@@ -100,31 +106,31 @@ class CrestConsoleUI(cmd.Cmd):
                 for el in cutstringarr:
                     (k,v) = el.split('=')
                     cdic[k] = v
-                print('use cut params : %s' % cdic)
+                log.info('use cut params : %s' % cdic)
                 out = self.cm.search_iovs(tagname=args.tag,**cdic)
             else:
                 out = self.cm.search_iovs(tagname=args.tag)
 
         else:
-            print ('Cannot search iovs without a tagname parameter')
-            print ('Optional arguments are: -c insertionTime>222222 , where the time needs to be expressed in ms')
+            log.info ('Cannot search iovs without a tagname parameter')
+            log.info ('Optional arguments are: -c insertionTime=>222222 , where the time needs to be expressed in ms')
         crest_print(out,fmt)
 
     def do_get(self, line):
-        """get [-p somehash ...]
-        Search for payload with the given hash, eventually add an header param"""
+        """get -p somehash [-i -H BLOB {JSON}]
+        Search for payload with the given hash, eventually add an header param to determine the output format. The -i option can be used to get only meta data."""
         out = None
         fmt = 'short'
         if line:
-            print ("Searching payload using %s " % line)
+            log.info ("Searching payload using %s " % line)
             args = self.get_args(line)
             fmt = args.format
             if args.header:
                 self.cm.set_header({"X-Crest-PayloadFormat" : args.header})
             out = self.cm.get_payload(phash=args.hash)
         else:
-            print ('Cannot get payload without a hash parameter')
-        print(f'Output is {out}')
+            log.info ('Cannot get payload without a hash parameter')
+        log.info(f'Output is {out}')
 
 
     def do_exit(self, line):
@@ -160,7 +166,7 @@ class CrestConsoleUI(cmd.Cmd):
 
 def crest_print(crestdata, format='all'):
     if 'size' not in crestdata.keys():
-        print('Cannot find results to print')
+        log.info('Cannot find results to print')
         return
     size=crestdata['size']
     print(f'Retrieved {size} lines')
@@ -180,6 +186,7 @@ def crest_print(crestdata, format='all'):
             print('{since:15d} {instime:28s} {hash:65s}'.format(since=xt['since'],instime=xt['insertionTime'],hash=xt['payloadHash']))
     else:
         print(crestdata)
+        
 if __name__ == '__main__':
         # Parse arguments
     parser = argparse.ArgumentParser(description='Crest browser.')
