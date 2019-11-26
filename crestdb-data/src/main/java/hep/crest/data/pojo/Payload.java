@@ -2,12 +2,14 @@ package hep.crest.data.pojo;
 // Generated Aug 2, 2016 3:50:25 PM by Hibernate Tools 3.2.2.GA
 
 import java.sql.Blob;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -103,7 +105,6 @@ public class Payload implements java.io.Serializable {
         this.hash = hash;
     }
 
-    ////// @/////Version
     /**
      * @return String
      */
@@ -208,6 +209,19 @@ public class Payload implements java.io.Serializable {
      */
     public void setInsertionTime(Date insertionTime) {
         this.insertionTime = insertionTime;
+    }
+
+    /**
+     * Before saving the object.
+     *
+     * @return
+     */
+    @PrePersist
+    public void prePersist() {
+        if (this.insertionTime == null) {
+            final Timestamp now = new Timestamp(new Date().getTime());
+            this.insertionTime = now;
+        }
     }
 
     /*
