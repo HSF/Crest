@@ -11,7 +11,8 @@ import readline
 import logging
 import atexit
 import argparse
-from svom.messaging import CrestDbIo
+from datetime import datetime
+from crest.io import CrestDbIo
 
 from pip._vendor.pyparsing import empty
 
@@ -62,11 +63,14 @@ class CrestConsoleUI(cmd.Cmd):
         group = self.loc_parser.add_mutually_exclusive_group()
         group.add_argument("-v", "--verbose", action="store_true")
         group.add_argument("-q", "--quiet", action="store_true")
+        self.loc_parser.add_argument('cmd', nargs='?', default='iovs')
         self.loc_parser.add_argument('-h', '--help', action="store_true", help='show this help message')
         self.loc_parser.add_argument("-t", "--tag", help="the tag name")
-        self.loc_parser.add_argument("-f", "--format", default="short", help="the output format")
+        self.loc_parser.add_argument("-f", "--format", default="short", help="the output format, use 'all' for details")
         self.loc_parser.add_argument("-p", "--hash", help="the payload hash")
         self.loc_parser.add_argument("-c", "--cut", help="additional selection parameters")
+        self.loc_parser.add_argument("-g", "--groups", action="store_true", help="use to select groups instead of iovs")
+        self.loc_parser.add_argument("-s", "--snapshot", default="0", help="add a snapshot time in ms for iovs and groups requests")
         self.loc_parser.add_argument("-H", "--header", default="BLOB", help="set header request for payload: BLOB, JSON, ...")
         return self.loc_parser.parse_args(argv)
 
@@ -126,6 +130,35 @@ class CrestConsoleUI(cmd.Cmd):
             log.info ('Optional arguments are: -c insertionTime=>222222 , where the time needs to be expressed in ms')
         crest_print(out,fmt)
 
+    def do_select(self, line):
+        """select [iovs|groups|ranges] -t sometag -s snapshot -c since=1000,until=2000
+        Select for iovs in the given tag, since and until can be defined using --cut"""
+        out = None
+        fmt = 'short'
+        cdic = {}
+        if line:
+            log.info ("Searching iovs using %s " % line)
+            args = self.get_args(line)
+            cdic['snapshot'] = args.snapshot
+            if args.help:
+                self.loc_parser.print_help()
+                return
+            fmt = args.format
+            if args.cut:
+                cutstringarr = args.cut.split(',')
+                cdic = {}
+                for el in cutstringarr:
+                    (k,v) = el.split('=')
+                    cdic[k] = f'{v}'
+                log.info('use cut params : %s' % cdic)
+            cmd = args.cmd
+            out = self.cm.select(cmd=cmd,tagname=args.tag,**cdic)
+
+        else:
+            log.info ('Cannot search iovs without a tagname parameter')
+            log.info ('Optional arguments are: -c since=222222,until=3333333 ; in addition also a snapshot can be provided')
+        crest_print(out,fmt)
+
     def do_get(self, line):
         """get -p somehash [-i -H BLOB {JSON}]
         Search for payload with the given hash, eventually add an header param to determine the output format. The -i option can be used to get only meta data."""
@@ -142,6 +175,13 @@ class CrestConsoleUI(cmd.Cmd):
             log.info ('Cannot get payload without a hash parameter')
         log.info(f'Output is {out}')
 
+    def do_convert(self, line):
+        """convert date
+        Convert a date to UTC unix time."""
+        dt=datetime.fromisoformat(line)
+        log.info('create time from string %s %s' % (line,dt.timestamp()))
+        since=int(dt.timestamp()* 1000)
+        print(f'date {line} = {since}')
 
     def do_exit(self, line):
         return True
@@ -191,12 +231,17 @@ def crest_print(crestdata, format='all'):
             for xt in dataarr:
                 print('{name:60.60s} {instime:28.28s} '.format(name=xt['name'],instime=xt['insertionTime']))
     elif (crestdata['format'] == 'IovSetDto'):
-        print('{name:15.15s} {instime:28.28s} {hash:65s}'.format(name='since',instime='Insertion time',hash='HASH'))
-        for xt in dataarr:
-            print('{since:15d} {instime:28s} {hash:65s}'.format(since=xt['since'],instime=xt['insertionTime'],hash=xt['payloadHash']))
+        if crestdata['datatype'] == 'iovs':
+            print('{name:15.15s} {instime:28.28s} {hash:65s}'.format(name='since',instime='Insertion time',hash='HASH'))
+            for xt in dataarr:
+                print('{since:15d} {instime:28s} {hash:65s}'.format(since=xt['since'],instime=xt['insertionTime'],hash=xt['payloadHash']))
+        elif (crestdata['datatype'] == 'groups'):
+            print('{name:15.15s}'.format(name='since'))
+            for xt in dataarr:
+                print('{since:15d}'.format(since=xt['since']))
     else:
         print(crestdata)
-        
+
 if __name__ == '__main__':
         # Parse arguments
     parser = argparse.ArgumentParser(description='Crest browser.')
