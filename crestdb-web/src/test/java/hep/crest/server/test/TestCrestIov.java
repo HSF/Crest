@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -152,9 +154,24 @@ public class TestCrestIov {
         final ResponseEntity<String> resp4 = this.testRestTemplate
                 .exchange("/crestapi/iovs/selectSnapshot?tagname=NONR", HttpMethod.GET, null, String.class);
         assertThat(resp4.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+        final ResponseEntity<String> resp4b = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectSnapshot?tagname=NONR&snapshot=10000", HttpMethod.GET, null, String.class);
+        assertThat(resp4b.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+        final ResponseEntity<String> resp4c = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectSnapshot?tagname=NONR&snapshot=somestring", HttpMethod.GET, null, String.class);
+        assertThat(resp4c.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
         final ResponseEntity<String> resp5 = this.testRestTemplate
                 .exchange("/crestapi/iovs/lastIov?tagname=NONR", HttpMethod.GET, null, String.class);
         assertThat(resp5.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
+        
+        // dateformat
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("dateformat", "min");
+        final HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        final ResponseEntity<String> resp5b = this.testRestTemplate
+                .exchange("/crestapi/iovs/lastIov?tagname=NONR", HttpMethod.GET, entity, String.class);
+        assertThat(resp5b.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);  
 
     }
  
