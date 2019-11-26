@@ -259,7 +259,7 @@ public class IovService {
                 entities = iovRepository.getRange(tagname, since, until, snapshot);
             }
             if (entities == null) {
-                log.warn("Cannot find iovs for tag {} ",tagname);
+                log.warn("Cannot find iovs for tag {}", tagname);
                 return new ArrayList<>();
             }
             return StreamSupport.stream(entities.spliterator(), false)
@@ -293,7 +293,7 @@ public class IovService {
         catch (final Exception e) {
             log.error("Exception in retrieving iov list by tag using {}", tagname);
             throw new CdbServiceException(
-                    "Cannot find iov size by tag name and snapshot: " + e.getMessage());
+                    "Cannot find iov list by tag name and snapshot: " + e.getMessage());
         }
     }
 
