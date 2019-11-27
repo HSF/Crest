@@ -58,6 +58,9 @@
             default-sort="since"
             :loading="isloading">
             <template slot-scope="props">
+              <b-table-column field="selectedtag.name" label="Tag name" centered>
+                  {{ selectedtag.name }}
+              </b-table-column>
               <b-table-column v-for="(column, index) in columns"
                   :key="index"
                   :label="column.label"
@@ -125,12 +128,6 @@ import Long from 'long';
                 selected: {},
                 columns : [
                         {
-                            field: 'tagName',
-                            label: 'TAG NAME',
-                            visible: true,
-                            width: '20',
-                        },
-                        {
                             field: 'since',
                             label: 'SINCE',
                             width: '15',
@@ -140,14 +137,14 @@ import Long from 'long';
                         {
                             field: 'insertionTime',
                             label: 'InsertTime',
-                            visible: false,
+                            visible: true,
                             sortable: false
                         },
                         {
                             field: 'payloadHash',
                             label: 'HASH',
                             width: '60',
-                            visible: false
+                            visible: true
                         },
                     ],
                 since : 0,

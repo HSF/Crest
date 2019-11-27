@@ -31,7 +31,7 @@ export default {
 	mutations: {
 		mergeGlobalTagMapForTagName(state, {name, globaltagmap_list}) {
 			if (!(name in state.globaltag_for_tag)) {
-				Vue.set(state.globaltag_for_tag, name, globaltagmap_list);
+				Vue.set(state.globaltag_for_tag, name, globaltagmap_list.resources);
 			}
 		},
 		mergeNewGlobalTagMap(state, globaltagmap) {

@@ -31,11 +31,11 @@ export default {
 	},
 	mutations: {
 		mergeIovsForTag(state, {tagname, iovs_list}) {
-            Vue.set(state.iovs_for_tag, tagname, iovs_list);
+            Vue.set(state.iovs_for_tag, tagname, iovs_list.resources);
         },
         mergeNbIovs(state, {tagname, iovs_list}) {
             if (!(tagname in state.nb_iovs_for_tag)) {
-                Vue.set(state.nb_iovs_for_tag, tagname, iovs_list[0]);
+                Vue.set(state.nb_iovs_for_tag, tagname, iovs_list.resources[0]);
             }
         }
 	},
