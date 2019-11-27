@@ -62,7 +62,7 @@ export default {
 	},
 	mutations: {
 		mergeTags(state, tags_list) {
-			tags_list.forEach(tag => {
+			tags_list.resources.forEach(tag => {
 				let name = tag.name;
 				if (!(name in state.tag)) {
 					Vue.set(state.tag, name, tag);
@@ -70,7 +70,7 @@ export default {
 			});
 		},
 		mergeTagsForGlobaltag(state, {gtname, tags_list}) {
-			Vue.set(state.tag_for_globaltag, gtname, tags_list);
+			Vue.set(state.tag_for_globaltag, gtname, tags_list.resources);
     },
 		mergeTagMetaForTag(state, {tagname, tagmeta_list}) {
 			if (!(tagname in state.tagmeta_for_tag)) {
