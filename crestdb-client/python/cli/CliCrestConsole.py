@@ -66,6 +66,8 @@ class CrestConsoleUI(cmd.Cmd):
         self.loc_parser.add_argument('cmd', nargs='?', default='iovs')
         self.loc_parser.add_argument('-h', '--help', action="store_true", help='show this help message')
         self.loc_parser.add_argument("-t", "--tag", help="the tag name")
+        self.loc_parser.add_argument("--inpfile", help="the input file to upload")
+        self.loc_parser.add_argument("--since", help="the since time for the payload.")
         self.loc_parser.add_argument("-f", "--format", default="short", help="the output format, use 'all' for details")
         self.loc_parser.add_argument("-p", "--hash", help="the payload hash")
         self.loc_parser.add_argument("-c", "--cut", help="additional selection parameters")
@@ -99,6 +101,42 @@ class CrestConsoleUI(cmd.Cmd):
             log.info ('Search all tags')
             out = self.cm.search_tags()
         crest_print(out,format=fmt)
+
+    def do_createtag(self, pattern):
+        """createtag -h
+        Create a new tag, the name is provided via --tag ATAG"""
+        out = None
+        fmt = 'short'
+        if pattern:
+            log.info ("Create tags %s " % pattern)
+            args = self.get_args(pattern)
+            if args.help:
+                self.loc_parser.print_help()
+                return
+            fmt = args.format
+            out = self.cm.create_tags(name=args.tag)
+        else:
+            log.info ('Cannot create a tag without arguments')
+        print(f'Response is : {out}')
+
+    def do_upload(self, pattern):
+        """upload -h
+        Upload a file in a tag, the name is provided via --tag ATAG.
+        You should also provide a since time and a file name in input."""
+        out = None
+        fmt = 'short'
+        if pattern:
+            log.info ("Create payload %s " % pattern)
+            args = self.get_args(pattern)
+            if args.help:
+                self.loc_parser.print_help()
+                return
+            fmt = args.format
+            print(f'Upload file {args.inpfile} @ {args.since} in tag {args.tag}')
+            out = self.cm.create_payload(tag=args.tag,filename=args.inpfile,since=args.since)
+        else:
+            log.info ('Cannot create a payload without arguments')
+        print(f'Response is : {out}')
 
     def do_iovs(self, line):
         """iovs -t sometag [-c since=<1000,insertionTime=>123456]
