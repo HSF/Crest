@@ -36,6 +36,9 @@ class CrestDbIo(HttpIo):
         self.crest_headers = {"X-Crest-PayloadFormat" : "BLOB"}
 
     def set_header(self, hdr):
+        """
+        set {hdr} as self.crest_headers
+        """
         # example : {"X-Crest-PayloadFormat" : "JSON"}
         self.crest_headers = hdr
 
@@ -143,7 +146,7 @@ class CrestDbIo(HttpIo):
         resp = self.post(self.tags_endpoint, json=body_req, headers=self.headers)
         return resp.json()
 
-    def create_payload(self, filename=None, tag=None, since=None, format='ms', **kwargs):
+    def create_payload(self, filename=None, tag=None, since=None, timeformat='ms', **kwargs):
         """
         request and import data into the database
         If you want to use a date as a string put format = 'str'
@@ -151,10 +154,10 @@ class CrestDbIo(HttpIo):
         """
         # define output fields
         valid_fields = ['endtime']
-        if format != 'ms':
-            dt=datetime.fromisoformat(since)
-            log.info('create time from string %s %s' % (since,dt.timestamp()))
-            since=int(dt.timestamp()* 1000)
+        if timeformat != 'ms':
+            dtime = datetime.fromisoformat(since)
+            log.info('create time from string %s %s', since, dtime.timestamp())
+            since = int(dtime.timestamp()* 1000)
         # check request validity
         if not set(kwargs.keys()).issubset(valid_fields):
             log.error('Requested fields should be in %s', valid_fields)
@@ -162,10 +165,10 @@ class CrestDbIo(HttpIo):
         # prepare request arguments
         with open(filename, 'rb') as fin:
             files_req = {
-                    'file': (filename, fin),
-                    'endtime' : (None, 0),
-                    'tag' : (None, tag),
-                    'since' : (None, since)
+                'file': (filename, fin),
+                'endtime' : (None, 0),
+                'tag' : (None, tag),
+                'since' : (None, since)
             }
             for key, val in kwargs.items():
                 files_req[key] = (None, val)
