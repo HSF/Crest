@@ -90,7 +90,10 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             final GenericMap filters = new GenericMap();
             filters.put("name", name);
             final CrestBaseResponse setdto = new GlobalTagSetDto().addResourcesItem(dto)
-                    .filter(filters).size(1L).datatype("globaltags");
+                    .format("GlobalTagSetDto")
+                    .filter(filters)
+                    .size(1L)
+                    .datatype("globaltags");
             return Response.ok().entity(setdto).build();
 
         }
@@ -125,7 +128,10 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             }
             final GenericMap filters = new GenericMap();
             filters.put("name", name);
-            final CrestBaseResponse setdto = new TagSetDto().resources(dtolist).filter(filters)
+            final CrestBaseResponse setdto = new TagSetDto()
+                    .resources(dtolist)
+                    .format("TagSetDto")
+                    .filter(filters)
                     .size((long) dtolist.size()).datatype("tags");
             return Response.ok().entity(setdto).build();
         }
@@ -172,8 +178,11 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
                         message);
                 return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
             }
-            final CrestBaseResponse setdto = new GlobalTagSetDto().resources(dtolist)
-                    .size((long) dtolist.size()).datatype("globaltags");
+            final CrestBaseResponse setdto = new GlobalTagSetDto()
+                    .resources(dtolist)
+                    .format("GlobalTagSetDto")
+                    .size((long) dtolist.size())
+                    .datatype("globaltags");
             if (filters != null) {
                 setdto.filter(filters);
             }
