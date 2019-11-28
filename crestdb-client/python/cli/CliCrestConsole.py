@@ -27,6 +27,75 @@ log.addHandler( handler )
 sys.path.append(os.path.join(sys.path[0],'..'))
 historyFile = '.crestconsole_hist'
 
+gtagfieldsdic = {
+    'name' : '{name:25.25s}',
+    'release' : '{release:10s}',
+    'workflow' : '{workflow:10s}',
+    'scenario' : '{scenario:10s}',
+    'validity' : '{validity:10d}',
+    'description' : '{description:50s}',
+    'snapshotTime' : '{snapshotTime:30s}',
+}
+gtagfieldsdicheader = {
+    'name' : {'key':'{name:25.25s}','val' : 'GlobalTag'},
+    'release' : {'key':'{release:10s}','val' : 'Release'},
+    'workflow' :  {'key':'{workflow:10s}','val' : 'Workflow'},
+    'scenario' : {'key':'{scenario:10s}','val' : 'Scenario'},
+    'validity' :  {'key':'{validity:10s}','val' : 'Validity'},
+    'description' : {'key':'{description:50s}','val' : 'Description'},
+    'snapshotTime' : {'key':'{snapshotTime:30s}', 'val' : 'Snapshot Time'}
+}
+iovfieldsdic = {
+    'since' : '{since:15d}',
+    'payloadHash' : '{payloadHash:50s}',
+    'insertionTime' : '{insertionTime:30s}',
+}
+iovfieldsdicheader = {
+    'since' : {'key':'{since:15s}','val' : 'since'},
+    'payloadHash' : {'key':'{payloadHash:50s}','val' : 'Hash'},
+    'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
+}
+tagfieldsdic = {
+    'name' : '{name:25.25s}',
+    'timeType' : '{timeType:10s}',
+    'payloadSpec' : '{payloadSpec:10s}',
+    'synchronization' : '{synchronization:10s}',
+    'lastValidatedTime' : '{lastValidatedTime:10d}',
+    'endOfValidity' : '{endOfValidity:10d}',
+    'description' : '{description:50s}',
+    'insertionTime' : '{insertionTime:30s}',
+}
+tagfieldsdicheader = {
+    'name' : {'key':'{name:25.25s}','val' : 'Tag'},
+    'timeType' : {'key':'{timeType:10s}','val' : 'Type'},
+    'payloadSpec' :  {'key':'{payloadSpec:10s}','val' : 'Payload'},
+    'synchronization' : {'key':'{synchronization:10s}','val' : 'Synchro'},
+    'lastValidatedTime' :  {'key':'{lastValidatedTime:10s}','val' : 'Last-Valid'},
+    'endOfValidity' :  {'key':'{endOfValidity:10s}','val' : 'End-Valid'},
+    'description' : {'key':'{description:50s}','val' : 'Description'},
+    'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
+}
+
+def dprint(format,headerdic,datadic,cdata):
+    if len(format) == 0:
+        format = datadic.keys()
+    headerfmtstr = ' '.join([ headerdic[k]['key'] for k in format])
+    headic = {}
+    for k in format:
+        headic[k] = headerdic[k]['val']
+    print(headerfmtstr.format(**headic))
+    #print('Use format %s' % format)
+    fmtstr = ' '.join([datadic[k] for k in format])
+    #print('Format string %s'%fmtstr)
+    for xt in cdata:
+        adic = {}
+        for k in format:
+            if xt[k] is None:
+                xt[k] = ' - '
+            adic[k]=xt[k]
+        #print('Use dictionary %s'%adic)
+        print(fmtstr.format(**adic))
+
 class CrestConsoleUI(cmd.Cmd):
     """Simple command processor example."""
     cm = None
@@ -118,6 +187,8 @@ class CrestConsoleUI(cmd.Cmd):
                 log.info('use cut params : %s' % cdic)
 
             if cmd == 'tags':
+                if tagname is None:
+                    tagname = "%"
                 cdic['name'] = tagname
                 out = self.cm.search_tags(**cdic)
             elif cmd == 'iovs':
@@ -313,23 +384,13 @@ def crest_print(crestdata, format='all'):
     print(f'Retrieved {size} lines')
     dataarr = crestdata['resources']
     if (crestdata['format'] == 'TagSetDto'):
-        if format == 'all':
-            print('{name:40s} {instime:28.28s} {endtime:15.15s} {synchro:10s} {desc:60.60s}'.format(name='tag name',instime='Insertion time',endtime='End time',synchro='Synchro',desc='Description'))
-            for xt in dataarr:
-                print('{name:40s} {instime:28.28s} {endtime:15d} {synchro:10s} {desc:60.60s}'.format(name=xt['name'],instime=xt['insertionTime'],endtime=xt['endOfValidity'],synchro=xt['synchronization'],desc=xt['description']))
-        else:
-            print('{name:60.60s} {instime:28.28s}'.format(name='tag name',instime='Insertion time'))
-            for xt in dataarr:
-                print('{name:60.60s} {instime:28.28s} '.format(name=xt['name'],instime=xt['insertionTime']))
+        dprint([],tagfieldsdicheader,tagfieldsdic,dataarr)
+
+    elif (crestdata['format'] == 'GlobalTagSetDto'):
+        dprint([],gtagfieldsdicheader,gtagfieldsdic,dataarr)
+
     elif (crestdata['format'] == 'IovSetDto'):
-        if crestdata['datatype'] == 'iovs':
-            print('{name:15.15s} {instime:28.28s} {hash:65s}'.format(name='since',instime='Insertion time',hash='HASH'))
-            for xt in dataarr:
-                print('{since:15d} {instime:28s} {hash:65s}'.format(since=xt['since'],instime=xt['insertionTime'],hash=xt['payloadHash']))
-        elif (crestdata['datatype'] == 'groups'):
-            print('{name:15.15s}'.format(name='since'))
-            for xt in dataarr:
-                print('{since:15d}'.format(since=xt['since']))
+        dprint([],iovsfieldsdicheader,iovsfieldsdic,dataarr)
     else:
         print(crestdata)
 
