@@ -29,9 +29,10 @@ class CrestDbIo(HttpIo):
                          backoff_factor=backoff_factor,
                          asynchronous=asynchronous,
                          loop=loop)
-        self.tags_endpoint = '/tags'
-        self.iovs_endpoint = '/iovs'
-        self.payloads_endpoint = '/payloads'
+        self.endpoints = { 'tags': '/tags', 'iovs' : '/iovs', \
+            'payloads' : '/payloads', 'globaltags' : '/globaltags', \
+            'maps' : '/globaltagmaps' }
+
         self.headers = {"Content-Type" : "application/json", "Accept" : "application/json"}
         self.crest_headers = {"X-Crest-PayloadFormat" : "BLOB"}
 
@@ -60,14 +61,38 @@ class CrestDbIo(HttpIo):
         criteria = {'by': by_crit}
 
         # send request
-        resp = self.get(self.tags_endpoint, params=criteria)
+        resp = self.get(self.endpoints['tags'], params=criteria)
+        return resp.json()
+
+    def search_globaltags(self, **kwargs):
+        """
+        request and export data from the database in json format
+        usage example: search_globaltags(name='SVOM')
+        """
+        # define output fields
+        valid_filters = ['name', 'payloadspec', 'timetype']
+
+        # check request validity
+        if not set(kwargs.keys()).issubset(valid_filters):
+            log.error('Requested filters should be in %s', valid_filters)
+
+        # prepare request arguments
+        for key, val in kwargs.items():
+            if not val.startswith('>') and not val.startswith('<') and \
+                not val.startswith(':'):
+                kwargs[key] = ':'+val
+        by_crit = ','.join([f'{key}{val}' for key, val in kwargs.items()])
+        criteria = {'by': by_crit}
+
+        # send request
+        resp = self.get(self.endpoints['globaltags'], params=criteria)
         return resp.json()
 
     def search_iovs(self, tagname=None, **kwargs):
         """
         request and export data from the database in json format
-        usage example: search_iovs(tagname='SVOM', insertionTime='1574429040079')
-        ?by=tagname:SVOM,insertionTime:1574429040079
+        usage example:
+        search_iovs(tagname='SVOM', insertionTime='1574429040079')
         """
         # define output fields
         valid_filters = ['insertionTime', 'since']
@@ -86,14 +111,14 @@ class CrestDbIo(HttpIo):
         criteria = {'by': by_crit}
 
         # send request
-        resp = self.get(self.iovs_endpoint, params=criteria)
+        resp = self.get(self.endpoints['iovs'], params=criteria)
         return resp.json()
 
     def select(self, cmd='groups', tagname=None, **kwargs):
         """
         request and export iovs or groups data from the database in json format
-        usage example: select(tagname='SVOM', snapshot='1574429040079')
-        ?tagname=SVOM&snapshot=1574429040079
+        usage example: select(cmd='iovs',tagname='SVOM', snapshot='1574429040079')
+        The possible options for cmd are: iovs, groups, ranges
         """
         # define output fields
         valid_filters = ['snapshot', 'since', 'until']
@@ -112,7 +137,7 @@ class CrestDbIo(HttpIo):
         if cmd == 'ranges':
             loc_headers = {"X-Crest-Query" : "ranges"}
 
-        resp = self.get(self.iovs_endpoint+cmddic[cmd], params=criteria, headers=loc_headers)
+        resp = self.get(self.endpoints['iovs']+cmddic[cmd], params=criteria, headers=loc_headers)
         return resp.json()
 
     def create_tags(self, name=None, **kwargs):
@@ -144,6 +169,40 @@ class CrestDbIo(HttpIo):
         log.info('Create tag : %s', json.dumps(body_req))
         # send request
         resp = self.post(self.tags_endpoint, json=body_req, headers=self.headers)
+        return resp.json()
+
+    def create_globaltags(self, name=None, **kwargs):
+        """
+        request and export data from the database in json format
+        usage example: create_globaltags(name='GT-SVOM-01', validity=0,
+        description='some gt',release='a release',scenario='none',workflow='onl',
+        type='T',snapshotTime='2020-01-01T10:00:00')
+        """
+        # define output fields
+        valid_fields = ['validity', 'description', 'type', 'release', \
+        'scenario', 'workflow', 'snapshotTime']
+
+        # check request validity
+        if not set(kwargs.keys()).issubset(valid_fields):
+            log.error('Requested fields should be in %s', valid_fields)
+
+        # prepare request arguments
+        body_req = {
+            'name' : name,
+            'release' : 'none',
+            'type' : 'T',
+            'description' : 'a new gtag',
+            'release' : 'none',
+            'scenario' : 'none',
+            'validity' : 0,
+            'workflow' : 'all',
+            'snapshotTime' : None,
+            'insertionTime' : None}
+        for key, val in kwargs.items():
+            body_req[key] = val
+        log.info('Create global tag : %s', json.dumps(body_req))
+        # send request
+        resp = self.post(self.endpoints['globaltags'], json=body_req, headers=self.headers)
         return resp.json()
 
     def create_payload(self, filename=None, tag=None, since=None, timeformat='ms', **kwargs):

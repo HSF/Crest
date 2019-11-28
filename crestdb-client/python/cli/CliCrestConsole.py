@@ -66,6 +66,8 @@ class CrestConsoleUI(cmd.Cmd):
         self.loc_parser.add_argument('cmd', nargs='?', default='iovs')
         self.loc_parser.add_argument('-h', '--help', action="store_true", help='show this help message')
         self.loc_parser.add_argument("-t", "--tag", help="the tag name")
+        self.loc_parser.add_argument("-T", "--globaltag", help="the global tag name")
+        self.loc_parser.add_argument("--params", help="the string containing k=v pairs for tags or global tags creation")
         self.loc_parser.add_argument("--inpfile", help="the input file to upload")
         self.loc_parser.add_argument("--since", help="the since time for the payload.")
         self.loc_parser.add_argument("-f", "--format", default="short", help="the output format, use 'all' for details")
@@ -89,34 +91,85 @@ class CrestConsoleUI(cmd.Cmd):
         Search for tags which contain the input pattern provided via option --tag ATAG"""
         out = None
         fmt = 'short'
+        cmd = None
+        tagname = None
+        gtagname = None
         if pattern:
-            log.info ("Searching tags %s " % pattern)
             args = self.get_args(pattern)
             if args.help:
                 self.loc_parser.print_help()
                 return
+            cmd = args.cmd
+            log.info (f'Searching {cmd}')
             fmt = args.format
-            out = self.cm.search_tags(name=args.tag)
+            if args.tag:
+                tagname = args.tag
+            if args.globaltag:
+                gtagname = args.globaltag
+
+            cdic = {}
+            if args.cut:
+                cutstringarr = args.cut.split(',')
+                for el in cutstringarr:
+                    ss = self.rr.findall(el)
+                    ##print(el,ss)
+                    (k,v) = el.split(ss[0])
+                    cdic[k] = f'{ss[0]}{v}'
+                log.info('use cut params : %s' % cdic)
+
+            if cmd == 'tags':
+                cdic['name'] = tagname
+                out = self.cm.search_tags(**cdic)
+            elif cmd == 'iovs':
+                out = self.cm.search_iovs(name=tagname,**cdic)
+            elif cmd == 'globaltags':
+                if gtagname is None:
+                    gtagname = "%"
+                cdic['name'] = gtagname
+                out = self.cm.search_globaltags(**cdic)
+            else:
+                print(f'Command {cmd} is not recognized in this context')
         else:
             log.info ('Search all tags')
             out = self.cm.search_tags()
         crest_print(out,format=fmt)
 
-    def do_createtag(self, pattern):
-        """createtag -h
-        Create a new tag, the name is provided via --tag ATAG"""
+    def do_create(self, pattern):
+        """create -h
+        Create a new tag or global tag, using a series of k=val pairs, separated
+        by commas
+        """
         out = None
         fmt = 'short'
         if pattern:
-            log.info ("Create tags %s " % pattern)
             args = self.get_args(pattern)
             if args.help:
                 self.loc_parser.print_help()
                 return
+            cmd = args.cmd
+            log.info (f'Creating {cmd}')
             fmt = args.format
-            out = self.cm.create_tags(name=args.tag)
+            tname = None
+            if args.tag:
+                tname = args.tag
+            if args.globaltag:
+                tname = args.globaltag
+            pdic = {}
+            if args.params:
+                pararr = args.params.split(',')
+                for par in pararr:
+                    kv = par.split('=')
+                    pdic[kv[0]] = kv[1]
+
+            if cmd == 'tags':
+                out = self.cm.create_tags(name=tname, **pdic)
+            elif cmd == 'globaltags':
+                out = self.cm.create_globaltags(name=tname, **pdic)
+            else:
+                print(f'Command {cmd} is not recognized in this context')
+
         else:
-            log.info ('Cannot create a tag without arguments')
+            log.info ('Cannot create object without arguments')
         print(f'Response is : {out}')
 
     def do_upload(self, pattern):
@@ -253,7 +306,7 @@ class CrestConsoleUI(cmd.Cmd):
             print ('Error activating socks...%s %s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
 
 def crest_print(crestdata, format='all'):
-    if 'size' not in crestdata.keys():
+    if crestdata is None or 'size' not in crestdata.keys():
         log.info('Cannot find results to print')
         return
     size=crestdata['size']
