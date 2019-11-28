@@ -43,7 +43,7 @@ class CrestDbIo(HttpIo):
         # example : {"X-Crest-PayloadFormat" : "JSON"}
         self.crest_headers = hdr
 
-    def search_tags(self, **kwargs):
+    def search_tags(self, page=0, size=100, sort='name:ASC',**kwargs):
         """
         request and export data from the database in json format
         usage example: search_tags(name='SVOM', payloadspec=JSON)
@@ -59,18 +59,21 @@ class CrestDbIo(HttpIo):
         # prepare request arguments
         by_crit = ','.join([f'{key}:{val}' for key, val in kwargs.items()])
         criteria = {'by': by_crit}
+        criteria['page'] = page
+        criteria['size'] = size
+        criteria['sort'] = sort
 
         # send request
         resp = self.get(self.endpoints['tags'], params=criteria)
         return resp.json()
 
-    def search_globaltags(self, **kwargs):
+    def search_globaltags(self, page=0, size=100, sort='name:ASC',**kwargs):
         """
         request and export data from the database in json format
         usage example: search_globaltags(name='SVOM')
         """
         # define output fields
-        valid_filters = ['name', 'payloadspec', 'timetype']
+        valid_filters = ['name', 'scenario', 'release', 'workflow']
 
         # check request validity
         if not set(kwargs.keys()).issubset(valid_filters):
@@ -83,12 +86,15 @@ class CrestDbIo(HttpIo):
                 kwargs[key] = ':'+val
         by_crit = ','.join([f'{key}{val}' for key, val in kwargs.items()])
         criteria = {'by': by_crit}
+        criteria['page'] = page
+        criteria['size'] = size
+        criteria['sort'] = sort
 
         # send request
         resp = self.get(self.endpoints['globaltags'], params=criteria)
         return resp.json()
 
-    def search_iovs(self, tagname=None, **kwargs):
+    def search_iovs(self, page=0, size=100, sort='id.since:ASC', tagname=None, **kwargs):
         """
         request and export data from the database in json format
         usage example:
@@ -109,7 +115,11 @@ class CrestDbIo(HttpIo):
         by_crit = f'tagname:{tagname},'
         by_crit += ','.join([f'{key}{val}' for key, val in kwargs.items()])
         criteria = {'by': by_crit}
+        criteria['page'] = page
+        criteria['size'] = size
+        criteria['sort'] = sort
 
+        print(f'Seding iov search request using {criteria}')
         # send request
         resp = self.get(self.endpoints['iovs'], params=criteria)
         return resp.json()

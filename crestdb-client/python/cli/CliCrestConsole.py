@@ -47,12 +47,12 @@ gtagfieldsdicheader = {
 }
 iovfieldsdic = {
     'since' : '{since:15d}',
-    'payloadHash' : '{payloadHash:50s}',
+    'payloadHash' : '{payloadHash:65s}',
     'insertionTime' : '{insertionTime:30s}',
 }
 iovfieldsdicheader = {
     'since' : {'key':'{since:15s}','val' : 'since'},
-    'payloadHash' : {'key':'{payloadHash:50s}','val' : 'Hash'},
+    'payloadHash' : {'key':'{payloadHash:65s}','val' : 'Hash'},
     'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
 }
 tagfieldsdic = {
@@ -139,6 +139,9 @@ class CrestConsoleUI(cmd.Cmd):
         self.loc_parser.add_argument("--params", help="the string containing k=v pairs for tags or global tags creation")
         self.loc_parser.add_argument("--inpfile", help="the input file to upload")
         self.loc_parser.add_argument("--since", help="the since time for the payload.")
+        self.loc_parser.add_argument("--page", default="0", help="the page number.")
+        self.loc_parser.add_argument("--size", default="100", help="the page size.")
+        self.loc_parser.add_argument("--sort", default="name:ASC",help="the sort parameter (depend on the selection).")
         self.loc_parser.add_argument("-f", "--format", default="short", help="the output format, use 'all' for details")
         self.loc_parser.add_argument("-p", "--hash", help="the payload hash")
         self.loc_parser.add_argument("-c", "--cut", help="additional selection parameters")
@@ -185,19 +188,21 @@ class CrestConsoleUI(cmd.Cmd):
                     (k,v) = el.split(ss[0])
                     cdic[k] = f'{ss[0]}{v}'
                 log.info('use cut params : %s' % cdic)
-
             if cmd == 'tags':
                 if tagname is None:
                     tagname = "%"
                 cdic['name'] = tagname
-                out = self.cm.search_tags(**cdic)
+                out = self.cm.search_tags(page=args.page,size=args.size,sort=args.sort,**cdic)
             elif cmd == 'iovs':
-                out = self.cm.search_iovs(name=tagname,**cdic)
+                if 'name' in args.sort:
+                    args.sort = 'id.insertionTime:ASC'
+                print(f'Using tag {tagname} and dic {cdic}')
+                out = self.cm.search_iovs(page=args.page,size=args.size,sort=args.sort,tagname=tagname,**cdic)
             elif cmd == 'globaltags':
                 if gtagname is None:
                     gtagname = "%"
                 cdic['name'] = gtagname
-                out = self.cm.search_globaltags(**cdic)
+                out = self.cm.search_globaltags(page=args.page,size=args.size,sort=args.sort,**cdic)
             else:
                 print(f'Command {cmd} is not recognized in this context')
         else:
@@ -390,7 +395,7 @@ def crest_print(crestdata, format='all'):
         dprint([],gtagfieldsdicheader,gtagfieldsdic,dataarr)
 
     elif (crestdata['format'] == 'IovSetDto'):
-        dprint([],iovsfieldsdicheader,iovsfieldsdic,dataarr)
+        dprint([],iovfieldsdicheader,iovfieldsdic,dataarr)
     else:
         print(crestdata)
 
