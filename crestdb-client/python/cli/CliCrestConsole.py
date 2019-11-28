@@ -28,19 +28,19 @@ sys.path.append(os.path.join(sys.path[0],'..'))
 historyFile = '.crestconsole_hist'
 
 gtagfieldsdic = {
-    'name' : '{name:25.25s}',
-    'release' : '{release:10s}',
-    'workflow' : '{workflow:10s}',
-    'scenario' : '{scenario:10s}',
+    'name' : '{name:25s}',
+    'release' : '{release:20s}',
+    'workflow' : '{workflow:20s}',
+    'scenario' : '{scenario:20s}',
     'validity' : '{validity:10d}',
     'description' : '{description:50s}',
     'snapshotTime' : '{snapshotTime:30s}',
 }
 gtagfieldsdicheader = {
-    'name' : {'key':'{name:25.25s}','val' : 'GlobalTag'},
-    'release' : {'key':'{release:10s}','val' : 'Release'},
-    'workflow' :  {'key':'{workflow:10s}','val' : 'Workflow'},
-    'scenario' : {'key':'{scenario:10s}','val' : 'Scenario'},
+    'name' : {'key':'{name:25s}','val' : 'GlobalTag'},
+    'release' : {'key':'{release:20s}','val' : 'Release'},
+    'workflow' :  {'key':'{workflow:20s}','val' : 'Workflow'},
+    'scenario' : {'key':'{scenario:20s}','val' : 'Scenario'},
     'validity' :  {'key':'{validity:10s}','val' : 'Validity'},
     'description' : {'key':'{description:50s}','val' : 'Description'},
     'snapshotTime' : {'key':'{snapshotTime:30s}', 'val' : 'Snapshot Time'}
@@ -56,22 +56,22 @@ iovfieldsdicheader = {
     'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
 }
 tagfieldsdic = {
-    'name' : '{name:25.25s}',
+    'name' : '{name:25s}',
     'timeType' : '{timeType:10s}',
     'payloadSpec' : '{payloadSpec:10s}',
     'synchronization' : '{synchronization:10s}',
     'lastValidatedTime' : '{lastValidatedTime:10d}',
-    'endOfValidity' : '{endOfValidity:10d}',
+    'endOfValidity' : '{endOfValidity:20d}',
     'description' : '{description:50s}',
     'insertionTime' : '{insertionTime:30s}',
 }
 tagfieldsdicheader = {
-    'name' : {'key':'{name:25.25s}','val' : 'Tag'},
+    'name' : {'key':'{name:25s}','val' : 'Tag'},
     'timeType' : {'key':'{timeType:10s}','val' : 'Type'},
     'payloadSpec' :  {'key':'{payloadSpec:10s}','val' : 'Payload'},
     'synchronization' : {'key':'{synchronization:10s}','val' : 'Synchro'},
     'lastValidatedTime' :  {'key':'{lastValidatedTime:10s}','val' : 'Last-Valid'},
-    'endOfValidity' :  {'key':'{endOfValidity:10s}','val' : 'End-Valid'},
+    'endOfValidity' :  {'key':'{endOfValidity:20s}','val' : 'End-Valid'},
     'description' : {'key':'{description:50s}','val' : 'Description'},
     'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
 }
@@ -142,7 +142,7 @@ class CrestConsoleUI(cmd.Cmd):
         self.loc_parser.add_argument("--page", default="0", help="the page number.")
         self.loc_parser.add_argument("--size", default="100", help="the page size.")
         self.loc_parser.add_argument("--sort", default="name:ASC",help="the sort parameter (depend on the selection).")
-        self.loc_parser.add_argument("-f", "--format", default="short", help="the output format, use 'all' for details")
+        self.loc_parser.add_argument("-f", "--format", help="the output format, use <help> for details")
         self.loc_parser.add_argument("-p", "--hash", help="the payload hash")
         self.loc_parser.add_argument("-c", "--cut", help="additional selection parameters")
         self.loc_parser.add_argument("-g", "--groups", action="store_true", help="use to select groups instead of iovs")
@@ -162,7 +162,6 @@ class CrestConsoleUI(cmd.Cmd):
         """ls -h
         Search for tags which contain the input pattern provided via option --tag ATAG"""
         out = None
-        fmt = 'short'
         cmd = None
         tagname = None
         gtagname = None
@@ -173,7 +172,6 @@ class CrestConsoleUI(cmd.Cmd):
                 return
             cmd = args.cmd
             log.info (f'Searching {cmd}')
-            fmt = args.format
             if args.tag:
                 tagname = args.tag
             if args.globaltag:
@@ -188,6 +186,19 @@ class CrestConsoleUI(cmd.Cmd):
                     (k,v) = el.split(ss[0])
                     cdic[k] = f'{ss[0]}{v}'
                 log.info('use cut params : %s' % cdic)
+
+            fields = []
+            if args.format:
+                if args.format == 'help':
+                    if cmd == 'globaltags':
+                        print(f'Fields for {cmd} are {gtagfieldsdic.keys()}')
+                    if cmd == 'tags':
+                        print(f'Fields for {cmd} are {tagfieldsdic.keys()}')
+                    if cmd == 'iovs':
+                        print(f'Fields for {cmd} are {iovfieldsdic.keys()}')
+                    return
+                fields = args.format.split(',')
+
             if cmd == 'tags':
                 if tagname is None:
                     tagname = "%"
@@ -208,7 +219,7 @@ class CrestConsoleUI(cmd.Cmd):
         else:
             log.info ('Search all tags')
             out = self.cm.search_tags()
-        crest_print(out,format=fmt)
+        crest_print(out,format=fields)
 
     def do_create(self, pattern):
         """create -h
@@ -301,7 +312,6 @@ class CrestConsoleUI(cmd.Cmd):
         """select [iovs|groups|ranges] -t sometag -s snapshot -c since=1000,until=2000
         Select for iovs in the given tag, since and until can be defined using --cut"""
         out = None
-        fmt = 'short'
         cdic = {}
         if line:
             log.info ("Searching iovs using %s " % line)
@@ -310,7 +320,6 @@ class CrestConsoleUI(cmd.Cmd):
             if args.help:
                 self.loc_parser.print_help()
                 return
-            fmt = args.format
             if args.cut:
                 cutstringarr = args.cut.split(',')
                 cdic = {}
@@ -324,7 +333,7 @@ class CrestConsoleUI(cmd.Cmd):
         else:
             log.info ('Cannot search iovs without a tagname parameter')
             log.info ('Optional arguments are: -c since=222222,until=3333333 ; in addition also a snapshot can be provided')
-        crest_print(out,fmt)
+        crest_print(out,[])
 
     def do_get(self, line):
         """get -p somehash [-i -H BLOB {JSON}]
@@ -381,7 +390,7 @@ class CrestConsoleUI(cmd.Cmd):
         except:
             print ('Error activating socks...%s %s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
 
-def crest_print(crestdata, format='all'):
+def crest_print(crestdata, format=[]):
     if crestdata is None or 'size' not in crestdata.keys():
         log.info('Cannot find results to print')
         return
@@ -389,13 +398,13 @@ def crest_print(crestdata, format='all'):
     print(f'Retrieved {size} lines')
     dataarr = crestdata['resources']
     if (crestdata['format'] == 'TagSetDto'):
-        dprint([],tagfieldsdicheader,tagfieldsdic,dataarr)
+        dprint(format,tagfieldsdicheader,tagfieldsdic,dataarr)
 
     elif (crestdata['format'] == 'GlobalTagSetDto'):
-        dprint([],gtagfieldsdicheader,gtagfieldsdic,dataarr)
+        dprint(format,gtagfieldsdicheader,gtagfieldsdic,dataarr)
 
     elif (crestdata['format'] == 'IovSetDto'):
-        dprint([],iovfieldsdicheader,iovfieldsdic,dataarr)
+        dprint(format,iovfieldsdicheader,iovfieldsdic,dataarr)
     else:
         print(crestdata)
 
