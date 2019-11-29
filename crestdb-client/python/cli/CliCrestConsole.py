@@ -13,7 +13,7 @@ import atexit
 import argparse
 from datetime import datetime
 from crest.io import CrestDbIo
-
+from crestutils import *
 from pip._vendor.pyparsing import empty
 
 log = logging.getLogger( __name__ )
@@ -26,75 +26,6 @@ log.addHandler( handler )
 
 sys.path.append(os.path.join(sys.path[0],'..'))
 historyFile = '.crestconsole_hist'
-
-gtagfieldsdic = {
-    'name' : '{name:25s}',
-    'release' : '{release:20s}',
-    'workflow' : '{workflow:20s}',
-    'scenario' : '{scenario:20s}',
-    'validity' : '{validity:10d}',
-    'description' : '{description:50s}',
-    'snapshotTime' : '{snapshotTime:30s}',
-}
-gtagfieldsdicheader = {
-    'name' : {'key':'{name:25s}','val' : 'GlobalTag'},
-    'release' : {'key':'{release:20s}','val' : 'Release'},
-    'workflow' :  {'key':'{workflow:20s}','val' : 'Workflow'},
-    'scenario' : {'key':'{scenario:20s}','val' : 'Scenario'},
-    'validity' :  {'key':'{validity:10s}','val' : 'Validity'},
-    'description' : {'key':'{description:50s}','val' : 'Description'},
-    'snapshotTime' : {'key':'{snapshotTime:30s}', 'val' : 'Snapshot Time'}
-}
-iovfieldsdic = {
-    'since' : '{since:15d}',
-    'payloadHash' : '{payloadHash:65s}',
-    'insertionTime' : '{insertionTime:30s}',
-}
-iovfieldsdicheader = {
-    'since' : {'key':'{since:15s}','val' : 'since'},
-    'payloadHash' : {'key':'{payloadHash:65s}','val' : 'Hash'},
-    'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
-}
-tagfieldsdic = {
-    'name' : '{name:25s}',
-    'timeType' : '{timeType:10s}',
-    'payloadSpec' : '{payloadSpec:10s}',
-    'synchronization' : '{synchronization:10s}',
-    'lastValidatedTime' : '{lastValidatedTime:10d}',
-    'endOfValidity' : '{endOfValidity:20d}',
-    'description' : '{description:50s}',
-    'insertionTime' : '{insertionTime:30s}',
-}
-tagfieldsdicheader = {
-    'name' : {'key':'{name:25s}','val' : 'Tag'},
-    'timeType' : {'key':'{timeType:10s}','val' : 'Type'},
-    'payloadSpec' :  {'key':'{payloadSpec:10s}','val' : 'Payload'},
-    'synchronization' : {'key':'{synchronization:10s}','val' : 'Synchro'},
-    'lastValidatedTime' :  {'key':'{lastValidatedTime:10s}','val' : 'Last-Valid'},
-    'endOfValidity' :  {'key':'{endOfValidity:20s}','val' : 'End-Valid'},
-    'description' : {'key':'{description:50s}','val' : 'Description'},
-    'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
-}
-
-def dprint(format,headerdic,datadic,cdata):
-    if len(format) == 0:
-        format = datadic.keys()
-    headerfmtstr = ' '.join([ headerdic[k]['key'] for k in format])
-    headic = {}
-    for k in format:
-        headic[k] = headerdic[k]['val']
-    print(headerfmtstr.format(**headic))
-    #print('Use format %s' % format)
-    fmtstr = ' '.join([datadic[k] for k in format])
-    #print('Format string %s'%fmtstr)
-    for xt in cdata:
-        adic = {}
-        for k in format:
-            if xt[k] is None:
-                xt[k] = ' - '
-            adic[k]=xt[k]
-        #print('Use dictionary %s'%adic)
-        print(fmtstr.format(**adic))
 
 class CrestConsoleUI(cmd.Cmd):
     """Simple command processor example."""
@@ -159,8 +90,11 @@ class CrestConsoleUI(cmd.Cmd):
         log.info(f'Connected to {url}')
 
     def do_ls(self, pattern):
-        """ls -h
-        Search for tags which contain the input pattern provided via option --tag ATAG"""
+        """ls <datatype> [-t tag_name] [-T globaltag_name] [other options: --size, --page, --sort, --format]
+        Search for data collection of different kinds: iovs, tags, globaltags.
+        datatype: iovs, tags, globaltags, trace, backtrace
+        Type ls -h for help on available options (not all will be appliable depending on the chosen datatype)
+        """
         out = None
         cmd = None
         tagname = None
@@ -214,6 +148,18 @@ class CrestConsoleUI(cmd.Cmd):
                     gtagname = "%"
                 cdic['name'] = gtagname
                 out = self.cm.search_globaltags(page=args.page,size=args.size,sort=args.sort,**cdic)
+            elif cmd == 'trace':
+                if gtagname is None:
+                    print('Select a global tag name')
+                    return
+                out = self.cm.search_maps(name=gtagname,mode='Trace')
+                out['format'] = 'GlobalTagMapSetDto'
+            elif cmd == 'backtrace':
+                if tagname is None:
+                    print('Select a tag name')
+                    return
+                out = self.cm.search_maps(name=tagname,mode='BackTrace')
+                out['format'] = 'GlobalTagMapSetDto'
             else:
                 print(f'Command {cmd} is not recognized in this context')
         else:
@@ -389,24 +335,6 @@ class CrestConsoleUI(cmd.Cmd):
             print ('Activated socks proxy on %s:%s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
         except:
             print ('Error activating socks...%s %s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
-
-def crest_print(crestdata, format=[]):
-    if crestdata is None or 'size' not in crestdata.keys():
-        log.info('Cannot find results to print')
-        return
-    size=crestdata['size']
-    print(f'Retrieved {size} lines')
-    dataarr = crestdata['resources']
-    if (crestdata['format'] == 'TagSetDto'):
-        dprint(format,tagfieldsdicheader,tagfieldsdic,dataarr)
-
-    elif (crestdata['format'] == 'GlobalTagSetDto'):
-        dprint(format,gtagfieldsdicheader,gtagfieldsdic,dataarr)
-
-    elif (crestdata['format'] == 'IovSetDto'):
-        dprint(format,iovfieldsdicheader,iovfieldsdic,dataarr)
-    else:
-        print(crestdata)
 
 if __name__ == '__main__':
         # Parse arguments
