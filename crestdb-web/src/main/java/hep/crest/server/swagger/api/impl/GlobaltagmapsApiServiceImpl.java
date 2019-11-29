@@ -97,8 +97,11 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
             final GenericMap filters = new GenericMap();
             filters.put("name", name);
             filters.put("mode", xCrestMapMode);
-            final CrestBaseResponse setdto = new GlobalTagMapSetDto().resources(dtolist)
-                    .filter(filters).size((long) dtolist.size()).datatype("maps");
+            final CrestBaseResponse setdto = new GlobalTagMapSetDto()
+                    .resources(dtolist)
+                    .filter(filters)
+                    .format("GlobalTagMapSetDto")
+                    .size((long) dtolist.size()).datatype("maps");
             if (dtolist.size() == 0) {
                 return Response.status(Response.Status.NOT_FOUND).entity(setdto).build();
             }

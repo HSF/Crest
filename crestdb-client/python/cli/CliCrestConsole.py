@@ -13,7 +13,7 @@ import atexit
 import argparse
 from datetime import datetime
 from crest.io import CrestDbIo
-
+from crestutils import *
 from pip._vendor.pyparsing import empty
 
 log = logging.getLogger( __name__ )
@@ -85,8 +85,11 @@ class CrestConsoleUI(cmd.Cmd):
         log.info(f'Connected to {url}')
 
     def do_ls(self, pattern):
-        """ls -h
-        Search for tags which contain the input pattern provided via option --tag ATAG"""
+        """ls <datatype> [-t tag_name] [-T globaltag_name] [other options: --size, --page, --sort, --format]
+        Search for data collection of different kinds: iovs, tags, globaltags.
+        datatype: iovs, tags, globaltags, trace, backtrace
+        Type ls -h for help on available options (not all will be appliable depending on the chosen datatype)
+        """
         out = None
         fmt = 'short'
         if pattern:
@@ -95,8 +98,64 @@ class CrestConsoleUI(cmd.Cmd):
             if args.help:
                 self.loc_parser.print_help()
                 return
-            fmt = args.format
-            out = self.cm.search_tags(name=args.tag)
+            cmd = args.cmd
+            log.info (f'Searching {cmd}')
+            if args.tag:
+                tagname = args.tag
+            if args.globaltag:
+                gtagname = args.globaltag
+
+            cdic = {}
+            if args.cut:
+                cutstringarr = args.cut.split(',')
+                for el in cutstringarr:
+                    ss = self.rr.findall(el)
+                    ##print(el,ss)
+                    (k,v) = el.split(ss[0])
+                    cdic[k] = f'{ss[0]}{v}'
+                log.info('use cut params : %s' % cdic)
+
+            fields = []
+            if args.format:
+                if args.format == 'help':
+                    if cmd == 'globaltags':
+                        print(f'Fields for {cmd} are {gtagfieldsdic.keys()}')
+                    if cmd == 'tags':
+                        print(f'Fields for {cmd} are {tagfieldsdic.keys()}')
+                    if cmd == 'iovs':
+                        print(f'Fields for {cmd} are {iovfieldsdic.keys()}')
+                    return
+                fields = args.format.split(',')
+
+            if cmd == 'tags':
+                if tagname is None:
+                    tagname = "%"
+                cdic['name'] = tagname
+                out = self.cm.search_tags(page=args.page,size=args.size,sort=args.sort,**cdic)
+            elif cmd == 'iovs':
+                if 'name' in args.sort:
+                    args.sort = 'id.insertionTime:ASC'
+                print(f'Using tag {tagname} and dic {cdic}')
+                out = self.cm.search_iovs(page=args.page,size=args.size,sort=args.sort,tagname=tagname,**cdic)
+            elif cmd == 'globaltags':
+                if gtagname is None:
+                    gtagname = "%"
+                cdic['name'] = gtagname
+                out = self.cm.search_globaltags(page=args.page,size=args.size,sort=args.sort,**cdic)
+            elif cmd == 'trace':
+                if gtagname is None:
+                    print('Select a global tag name')
+                    return
+                out = self.cm.search_maps(name=gtagname,mode='Trace')
+                out['format'] = 'GlobalTagMapSetDto'
+            elif cmd == 'backtrace':
+                if tagname is None:
+                    print('Select a tag name')
+                    return
+                out = self.cm.search_maps(name=tagname,mode='BackTrace')
+                out['format'] = 'GlobalTagMapSetDto'
+            else:
+                print(f'Command {cmd} is not recognized in this context')
         else:
             log.info ('Search all tags')
             out = self.cm.search_tags()
@@ -251,34 +310,6 @@ class CrestConsoleUI(cmd.Cmd):
             print ('Activated socks proxy on %s:%s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
         except:
             print ('Error activating socks...%s %s' % (SOCKS5_PROXY_HOST,SOCKS5_PROXY_PORT))
-
-def crest_print(crestdata, format='all'):
-    if 'size' not in crestdata.keys():
-        log.info('Cannot find results to print')
-        return
-    size=crestdata['size']
-    print(f'Retrieved {size} lines')
-    dataarr = crestdata['resources']
-    if (crestdata['format'] == 'TagSetDto'):
-        if format == 'all':
-            print('{name:40s} {instime:28.28s} {endtime:15.15s} {synchro:10s} {desc:60.60s}'.format(name='tag name',instime='Insertion time',endtime='End time',synchro='Synchro',desc='Description'))
-            for xt in dataarr:
-                print('{name:40s} {instime:28.28s} {endtime:15d} {synchro:10s} {desc:60.60s}'.format(name=xt['name'],instime=xt['insertionTime'],endtime=xt['endOfValidity'],synchro=xt['synchronization'],desc=xt['description']))
-        else:
-            print('{name:60.60s} {instime:28.28s}'.format(name='tag name',instime='Insertion time'))
-            for xt in dataarr:
-                print('{name:60.60s} {instime:28.28s} '.format(name=xt['name'],instime=xt['insertionTime']))
-    elif (crestdata['format'] == 'IovSetDto'):
-        if crestdata['datatype'] == 'iovs':
-            print('{name:15.15s} {instime:28.28s} {hash:65s}'.format(name='since',instime='Insertion time',hash='HASH'))
-            for xt in dataarr:
-                print('{since:15d} {instime:28s} {hash:65s}'.format(since=xt['since'],instime=xt['insertionTime'],hash=xt['payloadHash']))
-        elif (crestdata['datatype'] == 'groups'):
-            print('{name:15.15s}'.format(name='since'))
-            for xt in dataarr:
-                print('{since:15d}'.format(since=xt['since']))
-    else:
-        print(crestdata)
 
 if __name__ == '__main__':
         # Parse arguments

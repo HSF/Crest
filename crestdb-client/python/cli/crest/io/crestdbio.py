@@ -63,7 +63,21 @@ class CrestDbIo(HttpIo):
         resp = self.get(self.tags_endpoint, params=criteria)
         return resp.json()
 
-    def search_iovs(self, tagname=None, **kwargs):
+    def search_maps(self, page=0, size=100, sort='name:ASC',name=None,mode='Trace'):
+        """
+        request and export data from the database in json format
+        usage example: search_maps(name='A-GT-OR-T-NAME')
+        mode: trace|backtrace
+        name: if mode is trace, then this represents a GT name, otherwise is a Tag name
+        """
+        # prepare headers
+        loc_header = { 'X-Crest-MapMode' : mode }
+        # send request
+        resp = self.get(self.endpoints['maps']+f'/{name}',headers=loc_header)
+        return resp.json()
+
+
+    def search_globaltags(self, page=0, size=100, sort='name:ASC',**kwargs):
         """
         request and export data from the database in json format
         usage example: search_iovs(tagname='SVOM', insertionTime='1574429040079')
@@ -85,6 +99,7 @@ class CrestDbIo(HttpIo):
         by_crit += ','.join([f'{key}{val}' for key, val in kwargs.items()])
         criteria = {'by': by_crit}
 
+        print(f'Iov search request using {criteria}')
         # send request
         resp = self.get(self.iovs_endpoint, params=criteria)
         return resp.json()
