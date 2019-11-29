@@ -35,6 +35,7 @@
             :selected.sync="selected"
             default-sort="name"
             @click="onClick"
+            style="overflow: scroll"
             :checkable="globalTagMap"
             :checked-rows.sync="checkedRows"
             :is-row-checkable="record"
@@ -84,6 +85,7 @@
                       :default-sort-direction="defaultSortDirection"
                       :selected.sync="selected"
                       default-sort="name"
+                      style="overflow: scroll"
                       :loading="isloading">
                       <template slot-scope="props">
                         <b-table-column v-for="(column, index) in columnsGlobalTag"

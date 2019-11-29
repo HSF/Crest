@@ -1,6 +1,7 @@
 <template>
 
 <section>
+<div class="container is-fluid">
 <b-tabs v-model="activeTab">
 <!--
 <b-tab-item label="Server">
@@ -20,6 +21,7 @@
     <FoldersPane  v-on:select-tab="selActive"/>
 </b-tab-item>
 </b-tabs>
+</div>
 </section>
 </template>
 <script>

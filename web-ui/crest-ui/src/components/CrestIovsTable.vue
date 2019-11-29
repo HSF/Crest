@@ -3,10 +3,10 @@
     <p>Number of rows: {{ numrows }}
     </p>
     <b-tabs>
-      <b-tab-item label="Table">    
+      <b-tab-item label="Table">
       <div class="columns">
       <div class="column is-three-quarters">
-          <span v-if="selectedTag != ''">    
+          <span v-if="selectedTag != ''">
             <b-field label="Since">
               <b-input v-if="tag[selectedTag].timeType != 'time'" v-model="since" maxlength="20"></b-input>
               <DateTimePicker v-if="tag[selectedTag].timeType == 'time'" v-on:select-since="selectSince" v-model="since" />
@@ -17,8 +17,8 @@
             </b-field>
             </span>
             </div>
-            <div class="column is-one-quarter">     
-            <span v-if="selectedTag != ''">  
+            <div class="column is-one-quarter">
+            <span v-if="selectedTag != ''">
             <b-field label="Tag">
               <b-input v-model="selectedtag.name" placeholder="Tag selection on another tab" disabled></b-input>
             </b-field>
@@ -56,6 +56,7 @@
             :default-sort-direction="defaultSortDirection"
             :selected.sync="selected"
             default-sort="since"
+            style="overflow: scroll"
             :loading="isloading">
             <template slot-scope="props">
               <b-table-column field="selectedtag.name" label="Tag name" centered>
@@ -174,7 +175,7 @@ import Long from 'long';
           this.$store.commit('gui/iovForm/selectTagname', this.selectedTag);
           this.$store.commit('gui/iovForm/selectSince', this.since);
           this.$store.commit('gui/iovForm/selectUntil', this.until);
-          this.$store.commit('gui/iovForm/selectSnapshot', this.snapshot);        
+          this.$store.commit('gui/iovForm/selectSnapshot', this.snapshot);
           this.searchIovs;
       },
       selectSince(since) {

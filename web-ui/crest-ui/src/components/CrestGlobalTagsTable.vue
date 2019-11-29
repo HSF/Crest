@@ -41,6 +41,7 @@
             :selected.sync="selected"
             default-sort="name"
             @click="onClick"
+            style="overflow: scroll"
             :loading="isloading">
             <template slot-scope="props">
               <b-table-column v-for="(column, index) in columns"

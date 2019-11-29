@@ -1,7 +1,5 @@
 <template>
-<div class="">
-    <p class="has-text-info is-size-2">Search for Tags</p>
-
+  <div>
     <div class="columns">
       <div class="column is-one-fifth">
         <b-field>
@@ -178,7 +176,7 @@ export default {
           for (var i = 0; i < this.tagsSelected.length; i++){
               liste_map.push(this.tagsSelected[i].name);
           }
-          return liste_map;  
+          return liste_map;
       },
       liste_global_tagname: function() {
           let liste_globaltags = [];
