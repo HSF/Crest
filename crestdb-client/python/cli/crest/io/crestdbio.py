@@ -192,7 +192,7 @@ class CrestDbIo(HttpIo):
             body_req[key] = val
         log.info('Create tag : %s', json.dumps(body_req))
         # send request
-        resp = self.post(self.tags_endpoint, json=body_req, headers=self.headers)
+        resp = self.post(self.endpoints['tags'], json=body_req, headers=self.headers)
         return resp.json()
 
     def create_globaltags(self, name=None, **kwargs):
