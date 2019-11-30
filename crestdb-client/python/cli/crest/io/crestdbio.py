@@ -257,7 +257,7 @@ class CrestDbIo(HttpIo):
                 files_req[key] = (None, val)
             log.info('Create payload : %s', files_req)
             # send request
-            loc_url = self.payloads_endpoint+'/store'
+            loc_url = self.endpoints['payloads']+'/store'
             loc_headers = {"X-Crest-PayloadFormat" : "JSON"}
 
             resp = self.post(loc_url, files=files_req, headers=loc_headers)
@@ -278,7 +278,7 @@ class CrestDbIo(HttpIo):
         # prepare request arguments
         log.info('Get payload : %s', phash)
         # send request
-        loc_url = self.payloads_endpoint+'/'+phash
+        loc_url = self.endpoints['payloads']+'/'+phash
         resp = self.get(loc_url, headers=self.crest_headers)
         # If the HTTP GET request can be served
         if resp.status_code == 200:
