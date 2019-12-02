@@ -540,7 +540,15 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 hash);
         try {
             final PayloadDto entity = payloadService.getPayloadMetaInfo(hash);
-            return Response.ok().entity(entity).build();
+
+            final GenericMap map = new GenericMap();
+            map.put("hash", hash);
+            final PayloadSetDto psetdto = new PayloadSetDto().addResourcesItem(entity);
+            psetdto.datatype(entity.getObjectType()).filter(map).size(1L);
+            return Response.ok()
+                    .header("Content-type", MediaType.APPLICATION_JSON_TYPE.toString())
+                    .entity(psetdto).build();
+
         }
         catch (final NotExistsPojoException e) {
             final String msg = "Cannot find payload corresponding to hash " + hash;

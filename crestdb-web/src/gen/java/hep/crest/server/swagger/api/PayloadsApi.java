@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import hep.crest.swagger.model.HTTPResponse;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.PayloadSetDto;
 import io.swagger.annotations.ApiParam;
 
 @Path("/payloads")
@@ -80,9 +81,9 @@ public class PayloadsApi  {
     @Path("/{hash}/meta")
     
     @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Finds a payload resource associated to the hash.", notes = "This method retrieves metadata of the payload resource.Arguments: hash=<hash> the hash of the payload", response = PayloadDto.class, tags={ "payloads", })
+    @io.swagger.annotations.ApiOperation(value = "Finds a payload resource associated to the hash.", notes = "This method retrieves metadata of the payload resource.Arguments: hash=<hash> the hash of the payload", response = PayloadSetDto.class, tags={ "payloads", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = PayloadDto.class) })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = PayloadSetDto.class) })
     public Response getPayloadMetaInfo(@ApiParam(value = "hash:  the hash of the payload",required=true) @PathParam("hash") String hash
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {

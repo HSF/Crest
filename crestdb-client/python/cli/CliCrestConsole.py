@@ -126,10 +126,12 @@ class CrestConsoleUI(cmd.Cmd):
                 if args.format == 'help':
                     if cmd == 'globaltags':
                         print(f'Fields for {cmd} are {gtagfieldsdic.keys()}')
-                    if cmd == 'tags':
+                    elif cmd == 'tags':
                         print(f'Fields for {cmd} are {tagfieldsdic.keys()}')
-                    if cmd == 'iovs':
+                    elif cmd == 'iovs':
                         print(f'Fields for {cmd} are {iovfieldsdic.keys()}')
+                    else:
+                        print('The command is not known or does not need fields specifications')
                     return
                 fields = args.format.split(',')
 
@@ -224,38 +226,48 @@ class CrestConsoleUI(cmd.Cmd):
             log.info ('Cannot create a payload without arguments')
         print(f'Response is : {out}')
 
-    def do_iovs(self, line):
-        """iovs -t sometag [-c since=<1000,insertionTime=>123456]
-        Search for iovs in the given tag, other parameters can be added using --cut"""
+    def do_info(self, pattern):
+        """info [tagsize|payload] [-t sometag] [-p payloadhash]
+        Search for meta information on a given tag, or on a given payload"""
         out = None
-        fmt = 'short'
-        if line:
-            log.info ("Searching iovs using %s " % line)
-            args = self.get_args(line)
+        cmd = None
+        tagname = None
+        phash = None
+        cdic = {}
+        if pattern:
+            args = self.get_args(pattern)
             if args.help:
                 self.loc_parser.print_help()
                 return
-            fmt = args.format
-            if args.cut:
-                cutstringarr = args.cut.split(',')
-                cdic = {}
-                for el in cutstringarr:
-                    ss = self.rr.findall(el)
-                    ##print(el,ss)
-                    (k,v) = el.split(ss[0])
-                    cdic[k] = f'{ss[0]}{v}'
-                log.info('use cut params : %s' % cdic)
-                out = self.cm.search_iovs(tagname=args.tag,**cdic)
-            else:
-                out = self.cm.search_iovs(tagname=args.tag)
+            cmd = args.cmd
+            log.info (f'Searching {cmd}')
+            if args.tag:
+                tagname = args.tag
+            if args.hash:
+                phash = args.hash
 
+            fields = []
+            if cmd == 'tagsize':
+                if args.snapshot:
+                    cdic['snapshot'] = args.snapshot
+                if tagname is None:
+                    print('Cannot get size without a precise tag selection')
+                    return
+                out = self.cm.select(cmd='size',tagname=tagname,**cdic)
+            elif cmd == 'payload':
+                if 'phash' is None:
+                    print('Cannot get size without a precise tag selection')
+                    return
+                cdic['info'] = 'meta'
+                out = self.cm.get_payload(phash=phash,**cdic)
+            else:
+                print(f'Command {cmd} is not recognized in this context')
         else:
-            log.info ('Cannot search iovs without a tagname parameter')
-            log.info ('Optional arguments are: -c insertionTime=>222222 , where the time needs to be expressed in ms')
-        crest_print(out,fmt)
+            log.info ('Need an input line...type -h for help')
+        crest_print(out,format=fields)
 
     def do_select(self, line):
-        """select [iovs|groups|ranges] -t sometag -s snapshot -c since=1000,until=2000
+        """select [iovs|groups|ranges|size] -t sometag -s snapshot -c since=1000,until=2000
         Select for iovs in the given tag, since and until can be defined using --cut"""
         out = None
         cdic = {}
