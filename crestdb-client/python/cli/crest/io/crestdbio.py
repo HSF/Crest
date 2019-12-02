@@ -121,7 +121,7 @@ class CrestDbIo(HttpIo):
         criteria = {'tagname': tagname }
         for key, val in kwargs.items():
             criteria[key] = val
-        cmddic = { 'groups' : '/selectGroups', 'iovs' : '/selectIovs', 'ranges' : '/selectIovs'}
+        cmddic = { 'groups' : '/selectGroups', 'iovs' : '/selectIovs', 'ranges' : '/selectIovs', 'size' : '/getSize'}
         # send request
         loc_headers = {"X-Crest-Query" : "iovs"}
         if cmd == 'ranges':
@@ -132,7 +132,7 @@ class CrestDbIo(HttpIo):
 
     def create_tags(self, name=None, **kwargs):
         """
-        request and export data from the database in json format
+        import data into the database in json format
         usage example: create_tags(name='SVOM-01', payloadSpec='JSON',
         timeType='time',description='a tag',synchronization='none')
         """
@@ -158,12 +158,73 @@ class CrestDbIo(HttpIo):
             body_req[key] = val
         log.info('Create tag : %s', json.dumps(body_req))
         # send request
-        resp = self.post(self.tags_endpoint, json=body_req, headers=self.headers)
+        resp = self.post(self.endpoints['tags'], json=body_req, headers=self.headers)
+        return resp.json()
+
+    def create_iovs(self, name=None, since=None, phash=None, **kwargs):
+        """
+        import data into the database in json format
+        usage example: create_iovs(name='SVOM-01', phash='somehash',
+        since=1000)
+        """
+        # define output fields
+        valid_fields = [ 'insertionTime' ]
+
+        # check request validity
+        if not set(kwargs.keys()).issubset(valid_fields):
+            log.error('Requested fields should be in %s', valid_fields)
+
+        # prepare request arguments
+        body_req = {
+            'tagName' : name,
+            'since' : since,
+            'payloadHash' : phash,
+            'insertionTime' : None}
+
+        for key, val in kwargs.items():
+            body_req[key] = val
+        log.info('Create iov if the hash is known : %s', json.dumps(body_req))
+        # send request
+        resp = self.post(self.endpoints['iovs'], json=body_req)
+        return resp.json()
+
+    def create_globaltags(self, name=None, **kwargs):
+        """
+        import data into the database in json format
+        usage example: create_globaltags(name='GT-SVOM-01', validity=0,
+        description='some gt',release='a release',scenario='none',workflow='onl',
+        type='T',snapshotTime='2020-01-01T10:00:00')
+        """
+        # define output fields
+        valid_fields = ['validity', 'description', 'type', 'release', \
+        'scenario', 'workflow', 'snapshotTime']
+
+        # check request validity
+        if not set(kwargs.keys()).issubset(valid_fields):
+            log.error('Requested fields should be in %s', valid_fields)
+
+        # prepare request arguments
+        body_req = {
+            'name' : name,
+            'release' : 'none',
+            'type' : 'T',
+            'description' : 'a new gtag',
+            'release' : 'none',
+            'scenario' : 'none',
+            'validity' : 0,
+            'workflow' : 'all',
+            'snapshotTime' : None,
+            'insertionTime' : None}
+        for key, val in kwargs.items():
+            body_req[key] = val
+        log.info('Create global tag : %s', json.dumps(body_req))
+        # send request
+        resp = self.post(self.endpoints['globaltags'], json=body_req, headers=self.headers)
         return resp.json()
 
     def create_payload(self, filename=None, tag=None, since=None, timeformat='ms', **kwargs):
         """
-        request and import data into the database
+        import data into the database
         If you want to use a date as a string put format = 'str'
         usage example: create_payload(file='/tmp/temp-01.txt', tag='SVOM-TEST-01', since=1234567)
         """
@@ -201,7 +262,7 @@ class CrestDbIo(HttpIo):
         usage example: get_payload(phash=  ,fout='/tmp/out.blob')
         """
         # define output fields
-        valid_fields = []
+        valid_fields = [ 'info' ]
 
         # check request validity
         if not set(kwargs.keys()).issubset(valid_fields):
@@ -210,7 +271,13 @@ class CrestDbIo(HttpIo):
         # prepare request arguments
         log.info('Get payload : %s', phash)
         # send request
-        loc_url = self.payloads_endpoint+'/'+phash
+        loc_url = self.endpoints['payloads']+'/'+phash
+        ismeta = { 'info' : 'all' }
+        for key, val in kwargs.items():
+            ismeta[key] = val
+        if ismeta['info'] == 'meta':
+            loc_url = loc_url + '/meta'
+            self.crest_headers['X-Crest-PayloadFormat'] = 'DTO'
         resp = self.get(loc_url, headers=self.crest_headers)
         # If the HTTP GET request can be served
         if resp.status_code == 200:

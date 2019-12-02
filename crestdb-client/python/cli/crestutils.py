@@ -74,8 +74,10 @@ def crest_print(crestdata, format=[]):
         log.info('Cannot find results to print')
         return
     size=crestdata['size']
-    print(f'Retrieved {size} lines')
-    dataarr = crestdata['resources']
+    dataarr = []
+    if 'resources' in crestdata:
+        print(f'Retrieved {size} lines')
+        dataarr = crestdata['resources']
     if (crestdata['format'] == 'TagSetDto'):
         dprint(format,tagfieldsdicheader,tagfieldsdic,dataarr)
 
@@ -83,7 +85,11 @@ def crest_print(crestdata, format=[]):
         dprint(format,gtagfieldsdicheader,gtagfieldsdic,dataarr)
 
     elif (crestdata['format'] == 'IovSetDto'):
-        dprint(format,iovfieldsdicheader,iovfieldsdic,dataarr)
+        if crestdata['datatype'] == 'count':
+            size = crestdata['size']
+            print(f'Found number of iovs: {size}')
+        else:
+            dprint(format,iovfieldsdicheader,iovfieldsdic,dataarr)
 
     elif (crestdata['format'] == 'GlobalTagMapSetDto'):
         dprint(format,mapfieldsdicheader,mapfieldsdic,dataarr)
