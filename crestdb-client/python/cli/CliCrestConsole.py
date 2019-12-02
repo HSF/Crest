@@ -66,9 +66,14 @@ class CrestConsoleUI(cmd.Cmd):
         self.loc_parser.add_argument('cmd', nargs='?', default='iovs')
         self.loc_parser.add_argument('-h', '--help', action="store_true", help='show this help message')
         self.loc_parser.add_argument("-t", "--tag", help="the tag name")
+        self.loc_parser.add_argument("-T", "--globaltag", help="the global tag name")
+        self.loc_parser.add_argument("--params", help="the string containing k=v pairs for tags or global tags creation")
         self.loc_parser.add_argument("--inpfile", help="the input file to upload")
         self.loc_parser.add_argument("--since", help="the since time for the payload.")
-        self.loc_parser.add_argument("-f", "--format", default="short", help="the output format, use 'all' for details")
+        self.loc_parser.add_argument("--page", default="0", help="the page number.")
+        self.loc_parser.add_argument("--size", default="100", help="the page size.")
+        self.loc_parser.add_argument("--sort", default="name:ASC",help="the sort parameter (depend on the selection).")
+        self.loc_parser.add_argument("-f", "--format", help="the output format, use <help> for details")
         self.loc_parser.add_argument("-p", "--hash", help="the payload hash")
         self.loc_parser.add_argument("-c", "--cut", help="additional selection parameters")
         self.loc_parser.add_argument("-g", "--groups", action="store_true", help="use to select groups instead of iovs")
@@ -91,9 +96,10 @@ class CrestConsoleUI(cmd.Cmd):
         Type ls -h for help on available options (not all will be appliable depending on the chosen datatype)
         """
         out = None
-        fmt = 'short'
+        cmd = None
+        tagname = None
+        gtagname = None
         if pattern:
-            log.info ("Searching tags %s " % pattern)
             args = self.get_args(pattern)
             if args.help:
                 self.loc_parser.print_help()
@@ -161,23 +167,44 @@ class CrestConsoleUI(cmd.Cmd):
         else:
             log.info ('Search all tags')
             out = self.cm.search_tags()
-        crest_print(out,format=fmt)
+        crest_print(out,format=fields)
 
-    def do_createtag(self, pattern):
-        """createtag -h
-        Create a new tag, the name is provided via --tag ATAG"""
+    def do_create(self, pattern):
+        """create -h
+        Create a new tag or global tag, using a series of k=val pairs, separated
+        by commas
+        """
         out = None
         fmt = 'short'
         if pattern:
-            log.info ("Create tags %s " % pattern)
             args = self.get_args(pattern)
             if args.help:
                 self.loc_parser.print_help()
                 return
+            cmd = args.cmd
+            log.info (f'Creating {cmd}')
             fmt = args.format
-            out = self.cm.create_tags(name=args.tag)
+            tname = None
+            if args.tag:
+                tname = args.tag
+            if args.globaltag:
+                tname = args.globaltag
+            pdic = {}
+            if args.params:
+                pararr = args.params.split(',')
+                for par in pararr:
+                    kv = par.split('=')
+                    pdic[kv[0]] = kv[1]
+
+            if cmd == 'tags':
+                out = self.cm.create_tags(name=tname, **pdic)
+            elif cmd == 'globaltags':
+                out = self.cm.create_globaltags(name=tname, **pdic)
+            else:
+                print(f'Command {cmd} is not recognized in this context')
+
         else:
-            log.info ('Cannot create a tag without arguments')
+            log.info ('Cannot create object without arguments')
         print(f'Response is : {out}')
 
     def do_upload(self, pattern):
@@ -243,7 +270,6 @@ class CrestConsoleUI(cmd.Cmd):
         """select [iovs|groups|ranges|size] -t sometag -s snapshot -c since=1000,until=2000
         Select for iovs in the given tag, since and until can be defined using --cut"""
         out = None
-        fmt = 'short'
         cdic = {}
         if line:
             log.info ("Searching iovs using %s " % line)
@@ -252,7 +278,6 @@ class CrestConsoleUI(cmd.Cmd):
             if args.help:
                 self.loc_parser.print_help()
                 return
-            fmt = args.format
             if args.cut:
                 cutstringarr = args.cut.split(',')
                 cdic = {}
@@ -266,7 +291,7 @@ class CrestConsoleUI(cmd.Cmd):
         else:
             log.info ('Cannot search iovs without a tagname parameter')
             log.info ('Optional arguments are: -c since=222222,until=3333333 ; in addition also a snapshot can be provided')
-        crest_print(out,fmt)
+        crest_print(out,[])
 
     def do_get(self, line):
         """get -p somehash [-i -H BLOB {JSON}]

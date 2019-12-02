@@ -29,9 +29,10 @@ class CrestDbIo(HttpIo):
                          backoff_factor=backoff_factor,
                          asynchronous=asynchronous,
                          loop=loop)
-        self.tags_endpoint = '/tags'
-        self.iovs_endpoint = '/iovs'
-        self.payloads_endpoint = '/payloads'
+        self.endpoints = { 'tags': '/tags', 'iovs' : '/iovs', \
+            'payloads' : '/payloads', 'globaltags' : '/globaltags', \
+            'maps' : '/globaltagmaps' }
+
         self.headers = {"Content-Type" : "application/json", "Accept" : "application/json"}
         self.crest_headers = {"X-Crest-PayloadFormat" : "BLOB"}
 
@@ -42,7 +43,7 @@ class CrestDbIo(HttpIo):
         # example : {"X-Crest-PayloadFormat" : "JSON"}
         self.crest_headers = hdr
 
-    def search_tags(self, **kwargs):
+    def search_tags(self, page=0, size=100, sort='name:ASC',**kwargs):
         """
         request and export data from the database in json format
         usage example: search_tags(name='SVOM', payloadspec=JSON)
@@ -58,9 +59,12 @@ class CrestDbIo(HttpIo):
         # prepare request arguments
         by_crit = ','.join([f'{key}:{val}' for key, val in kwargs.items()])
         criteria = {'by': by_crit}
+        criteria['page'] = page
+        criteria['size'] = size
+        criteria['sort'] = sort
 
         # send request
-        resp = self.get(self.tags_endpoint, params=criteria)
+        resp = self.get(self.endpoints['tags'], params=criteria)
         return resp.json()
 
     def search_maps(self, page=0, size=100, sort='name:ASC',name=None,mode='Trace'):
@@ -80,8 +84,35 @@ class CrestDbIo(HttpIo):
     def search_globaltags(self, page=0, size=100, sort='name:ASC',**kwargs):
         """
         request and export data from the database in json format
-        usage example: search_iovs(tagname='SVOM', insertionTime='1574429040079')
-        ?by=tagname:SVOM,insertionTime:1574429040079
+        usage example: search_globaltags(name='SVOM')
+        """
+        # define output fields
+        valid_filters = ['name', 'scenario', 'release', 'workflow']
+
+        # check request validity
+        if not set(kwargs.keys()).issubset(valid_filters):
+            log.error('Requested filters should be in %s', valid_filters)
+
+        # prepare request arguments
+        for key, val in kwargs.items():
+            if not val.startswith('>') and not val.startswith('<') and \
+                not val.startswith(':'):
+                kwargs[key] = ':'+val
+        by_crit = ','.join([f'{key}{val}' for key, val in kwargs.items()])
+        criteria = {'by': by_crit}
+        criteria['page'] = page
+        criteria['size'] = size
+        criteria['sort'] = sort
+
+        # send request
+        resp = self.get(self.endpoints['globaltags'], params=criteria)
+        return resp.json()
+
+    def search_iovs(self, page=0, size=100, sort='id.since:ASC', tagname=None, **kwargs):
+        """
+        request and export data from the database in json format
+        usage example:
+        search_iovs(tagname='SVOM', insertionTime='1574429040079')
         """
         # define output fields
         valid_filters = ['insertionTime', 'since']
@@ -98,17 +129,20 @@ class CrestDbIo(HttpIo):
         by_crit = f'tagname:{tagname},'
         by_crit += ','.join([f'{key}{val}' for key, val in kwargs.items()])
         criteria = {'by': by_crit}
+        criteria['page'] = page
+        criteria['size'] = size
+        criteria['sort'] = sort
 
         print(f'Iov search request using {criteria}')
         # send request
-        resp = self.get(self.iovs_endpoint, params=criteria)
+        resp = self.get(self.endpoints['iovs'], params=criteria)
         return resp.json()
 
     def select(self, cmd='groups', tagname=None, **kwargs):
         """
         request and export iovs or groups data from the database in json format
-        usage example: select(tagname='SVOM', snapshot='1574429040079')
-        ?tagname=SVOM&snapshot=1574429040079
+        usage example: select(cmd='iovs',tagname='SVOM', snapshot='1574429040079')
+        The possible options for cmd are: iovs, groups, ranges
         """
         # define output fields
         valid_filters = ['snapshot', 'since', 'until']
@@ -127,7 +161,7 @@ class CrestDbIo(HttpIo):
         if cmd == 'ranges':
             loc_headers = {"X-Crest-Query" : "ranges"}
 
-        resp = self.get(self.iovs_endpoint+cmddic[cmd], params=criteria, headers=loc_headers)
+        resp = self.get(self.endpoints['iovs']+cmddic[cmd], params=criteria, headers=loc_headers)
         return resp.json()
 
     def create_tags(self, name=None, **kwargs):
@@ -250,7 +284,7 @@ class CrestDbIo(HttpIo):
                 files_req[key] = (None, val)
             log.info('Create payload : %s', files_req)
             # send request
-            loc_url = self.payloads_endpoint+'/store'
+            loc_url = self.endpoints['payloads']+'/store'
             loc_headers = {"X-Crest-PayloadFormat" : "JSON"}
 
             resp = self.post(loc_url, files=files_req, headers=loc_headers)
