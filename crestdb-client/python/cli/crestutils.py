@@ -68,7 +68,18 @@ mapfieldsdicheader = {
     'globalTagName' : {'key':'{globalTagName:30.30s}','val' : 'GlobalTag'},
     'tagName' : {'key':'{tagName:50s}','val' : 'Tag'},
 }
-
+pyldfieldsdic = {
+    'version' : '{version:15s}',
+    'objectType' : '{objectType:25s}',
+    'size' : '{size:10d}',
+    'insertionTime' : '{insertionTime:30s}',
+}
+pyldfieldsdicheader = {
+    'version' : {'key':'{version:15s}','val' : 'Version'},
+    'objectType' : {'key':'{objectType:25s}','val' : 'Object'},
+    'size' : {'key':'{size:10s}','val' : 'Size(Bytes)'},
+    'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
+}
 def crest_print(crestdata, format=[]):
     if crestdata is None or 'size' not in crestdata.keys():
         log.info('Cannot find results to print')
@@ -93,6 +104,8 @@ def crest_print(crestdata, format=[]):
 
     elif (crestdata['format'] == 'GlobalTagMapSetDto'):
         dprint(format,mapfieldsdicheader,mapfieldsdic,dataarr)
+    elif (crestdata['format'] == 'PayloadSetDto' and crestdata['datatype'] == 'JSON'):
+        dprint(format,pyldfieldsdicheader,pyldfieldsdic,dataarr)
     else:
         print(crestdata)
 
