@@ -39,6 +39,8 @@ import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.IovPayloadSetDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSummaryDto;
@@ -403,9 +405,9 @@ public class IovsApiServiceImpl extends IovsApiService {
      * javax.ws.rs.core.Request, javax.ws.rs.core.HttpHeaders)
      */
     @Override
-    public Response selectIovs(String xCrestQuery, String tagname, String since, String until, Long snapshot,
-            SecurityContext securityContext, UriInfo info, Request request, HttpHeaders headers)
-            throws NotFoundException {
+    public Response selectIovs(String xCrestQuery, String tagname, String since, String until,
+            Long snapshot, SecurityContext securityContext, UriInfo info, Request request,
+            HttpHeaders headers) throws NotFoundException {
         log.info(
                 "IovRestController processing request for iovs using tag name {} and range {} - {} ",
                 tagname, since, until);
@@ -447,7 +449,8 @@ public class IovsApiServiceImpl extends IovsApiService {
             if (xCrestQuery == null) {
                 xCrestQuery = "groups";
             }
-            dtolist = iovService.selectIovsByTagRangeSnapshot(tagname, rsince, runtil, snap, xCrestQuery);
+            dtolist = iovService.selectIovsByTagRangeSnapshot(tagname, rsince, runtil, snap,
+                    xCrestQuery);
             final IovSetDto respdto = new IovSetDto();
             ((IovSetDto) respdto.datatype("iovs")).resources(dtolist).size((long) dtolist.size());
             final GenericMap filters = new GenericMap();
@@ -549,4 +552,68 @@ public class IovsApiServiceImpl extends IovsApiService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
     }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hep.crest.server.swagger.api.IovsApiService#selectIovPayloads(java.lang.
+     * String, java.lang.String, java.lang.String, java.lang.String, java.lang.Long,
+     * javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     */
+    @Override
+    public Response selectIovPayloads(String xCrestQuery, String tagname, String since,
+            String until, Long snapshot, SecurityContext securityContext, UriInfo info)
+            throws NotFoundException {
+        log.info(
+                "IovRestController processing request for iovs and payload using tag name {} and range {} - {} ",
+                tagname, since, until);
+        try {
+            List<IovPayloadDto> dtolist = null;
+            // Retrieve all iovs
+            final TagDto tagentity = tagService.findOne(tagname);
+            if (tagentity == null) {
+                throw new CdbServiceException("Cannot find tag for name " + tagname);
+            }
+            log.debug("Found tag " + tagentity);
+
+            log.debug("Setting iov range to : {}, {}", since, until);
+            BigDecimal runtil = null;
+            if (until.equals("INF")) {
+                log.debug("The end time will be set to : {}", CrestProperties.INFINITY);
+                runtil = CrestProperties.INFINITY;
+            }
+            else {
+                runtil = new BigDecimal(until);
+                log.debug("The end time will be set to : " + runtil);
+            }
+            final BigDecimal rsince = new BigDecimal(since);
+            Date snap = new Date();
+            if (snapshot != 0L) {
+                snap = new Date(snapshot);
+            }
+
+            dtolist = iovService.selectIovPayloadsByTagRangeSnapshot(tagname, rsince, runtil, snap);
+            final IovPayloadSetDto respdto = new IovPayloadSetDto();
+            ((IovPayloadSetDto) respdto.datatype("iovpayloads")).resources(dtolist)
+                    .size((long) dtolist.size());
+            final GenericMap filters = new GenericMap();
+            filters.put("tagName", tagname);
+            filters.put("snapshot", snapshot.toString());
+            filters.put("since", rsince.toString());
+            filters.put("until", runtil.toString());
+            respdto.filter(filters);
+            respdto.format("IovPayloadSetDto");
+            return Response.ok().entity(respdto).build();
+
+        }
+        catch (final Exception e) {
+            final String msg = "Error in selectIovPayloads : " + tagname + ", " + snapshot;
+            log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
+            final String message = msg + " -- " + e.getMessage();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+        }
+    }
+
 }

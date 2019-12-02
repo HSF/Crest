@@ -31,6 +31,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Payload;
+import hep.crest.swagger.model.IovPayloadDto;
 import hep.crest.swagger.model.TagSummaryDto;
 
 /**
@@ -87,6 +89,21 @@ public class IovGroupsImpl implements IovGroupsCustom {
      */
     protected String tablename() {
         final Table ann = Iov.class.getAnnotation(Table.class);
+        String tablename = ann.name();
+        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
+            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
+        }
+        else if (this.defaultTablename != null) {
+            tablename = this.defaultTablename + "." + tablename;
+        }
+        return tablename;
+    }
+
+    /**
+     * @return String
+     */
+    protected String payloadTablename() {
+        final Table ann = Payload.class.getAnnotation(Table.class);
         String tablename = ann.name();
         if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
             tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
@@ -200,6 +217,43 @@ public class IovGroupsImpl implements IovGroupsCustom {
             final TagSummaryDto entity = new TagSummaryDto();
             entity.setTagname(rs.getString("TAG_NAME"));
             entity.setNiovs(rs.getLong("NIOVS"));
+            return entity;
+        });
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hep.crest.data.repositories.IovGroupsCustom#getRangeIovPayloadInfo(java.lang
+     * .String, java.math.BigDecimal, java.math.BigDecimal, java.util.Date)
+     */
+    @Override
+    public List<IovPayloadDto> getRangeIovPayloadInfo(String name, BigDecimal since,
+            BigDecimal until, Date snapshot) {
+        log.info("Select Iov and Payload meta info for tag  {} using JDBCTEMPLATE",
+                name);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final String tablename = this.tablename();
+
+        final String sql = "select iv.TAG_NAME, iv.SINCE, iv.PAYLOAD_HASH, "
+                + " pyld.VERSION, pyld.OBJECT_TYPE, "
+                + " pyld.DATA_SIZE from " + tablename + " iv "
+                + " LEFT JOIN " + payloadTablename() + " pyld "
+                + " ON iv.PAYLOAD_HASH=pyld.HASH "
+                + " where iv.TAG_NAME=? AND iv.SINCE>=COALESCE("
+                + "  (SELECT max(iov2.SINCE) FROM " + tablename + " iov2 "
+                + "  WHERE iov2.TAG_NAME=? AND iov2.SINCE<=? AND iov2.INSERTION_TIME<=? ),0)"
+                + " AND iv.SINCE<=? AND iv.INSERTION_TIME<=? "
+                + " ORDER BY iv.SINCE ASC, iv.INSERTION_TIME DESC";
+        return jdbcTemplate.query(sql,
+                new Object[] {name, name, since, snapshot, until, snapshot},
+                (rs, num) -> {
+            final IovPayloadDto entity = new IovPayloadDto();
+            entity.setSince(rs.getBigDecimal("SINCE"));
+            entity.setPayloadHash(rs.getString("PAYLOAD_HASH"));
+            entity.setVersion(rs.getString("VERSION"));
+            entity.setObjectType(rs.getString("OBJECT_TYPE"));
+            entity.setSize(rs.getInt("DATA_SIZE"));
             return entity;
         });
     }

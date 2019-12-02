@@ -1017,6 +1017,69 @@
 				}
 			}
 		},
+		"/iovs/selectIovPayloads": {
+			"get": {
+				"tags": [
+					"iovs"
+				],
+				"summary": "Select iovs and payload meta info for a given tagname and in a given range.",
+				"description": "This method allows to select a list of iovs+payload meta in a tag, using a given range in time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, until={until time as string}, snapshot={snapshot time as long}",
+				"operationId": "selectIovPayloads",
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"in": "header",
+						"name": "X-Crest-Query",
+						"description": "The query type. The header parameter X-Crest-Query can be : groups (default) or ranges (include previous since).",
+						"default": "groups",
+						"type": "string"
+					},
+					{
+						"name": "tagname",
+						"in": "query",
+						"description": "tagname: the tag name {none}",
+						"required": false,
+						"type": "string",
+						"default": "none"
+					},
+					{
+						"name": "since",
+						"in": "query",
+						"description": "since: the since time as a string {0}",
+						"required": false,
+						"type": "string",
+						"default": "0"
+					},
+					{
+						"name": "until",
+						"in": "query",
+						"description": "until: the until time as a string {INF}",
+						"required": false,
+						"type": "string",
+						"default": "INF"
+					},
+					{
+						"name": "snapshot",
+						"in": "query",
+						"description": "snapshot: the snapshot time {0}",
+						"required": false,
+						"type": "integer",
+						"default": 0,
+						"format": "int64"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "successful operation",
+						"schema": {
+							"$ref": "#/definitions/IovPayloadSetDto"
+						}
+					}
+				}
+			}
+		},
 		"/iovs/lastIov": {
 			"get": {
 				"tags": [
@@ -1993,7 +2056,17 @@
 				"since": {
 					"type": "number"
 				},
-				"payload": {
+				"version": {
+					"type": "string"
+				},
+				"objectType": {
+					"type": "string"
+				},
+				"size": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"payloadHash": {
 					"type": "string"
 				}
 			}
@@ -2042,7 +2115,7 @@
 				}
 			]
 		},
-		"IovPyldSetDto": {
+		"IovPayloadSetDto": {
 			"description" : "An Set containing IovPayloadDto objects.",
 			"allOf": [
 				{
@@ -2052,7 +2125,7 @@
 					"properties": {
 						"format" : {
 							"type": "string",
-							"default" : "IovPyldSetDto"
+							"default" : "IovPayloadSetDto"
 						},
 						"resources": {
 							"type": "array",

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadSetDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagSummarySetDto;
 import io.swagger.annotations.ApiParam;
@@ -156,4 +157,21 @@ public class IovsApi  {
     throws NotFoundException {
         return delegate.lastIov(tagname,since,snapshot,dateformat,securityContext,info);
     }
+    
+    @GET
+    @Path("/selectIovPayloads")
+
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Select iovs and payload meta info for a given tagname and in a given range.", notes = "This method allows to select a list of iovs+payload meta in a tag, using a given range in time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, until={until time as string}, snapshot={snapshot time as long}", response = IovPayloadSetDto.class, tags={ "iovs", })
+    @io.swagger.annotations.ApiResponses(value = {
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = IovPayloadSetDto.class) })
+    public Response selectIovPayloads(@ApiParam(value = "The query type. The header parameter X-Crest-Query can be : groups (default) or ranges (include previous since)." , defaultValue="groups")@HeaderParam("X-Crest-Query") String xCrestQuery
+,@ApiParam(value = "tagname: the tag name {none}", defaultValue="none") @DefaultValue("none") @QueryParam("tagname") String tagname
+,@ApiParam(value = "since: the since time as a string {0}", defaultValue="0") @DefaultValue("0") @QueryParam("since") String since
+,@ApiParam(value = "until: the until time as a string {INF}", defaultValue="INF") @DefaultValue("INF") @QueryParam("until") String until
+,@ApiParam(value = "snapshot: the snapshot time {0}", defaultValue="0") @DefaultValue("0") @QueryParam("snapshot") Long snapshot
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.selectIovPayloads(xCrestQuery,tagname,since,until,snapshot,securityContext,info);
+    }    
 }
