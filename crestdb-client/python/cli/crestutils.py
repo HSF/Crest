@@ -36,6 +36,20 @@ iovfieldsdicheader = {
     'payloadHash' : {'key':'{payloadHash:65s}','val' : 'Hash'},
     'insertionTime' : {'key':'{insertionTime:30s}', 'val' : 'Insertion Time'}
 }
+iovpyldfieldsdic = {
+    'since' : '{since:20d}',
+    'payloadHash' : '{payloadHash:65s}',
+    'size' : '{size:12d}',
+    'objectType' : '{objectType:15s}',
+    'version' : '{version:10s}',
+}
+iovpyldfieldsdicheader = {
+    'since' : {'key':'{since:20s}','val' : 'since'},
+    'payloadHash' : {'key':'{payloadHash:65s}','val' : 'Hash'},
+    'size' : {'key': '{size:12s}', 'val' : 'Size(Bytes)'},
+    'objectType' : {'key': '{objectType:15s}','val' : 'Type'},
+    'version' : {'key': '{version:10s}','val' : 'Version'},
+}
 tagfieldsdic = {
     'name' : '{name:25s}',
     'timeType' : '{timeType:10s}',
@@ -102,6 +116,8 @@ def crest_print(crestdata, format=[]):
         else:
             dprint(format,iovfieldsdicheader,iovfieldsdic,dataarr)
 
+    elif (crestdata['format'] == 'IovPayloadSetDto'):
+        dprint(format,iovpyldfieldsdicheader,iovpyldfieldsdic,dataarr)
     elif (crestdata['format'] == 'GlobalTagMapSetDto'):
         dprint(format,mapfieldsdicheader,mapfieldsdic,dataarr)
     elif (crestdata['format'] == 'PayloadSetDto' and crestdata['datatype'] == 'JSON'):

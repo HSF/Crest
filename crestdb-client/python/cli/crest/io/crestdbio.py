@@ -155,7 +155,7 @@ class CrestDbIo(HttpIo):
         criteria = {'tagname': tagname }
         for key, val in kwargs.items():
             criteria[key] = val
-        cmddic = { 'groups' : '/selectGroups', 'iovs' : '/selectIovs', 'ranges' : '/selectIovs', 'size' : '/getSize'}
+        cmddic = { 'groups' : '/selectGroups', 'iovs' : '/selectIovs', 'iovpayloads' : '/selectIovPayloads', 'ranges' : '/selectIovs', 'size' : '/getSize'}
         # send request
         loc_headers = {"X-Crest-Query" : "iovs"}
         if cmd == 'ranges':

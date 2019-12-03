@@ -267,7 +267,7 @@ class CrestConsoleUI(cmd.Cmd):
         crest_print(out,format=fields)
 
     def do_select(self, line):
-        """select [iovs|groups|ranges|size] -t sometag -s snapshot -c since=1000,until=2000
+        """select [iovs|groups|ranges|size|iovpayloads] -t sometag -s snapshot -c since=1000,until=2000
         Select for iovs in the given tag, since and until can be defined using --cut"""
         out = None
         cdic = {}
