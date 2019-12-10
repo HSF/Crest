@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagSetDto;
-import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
 import io.swagger.annotations.ApiParam;
 
 @Path("/globaltags")
@@ -35,7 +35,7 @@ public class GlobaltagsApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a GlobalTag in the database.", notes = "This method allows to insert a GlobalTag.Arguments: GlobalTagDto should be provided in the body as a JSON file.", response = GlobalTagDto.class, tags={ "globaltags", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagDto.class) })
+        @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = GlobalTagDto.class) })
     public Response createGlobalTag(@ApiParam(value = "A json string that is used to construct a globaltagdto object: { name: xxx, ... }" ,required=true) GlobalTagDto body
 ,@ApiParam(value = "force: tell the server if it should use or not the insertion time provided {default: false}", defaultValue="false") @DefaultValue("false") @QueryParam("force") String force
 ,@Context SecurityContext securityContext,@Context UriInfo info)
@@ -46,9 +46,9 @@ public class GlobaltagsApi  {
     @Path("/{name}")
     
     @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Finds a GlobalTagDto by name", notes = "This method will search for a global tag with the given name. Only one global tag should be returned.", response = GlobalTagDto.class, tags={ "globaltags", })
+    @io.swagger.annotations.ApiOperation(value = "Finds a GlobalTagDto by name", notes = "This method will search for a global tag with the given name. Only one global tag should be returned.", response = GlobalTagSetDto.class, tags={ "globaltags", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagDto.class) })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagSetDto.class) })
     public Response findGlobalTag(@ApiParam(value = "",required=true) @PathParam("name") String name
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
@@ -58,9 +58,9 @@ public class GlobaltagsApi  {
     @Path("/{name}/tags")
     
     @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Finds a TagDtos lists associated to the global tag name in input.", notes = "This method allows to trace a global tag.Arguments: record=<record> filter output by record, label=<label> filter output by label", response = TagDto.class, responseContainer = "List", tags={ "globaltags", })
+    @io.swagger.annotations.ApiOperation(value = "Finds a TagDtos lists associated to the global tag name in input.", notes = "This method allows to trace a global tag.Arguments: record=<record> filter output by record, label=<label> filter output by label", response = TagSetDto.class, tags={ "globaltags", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = TagDto.class, responseContainer = "List") })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = TagSetDto.class) })
     public Response findGlobalTagFetchTags(@ApiParam(value = "",required=true) @PathParam("name") String name
 ,@ApiParam(value = "record:  the record string {}", defaultValue="none") @DefaultValue("none") @QueryParam("record") String record
 ,@ApiParam(value = "label:  the label string {}", defaultValue="none") @DefaultValue("none")  @QueryParam("label") String label

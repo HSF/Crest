@@ -455,10 +455,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/definitions/RunLumiInfoDto"
-							}
+							"$ref": "#/definitions/RunLumiSetDto"
 						}
 					}
 				}
@@ -490,7 +487,7 @@
 					}
 				],
 				"responses": {
-					"200": {
+					"201": {
 						"description": "successful operation",
 						"schema": {
 							"$ref": "#/definitions/GlobalTagMapDto"
@@ -626,7 +623,7 @@
 					}
 				],
 				"responses": {
-					"200": {
+					"201": {
 						"description": "successful operation",
 						"schema": {
 							"$ref": "#/definitions/GlobalTagDto"
@@ -659,7 +656,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "#/definitions/GlobalTagDto"
+							"$ref": "#/definitions/GlobalTagSetDto"
 						}
 					}
 				}
@@ -799,7 +796,7 @@
 					}
 				],
 				"responses": {
-					"200": {
+					"201": {
 						"description": "successful operation",
 						"schema": {
 							"$ref": "#/definitions/IovDto"
