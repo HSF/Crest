@@ -7,7 +7,7 @@ variables:
     WEB_CONTAINER_IMAGE: $REGISTRY/crest-ui:$VERSION
     GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     GIT_SSL_NO_VERIFY: "true"
-    BUILD_DIR: "."
+
   # When using dind service we need to instruct docker, to talk with the
   # daemon started inside of the service. The daemon is available with
   # a network connection instead of the default /var/run/docker.sock socket.
@@ -83,8 +83,16 @@ release:
   before_script:
       - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
   script:
-      - docker build --rm --tag=$CONTAINER_IMAGE $BUILD_DIR
+      - docker build --rm --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
       - docker push $CONTAINER_IMAGE
+  only:
+  - svom-dc1
+
+webui:
+  stage: webui
+  script:
+    - docker info
+    - docker build --tag=$WEB_CONTAINER_IMAGE ./web-ui/crest-ui/
   only:
   - svom-dc1
 
