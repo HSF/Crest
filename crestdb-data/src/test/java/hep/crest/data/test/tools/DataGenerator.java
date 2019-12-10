@@ -17,13 +17,14 @@ import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.IovId;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
-import hep.crest.data.runinfo.pojo.RunLumiInfo;
+import hep.crest.data.runinfo.pojo.RunInfo;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.RunInfoDto;
 import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSummaryDto;
@@ -144,14 +145,20 @@ public class DataGenerator {
         return dto;
     }
 
-    public static RunLumiInfo generateRunLumiInfo(BigDecimal since, BigDecimal run, BigDecimal lb) {
-        final RunLumiInfo entity = new RunLumiInfo();
-        entity.setRun(run);
-        entity.setEndtime(new BigDecimal(99L));
-        entity.setStarttime(new BigDecimal(1L));
-        entity.setLb(lb);
-        entity.setSince(since);
+    public static RunInfo generateRunInfo(Date start, Date end, BigDecimal run) {
+        final RunInfo entity = new RunInfo();
+        entity.setRunNumber(run);
+        entity.setEndTime(end);
+        entity.setStartTime(start);
         return entity;
+    }
+
+    public static RunInfoDto generateRunInfoDto(Date start, Date end, BigDecimal run) {
+        final RunInfoDto dto = new RunInfoDto();
+        dto.setRunNumber(run);
+        dto.setEndTime(end);
+        dto.setStartTime(start);
+        return dto;
     }
 
     public static TagSummaryDto generateTagSummaryDto(String name, Long niovs) {

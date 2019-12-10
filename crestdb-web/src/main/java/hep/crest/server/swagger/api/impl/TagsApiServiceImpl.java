@@ -77,7 +77,6 @@ public class TagsApiServiceImpl extends TagsApiService {
         try {
             final TagDto saved = tagService.insertTag(body);
             return Response.created(info.getRequestUri()).entity(saved).build();
-
         }
         catch (final AlreadyExistsPojoException e) {
             log.error("Cannot create tag {}, name already exists...", body);

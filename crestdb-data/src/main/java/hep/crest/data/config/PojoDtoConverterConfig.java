@@ -14,14 +14,14 @@ import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
-import hep.crest.data.runinfo.pojo.RunLumiInfo;
+import hep.crest.data.runinfo.pojo.RunInfo;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.RunLumiInfoDto;
+import hep.crest.swagger.model.RunInfoDto;
 import hep.crest.swagger.model.TagDto;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFacade;
@@ -52,7 +52,7 @@ public class PojoDtoConverterConfig {
         this.initTagMap(mapperFactory);
         this.initIovMap(mapperFactory);
         this.initPayloadMap(mapperFactory);
-        this.initRunLumiInfoMap(mapperFactory);
+        this.initRunInfoMap(mapperFactory);
         this.initFolderMap(mapperFactory);
         return mapperFactory;
     }
@@ -130,8 +130,8 @@ public class PojoDtoConverterConfig {
      *            the MapperFactory
      * @return
      */
-    protected void initRunLumiInfoMap(MapperFactory mapperFactory) {
-        mapperFactory.classMap(RunLumiInfo.class, RunLumiInfoDto.class).exclude("insertionTime")
+    protected void initRunInfoMap(MapperFactory mapperFactory) {
+        mapperFactory.classMap(RunInfo.class, RunInfoDto.class)
                 .byDefault().register();
     }
 

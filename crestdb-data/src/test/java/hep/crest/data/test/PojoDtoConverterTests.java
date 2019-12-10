@@ -27,7 +27,7 @@ import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.IovId;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
-import hep.crest.data.runinfo.pojo.RunLumiInfo;
+import hep.crest.data.runinfo.pojo.RunInfo;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.data.security.pojo.CrestRoles;
 import hep.crest.data.security.pojo.CrestUser;
@@ -45,6 +45,7 @@ import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.PayloadSetDto;
 import hep.crest.swagger.model.PayloadTagInfoDto;
+import hep.crest.swagger.model.RunInfoDto;
 import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.RunLumiSetDto;
 import hep.crest.swagger.model.TagDto;
@@ -271,13 +272,14 @@ public class PojoDtoConverterTests {
 
     @Test
     public void testRunInfoConverter() throws Exception {
-        final RunLumiInfoDto dto1 = DataGenerator.generateRunLumiInfoDto(new BigDecimal(1000L),
-                new BigDecimal(222222L), new BigDecimal(100L));
+        final Date start = new Date();
+        final Date end = new Date(start.getTime()+3600000);
+        final RunInfoDto dto1 = DataGenerator.generateRunInfoDto(start, end, new BigDecimal(100L));
 
         assertThat(dto1.toString().length()).isGreaterThan(0);
         assertThat(dto1.hashCode()).isNotNull();
-        final RunLumiInfo entity = mapper.map(dto1, RunLumiInfo.class);
-        assertThat(dto1.getRun()).isEqualTo(entity.getRun());
+        final RunInfo entity = mapper.map(dto1, RunInfo.class);
+        assertThat(dto1.getRunNumber()).isEqualTo(entity.getRunNumber());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
     }

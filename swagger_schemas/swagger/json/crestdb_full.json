@@ -302,7 +302,7 @@
 				],
 				"summary": "Create an entry for run information.",
 				"description": "Run informations go into a separate table.",
-				"operationId": "createRunLumiInfo",
+				"operationId": "createRunInfo",
 				"consumes": [
 					"application/json"
 				],
@@ -314,10 +314,10 @@
 					{
 						"in": "body",
 						"name": "body",
-						"description": "A json string that is used to construct a runlumiinfodto object: { run: xxx, ... }",
+						"description": "A json string that is used to construct one or more runinfodto object: { run: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "#/definitions/RunLumiInfoDto"
+							"$ref": "#/definitions/RunInfoSetDto"
 						}
 					}
 				],
@@ -336,7 +336,7 @@
 				],
 				"summary": "Finds a RunLumiInfoDto lists.",
 				"description": "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]",
-				"operationId": "listRunLumiInfo",
+				"operationId": "listRunInfo",
 				"produces": [
 					"application/json",
 					"application/xml"
@@ -371,30 +371,30 @@
 					{
 						"name": "sort",
 						"in": "query",
-						"description": "sort: the sort pattern {since:ASC}",
+						"description": "sort: the sort pattern {runNumber:ASC}",
 						"required": false,
 						"type": "string",
-						"default": "since:ASC"
+						"default": "runNumber:ASC"
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"$ref": "#/definitions/RunLumiSetDto"
+							"$ref": "#/definitions/RunInfoSetDto"
 						}
 					}
 				}
 			}
 		},
-		"/runinfo/list": {
+		"/runinfo/select": {
 			"get": {
 				"tags": [
 					"runinfo"
 				],
 				"summary": "Finds a RunLumiInfoDto lists using parameters.",
 				"description": "This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]",
-				"operationId": "findRunLumiInfo",
+				"operationId": "selectRunInfo",
 				"produces": [
 					"application/json",
 					"application/xml"
@@ -419,7 +419,7 @@
 					{
 						"name": "format",
 						"in": "query",
-						"description": "format: the format to digest previous arguments [time] or [run-lumi]. Time = yyyymmddhhmiss, Run-lumi = run-lumi",
+						"description": "format: the format to digest previous arguments [time] or [run]. Time = yyyymmddhhmiss, Run = runnumber",
 						"required": false,
 						"type": "string",
 						"default": "time"
@@ -445,20 +445,17 @@
 					{
 						"name": "sort",
 						"in": "query",
-						"description": "sort: the sort pattern {since:ASC}",
+						"description": "sort: the sort pattern {runNumber:ASC}",
 						"required": false,
 						"type": "string",
-						"default": "since:ASC"
+						"default": "runNumber:ASC"
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/definitions/RunLumiInfoDto"
-							}
+							"$ref": "#/definitions/RunInfoSetDto"
 						}
 					}
 				}
@@ -1714,6 +1711,22 @@
 				}
 			}
 		},
+		"RunInfoDto": {
+			"type": "object",
+			"properties": {
+				"runNumber": {
+					"type": "number"
+				},
+				"startTime": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"endTime": {
+					"type": "string",
+					"format": "date-time"
+				}
+			}
+		},
 		"GlobalTagMapDto": {
 			"type": "object",
 			"properties": {
@@ -2047,6 +2060,28 @@
 							"type": "array",
 							"items": {
 								"$ref": "#/definitions/RunLumiInfoDto"
+							}
+						}
+					}
+				}
+			]
+		},
+		"RunInfoSetDto": {
+			"description" : "An RunInfoSet containing RunInfoDto objects.",
+			"allOf": [
+				{
+					"$ref": "#/definitions/CrestBaseResponse"
+				},
+				{
+					"properties": {
+						"format" : {
+							"type": "string",
+							"default" : "RunInfoSetDto"
+						},
+						"resources": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/RunInfoDto"
 							}
 						}
 					}

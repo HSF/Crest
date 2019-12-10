@@ -10,22 +10,22 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import hep.crest.data.runinfo.pojo.RunLumiInfo;
+import hep.crest.data.runinfo.pojo.RunInfo;
 
 /**
  * @author formica
  *
  */
 @Transactional(readOnly = true)
-public interface RunLumiInfoBaseRepository
-        extends PagingAndSortingRepository<RunLumiInfo, BigDecimal>,
-        QuerydslPredicateExecutor<RunLumiInfo> {
+public interface RunInfoBaseRepository
+        extends PagingAndSortingRepository<RunInfo, BigDecimal>,
+        QuerydslPredicateExecutor<RunInfo> {
 
     /**
      * @param run
      *            the BigDecimal
      * @return RunLumiInfo
      */
-    RunLumiInfo findByRun(@Param("run") BigDecimal run);
+    RunInfo findByRunNumber(@Param("runNumber") BigDecimal run);
 
 }
