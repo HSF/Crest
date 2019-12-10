@@ -66,8 +66,6 @@ stages:
 
 package_svom_application:
   stage: package_application
-  tags:
-    - dc0
   image: java:8
   script:
    - ./gradlew -g /cache/.gradle clean assemble -PwarName=crest.war
@@ -102,15 +100,15 @@ release:
 #   only:
 #   - svom-dc1
 
-webui:
-  stage: webui
-  tags:
-    - dc0-shell
-  script:
-    - docker info
-    - docker build --tag=$WEB_CONTAINER_IMAGE ./web-ui/crest-ui/
-  only:
-  - svom-dc0
+# webui:
+#   stage: webui
+#   tags:
+#     - dc0-shell
+#   script:
+#     - docker info
+#     - docker build --tag=$WEB_CONTAINER_IMAGE ./web-ui/crest-ui/
+#   only:
+#   - svom-dc0
 
 # registry-push:
 #   stage: release
