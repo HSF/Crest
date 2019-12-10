@@ -53,9 +53,9 @@ import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.IovFiltering;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.data.repositories.querydsl.TagFiltering;
-import hep.crest.data.runinfo.pojo.RunLumiInfo;
-import hep.crest.data.runinfo.repositories.RunLumiInfoRepository;
-import hep.crest.data.runinfo.repositories.querydsl.RunLumiInfoFiltering;
+import hep.crest.data.runinfo.pojo.RunInfo;
+import hep.crest.data.runinfo.repositories.RunInfoRepository;
+import hep.crest.data.runinfo.repositories.querydsl.RunInfoFiltering;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.PayloadDto;
 
@@ -85,7 +85,7 @@ public class QueryDslTests {
     private GlobalTagMapRepository tagmaprepository;
 
     @Autowired
-    private RunLumiInfoRepository runrepository;
+    private RunInfoRepository runrepository;
 
     @Autowired
     @Qualifier("dataSource") 
@@ -248,14 +248,16 @@ public class QueryDslTests {
     
     @Test
     public void testRunLumi() throws Exception {
-        final RunLumiInfo entity = DataGenerator.generateRunLumiInfo(new BigDecimal(99L), new BigDecimal(199L), new BigDecimal(90L));
+        final Date start = new Date();
+        final Date end = new Date(start.getTime()+3600000);
+        final RunInfo entity = DataGenerator.generateRunInfo(start, end, new BigDecimal(100L));
         
         runrepository.save(entity);
 
-        final IFilteringCriteria filter = new RunLumiInfoFiltering();
-        final PageRequest preq = createPageRequest(0, 10, "since:ASC");
+        final IFilteringCriteria filter = new RunInfoFiltering();
+        final PageRequest preq = createPageRequest(0, 10, "runNumber:ASC");
 
-        final List<SearchCriteria> params = createMatcherCriteria("run>100,since>0,insertiontime>0");
+        final List<SearchCriteria> params = createMatcherCriteria("runNumber>10,startTime>0");
         final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
 
@@ -267,7 +269,7 @@ public class QueryDslTests {
                 wherepred = wherepred.and(exp);
             }
         }
-        final Page<RunLumiInfo> dtolist = runrepository.findAll(wherepred, preq);
+        final Page<RunInfo> dtolist = runrepository.findAll(wherepred, preq);
         assertThat(dtolist.getSize()).isGreaterThan(0);        
     }
     

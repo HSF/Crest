@@ -19,9 +19,9 @@ import org.springframework.stereotype.Service;
 import com.querydsl.core.types.Predicate;
 
 import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.runinfo.pojo.RunLumiInfo;
-import hep.crest.data.runinfo.repositories.RunLumiInfoRepository;
-import hep.crest.swagger.model.RunLumiInfoDto;
+import hep.crest.data.runinfo.pojo.RunInfo;
+import hep.crest.data.runinfo.repositories.RunInfoRepository;
+import hep.crest.swagger.model.RunInfoDto;
 import ma.glasnost.orika.MapperFacade;
 
 /**
@@ -29,7 +29,7 @@ import ma.glasnost.orika.MapperFacade;
  *
  */
 @Service
-public class RunLumiInfoService {
+public class RunInfoService {
 
     /**
      * Logger.
@@ -40,7 +40,7 @@ public class RunLumiInfoService {
      * Repository.
      */
     @Autowired
-    private RunLumiInfoRepository runlumiRepository;
+    private RunInfoRepository runinfoRepository;
 
     /**
      * Mapper.
@@ -54,48 +54,48 @@ public class RunLumiInfoService {
      *            the Predicate
      * @param req
      *            the Pageable
-     * @return List<RunLumiInfoDto>
+     * @return List<RunInfoDto>
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public List<RunLumiInfoDto> findAllRunLumiInfo(Predicate qry, Pageable req)
+    public List<RunInfoDto> findAllRunInfo(Predicate qry, Pageable req)
             throws CdbServiceException {
         try {
-            Iterable<RunLumiInfo> entitylist = null;
+            Iterable<RunInfo> entitylist = null;
             if (qry == null) {
-                entitylist = runlumiRepository.findAll(req);
+                entitylist = runinfoRepository.findAll(req);
             }
             else {
-                entitylist = runlumiRepository.findAll(qry, req);
+                entitylist = runinfoRepository.findAll(qry, req);
             }
             return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, RunLumiInfoDto.class)).collect(Collectors.toList());
+                    .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
         }
         catch (final Exception e) {
-            log.error("Exception in retrieving iov list using predicate and pagination...");
+            log.error("Exception in retrieving run list using predicate and pagination...");
             throw new CdbServiceException(
-                    "Cannot find all iovs using predicate and pagination: " + e.getMessage());
+                    "Cannot find all runs using predicate and pagination: " + e.getMessage());
         }
     }
 
     /**
      * @param dto
-     *            the RunLumiInfoDto
-     * @return RunLumiInfoDto
+     *            the RunInfoDto
+     * @return RunInfoDto
      * @throws CdbServiceException
      *             If an Exception occurred
      */
     @Transactional
-    public RunLumiInfoDto insertRunLumiInfo(RunLumiInfoDto dto) throws CdbServiceException {
+    public RunInfoDto insertRunInfo(RunInfoDto dto) throws CdbServiceException {
         try {
-            log.debug("Create runlumiinfo from dto {}", dto);
-            final RunLumiInfo entity = mapper.map(dto, RunLumiInfo.class);
-            final RunLumiInfo saved = runlumiRepository.save(entity);
+            log.debug("Create runinfo from dto {}", dto);
+            final RunInfo entity = mapper.map(dto, RunInfo.class);
+            final RunInfo saved = runinfoRepository.save(entity);
             log.debug("Saved entity: {}", saved);
-            return mapper.map(saved, RunLumiInfoDto.class);
+            return mapper.map(saved, RunInfoDto.class);
         }
         catch (final Exception e) {
-            log.error("Exception in storing runlumi {}", dto);
+            log.error("Exception in storing run info {}", dto);
             throw new CdbServiceException("Cannot store runlumi : " + e.getMessage());
         }
     }

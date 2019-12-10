@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -26,14 +27,14 @@ import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.data.utils.RunIovConverter;
 import hep.crest.server.controllers.PageRequestHelper;
-import hep.crest.server.runinfo.services.RunLumiInfoService;
+import hep.crest.server.runinfo.services.RunInfoService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.RuninfoApiService;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.RunLumiInfoDto;
-import hep.crest.swagger.model.RunLumiSetDto;
+import hep.crest.swagger.model.RunInfoDto;
+import hep.crest.swagger.model.RunInfoSetDto;
 
 /**
  * @author formica
@@ -59,32 +60,40 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
      * Filtering.
      */
     @Autowired
-    @Qualifier("runlumiFiltering")
+    @Qualifier("runFiltering")
     private IFilteringCriteria filtering;
 
     /**
      * Service.
      */
     @Autowired
-    private RunLumiInfoService runlumiService;
+    private RunInfoService runinfoService;
 
     /*
      * (non-Javadoc)
      *
      * @see
-     * hep.crest.server.swagger.api.RuninfoApiService#createRunLumiInfo(hep.crest.
+     * hep.crest.server.swagger.api.RuninfoApiService#createRunInfo(hep.crest.
      * swagger.model.RunLumiInfoDto, javax.ws.rs.core.SecurityContext,
      * javax.ws.rs.core.UriInfo)
      */
     @Override
-    public Response createRunLumiInfo(RunLumiInfoDto body, SecurityContext securityContext,
+    public Response createRunInfo(RunInfoSetDto body, SecurityContext securityContext,
             UriInfo info) throws NotFoundException {
         log.info(
-                "RunLumiRestController processing request for creating a run lumi info entry using "
+                "RunInfoRestController processing request for creating a run info entry using "
                         + body);
         try {
-            final RunLumiInfoDto saved = runlumiService.insertRunLumiInfo(body);
-            return Response.created(info.getRequestUri()).entity(saved).build();
+            final List<RunInfoDto> dtolist = body.getResources();
+            final List<RunInfoDto> savedlist = new ArrayList<>();
+            for (final RunInfoDto runInfoDto : dtolist) {
+                final RunInfoDto saved = runinfoService.insertRunInfo(runInfoDto);
+                savedlist.add(saved);
+            }
+            final CrestBaseResponse respdto = new RunInfoSetDto().resources(savedlist)
+                    .size((long) savedlist.size())
+                    .datatype("runs");
+            return Response.created(info.getRequestUri()).entity(respdto).build();
         }
         catch (final CdbServiceException e) {
             final String message = e.getMessage();
@@ -99,12 +108,12 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
      * (non-Javadoc)
      *
      * @see
-     * hep.crest.server.swagger.api.RuninfoApiService#listRunLumiInfo(java.lang.
+     * hep.crest.server.swagger.api.RuninfoApiService#listRunInfo(java.lang.
      * String, java.lang.Integer, java.lang.Integer, java.lang.String,
      * javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
      */
     @Override
-    public Response listRunLumiInfo(String by, Integer page, Integer size, String sort,
+    public Response listRunInfo(String by, Integer page, Integer size, String sort,
             SecurityContext securityContext, UriInfo info) throws NotFoundException {
         try {
             log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size,
@@ -132,13 +141,13 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
      * (non-Javadoc)
      *
      * @see
-     * hep.crest.server.swagger.api.RuninfoApiService#findRunLumiInfo(java.lang.
+     * hep.crest.server.swagger.api.RuninfoApiService#selectRunInfo(java.lang.
      * String, java.lang.String, java.lang.String, java.lang.Integer,
      * java.lang.Integer, java.lang.String, javax.ws.rs.core.SecurityContext,
      * javax.ws.rs.core.UriInfo)
      */
     @Override
-    public Response findRunLumiInfo(String from, String to, String format, Integer page,
+    public Response selectRunInfo(String from, String to, String format, Integer page,
             Integer size, String sort, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         try {
@@ -165,6 +174,8 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
 
             }
             else if (format.equals("run-lumi")) {
+                // FIXME : this code is for ATLAS only. 
+                // We should check with Giacomo what to do in CMS.
                 final String[] fromarr = from.split("-");
                 final String[] toarr = to.split("-");
                 final BigDecimal bfrom = RunIovConverter.getCoolRunLumi(new Long(fromarr[0]),
@@ -211,23 +222,23 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             throws CdbServiceException {
         final PageRequest preq = prh.createPageRequest(page, size, sort);
 
-        List<RunLumiInfoDto> dtolist = null;
+        List<RunInfoDto> dtolist = null;
         List<SearchCriteria> params = null;
         GenericMap filters = null;
         if (by.equals("none")) {
-            dtolist = runlumiService.findAllRunLumiInfo(null, preq);
+            dtolist = runinfoService.findAllRunInfo(null, preq);
         }
         else {
             params = prh.createMatcherCriteria(by);
             filters = prh.getFilters(params);
             final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
             final BooleanExpression wherepred = prh.getWhere(expressions);
-            dtolist = runlumiService.findAllRunLumiInfo(wherepred, preq);
+            dtolist = runinfoService.findAllRunInfo(wherepred, preq);
         }
         if (dtolist == null) {
             return null;
         }
-        final CrestBaseResponse setdto = new RunLumiSetDto().resources(dtolist)
+        final CrestBaseResponse setdto = new RunInfoSetDto().resources(dtolist)
                 .size((long) dtolist.size()).datatype("runs");
         if (filters != null) {
             setdto.filter(filters);

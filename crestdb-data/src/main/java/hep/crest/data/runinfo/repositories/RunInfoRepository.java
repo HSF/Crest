@@ -8,15 +8,15 @@ import java.math.BigDecimal;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import hep.crest.data.runinfo.pojo.RunLumiInfo;
+import hep.crest.data.runinfo.pojo.RunInfo;
 
 /**
  * @author formica
  *
  */
 @Repository
-public interface RunLumiInfoRepository
-        extends CrudRepository<RunLumiInfo, BigDecimal>, RunLumiInfoBaseRepository {
+public interface RunInfoRepository
+        extends CrudRepository<RunInfo, BigDecimal>, RunInfoBaseRepository {
 
     /*
      * (non-Javadoc)
@@ -34,7 +34,7 @@ public interface RunLumiInfoRepository
      * org.springframework.data.repository.CrudRepository#delete(java.lang.Object)
      */
     @Override
-    void delete(RunLumiInfo entity);
+    void delete(RunInfo entity);
 
     /*
      * (non-Javadoc)
@@ -43,6 +43,6 @@ public interface RunLumiInfoRepository
      */
     @SuppressWarnings("unchecked")
     @Override
-    RunLumiInfo save(RunLumiInfo entity);
+    RunInfo save(RunInfo entity);
 
 }
