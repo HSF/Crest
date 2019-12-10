@@ -7,6 +7,7 @@ variables:
     WEB_CONTAINER_IMAGE: $REGISTRY/crest-ui:$VERSION
     GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     GIT_SSL_NO_VERIFY: "true"
+    BUILD_DIR: "."
   # When using dind service we need to instruct docker, to talk with the
   # daemon started inside of the service. The daemon is available with
   # a network connection instead of the default /var/run/docker.sock socket.
@@ -78,17 +79,28 @@ package_svom_application:
   only:
   - svom-dc1
 
-build_svom_docker_image:
-  stage: build
-  environment: dc0
-  tags:
-    - dc0-shell
-  image: java:8
+release:
+  stage: release
+  image: docker:dind
+  before_script:
+      - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
   script:
-    - docker info
-    - docker build --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
+      - docker build --rm --tag=$CONTAINER_IMAGE $BUILD_DIR
+      - docker push $CONTAINER_IMAGE
   only:
   - svom-dc1
+
+# build_svom_docker_image:
+#   stage: build
+#   environment: dc0
+#   tags:
+#     - dc0-shell
+#   image: java:8
+#   script:
+#     - docker info
+#     - docker build --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
+#   only:
+#   - svom-dc1
 
 webui:
   stage: webui
@@ -100,17 +112,16 @@ webui:
   only:
   - svom-dc0
 
-registry-push:
-  stage: release
-  environment: dc0
-  tags:
-    - dc0-shell
-  script:
-    - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
-    - docker push $CONTAINER_IMAGE
-##    - docker push $WEB_CONTAINER_IMAGE
-  only:
-  - svom-dc1
+# registry-push:
+#   stage: release
+#   environment: dc0
+#   tags:
+#     - dc0-shell
+#   script:
+#     - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
+#     - docker push $CONTAINER_IMAGE
+#   only:
+#   - svom-dc1
 
 package_cern_application:
   stage: package_application
