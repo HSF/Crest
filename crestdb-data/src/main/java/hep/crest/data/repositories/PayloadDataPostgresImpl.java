@@ -160,6 +160,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
         finally {
             if (obj != null) {
                 obj.close();
+                // conn.commit(); no need to call commit here, it will be done in the calling func.
             }
             //This may not work ? lobj.unlink(oid);
         }
