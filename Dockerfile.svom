@@ -11,15 +11,15 @@ ENV USR svom
 
 ENV crest_version 1.1-SNAPSHOT
 ENV crest_dir /home/${USR}/swagger_crest
-##ENV data_dir /home/${USR}/data
-ENV data_dir /data
+ENV data_dir /home/${USR}/data
+##ENV data_dir /data
 ENV gradle_version 4.2.1
 ENV TZ GMT
 
 RUN  mkdir -p ${crest_dir} \
   && mkdir -p ${data_dir}/web \
-  && mkdir -p ${data_dir}/dump \
-  && mkdir -p ${data_dir}/logs 
+  && mkdir -p ${data_dir}/web/dump \
+  && mkdir -p ${data_dir}/logs
 
 ### This is if you need to create a full war on docker
 #ADD . ${crest_dir}
@@ -31,7 +31,6 @@ ADD web ${data_dir}/web
 ADD logback.xml.crest ${data_dir}/logback.xml
 
 VOLUME "${data_dir}/web"
-VOLUME "${data_dir}/dump"
 VOLUME "${data_dir}/logs"
 
 EXPOSE 8080

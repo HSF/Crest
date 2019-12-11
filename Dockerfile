@@ -1,9 +1,6 @@
 # CrestDB
 #
 # VERSION       CrestDB-1.0
-
-# use the centos base image provided by dotCloud
-# FROM openjdk:8u121-jdk
 FROM anapsix/alpine-java
 MAINTAINER Andrea Formica
 
