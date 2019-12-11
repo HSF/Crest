@@ -119,7 +119,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             return new ByteArrayInputStream(buf);
         }
         catch (final SQLException e) {
-            log.error("SQL exception occurred in retrieving payload data for {}", id);
+            log.error("SQL exception occurred in retrieving payload data for {}: {}", id, e.getMessage());
         }
         finally {
             try {
@@ -161,7 +161,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             if (obj != null) {
                 obj.close();
             }
-            lobj.unlink(oid);
+            //This may not work ? lobj.unlink(oid);
         }
         return buf;
     }
