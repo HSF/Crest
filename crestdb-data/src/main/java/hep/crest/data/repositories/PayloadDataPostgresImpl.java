@@ -163,6 +163,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                 // conn.commit(); no need to call commit here, it will be done in the calling func.
             }
             //This may not work ? lobj.unlink(oid);
+            // Be Careful : unlink could be used to DELETE the BLOB.
         }
         return buf;
     }
@@ -205,6 +206,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             // Close the large object
             obj.close();
             // This seems to be not needed or harmful: lobj . unlink( oid )
+            // unlink seems to be used to DELETE the BLOB.
             return oid;
         }
         catch (SQLException | IOException e) {
