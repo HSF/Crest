@@ -107,11 +107,10 @@ public class IovsApiServiceImpl extends IovsApiService {
     @Override
     public Response createIov(IovDto body, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
-        log.info("IovRestController processing request for creating an iov");
+        log.info("IovRestController processing request for creating an iov : {}", body);
         try {
             final IovDto saved = iovService.insertIov(body);
             return Response.created(info.getRequestUri()).entity(saved).build();
-
         }
         catch (final CdbServiceException e) {
             log.error("Exception in creating iov : {}", e.getMessage());
@@ -140,7 +139,7 @@ public class IovsApiServiceImpl extends IovsApiService {
     @Override
     public Response storeBatchIovMultiForm(IovSetDto dto, SecurityContext securityContext,
             UriInfo info) throws NotFoundException {
-        this.log.info("IovRestController processing request to upload iovs batch {}", dto);
+        log.info("IovRestController processing request to upload iovs batch {}", dto);
         final GenericMap filters = dto.getFilter();
         String tagName = "unknown";
 
@@ -153,7 +152,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             tagName = filters.get("tagName");
         }
         try {
-            log.info("Batch insertion of {} iovs using file formatted in {} for tag {}",
+            log.debug("Batch insertion of {} iovs using file formatted in {} for tag {}",
                     dto.getSize(), dto.getFormat(), tagName);
             final List<IovDto> iovlist = dto.getResources();
             final List<IovDto> savedList = new ArrayList<>();
@@ -197,8 +196,9 @@ public class IovsApiServiceImpl extends IovsApiService {
             String dateformat, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         try {
-            log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size,
-                    sort);
+            log.info(
+                    "IovRestController processing request to search iovs list using by={}, page={}, size={}, sort={}",
+                    by, page, size, sort);
 
             if (dateformat == null) {
                 dateformat = "ms";
@@ -262,6 +262,9 @@ public class IovsApiServiceImpl extends IovsApiService {
     public Response getSize(@NotNull String tagname, Long snapshot, SecurityContext securityContext,
             UriInfo info) throws NotFoundException {
         try {
+            log.info(
+                    "IovRestController processing request to get iovs list size for tag {} and snapshot={}",
+                    tagname, snapshot);
             Long size = 0L;
             if (snapshot != 0L) {
                 Date snap = null;
@@ -300,6 +303,7 @@ public class IovsApiServiceImpl extends IovsApiService {
     public Response getSizeByTag(@NotNull String tagname, SecurityContext securityContext,
             UriInfo info) throws NotFoundException {
         try {
+            log.info("IovRestController processing request to get iovs size by tag {}", tagname);
             final List<TagSummaryDto> entitylist = iovService.getTagSummaryInfo(tagname);
             final TagSummarySetDto respdto = new TagSummarySetDto();
             final GenericMap filters = new GenericMap();
@@ -317,7 +321,7 @@ public class IovsApiServiceImpl extends IovsApiService {
 
         }
         catch (final Exception e) {
-            log.error("Error in getting size by tagname {} : {}", tagname, e.getMessage());
+            log.error("Error in getting size by tag {} : {}", tagname, e.getMessage());
             final String message = e.getMessage();
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
@@ -337,8 +341,9 @@ public class IovsApiServiceImpl extends IovsApiService {
     public Response selectGroups(@NotNull String tagname, Long snapshot,
             SecurityContext securityContext, UriInfo info, Request request, HttpHeaders headers)
             throws NotFoundException {
-        this.log.info("IovRestController processing request for iovs groups using tag name {}",
-                tagname);
+        log.info(
+                "IovRestController processing request for iovs groups using tag {} and snapshot {}",
+                tagname, snapshot);
         try {
             // Search for tag in order to load the time type:
             final TagDto tagentity = tagService.findOne(tagname);
@@ -484,6 +489,8 @@ public class IovsApiServiceImpl extends IovsApiService {
     public Response selectSnapshot(@NotNull String tagname, @NotNull Long snapshot,
             SecurityContext securityContext, UriInfo info) throws NotFoundException {
         try {
+            log.info("IovRestController processing request for iovs using tag {} and snapshot {}",
+                    tagname, snapshot);
             Date snap = new Date();
             if (snapshot != 0L) {
                 snap = new Date(snapshot);
@@ -520,7 +527,7 @@ public class IovsApiServiceImpl extends IovsApiService {
     public Response lastIov(String tagname, String since, Long snapshot, String dateformat,
             SecurityContext securityContext, UriInfo info) throws NotFoundException {
         try {
-            log.debug("Search resource list using tagname={} and before since={}", tagname, since);
+            log.info("Search last iovs using tag {} and before since {}", tagname, since);
 
             if (dateformat == null) {
                 dateformat = "ms";
@@ -565,7 +572,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             String until, Long snapshot, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         log.info(
-                "IovRestController processing request for iovs and payload using tag name {} and range {} - {} ",
+                "IovRestController processing request for iovs and payloads meta using tag name {} and range {} - {} ",
                 tagname, since, until);
         try {
             List<IovPayloadDto> dtolist = null;
