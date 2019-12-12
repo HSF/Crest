@@ -85,7 +85,7 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         final String tablename = this.tablename();
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Payload with hash {} using saveBlobAsBytes", entity.getHash());
+        log.debug("Insert Payload with hash {} using saveBlobAsBytes", entity.getHash());
         execute(null, sql, entity);
         return findMetaInfo(entity.getHash());
     }
@@ -96,7 +96,7 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Payload with hash {} using saveBlobAsStream", entity.getHash());
+        log.debug("Insert Payload with hash {} using saveBlobAsStream", entity.getHash());
         execute(is, sql, entity);
         return findMetaInfo(entity.getHash());
     }
@@ -129,7 +129,7 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         }
         try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
-            log.info("Getting connection {}", conn);
+            log.debug("Getting connection {}", conn);
 
             ps.setString(1, entity.getHash());
             ps.setString(2, entity.getObjectType());
@@ -138,7 +138,7 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
             ps.setBytes(5, entity.getStreamerInfo());
             ps.setDate(6, inserttime);
             ps.setInt(7, entity.getSize());
-            log.info("Dump preparedstatement {}", ps);
+            log.debug("Dump preparedstatement {}", ps);
             ps.execute();
             //conn.commit();
         }
@@ -165,7 +165,7 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
      */
     @Override
     public InputStream findData(String id) {
-        log.info("Find payload data for hash {}", id);
+        log.debug("Find payload data for hash {}", id);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 

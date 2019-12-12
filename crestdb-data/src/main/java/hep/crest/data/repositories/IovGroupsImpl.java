@@ -123,7 +123,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
      */
     @Override
     public List<BigDecimal> selectGroups(String tagname, Long groupsize) {
-        log.info("Select Iov Groups for tag {} with group size {} using JDBCTEMPLATE", tagname,
+        log.debug("Select Iov Groups for tag {} with group size {} using JDBCTEMPLATE", tagname,
                 groupsize);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
@@ -146,7 +146,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
      */
     @Override
     public List<BigDecimal> selectSnapshotGroups(String tagname, Date snap, Long groupsize) {
-        log.info(
+        log.debug(
                 "Select Iov Snapshot Groups for tag {} with group size {} and snapshot time {} using JDBCTEMPLATE",
                 tagname, groupsize, snap);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
@@ -171,7 +171,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
      */
     @Override
     public Long getSize(String tagname) {
-        log.info("Select count(TAG_NAME) Iov for tag {} using JDBCTEMPLATE", tagname);
+        log.debug("Select count(TAG_NAME) Iov for tag {} using JDBCTEMPLATE", tagname);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
 
@@ -188,7 +188,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
      */
     @Override
     public Long getSizeBySnapshot(String tagname, Date snap) {
-        log.info("Select count(TAG_NAME) Iov for tag {} and snapshot time {} using JDBCTEMPLATE",
+        log.debug("Select count(TAG_NAME) Iov for tag {} and snapshot time {} using JDBCTEMPLATE",
                 tagname, snap);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
@@ -206,7 +206,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
      */
     @Override
     public List<TagSummaryDto> getTagSummaryInfo(String tagname) {
-        log.info("Select count(TAG_NAME) Iov for tag matching pattern {} using JDBCTEMPLATE",
+        log.debug("Select count(TAG_NAME) Iov for tag matching pattern {} using JDBCTEMPLATE",
                 tagname);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
@@ -230,7 +230,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
     @Override
     public List<IovPayloadDto> getRangeIovPayloadInfo(String name, BigDecimal since,
             BigDecimal until, Date snapshot) {
-        log.info("Select Iov and Payload meta info for tag  {} using JDBCTEMPLATE",
+        log.debug("Select Iov and Payload meta info for tag  {} using JDBCTEMPLATE",
                 name);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();

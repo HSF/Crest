@@ -85,7 +85,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
      */
     @Override
     public InputStream findData(String id) {
-        log.info("Find payload data only for {} using JDBCTEMPLATE", id);
+        log.debug("Find payload data only for {} using JDBCTEMPLATE", id);
         return readBlobAsStream(id);
     }
 
@@ -99,7 +99,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
 
         final String sql = PayloadRequests.getFindDataQuery(tablename);
 
-        log.info("Read Payload data with hash {} using JDBCTEMPLATE", id);
+        log.debug("Read Payload data with hash {} using JDBCTEMPLATE", id);
         byte[] buf = null;
         Long oid = null;
         ResultSet rs = null;
@@ -128,7 +128,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                 }
             }
             catch (SQLException | NullPointerException e) {
-                log.error("Error in closing result set : {}", e.getMessage());
+                log.error("Error from readBlobAsStream in closing result set : {}", e.getMessage());
             }
         }
         return null;
@@ -161,8 +161,8 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             if (obj != null) {
                 obj.close();
             }
-            lobj.unlink(oid);
-
+            // lobj .unlink(oid);
+            // This instruction delete the LargeObject
         }
         return buf;
     }
@@ -208,7 +208,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             return oid;
         }
         catch (SQLException | IOException e) {
-            log.error("Exception in getting large object id: {}", e.getMessage());
+            log.error("Exception from getLargeObjectId in getting large object id: {}", e.getMessage());
         }
         finally {
             try {
@@ -233,7 +233,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
+        log.debug("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
 
         final InputStream is = new ByteArrayInputStream(entity.getData());
         final InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
@@ -250,7 +250,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
+        log.debug("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
         log.debug("Streamer info {} ", entity.getStreamerInfo());
         final InputStream sis = new ByteArrayInputStream(entity.getStreamerInfo());
 
@@ -290,7 +290,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             ps.setLong(5, sioid);
             ps.setDate(6, inserttime);
             ps.setInt(7, entity.getSize());
-            log.info("Dump preparedstatement {} ", ps);
+            log.debug("Dump preparedstatement {} ", ps);
             ps.executeUpdate();
             conn.commit();
         }
@@ -319,7 +319,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
 
         final String sql = PayloadRequests.getInsertMetaQuery(tablename);
 
-        log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
+        log.debug("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
         try (Connection conn = super.getDs().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);) {
             ps.setString(1, metainfoentity.getHash());
@@ -348,4 +348,47 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
     public Payload saveNull() throws IOException, PayloadEncodingException {
         return null;
     }
+
+    /* (non-Javadoc)
+     * @see hep.crest.data.repositories.PayloadDataGeneral#delete(java.lang.String)
+     */
+    @Override
+    public void delete(String id) {
+        log.debug("Delete Payload data with hash {} using JDBCTEMPLATE", id);
+        final String tablename = this.tablename();
+        final String sql = PayloadRequests.getFindDataQuery(tablename);
+        Long oid = null;
+        ResultSet rs = null;
+        try (Connection conn = super.getDs().getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);) {
+            conn.setAutoCommit(false);
+            final LargeObjectManager lobj = conn.unwrap(org.postgresql.PGConnection.class)
+                    .getLargeObjectAPI();
+            ps.setString(1, id);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                // Open the large object for reading
+                oid = rs.getLong(1);
+            }
+            // Only one row is returned....
+            lobj .unlink(oid);
+            conn.commit();
+        }
+        catch (final SQLException e) {
+            log.error("SQL exception occurred in deleting payload data for {} : {}", id, e.getMessage());
+        }
+        finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            }
+            catch (SQLException | NullPointerException e) {
+                log.error("Error from delete in closing result set : {}", e.getMessage());
+            }
+        }
+        super.delete(id);
+    }
+    
+    
 }

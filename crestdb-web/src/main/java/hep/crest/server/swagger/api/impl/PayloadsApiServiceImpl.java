@@ -82,8 +82,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * The list of payload types for download.
      */
-    private static final List<String> payloadlist = Arrays.asList("png", "svg", "json", "xml", "csv", "txt", "tgz",
-            "gz", "pdf");
+    private static final List<String> payloadlist = Arrays.asList("png", "svg", "json", "xml",
+            "csv", "txt", "tgz", "gz", "pdf");
 
     /**
      * Service.
@@ -106,7 +106,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     @Inject
     private ObjectMapper jacksonMapper;
 
-
     @Override
     public Response createPayload(PayloadDto body, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
@@ -116,8 +115,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             return Response.created(info.getRequestUri()).entity(saved).build();
         }
         catch (final CdbServiceException e) {
-            log.error("Error saving PayloadDto {}", body);
-            final String msg = "Error creating payload resource using " + body.toString();
+            log.error("Error saving PayloadDto with hash={}, type={}, size={}", body.getHash(),
+                    body.getObjectType(), body.getData().length);
+            final String msg = "Error creating payload resource using " + body.toString() + " : "
+                    + e.getMessage();
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
@@ -263,16 +264,16 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             String fdetailsname = fileDetail.getFileName();
             if (fdetailsname == null || fdetailsname.isEmpty()) {
                 fdetailsname = ".blob";
-            } else {
-                final Path p = Paths.get(fdetailsname);
-                fdetailsname = "_"+p.getFileName().toString(); 
             }
-            final String filename = cprops.getDumpdir() + SLASH + tag + "_" + since
-                    + fdetailsname;
+            else {
+                final Path p = Paths.get(fdetailsname);
+                fdetailsname = "_" + p.getFileName().toString();
+            }
+            final String filename = cprops.getDumpdir() + SLASH + tag + "_" + since + fdetailsname;
             if (format == null) {
                 format = "JSON";
             }
-            final Map<String,String> sinfomap = new HashMap<>();
+            final Map<String, String> sinfomap = new HashMap<>();
             sinfomap.put("filename", filename);
             sinfomap.put("format", format);
             final PayloadDto pdto = new PayloadDto().objectType(format)
@@ -405,13 +406,14 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
         for (final IovDto piovDto : iovlist) {
             String filename = null;
-            final Map<String,String> sinfomap = new HashMap<>();
+            final Map<String, String> sinfomap = new HashMap<>();
             sinfomap.put("format", dto.getFormat());
 
             final PayloadDto pdto = new PayloadDto().objectType(dto.getFormat()).hash("none")
                     .version("none");
             if (filesbodyparts == null) {
-                // If there are no attached files, then the payloadHash contains the payload itself.
+                // If there are no attached files, then the payloadHash contains the payload
+                // itself.
                 pdto.data(piovDto.getPayloadHash().getBytes());
                 final String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
                 pdto.hash(hash);
@@ -433,7 +435,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 savediovlist.add(iovDto);
             }
             catch (final CdbServiceException e1) {
-                log.error("Cannot insert iov {}", piovDto);
+                log.error("Cannot insert iov {} {} {}", piovDto.getSince(), piovDto.getTagName(),
+                        piovDto.getPayloadHash().substring(0,
+                                Math.min(piovDto.getPayloadHash().length(), 128)));
             }
         }
         dto.size((long) savediovlist.size());
@@ -461,6 +465,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             return PayloadHandler.saveToFileGetHash(bis, filename);
         }
         catch (final PayloadEncodingException e) {
+            log.error("Cannot compute hash from file {}", filename);
             throw new CdbServiceException("Cannot compute the hash : " + e.getMessage());
         }
     }
@@ -489,7 +494,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 pdto.size(pdto.getData().length);
                 final PayloadDto saved = payloadService.insertPayload(pdto);
                 final IovDto savediov = iovService.insertIov(dto);
-                log.debug("Created payload {} and iov {} ", saved, savediov);
+                log.debug("Created payload {} and iov {} {} ", saved, savediov.getSince(),
+                        savediov.getTagName());
                 return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
                         .id(savediov.getPayloadHash()).message("Iov created in tag "
                                 + dto.getTagName() + " with time " + savediov.getSince());
@@ -508,7 +514,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             tempchan.close();
             final PayloadDto saved = payloadService.insertPayloadAndInputStream(pdto, is);
             final IovDto savediov = iovService.insertIov(dto);
-            log.debug("Create payload {} and iov {} ", saved, savediov);
+            log.debug("Created payload {} and iov {} {} ", saved, savediov.getSince(),
+                    savediov.getTagName());
             return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
                     .id(savediov.getPayloadHash()).message("Iov created in tag " + dto.getTagName()
                             + " with time " + savediov.getSince());
@@ -520,7 +527,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         }
         finally {
             Files.deleteIfExists(temppath);
-            log.debug("Removed temporary file");
+            log.debug("Removed temporary file {}", temppath.toString());
         }
     }
 
@@ -544,8 +551,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             map.put("hash", hash);
             final PayloadSetDto psetdto = new PayloadSetDto().addResourcesItem(entity);
             psetdto.datatype(entity.getObjectType()).filter(map).size(1L);
-            return Response.ok()
-                    .header("Content-type", MediaType.APPLICATION_JSON_TYPE.toString())
+            return Response.ok().header("Content-type", MediaType.APPLICATION_JSON_TYPE.toString())
                     .entity(psetdto).build();
 
         }

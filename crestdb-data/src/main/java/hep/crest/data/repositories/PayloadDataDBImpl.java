@@ -78,7 +78,7 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
     @Override
     @Transactional
     public InputStream findData(String id) {
-        log.info("Find payload data {} using JDBCTEMPLATE", id);
+        log.debug("Find payload data {} using JDBCTEMPLATE", id);
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
             final String tablename = this.tablename();
@@ -100,7 +100,7 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
         final String tablename = this.tablename();
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
+        log.debug("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
         execute(null, sql, entity);
         return findMetaInfo(entity.getHash());
     }
@@ -141,7 +141,7 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
             ps.setBytes(5, entity.getStreamerInfo());
             ps.setDate(6, inserttime);
             ps.setInt(7, entity.getSize());
-            log.info("Dump preparedstatement {} using sql {} and arguments : {} {} {} {}", ps, sql,
+            log.debug("Dump preparedstatement {} using sql {} and arguments : {} {} {} {}", ps, sql,
                     entity.getHash(), entity.getObjectType(), entity.getVersion(),
                     entity.getInsertionTime());
             ps.execute();
@@ -178,7 +178,7 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
+        log.debug("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
         execute(is, sql, entity);
         return findMetaInfo(entity.getHash());
     }

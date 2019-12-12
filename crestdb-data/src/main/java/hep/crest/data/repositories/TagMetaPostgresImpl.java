@@ -135,7 +135,7 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
             }
             // Close the large object
             obj.close();
-            lobj.unlink(oid);
+            // lobj.unlink(oid);
             return oid;
         }
         catch (SQLException | IOException e) {
@@ -185,7 +185,7 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
             ps.setInt(4, entity.getColsize());
             ps.setLong(5, tid);
             ps.setDate(6, inserttime);
-            log.info("Dump preparedstatement {} ", ps);
+            log.debug("Dump preparedstatement {} ", ps);
             ps.executeUpdate();
             conn.commit();
         }
@@ -255,7 +255,7 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
 
         final String sql = PayloadRequests.getInsertAllQuery(tablename);
 
-        log.info("Insert Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
+        log.debug("Insert Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
 
         final InputStream is = new ByteArrayInputStream(entity.getTagInfo().getBytes(StandardCharsets.UTF_8));
 
@@ -270,7 +270,7 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
         final String tablename = this.tablename();
         final String sql = TagMetaRequests.getUpdateQuery(tablename);
 
-        log.info("Update Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
+        log.debug("Update Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
         final InputStream is = new ByteArrayInputStream(entity.getTagInfo().getBytes(StandardCharsets.UTF_8));
 
         update(is, sql, entity);

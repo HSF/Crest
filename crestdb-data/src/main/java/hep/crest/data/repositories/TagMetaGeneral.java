@@ -131,22 +131,22 @@ public abstract class TagMetaGeneral implements TagMetaDataBaseCustom {
         final String tablename = this.tablename();
 
         final String sql = TagMetaRequests.getDeleteQuery(tablename);
-        log.info("Remove tag meta with tag name {} using JDBCTEMPLATE", id);
+        log.debug("Remove tag meta with tag name {} using JDBCTEMPLATE", id);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         jdbcTemplate.update(sql, id);
-        log.info("Entity removal done...");
+        log.debug("Entity removal done...");
     }
 
     @Override
     @Transactional
     public TagMetaDto find(String id) {
-        log.info("Find tag meta {} using JDBCTEMPLATE", id);
+        log.debug("Find tag meta {} using JDBCTEMPLATE", id);
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
             final String tablename = this.tablename();
 
             final String sql = TagMetaRequests.getFindQuery(tablename);
-            log.info("Use sql request {}", sql);
+            log.debug("Use sql request {}", sql);
             // Be careful, this seems not to work with Postgres: probably getBlob loads an
             // OID and not the byte[]
             // Temporarely, try to create a postgresql implementation of this class.
@@ -171,7 +171,7 @@ public abstract class TagMetaGeneral implements TagMetaDataBaseCustom {
     @Override
     @Transactional
     public TagMetaDto findMetaInfo(String id) {
-        log.info("Find tag meta info {} using JDBCTEMPLATE", id);
+        log.debug("Find tag meta info {} using JDBCTEMPLATE", id);
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
             final String tablename = this.tablename();

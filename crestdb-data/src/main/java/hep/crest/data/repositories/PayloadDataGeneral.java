@@ -152,10 +152,10 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
         final String tablename = this.tablename();
 
         final String sql = PayloadRequests.getDeleteQuery(tablename);
-        log.info("Remove payload with hash {} using JDBCTEMPLATE", id);
+        log.debug("Remove payload with hash {} using JDBCTEMPLATE", id);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         jdbcTemplate.update(sql, id);
-        log.info("Entity removal done...");
+        log.debug("Entity removal done...");
     }
 
     /* (non-Javadoc)
@@ -164,7 +164,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
     @Override
     @Transactional
     public PayloadDto find(String id) {
-        log.info("Find payload {} using JDBCTEMPLATE", id);
+        log.debug("Find payload {} using JDBCTEMPLATE", id);
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
             final String tablename = this.tablename();

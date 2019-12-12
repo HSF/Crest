@@ -218,7 +218,8 @@ public class IovService {
                     snapshot, groupsize);
             final List<IovDto> iovlist = minsincelist.stream().map(s -> new IovDto().since(s))
                     .collect(Collectors.toList());
-            return new IovSetDto().resources(iovlist).size((long) iovlist.size()).format("IovSetDto");
+            return new IovSetDto().resources(iovlist).size((long) iovlist.size())
+                    .format("IovSetDto");
         }
         catch (final Exception e) {
             log.error("Exception in retrieving iov groups list using tag and snapshot {}", tagname);
@@ -269,7 +270,8 @@ public class IovService {
         catch (final Exception e) {
             log.debug("Exception in retrieving iov list using tag {} and snapshot and time range",
                     tagname);
-            throw new CdbServiceException("Cannot find iov list by tag, range snapshot: " + e.getMessage());
+            throw new CdbServiceException(
+                    "Cannot find iov list by tag, range snapshot: " + e.getMessage());
         }
     }
 
@@ -296,9 +298,9 @@ public class IovService {
                 snapshot = Instant.now().toDate(); // Use now for the snapshot
             }
             entities = iovgroupsrepo.getRangeIovPayloadInfo(tagname, since, until, snapshot);
-            
+
             if (entities == null) {
-                log.warn("Cannot find iovpayloads for tag {} using ranges {} {} and snapshot {}", 
+                log.warn("Cannot find iovpayloads for tag {} using ranges {} {} and snapshot {}",
                         tagname, since, until, snapshot);
                 return new ArrayList<>();
             }
@@ -426,15 +428,17 @@ public class IovService {
      */
     @Transactional
     public IovDto insertIov(IovDto dto) throws CdbServiceException, AlreadyExistsPojoException {
-        log.debug("Create iov from dto {}", dto);
+        log.debug("Create iov from dto : {} {} {}", dto.getSince(), dto.getTagName(),
+                dto.getPayloadHash());
         Iov entity = null;
         final String tagname = dto.getTagName();
         // FIXME: this is not needed.
-//        final BigDecimal since = dto.getSince();
-//        final String hash = dto.getPayloadHash();
-//        if (existsIov(tagname, since, hash)) {
-//            throw new AlreadyExistsPojoException("Iov already exists : " + dto.toString());
-//        }
+        // final BigDecimal since = dto.getSince();
+        // final String hash = dto.getPayloadHash();
+        // if (existsIov(tagname, since, hash)) {
+        // throw new AlreadyExistsPojoException("Iov already exists : " +
+        // dto.toString());
+        // }
         try {
             entity = mapper.map(dto, Iov.class);
             // The IOV is not yet stored. Verify that the tag exists before inserting it.
@@ -446,12 +450,11 @@ public class IovService {
                 final Tag updtag = tagRepository.save(t);
                 entity.setTag(updtag);
                 entity.getId().setTagName(updtag.getName());
-                log.debug("Storing iov entity {}", entity);
+                log.debug("Storing iov {}", entity);
                 final Iov saved = iovRepository.save(entity);
-                log.debug("Saved entity: {}", saved);
                 final IovDto dtoentity = mapper.map(saved, IovDto.class);
                 dtoentity.tagName(tagname);
-                log.debug("Returning iovDto: {}", dtoentity);
+                log.debug("Returning iov dto : {}", dtoentity);
                 return dtoentity;
             }
             else {
@@ -459,7 +462,8 @@ public class IovService {
             }
         }
         catch (final Exception e) {
-            log.error("Exception in storing iov {}", dto);
+            log.error("Exception in storing iov : {} {} {}", dto.getSince(), dto.getTagName(),
+                    dto.getPayloadHash());
             throw new CdbServiceException("Cannot store iov : " + e.getMessage());
         }
     }
