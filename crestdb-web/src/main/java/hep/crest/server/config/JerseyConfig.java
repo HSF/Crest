@@ -7,6 +7,7 @@ import org.glassfish.jersey.servlet.ServletProperties;
 import hep.crest.server.filters.CORSFilter;
 import hep.crest.server.filters.CacheControlFilter;
 import hep.crest.server.swagger.api.AdminApi;
+import hep.crest.server.swagger.api.FoldersApi;
 import hep.crest.server.swagger.api.FsApi;
 import hep.crest.server.swagger.api.GlobaltagmapsApi;
 import hep.crest.server.swagger.api.GlobaltagsApi;
@@ -34,7 +35,7 @@ public class JerseyConfig extends ResourceConfig {
         register(PayloadsApi.class);
         register(FsApi.class);
         register(RuninfoApi.class);
-        //register(FoldersApi.class);
+        register(FoldersApi.class);
         register(MultiPartFeature.class);
         register(CacheControlFilter.class);
         register(CORSFilter.class);
