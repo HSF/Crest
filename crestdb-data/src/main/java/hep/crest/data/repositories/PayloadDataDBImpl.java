@@ -19,11 +19,8 @@ package hep.crest.data.repositories;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
 
 import javax.sql.DataSource;
 
@@ -34,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
 import hep.crest.swagger.model.PayloadDto;
@@ -104,65 +100,6 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
         execute(null, sql, entity);
         return findMetaInfo(entity.getHash());
     }
-
-    /**
-     * @param is
-     *            the InputStream
-     * @param sql
-     *            the String
-     * @param entity
-     *            the PayloadDto
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     * @return
-     */
-    protected void execute(InputStream is, String sql, PayloadDto entity) {
-
-        final Calendar calendar = Calendar.getInstance();
-        final java.sql.Date inserttime = new java.sql.Date(calendar.getTime().getTime());
-        entity.setInsertionTime(calendar.getTime());
-
-        if (is != null) {
-            final byte[] blob = PayloadHandler.getBytesFromInputStream(is);
-            if (blob != null) {
-                entity.setSize(blob.length);
-                entity.setData(blob);
-                log.debug("Read data blob of length {} and streamer info {}", blob.length,
-                        entity.getStreamerInfo().length);
-            }
-        }
-
-        try (Connection conn = super.getDs().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);) {
-            ps.setString(1, entity.getHash());
-            ps.setString(2, entity.getObjectType());
-            ps.setString(3, entity.getVersion());
-            ps.setBytes(4, entity.getData());
-            ps.setBytes(5, entity.getStreamerInfo());
-            ps.setDate(6, inserttime);
-            ps.setInt(7, entity.getSize());
-            log.info("Dump preparedstatement {} using sql {} and arguments : {} {} {} {}", ps, sql,
-                    entity.getHash(), entity.getObjectType(), entity.getVersion(),
-                    entity.getInsertionTime());
-            ps.execute();
-            log.debug("Search for stored payload as a verification, use hash {} ",
-                    entity.getHash());
-        }
-        catch (final SQLException e) {
-            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
-        }
-        finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            }
-            catch (final IOException e) {
-                log.error("Error in closing streams...potential leak");
-            }
-        }
-    }
-
 
     /**
      * @param entity
