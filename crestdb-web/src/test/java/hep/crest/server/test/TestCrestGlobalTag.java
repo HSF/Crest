@@ -322,7 +322,15 @@ public class TestCrestGlobalTag {
         // Retrieve global tag maps for not existing gtag
         final ResponseEntity<String> respmaptagsnull = this.testRestTemplate
                 .exchange("/crestapi/globaltagmaps/NOT-THERE", HttpMethod.GET, null, String.class);
-        assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        {
+            log.info("Retrieved associated tags for global tag {} should give 0", dto.getName());
+            final String responseBody = respmaptagsnull.getBody();
+            assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.OK);
+            GlobalTagMapSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
+            assertThat(ok.getSize()).isEqualTo(0);
+        }
 
         // Retrieve global tag maps from tagname using backtrace
         final HttpHeaders headers = new HttpHeaders();
