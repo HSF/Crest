@@ -166,18 +166,18 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
                 final BooleanExpression wherepred = prh.getWhere(expressions);
                 dtolist = globaltagService.findAllGlobalTags(wherepred, preq);
             }
-            if (dtolist == null || dtolist.isEmpty()) {
+            if (dtolist == null) {
                 final String message = "No resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                         message);
                 return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
             }
-            final CrestBaseResponse setdto = new GlobalTagSetDto().resources(dtolist)
+            final CrestBaseResponse respdto = new GlobalTagSetDto().resources(dtolist)
                     .size((long) dtolist.size()).datatype("globaltags");
             if (filters != null) {
-                setdto.filter(filters);
+                respdto.filter(filters);
             }
-            return Response.ok().entity(setdto).build();
+            return Response.ok().entity(respdto).build();
 
         }
         catch (final CdbServiceException e) {

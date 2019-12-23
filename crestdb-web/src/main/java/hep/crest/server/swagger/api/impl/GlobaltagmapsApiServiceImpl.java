@@ -102,9 +102,6 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
                     .filter(filters)
                     .format("GlobalTagMapSetDto")
                     .size((long) dtolist.size()).datatype("maps");
-            if (dtolist.size() == 0) {
-                return Response.status(Response.Status.NOT_FOUND).entity(setdto).build();
-            }
             return Response.ok().entity(setdto).build();
 
         }

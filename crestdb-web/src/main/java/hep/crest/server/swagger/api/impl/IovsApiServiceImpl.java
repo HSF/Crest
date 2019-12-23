@@ -465,6 +465,9 @@ public class IovsApiServiceImpl extends IovsApiService {
             filters.put("until", runtil.toString());
             respdto.filter(filters);
             respdto.format("IovSetDto");
+            if (dtolist.size() == 0) {
+                return Response.status(Response.Status.NOT_FOUND).entity(respdto).build();
+            }
             return Response.ok().entity(respdto).cacheControl(cc).build();
 
         }

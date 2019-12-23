@@ -155,7 +155,7 @@ public class TagService {
                     .map(s -> mapper.map(s, TagDto.class)).collect(Collectors.toList());
         }
         catch (final Exception e) {
-            throw new CdbServiceException("Cannot find global tag list " + e.getMessage());
+            throw new CdbServiceException("Cannot find tag list " + e.getMessage());
         }
     }
 
