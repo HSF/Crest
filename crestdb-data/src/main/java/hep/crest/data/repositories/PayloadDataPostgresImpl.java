@@ -161,7 +161,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             if (obj != null) {
                 obj.close();
             }
-            // lobj .unlink(oid);
+            // Do not use it : lobj .unlink(oid);
             // This instruction delete the LargeObject
         }
         return buf;
