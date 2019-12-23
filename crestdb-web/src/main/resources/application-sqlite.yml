@@ -22,6 +22,7 @@ crest:
   synchro: none
   webstaticdir: /tmp/data/web
   dbfile: /tmp/crestdb.sqlite
+  apiname: /crestapi
   authenticationtype: none
 server:
     port: 8090
@@ -30,7 +31,7 @@ server:
 spring:
     profiles: sqlite
     jersey:
-      application-path: ${crest.api.name}
+      application-path: ${crest.apiname}
     datasource:
       url: jdbc:sqlite:${crest.dbfile}?cache=shared
       driverClassName: org.sqlite.JDBC
