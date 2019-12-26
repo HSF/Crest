@@ -30,12 +30,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import hep.crest.data.handlers.CrestLobHandler;
 import hep.crest.data.handlers.PayloadHandler;
+import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataSQLITEImpl;
+import hep.crest.data.repositories.TagMetaDBImpl;
+import hep.crest.data.repositories.TagMetaSQLITEImpl;
+import hep.crest.data.repositories.TagRepository;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.TagMetaDto;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -45,6 +49,9 @@ import hep.crest.swagger.model.PayloadDto;
 public class RepositorySqliteTests {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private TagRepository tagrepository;
 
     @Autowired
     @Qualifier("dataSource") 
@@ -78,7 +85,6 @@ public class RepositorySqliteTests {
     public void testPayload() throws Exception {
         
         final PayloadDataBaseCustom repobean = new PayloadDataSQLITEImpl(mainDataSource);
-        final CrestLobHandler lobhandler = new CrestLobHandler(mainDataSource);
         final Instant now = Instant.now();
         final Date time = new Date(now.toEpochMilli());
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhashsqlite1", "mydata", "mystreamer",
@@ -123,4 +129,25 @@ public class RepositorySqliteTests {
 //        assertThat(pdto.getHash()).isEqualTo(loadedblob1.getHash());
     }
     
+    @Test
+    public void testTags() throws Exception {
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+
+        final TagMetaDBImpl metarepo = new TagMetaSQLITEImpl(mainDataSource);
+        final Tag mtag = DataGenerator.generateTag("ASQLITE-TEST-FOR-META", "test");
+        final Tag savedtag = tagrepository.save(mtag);
+        final TagMetaDto metadto = DataGenerator.generateTagMetaDto("ASQLITE-TEST-FOR-META", "{ \"key\" : \"val\" }", time);
+        final TagMetaDto savedmeta = metarepo.save(metadto);
+        assertThat(savedmeta).isNotNull();
+        assertThat(savedmeta.toString().length()).isGreaterThan(0);
+        assertThat(savedmeta.getTagName()).isEqualTo(savedtag.getName());
+
+        final TagMetaDto storedmeta = metarepo.find(savedmeta.getTagName());
+        assertThat(storedmeta).isNotNull();
+        storedmeta.tagInfo("{ \"key1\" : \"val1\" }");
+        final TagMetaDto updmeta = metarepo.update(storedmeta);
+        assertThat(updmeta).isNotNull();
+    }
+
 }

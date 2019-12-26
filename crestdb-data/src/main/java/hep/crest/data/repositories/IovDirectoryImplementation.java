@@ -52,7 +52,7 @@ public class IovDirectoryImplementation {
      */
     public IovDirectoryImplementation(DirectoryUtilities dutils) {
         super();
-        this.dirtools = dutils;
+        this.setDirtools(dutils);
     }
 
     /**
@@ -103,11 +103,7 @@ public class IovDirectoryImplementation {
         try {
             final String tagname = iovdto.getTagName();
             final Path iovfilepath = dirtools.createIfNotexistsIov(tagname);
-            List<IovDto> iovlist = this.findByTagName(tagname);
-            if (iovlist == null) {
-                iovlist = new ArrayList<>();
-            }
-
+            final List<IovDto> iovlist = this.findByTagName(tagname);
             iovlist.add(iovdto);
             iovlist.sort(Comparator.comparing(IovDto::getSince));
             // FIXME: this is probably inefficient for large number of iovs...to be checked
