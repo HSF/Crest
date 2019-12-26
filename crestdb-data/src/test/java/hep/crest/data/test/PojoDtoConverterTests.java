@@ -41,6 +41,8 @@ import hep.crest.swagger.model.GlobalTagSetDto;
 import hep.crest.swagger.model.GroupDto;
 import hep.crest.swagger.model.HTTPResponse;
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.IovPayloadSetDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.PayloadSetDto;
@@ -80,7 +82,7 @@ public class PojoDtoConverterTests {
         final Instant now = Instant.now();
         final Date it = new Date(now.toEpochMilli());
 
-        final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("GT-02",it);
+        final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("GT-02", it);
         assertThat(dto1.getDescription()).isEqualTo(dto.getDescription());
         assertThat(dto1.equals(dto)).isFalse(); // Should be true
         assertThat(dto1.hashCode()).isNotNull();
@@ -95,6 +97,10 @@ public class PojoDtoConverterTests {
         assertThat(dto.toString().length()).isGreaterThan(0);
         assertThat(dto.hashCode()).isNotNull();
 
+        final Tag entity1 = DataGenerator.generateTag("MT-02", "run");
+        final TagDto dto1 = mapper.map(entity1, TagDto.class);
+        assertThat(dto1.equals(dto)).isTrue();
+        assertThat(dto1.equals(null)).isFalse();
     }
 
     @Test
@@ -105,13 +111,13 @@ public class PojoDtoConverterTests {
         id1.setGlobalTagName(gtag.getName());
         id1.setLabel("MY-TEST");
         id1.setRecord("aaa");
-        
+
         final GlobalTagMap map1 = DataGenerator.generateMapping(gtag, tag1, id1);
         final GlobalTagMapDto dto = mapper.map(map1, GlobalTagMapDto.class);
         assertThat(dto.toString().length()).isGreaterThan(0);
         assertThat(dto.getGlobalTagName()).isEqualTo(gtag.getName());
-        
-        final GlobalTagMapId id2 = new GlobalTagMapId(gtag.getName(),"aaa","MY-TEST");
+
+        final GlobalTagMapId id2 = new GlobalTagMapId(gtag.getName(), "aaa", "MY-TEST");
         assertThat(id2.equals(id1)).isTrue();
         assertThat(id2.hashCode()).isNotNull();
 
@@ -123,13 +129,13 @@ public class PojoDtoConverterTests {
         final Iov entity = mapper.map(dto, Iov.class);
         final IovId id = entity.getId();
         assertThat(id.getSince()).isEqualTo(new BigDecimal(1000L));
-        log.info("Id of iov is {}",id);
+        log.info("Id of iov is {}", id);
 
         final Iov geniov = DataGenerator.generateIov("MYHASH", "MT-02", new BigDecimal(1000L));
-        log.info("Generated iov {}",geniov);
+        log.info("Generated iov {}", geniov);
         final IovId genid = geniov.getId();
         assertThat(genid).isNotNull();
-        
+
         assertThat(entity.getPayloadHash()).isEqualTo(dto.getPayloadHash());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(dto.toString().length()).isGreaterThan(0);
@@ -143,7 +149,7 @@ public class PojoDtoConverterTests {
         final Date time = new Date(now.toEpochMilli());
 
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhash1", "mydata", "mystreamer",
-                "test",time);
+                "test", time);
         final Payload entity = DataGenerator.generatePayload("myhash1", "test");
         assertThat(entity.getHash()).isEqualTo(dto.getHash());
         assertThat(entity.toString().length()).isGreaterThan(0);
@@ -157,10 +163,10 @@ public class PojoDtoConverterTests {
         final Instant now = Instant.now();
         final Date it = new Date(now.toEpochMilli());
 
-        final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("MY-GTAG-01",it);
-        final GlobalTagDto dto2 = DataGenerator.generateGlobalTagDto("MY-GTAG-02",it);
-        final GlobalTagDto dto1bis = DataGenerator.generateGlobalTagDto("MY-GTAG-01",it);
-        log.info("compare {} with {}",dto1,dto1bis);
+        final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("MY-GTAG-01", it);
+        final GlobalTagDto dto2 = DataGenerator.generateGlobalTagDto("MY-GTAG-02", it);
+        final GlobalTagDto dto1bis = DataGenerator.generateGlobalTagDto("MY-GTAG-01", it);
+        log.info("compare {} with {}", dto1, dto1bis);
         assertThat(dto1.equals(dto1bis)).isTrue();
         final GlobalTagSetDto setdto = new GlobalTagSetDto();
         setdto.datatype("globaltags");
@@ -296,12 +302,12 @@ public class PojoDtoConverterTests {
         setdto.addResourcesItem(dto1);
         setdto.size(1L);
         assertThat(setdto.toString().length()).isGreaterThan(0);
-        
+
         final RunLumiSetDto setdto1 = new RunLumiSetDto();
         setdto1.datatype("runs").format("json");
         setdto1.addResourcesItem(dto1);
         setdto1.size(1L);
-        
+
         assertThat(setdto.equals(setdto1)).isTrue();
         assertThat(setdto.hashCode()).isNotNull();
 
@@ -332,25 +338,28 @@ public class PojoDtoConverterTests {
         setdto.addResourcesItem(dto1);
         setdto.size(1L);
         assertThat(setdto.toString().length()).isGreaterThan(0);
-        
+
         final FolderSetDto setdto1 = new FolderSetDto();
         setdto1.datatype("folders").format("json");
         setdto1.addResourcesItem(dto1);
         setdto1.size(1L);
-        
+
         assertThat(setdto.equals(setdto1)).isTrue();
         assertThat(setdto.hashCode()).isNotNull();
     }
-    
+
     @Test
     public void testPayloadDtoSetsConverter() throws Exception {
         final Instant now = Instant.now();
         final Date time = new Date(now.toEpochMilli());
         final String data = "datastr";
         final String sinfo = "streaminfo";
-        final PayloadDto dto1 = DataGenerator.generatePayloadDto("somehash", data, sinfo, "test",time);
-        final PayloadDto dto1bis = DataGenerator.generatePayloadDto("somehash", data, sinfo, "test",time);
-        log.info("compare {} with {} having hash {} and {}",dto1,dto1bis,dto1.hashCode(),dto1bis.hashCode());
+        final PayloadDto dto1 = DataGenerator.generatePayloadDto("somehash", data, sinfo, "test",
+                time);
+        final PayloadDto dto1bis = DataGenerator.generatePayloadDto("somehash", data, sinfo, "test",
+                time);
+        log.info("compare {} with {} having hash {} and {}", dto1, dto1bis, dto1.hashCode(),
+                dto1bis.hashCode());
         assertThat(dto1.getHash().equals(dto1bis.getHash())).isTrue();
         final PayloadSetDto setdto = new PayloadSetDto();
         setdto.datatype("payloads");
@@ -367,13 +376,54 @@ public class PojoDtoConverterTests {
     }
 
     @Test
+    public void testIovPayloadSetsConverter() throws Exception {
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+        final String data = "datastr";
+        final String sinfo = "streaminfo";
+        final IovDto dto1 = DataGenerator.generateIovDto("MYHASH3", "MT-02", new BigDecimal(3000L));
+        final IovDto dto2 = DataGenerator.generateIovDto("MYHASH4", "MT-02", new BigDecimal(4000L));
+        final PayloadDto pdto1 = DataGenerator.generatePayloadDto("MYHASH3", data, sinfo, "test",
+                time);
+        final PayloadDto pdto2 = DataGenerator.generatePayloadDto("MYHASH4", data, sinfo, "test",
+                time);
+
+        final IovPayloadDto ipdto1 = new IovPayloadDto().objectType(pdto1.getObjectType())
+                .payloadHash(dto1.getPayloadHash()).since(dto1.getSince()).size(pdto1.getSize())
+                .version(pdto1.getVersion());
+        final IovPayloadDto ipdto2 = new IovPayloadDto().objectType(pdto2.getObjectType())
+                .payloadHash(dto2.getPayloadHash()).since(dto2.getSince()).size(pdto2.getSize())
+                .version(pdto2.getVersion());
+
+        final IovPayloadSetDto psetdto = new IovPayloadSetDto();
+        psetdto.addResourcesItem(ipdto1).addResourcesItem(ipdto2);
+        psetdto.datatype("IovPayloadSetDto");
+        psetdto.format("iovpayloaddto");
+        
+        assertThat(psetdto.getResources()).isNotNull();
+        assertThat(ipdto1.equals(ipdto2)).isFalse();
+        
+        final List<IovPayloadDto> plist = new ArrayList<>();
+        plist.add(ipdto1);
+        plist.add(ipdto2);
+        final IovPayloadSetDto psetdto1 = new IovPayloadSetDto();
+        psetdto.resources(plist);
+        psetdto.setDatatype("IovPayloadSetDto");
+        psetdto.setFormat("iovpayloaddto");
+        
+        assertThat(psetdto.equals(psetdto1)).isFalse();
+        assertThat(psetdto.toString().length()).isGreaterThan(0);
+    }
+
+    @Test
     public void testTagMetaDtoSetsConverter() throws Exception {
         final Instant now = Instant.now();
         final Date time = new Date(now.toEpochMilli());
         final String data = "{ \"key\" : \"value\" }";
         final TagMetaDto dto1 = DataGenerator.generateTagMetaDto("A_TAG", data, time);
         final TagMetaDto dto1bis = DataGenerator.generateTagMetaDto("A_TAG", data, time);
-        log.info("compare {} with {} having hash code {} and {}",dto1,dto1bis,dto1.hashCode(),dto1bis.hashCode());
+        log.info("compare {} with {} having hash code {} and {}", dto1, dto1bis, dto1.hashCode(),
+                dto1bis.hashCode());
         assertThat(dto1.getTagName().equals(dto1bis.getTagName())).isTrue();
         final TagMetaSetDto setdto = new TagMetaSetDto();
         setdto.datatype("TagMetaSetDto");
@@ -404,7 +454,7 @@ public class PojoDtoConverterTests {
         resp.message("a successful test");
         resp.id("ahash");
         assertThat(resp.toString().length()).isGreaterThan(0);
-        
+
         final PayloadTagInfoDto ptdto = new PayloadTagInfoDto();
         ptdto.avgvolume(1.0F);
         ptdto.niovs(10);
@@ -417,16 +467,15 @@ public class PojoDtoConverterTests {
         ptdto.setTotvolume(1.3F);
         assertThat(ptdto.toString().length()).isGreaterThan(0);
         assertThat(ptdto.hashCode()).isNotNull();
-        
-        final CrestUser user = new CrestUser("user","password");
+
+        final CrestUser user = new CrestUser("user", "password");
         user.setId("someid");
         user.setUsername("anothername");
         assertThat(user.toString().length()).isGreaterThan(0);
-        
-        final CrestRoles role = new CrestRoles("roleid","admin");
+
+        final CrestRoles role = new CrestRoles("roleid", "admin");
         role.setRole("guest");
         assertThat(role.toString().length()).isGreaterThan(0);
     }
 
-    
 }

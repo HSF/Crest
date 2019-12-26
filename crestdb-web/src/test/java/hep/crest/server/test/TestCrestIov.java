@@ -3,6 +3,8 @@ package hep.crest.server.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,9 +26,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.services.IovService;
+import hep.crest.server.services.TagService;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.IovPayloadSetDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
@@ -42,8 +52,50 @@ public class TestCrestIov {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
+    @Autowired 
+    private IovService iovservice;
+
+    @Autowired 
+    private TagService tagservice;
+
+    @Autowired
+    private PageRequestHelper prh;
+
     @Autowired
     private ObjectMapper mapper;
+
+    @Test
+    public void test_IovService() {
+        final TagDto dto = DataGenerator.generateTagDto("SVC-TAG-02", "test");
+        try {
+            final TagDto saved = tagservice.insertTag(dto);
+            assertThat(saved).isNotNull();
+            final IovDto iovdto0 = DataGenerator.generateIovDto("afakehashiov01", dto.getName(), new BigDecimal(0L));
+            iovservice.insertIov(iovdto0);
+            final IovDto iovdto1 = DataGenerator.generateIovDto("afakehashiov01", dto.getName(), new BigDecimal(3100000L));
+            iovservice.insertIov(iovdto1);
+            final IovDto iovdto2 = DataGenerator.generateIovDto("afakehashiov01", dto.getName(), new BigDecimal(4100000L));
+            iovservice.insertIov(iovdto2);
+            final PageRequest preq = prh.createPageRequest(0, 100, "id.since:DESC");
+            final List<IovDto> iovlist = iovservice.findAllIovs(null, preq);
+            assertThat(iovlist.size()).isGreaterThan(0);
+            
+            final Long niovs = iovservice.getSizeByTagAndSnapshot(dto.getName(), new Date());
+            assertThat(niovs).isGreaterThan(0);
+            
+            final List<IovPayloadDto> iplist = iovservice.selectIovPayloadsByTagRangeSnapshot(dto.getName(), new BigDecimal(0L), new BigDecimal(4100000L), new Date());
+            assertThat(iplist.size()).isGreaterThan(0);
+            
+            final List<IovDto> ilist = iovservice.selectIovsByTagRangeSnapshot(dto.getName(),new BigDecimal(1000L), new BigDecimal(4200000L), new Date(),"groups");
+            assertThat(ilist.size()).isGreaterThan(0);
+            final List<IovDto> ilist2 = iovservice.selectIovsByTagRangeSnapshot(dto.getName(),new BigDecimal(1000L), new BigDecimal(4200000L), new Date(),"ranges");
+            assertThat(ilist2.size()).isGreaterThan(0);
+        }
+        catch (CdbServiceException | AlreadyExistsPojoException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+       
+    }
 
     @Test
     public void testA_iovApi() throws Exception {
@@ -243,6 +295,7 @@ public class TestCrestIov {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
+
         final ResponseEntity<String> resp5 = this.testRestTemplate
                 .exchange("/crestapi/iovs/selectSnapshot?tagname=SB-TAG-IOV-01&snapshot=0", HttpMethod.GET, null, String.class);
 
@@ -282,6 +335,18 @@ public class TestCrestIov {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
+        final ResponseEntity<String> resp8 = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectIovPayloads?tagname=SB-TAG-IOV-01&since=0&until=3900000&snapshot=0", HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved iov payload selection " + resp8.getBody());
+            final String responseBody = resp8.getBody();
+            assertThat(resp8.getStatusCode()).isEqualTo(HttpStatus.OK);
+            IovPayloadSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, IovPayloadSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
 
     }
 

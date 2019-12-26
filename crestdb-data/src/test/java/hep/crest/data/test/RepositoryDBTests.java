@@ -188,6 +188,11 @@ public class RepositoryDBTests {
         assertThat(savedmeta.toString().length()).isGreaterThan(0);
         assertThat(savedmeta.getTagName()).isEqualTo(savedtag.getName());
 
+        final TagMetaDto storedmeta = metarepo.find(savedmeta.getTagName());
+        assertThat(storedmeta).isNotNull();
+        storedmeta.tagInfo("{ \"key1\" : \"val1\" }");
+        final TagMetaDto updmeta = metarepo.update(storedmeta);
+        assertThat(updmeta).isNotNull();
     }
     
     @Test
@@ -287,6 +292,8 @@ public class RepositoryDBTests {
         dtolist.add(idto2);
         final List<IovDto> idtolist = iovrepo.saveAll("A-TEST-03", dtolist);
         assertThat(idtolist.size()).isGreaterThan(0);
+        final List<IovDto> savedidtolist = iovrepo.findByTagName("A-TEST-03");
+        assertThat(savedidtolist.size()).isGreaterThan(0);
     }
 
     @Test

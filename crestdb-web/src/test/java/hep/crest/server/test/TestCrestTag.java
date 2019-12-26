@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -26,6 +28,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.services.TagService;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagMetaDto;
@@ -50,6 +54,55 @@ public class TestCrestTag {
     @Autowired
     @Qualifier("jacksonMapper")
     private ObjectMapper mapper;
+
+    @Test
+    public void test_TagService() {
+        final TagDto dto = DataGenerator.generateTagDto("SVC-TAG-01", "test");
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+        final String data = "{ \"key\" : \"value\" }";
+        try {
+            final TagDto saved = tagservice.insertTag(dto);
+            assertThat(saved).isNotNull();
+            final TagMetaDto tmdto1 = DataGenerator.generateTagMetaDto("SVC-TAG-01", data, time);
+
+            final TagMetaDto savedmeta = tagservice.insertTagMeta(tmdto1);
+            assertThat(savedmeta).isNotNull();
+            tagservice.insertTagMeta(tmdto1); // should throw exception
+        }
+        catch (CdbServiceException | AlreadyExistsPojoException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+        final TagMetaDto tmdto2 = DataGenerator.generateTagMetaDto("SVC-TAG-01", data, time);
+        tmdto2.chansize(3);
+        tmdto2.setTagName(null);
+        try {
+            tagservice.updateTagMeta(tmdto2);
+        }
+        catch (final CdbServiceException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+        try {
+            tagservice.exists(null);
+        }
+        catch (final CdbServiceException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+        try {
+            tagservice.findOne(null);
+        }
+        catch (final CdbServiceException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+        final List<String> ids = new ArrayList<>();
+        ids.add("SVC-TAG-01");
+        try {
+            tagservice.findAllTags(ids);
+        }
+        catch (final CdbServiceException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+    }
 
     @Test
     public void testA_getAndRemoveTags() {
