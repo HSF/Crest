@@ -269,6 +269,8 @@ public class RepositoryDBTests {
         dtolist.add(idto2);
         final List<IovDto> idtolist = iovrepo.saveAll("A-TEST-03", dtolist);
         assertThat(idtolist.size()).isGreaterThan(0);
+        final List<IovDto> savedidtolist = iovrepo.findByTagName("A-TEST-03");
+        assertThat(savedidtolist.size()).isGreaterThan(0);
     }
 
     @Test

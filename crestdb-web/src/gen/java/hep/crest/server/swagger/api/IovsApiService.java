@@ -20,4 +20,5 @@ public abstract class IovsApiService {
     public abstract Response selectSnapshot( @NotNull String tagname, @NotNull Long snapshot,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response storeBatchIovMultiForm(IovSetDto body,SecurityContext securityContext, UriInfo info) throws NotFoundException;
     public abstract Response lastIov(String tagname, String since, Long snapshot, String dateformat, SecurityContext securityContext, UriInfo info)  throws NotFoundException;
+    public abstract Response selectIovPayloads(String xCrestQuery, String tagname, String since, String until, Long snapshot,SecurityContext securityContext, UriInfo info) throws NotFoundException;
 }

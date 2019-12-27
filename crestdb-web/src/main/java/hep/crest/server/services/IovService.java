@@ -39,6 +39,7 @@ import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagSummaryDto;
 import ma.glasnost.orika.MapperFacade;
@@ -268,9 +269,47 @@ public class IovService {
         catch (final Exception e) {
             log.debug("Exception in retrieving iov list using tag {} and snapshot and time range",
                     tagname);
-            throw new CdbServiceException("Cannot find iov size by tag name: " + e.getMessage());
+            throw new CdbServiceException("Cannot find iov range by tag name: " + e.getMessage());
         }
     }
+    
+    /**
+     * @param tagname
+     *            the String
+     * @param since
+     *            the BigDecimal
+     * @param until
+     *            the BigDecimal
+     * @param snapshot
+     *            the Date
+     * @return List<IovPayloadDto>
+     * @throws CdbServiceException
+     *             If an Exception occurred
+     */
+    public List<IovPayloadDto> selectIovPayloadsByTagRangeSnapshot(String tagname, BigDecimal since,
+            BigDecimal until, Date snapshot) throws CdbServiceException {
+        try {
+            log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
+                    tagname, since, until, snapshot);
+            List<IovPayloadDto> entities = null;
+            if (snapshot == null || snapshot.getTime() == 0) {
+                snapshot = Instant.now().toDate(); // Use now for the snapshot
+            }
+            entities = iovgroupsrepo.getRangeIovPayloadInfo(tagname, since, until, snapshot);
+
+            if (entities == null) {
+                log.warn("Cannot find iovpayloads for tag {} using ranges {} {} and snapshot {}",
+                        tagname, since, until, snapshot);
+                return new ArrayList<>();
+            }
+            return entities;
+        }
+        catch (final Exception e) {
+            log.debug("Exception in retrieving iov list using tag {} and snapshot and time range",
+                    tagname);
+            throw new CdbServiceException("Cannot find iov size by tag name: " + e.getMessage());
+        }
+    }    
 
     /**
      * @param tagname

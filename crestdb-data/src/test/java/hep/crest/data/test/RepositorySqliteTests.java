@@ -34,12 +34,9 @@ import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataSQLITEImpl;
-import hep.crest.data.repositories.TagMetaDBImpl;
-import hep.crest.data.repositories.TagMetaSQLITEImpl;
 import hep.crest.data.repositories.TagRepository;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.TagMetaDto;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -131,23 +128,9 @@ public class RepositorySqliteTests {
     
     @Test
     public void testTags() throws Exception {
-        final Instant now = Instant.now();
-        final Date time = new Date(now.toEpochMilli());
-
-        final TagMetaDBImpl metarepo = new TagMetaSQLITEImpl(mainDataSource);
         final Tag mtag = DataGenerator.generateTag("ASQLITE-TEST-FOR-META", "test");
         final Tag savedtag = tagrepository.save(mtag);
-        final TagMetaDto metadto = DataGenerator.generateTagMetaDto("ASQLITE-TEST-FOR-META", "{ \"key\" : \"val\" }", time);
-        final TagMetaDto savedmeta = metarepo.save(metadto);
-        assertThat(savedmeta).isNotNull();
-        assertThat(savedmeta.toString().length()).isGreaterThan(0);
-        assertThat(savedmeta.getTagName()).isEqualTo(savedtag.getName());
-
-        final TagMetaDto storedmeta = metarepo.find(savedmeta.getTagName());
-        assertThat(storedmeta).isNotNull();
-        storedmeta.tagInfo("{ \"key1\" : \"val1\" }");
-        final TagMetaDto updmeta = metarepo.update(storedmeta);
-        assertThat(updmeta).isNotNull();
+        assertThat(savedtag).isNotNull();
     }
 
 }

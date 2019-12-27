@@ -120,7 +120,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             final List<TagDto> dtolist = globaltagService.getGlobalTagByNameFetchTags(name, record,
                     label);
             log.debug("Found list of tags of length " + (dtolist == null ? "0" : dtolist.size()));
-            if (dtolist == null || dtolist.isEmpty()) {
+            if (dtolist == null) {
                 final String message = "No tag resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                         message);
@@ -172,7 +172,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
                 final BooleanExpression wherepred = prh.getWhere(expressions);
                 dtolist = globaltagService.findAllGlobalTags(wherepred, preq);
             }
-            if (dtolist == null || dtolist.isEmpty()) {
+            if (dtolist == null) {
                 final String message = "No resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                         message);

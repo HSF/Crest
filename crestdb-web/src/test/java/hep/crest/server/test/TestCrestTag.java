@@ -3,6 +3,8 @@ package hep.crest.server.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -24,6 +26,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.services.TagService;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSetDto;
 import hep.crest.testutils.DataGenerator;
@@ -40,8 +45,44 @@ public class TestCrestTag {
     private TestRestTemplate testRestTemplate;
 
     @Autowired
+    private TagService tagservice;
+    
+    @Autowired
     @Qualifier("jacksonMapper")
     private ObjectMapper mapper;
+
+    @Test
+    public void test_TagService() {
+        final TagDto dto = DataGenerator.generateTagDto("SVC-TAG-01", "test");
+      
+        try {
+            final TagDto saved = tagservice.insertTag(dto);
+            assertThat(saved).isNotNull();
+        }
+        catch (CdbServiceException | AlreadyExistsPojoException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+        try {
+            tagservice.exists(null);
+        }
+        catch (final CdbServiceException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+        try {
+            tagservice.findOne(null);
+        }
+        catch (final CdbServiceException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+        final List<String> ids = new ArrayList<>();
+        ids.add("SVC-TAG-01");
+        try {
+            tagservice.findAllTags(ids);
+        }
+        catch (final CdbServiceException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+    }
 
     @Test
     public void testA_getAndRemoveTags() {
