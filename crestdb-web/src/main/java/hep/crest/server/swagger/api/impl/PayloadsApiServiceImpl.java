@@ -219,20 +219,15 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             }
             else {
                 log.debug("Retrieve the full pojo with hash {}", hash);
-                final GenericMap map = new GenericMap();
-                map.put("hash", hash);
                 final PayloadDto entity = payloadService.getPayload(hash);
-                final PayloadSetDto psetdto = new PayloadSetDto().addResourcesItem(entity);
-                psetdto.datatype(entity.getObjectType()).filter(map).size(1L);
+                final PayloadSetDto psetdto = buildSet(entity, hash);
                 return Response.ok()
                         .header("Content-type", MediaType.APPLICATION_JSON_TYPE.toString())
                         .entity(psetdto).build();
             }
         }
         catch (final NotExistsPojoException e) {
-            final String msg = "Cannot find payload corresponding to hash " + hash;
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+            return notFoundPojo(hash);
         }
         catch (final CdbServiceException e) {
             final String msg = "Error retrieving payload from hash " + hash;
@@ -540,20 +535,14 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 hash);
         try {
             final PayloadDto entity = payloadService.getPayloadMetaInfo(hash);
-
-            final GenericMap map = new GenericMap();
-            map.put("hash", hash);
-            final PayloadSetDto psetdto = new PayloadSetDto().addResourcesItem(entity);
-            psetdto.datatype(entity.getObjectType()).filter(map).size(1L);
+            final PayloadSetDto psetdto = buildSet(entity, hash);
             return Response.ok()
                     .header("Content-type", MediaType.APPLICATION_JSON_TYPE.toString())
                     .entity(psetdto).build();
 
         }
         catch (final NotExistsPojoException e) {
-            final String msg = "Cannot find payload corresponding to hash " + hash;
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+            return notFoundPojo(hash);
         }
         catch (final CdbServiceException e) {
             final String msg = "Error retrieving payload from hash " + hash;
@@ -654,6 +643,25 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             extension = comp;
         }
         return extension;
+    }
+
+    /**
+     * @param entity the PayloadDto
+     * @param hash the String
+     * @return PayloadSetDto
+     */
+    protected PayloadSetDto buildSet(PayloadDto entity, String hash) {
+        final GenericMap map = new GenericMap();
+        map.put("hash", hash);
+        final PayloadSetDto psetdto = new PayloadSetDto().addResourcesItem(entity);
+        psetdto.datatype(entity.getObjectType()).filter(map).size(1L);  
+        return psetdto;
+    }
+    
+    protected Response notFoundPojo(String hash) {
+        final String msg = "Cannot find payload corresponding to hash " + hash;
+        final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+        return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
     }
 
 }

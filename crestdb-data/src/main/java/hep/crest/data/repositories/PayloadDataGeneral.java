@@ -310,8 +310,15 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      *             If an Exception occurred
      * @return PayloadDto
      */
-    protected abstract PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is)
-            throws CdbServiceException;
+    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
+        final String tablename = this.tablename();
+
+        final String sql = PayloadRequests.getInsertAllQuery(tablename);
+
+        log.info("Insert Payload with hash {} using saveBlobAsStream", entity.getHash());
+        execute(is, sql, entity);
+        return findMetaInfo(entity.getHash());
+    }
 
     /**
      * @param entity
@@ -320,5 +327,14 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      *             If an Exception occurred
      * @return PayloadDto
      */
-    protected abstract PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException;
+    protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
+
+        final String tablename = this.tablename();
+        final String sql = PayloadRequests.getInsertAllQuery(tablename);
+
+        log.info("Insert Payload with hash {} using saveBlobAsBytes", entity.getHash());
+        execute(null, sql, entity);
+        return findMetaInfo(entity.getHash());
+    }
+
 }
