@@ -29,11 +29,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
-import hep.crest.swagger.model.PayloadDto;
 
 /**
  * An implementation for requests using Oracle and other database.
@@ -74,7 +72,7 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
     @Override
     @Transactional
     public InputStream findData(String id) {
-        log.debug("Find payload data {} using JDBCTEMPLATE", id);
+        log.info("Find payload data {} using JDBCTEMPLATE", id);
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
             final String tablename = this.tablename();
@@ -88,38 +86,6 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
             log.error("Cannot find payload with data for hash {}", id);
             return null;
         }
-    }
-
-    @Override
-    protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
-
-        final String tablename = this.tablename();
-        final String sql = PayloadRequests.getInsertAllQuery(tablename);
-
-        log.debug("Insert Payload {} using JDBCTEMPLATE ", entity.getHash());
-        execute(null, sql, entity);
-        return findMetaInfo(entity.getHash());
-    }
-
-
-
-    /**
-     * @param entity
-     *            the PayloadDto
-     * @param is
-     *            the InputStream
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     */
-    @Override
-    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
-        final String tablename = this.tablename();
-
-        final String sql = PayloadRequests.getInsertAllQuery(tablename);
-
-        log.debug("Insert Payload {} using JDBCTEMPLATE", entity.getHash());
-        execute(is, sql, entity);
-        return findMetaInfo(entity.getHash());
     }
 
     /*

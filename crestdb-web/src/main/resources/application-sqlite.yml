@@ -22,8 +22,8 @@ crest:
   synchro: none
   webstaticdir: /tmp/data/web
   dbfile: /tmp/crestdb.sqlite
-  authenticationtype: none
   apiname: /crestapi
+  authenticationtype: none
 server:
     port: 8090
     servlet.path: /    

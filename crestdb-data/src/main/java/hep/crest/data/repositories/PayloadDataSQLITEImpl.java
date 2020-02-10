@@ -29,11 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.repositories.externals.PayloadRequests;
-import hep.crest.swagger.model.PayloadDto;
 
 /**
  * An implementation for requests using SQLite database.
@@ -75,28 +73,6 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
         return null;
     }
 
-    @Override
-    protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
-
-        final String tablename = this.tablename();
-        final String sql = PayloadRequests.getInsertAllQuery(tablename);
-
-        log.debug("Insert Payload with hash {} using saveBlobAsBytes", entity.getHash());
-        execute(null, sql, entity);
-        return findMetaInfo(entity.getHash());
-    }
-
-    @Override
-    protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
-        final String tablename = this.tablename();
-
-        final String sql = PayloadRequests.getInsertAllQuery(tablename);
-
-        log.debug("Insert Payload with hash {} using saveBlobAsStream", entity.getHash());
-        execute(is, sql, entity);
-        return findMetaInfo(entity.getHash());
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -105,7 +81,7 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
      */
     @Override
     public InputStream findData(String id) {
-        log.debug("Find payload data for hash {}", id);
+        log.info("Find payload data for hash {}", id);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(super.getDs());
         final String tablename = this.tablename();
 
@@ -115,4 +91,5 @@ public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements Payload
             return blob.getBinaryStream();
         });
     }
+
 }
