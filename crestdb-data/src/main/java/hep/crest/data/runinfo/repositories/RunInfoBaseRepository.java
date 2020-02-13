@@ -54,10 +54,10 @@ public interface RunInfoBaseRepository
      * @return List<RunInfo>
      */
     @Query("SELECT distinct p FROM RunInfo p "
-            + "WHERE p.endTime <= ("
+            + "WHERE p.startTime <= ("
             + "SELECT min(pi.startTime) FROM RunInfo pi "
             + "WHERE pi.startTime >= (:upper)) "
-            + "AND p.startTime >= (:lower)"
+            + "AND p.endTime >= (:lower)"
             + "ORDER BY p.runNumber ASC")
     List<RunInfo> findByDateInclusive(@Param("lower") Date lower, @Param("upper") Date upper);
 
