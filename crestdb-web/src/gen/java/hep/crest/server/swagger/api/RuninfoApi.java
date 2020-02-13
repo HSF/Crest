@@ -33,7 +33,7 @@ import javax.validation.constraints.*;
 
 
 @io.swagger.annotations.Api(description = "the runinfo API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-12-10T11:36:04.026+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2020-02-12T19:50:42.235+01:00")
 public class RuninfoApi  {
 	@Autowired
 	private RuninfoApiService delegate;
@@ -72,14 +72,12 @@ public class RuninfoApi  {
     @io.swagger.annotations.ApiOperation(value = "Finds a RunLumiInfoDto lists using parameters.", notes = "This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = RunInfoSetDto.class, tags={ "runinfo", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = RunInfoSetDto.class) })
-    public Response selectRunInfo(@ApiParam(value = "from: the starting time or run-lumi", defaultValue="none") @DefaultValue("none") @QueryParam("from") String from
-,@ApiParam(value = "to: the ending time or run-lumi", defaultValue="none") @DefaultValue("none") @QueryParam("to") String to
-,@ApiParam(value = "format: the format to digest previous arguments [time] or [run]. Time = yyyymmddhhmiss, Run = runnumber", defaultValue="time") @DefaultValue("time") @QueryParam("format") String format
-,@ApiParam(value = "page: the page number {0}", defaultValue="0") @DefaultValue("0") @QueryParam("page") Integer page
-,@ApiParam(value = "size: the page size {1000}", defaultValue="1000") @DefaultValue("1000") @QueryParam("size") Integer size
-,@ApiParam(value = "sort: the sort pattern {runNumber:ASC}", defaultValue="runNumber:ASC") @DefaultValue("runNumber:ASC") @QueryParam("sort") String sort
+    public Response selectRunInfo(@ApiParam(value = "from: the starting time or run", defaultValue="none") @DefaultValue("none") @QueryParam("from") String from
+,@ApiParam(value = "to: the ending time or run", defaultValue="none") @DefaultValue("none") @QueryParam("to") String to
+,@ApiParam(value = "format: the format to digest previous arguments [iso], [number]. Time(iso) = yyyymmddhhmiss, Run(number) = runnumber, Time(number) = milliseconds", defaultValue="number") @DefaultValue("number") @QueryParam("format") String format
+,@ApiParam(value = "mode: the mode for the request : [daterange] or [runrange]. Interprets", defaultValue="runrange") @DefaultValue("runrange") @QueryParam("mode") String mode
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
-        return delegate.selectRunInfo(from,to,format,page,size,sort,securityContext,info);
+        return delegate.selectRunInfo(from,to,format,mode,securityContext,info);
     }
 }

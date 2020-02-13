@@ -3,6 +3,8 @@
  */
 package hep.crest.server.runinfo.services;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -58,8 +60,7 @@ public class RunInfoService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public List<RunInfoDto> findAllRunInfo(Predicate qry, Pageable req)
-            throws CdbServiceException {
+    public List<RunInfoDto> findAllRunInfo(Predicate qry, Pageable req) throws CdbServiceException {
         try {
             Iterable<RunInfo> entitylist = null;
             if (qry == null) {
@@ -98,6 +99,55 @@ public class RunInfoService {
             log.error("Exception in storing run info {}", dto);
             throw new CdbServiceException("Cannot store runlumi : " + e.getMessage());
         }
+    }
+
+    /**
+     * @param from
+     *            the BigDecimal.
+     * @param to
+     *            the BigDecimal.
+     * @throws CdbServiceException
+     *             If an Exception occurred.
+     * @return List<RunInfoDto>
+     */
+    public List<RunInfoDto> selectInclusiveByRun(BigDecimal from, BigDecimal to)
+            throws CdbServiceException {
+        try {
+            List<RunInfo> entitylist = null;
+            entitylist = runinfoRepository.findByRunNumberInclusive(from, to);
+            return StreamSupport.stream(entitylist.spliterator(), false)
+                    .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
+        }
+        catch (final Exception e) {
+            log.error("Exception in retrieving run list using run range {} {}...", from, to);
+            throw new CdbServiceException(
+                    "Cannot find all runs using run range: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * @param from
+     *            the Date.
+     * @param to
+     *            the Date.
+     * @throws CdbServiceException
+     *             If an Exception occurred.
+     * @return List<RunInfoDto>
+     */
+    public List<RunInfoDto> selectInclusiveByDate(Date from, Date to)
+            throws CdbServiceException {
+        try {
+            List<RunInfo> entitylist = null;
+            entitylist = runinfoRepository.findByDateInclusive(from, to);
+            return StreamSupport.stream(entitylist.spliterator(), false)
+                    .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
+        }
+        catch (final Exception e) {
+            log.error("Exception in retrieving run list using date range {} {}...", from, to);
+            throw new CdbServiceException(
+                    "Cannot find all runs using date range: " + e.getMessage());
+        }
+
     }
 
 }

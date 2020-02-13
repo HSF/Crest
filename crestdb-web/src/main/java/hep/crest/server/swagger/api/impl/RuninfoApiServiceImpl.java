@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -25,7 +26,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
-import hep.crest.data.utils.RunIovConverter;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.runinfo.services.RunInfoService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
@@ -72,17 +72,15 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
     /*
      * (non-Javadoc)
      *
-     * @see
-     * hep.crest.server.swagger.api.RuninfoApiService#createRunInfo(hep.crest.
+     * @see hep.crest.server.swagger.api.RuninfoApiService#createRunInfo(hep.crest.
      * swagger.model.RunLumiInfoDto, javax.ws.rs.core.SecurityContext,
      * javax.ws.rs.core.UriInfo)
      */
     @Override
-    public Response createRunInfo(RunInfoSetDto body, SecurityContext securityContext,
-            UriInfo info) throws NotFoundException {
-        log.info(
-                "RunInfoRestController processing request for creating a run info entry using "
-                        + body);
+    public Response createRunInfo(RunInfoSetDto body, SecurityContext securityContext, UriInfo info)
+            throws NotFoundException {
+        log.info("RunInfoRestController processing request for creating a run info entry using "
+                + body);
         try {
             final List<RunInfoDto> dtolist = body.getResources();
             final List<RunInfoDto> savedlist = new ArrayList<>();
@@ -91,8 +89,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
                 savedlist.add(saved);
             }
             final CrestBaseResponse respdto = new RunInfoSetDto().resources(savedlist)
-                    .size((long) savedlist.size())
-                    .datatype("runs");
+                    .size((long) savedlist.size()).datatype("runs");
             return Response.created(info.getRequestUri()).entity(respdto).build();
         }
         catch (final CdbServiceException e) {
@@ -107,8 +104,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
     /*
      * (non-Javadoc)
      *
-     * @see
-     * hep.crest.server.swagger.api.RuninfoApiService#listRunInfo(java.lang.
+     * @see hep.crest.server.swagger.api.RuninfoApiService#listRunInfo(java.lang.
      * String, java.lang.Integer, java.lang.Integer, java.lang.String,
      * javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
      */
@@ -140,61 +136,54 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
     /*
      * (non-Javadoc)
      *
-     * @see
-     * hep.crest.server.swagger.api.RuninfoApiService#selectRunInfo(java.lang.
+     * @see hep.crest.server.swagger.api.RuninfoApiService#selectRunInfo(java.lang.
      * String, java.lang.String, java.lang.String, java.lang.Integer,
      * java.lang.Integer, java.lang.String, javax.ws.rs.core.SecurityContext,
      * javax.ws.rs.core.UriInfo)
      */
     @Override
-    public Response selectRunInfo(String from, String to, String format, Integer page,
-            Integer size, String sort, SecurityContext securityContext, UriInfo info)
-            throws NotFoundException {
+    public Response selectRunInfo(String from, String to, String format, String mode,
+            SecurityContext securityContext, UriInfo info) throws NotFoundException {
         try {
-            log.debug(
-                    "Search resource list using from={}, to={}, format={}, page={}, size={}, sort={}",
-                    from, to, format, page, size, sort);
-            String by = "";
-            if (format.equals("time")) {
-                log.debug("Using from and to as times in yyyymmddhhmiss");
-                final DateTimeFormatter locFormatter = DateTimeFormatter
-                        .ofPattern("yyyyMMddHHmmss");
-                final ZonedDateTime zdtfrom = LocalDateTime.parse(from, locFormatter)
-                        .atZone(ZoneId.of("Z"));
-                final ZonedDateTime zdtto = LocalDateTime.parse(to, locFormatter)
-                        .atZone(ZoneId.of("Z"));
-                final Timestamp tsfrom = new Timestamp(zdtfrom.toInstant().toEpochMilli());
-                final Timestamp tsto = new Timestamp(zdtto.toInstant().toEpochMilli());
-                final BigDecimal bfrom = new BigDecimal(
-                        tsfrom.getTime() * RunIovConverter.TO_NANOSECONDS);
-                final BigDecimal bto = new BigDecimal(
-                        tsto.getTime() * RunIovConverter.TO_NANOSECONDS);
-                by = "starttime>" + bfrom.toString();
-                by = by + ",starttime<" + bto.toString();
-
+            log.debug("Search resource list using from={}, to={}, format={}, mode={}", from, to,
+                    format, mode);
+            List<RunInfoDto> dtolist = new ArrayList<>();
+            if (mode.equalsIgnoreCase("runrange")) {
+                final BigDecimal bfrom = new BigDecimal(from);
+                final BigDecimal bto = new BigDecimal(to);
+                dtolist = runinfoService.selectInclusiveByRun(bfrom, bto);
             }
-            else if (format.equals("run-lumi")) {
-                // FIXME : this code is for ATLAS only. 
-                // We should check with Giacomo what to do in CMS.
-                final String[] fromarr = from.split("-");
-                final String[] toarr = to.split("-");
-                final BigDecimal bfrom = RunIovConverter.getCoolRunLumi(new Long(fromarr[0]),
-                        new Long(fromarr[1]));
-                final BigDecimal bto = RunIovConverter.getCoolRunLumi(new Long(toarr[0]),
-                        new Long(toarr[1]));
-                by = "since>" + bfrom.toString();
-                by = by + ",since<" + bto.toString();
+            else if (mode.equalsIgnoreCase("daterange")) {
+                Timestamp tsfrom = null;
+                Timestamp tsto = null;
+                if (format.equals("iso")) {
+                    log.debug("Using from and to as times in yyyymmddhhmiss");
+                    final DateTimeFormatter locFormatter = DateTimeFormatter
+                            .ofPattern("yyyyMMddHHmmss");
+                    final ZonedDateTime zdtfrom = LocalDateTime.parse(from, locFormatter)
+                            .atZone(ZoneId.of("Z"));
+                    final ZonedDateTime zdtto = LocalDateTime.parse(to, locFormatter)
+                            .atZone(ZoneId.of("Z"));
+                    tsfrom = new Timestamp(zdtfrom.toInstant().toEpochMilli());
+                    tsto = new Timestamp(zdtto.toInstant().toEpochMilli());
+                }
+                else if (format.equals("number")) {
+                    tsfrom = new Timestamp(new Long(from));
+                    tsto = new Timestamp(new Long(to));
+                }
+                dtolist = runinfoService.selectInclusiveByDate(new Date(tsfrom.getTime()),
+                        new Date(tsto.getTime()));
             }
-
-            final CrestBaseResponse setdto = findRunInfo(by, page, size, sort);
-            if (setdto == null) {
-                final String message = "No resource has been found";
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
-                        message);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+            final CrestBaseResponse setdto = new RunInfoSetDto().resources(dtolist)
+                    .size((long) dtolist.size()).datatype("runs");
+            final GenericMap filters = new GenericMap();
+            filters.put("from", from);
+            filters.put("to", to);
+            filters.put("mode", mode);
+            if (filters != null) {
+                setdto.filter(filters);
             }
             return Response.ok().entity(setdto).build();
-
         }
         catch (final CdbServiceException e) {
             final String message = e.getMessage();

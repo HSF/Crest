@@ -73,7 +73,7 @@ public class TestMetadataApi {
 
         log.info("Retrieve runs in a range in time");
         final ResponseEntity<String> resp1 = this.testRestTemplate.exchange(
-                "/crestapi/runinfo/select?from=19700101010000&to=20210130150000&format=time", HttpMethod.GET, null,
+                "/crestapi/runinfo/select?from=19700101010000&to=20210130150000&format=iso&mode=daterange", HttpMethod.GET, null,
                 String.class);
 
         {
@@ -88,7 +88,7 @@ public class TestMetadataApi {
 
         log.info("Retrieve runs as run-lumi range");
         final ResponseEntity<String> resp2 = this.testRestTemplate.exchange(
-                "/crestapi/runinfo/select?from=200-0&to=2000000-100&format=run-lumi", HttpMethod.GET, null,
+                "/crestapi/runinfo/select?from=200&to=2000000&format=number&mode=runrange", HttpMethod.GET, null,
                 String.class);
 
         {
