@@ -150,9 +150,12 @@ public class TagMeta implements java.io.Serializable {
      * @return Date
      */
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "INSERTION_TIME", nullable = false, length = 11)
+    @Column(name = "INSERTION_TIME", nullable = false, updatable = true, length = 11)
     public Date getInsertionTime() {
-        return this.insertionTime;
+        if (insertionTime == null) {
+            return null;
+        }
+        return new Date(this.insertionTime.getTime());
     }
 
     /**
@@ -161,7 +164,9 @@ public class TagMeta implements java.io.Serializable {
      * @return
      */
     public void setInsertionTime(Date insertionTime) {
-        this.insertionTime = insertionTime;
+        if (insertionTime != null) {
+            this.insertionTime = new Date(insertionTime.getTime());
+        }
     }
 
     /**

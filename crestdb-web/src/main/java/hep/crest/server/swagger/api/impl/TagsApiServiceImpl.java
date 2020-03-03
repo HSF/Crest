@@ -172,7 +172,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             return Response.ok().entity(respdto).build();
         }
         catch (final Exception e) {
-            e.printStackTrace();
+            log.error("Exception in searching tag {}", name);
             final String message = e.getMessage();
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);

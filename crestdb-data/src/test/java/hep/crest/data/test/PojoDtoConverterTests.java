@@ -285,7 +285,7 @@ public class PojoDtoConverterTests {
         assertThat(dto1.toString().length()).isGreaterThan(0);
         assertThat(dto1.hashCode()).isNotNull();
         final RunLumiInfo entity = mapper.map(dto1, RunLumiInfo.class);
-        assertThat(dto1.getRun()).isEqualTo(entity.getRun());
+        assertThat(dto1.getRunNumber()).isEqualTo(entity.getRunNumber());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
     }

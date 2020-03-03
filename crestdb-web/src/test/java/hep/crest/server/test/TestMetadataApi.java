@@ -99,7 +99,7 @@ public class TestMetadataApi {
     public void testA_runinfofail() {
         final RunLumiInfoDto dto = DataGenerator.generateRunLumiInfoDto(new BigDecimal(210000L),
                 new BigDecimal(222222L), new BigDecimal(100));
-        dto.endtime(null).run(null);
+        dto.endtime(null).runNumber(null);
         log.info("Store runlumi info : {} ", dto);
         final ResponseEntity<String> response = this.testRestTemplate
                 .postForEntity("/crestapi/runinfo", dto, String.class);

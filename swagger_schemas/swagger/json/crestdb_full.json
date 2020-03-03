@@ -1869,7 +1869,7 @@
 				"since": {
 					"type": "number"
 				},
-				"run": {
+				"runNumber": {
 					"type": "number"
 				},
 				"lb": {

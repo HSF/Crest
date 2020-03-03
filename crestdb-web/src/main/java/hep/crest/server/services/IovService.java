@@ -432,13 +432,7 @@ public class IovService {
                 dto.getPayloadHash());
         Iov entity = null;
         final String tagname = dto.getTagName();
-        // FIXME: this is not needed.
-        // final BigDecimal since = dto.getSince();
-        // final String hash = dto.getPayloadHash();
-        // if (existsIov(tagname, since, hash)) {
-        // throw new AlreadyExistsPojoException("Iov already exists : " +
-        // dto.toString());
-        // }
+        
         try {
             entity = mapper.map(dto, Iov.class);
             // The IOV is not yet stored. Verify that the tag exists before inserting it.
@@ -450,11 +444,12 @@ public class IovService {
                 final Tag updtag = tagRepository.save(t);
                 entity.setTag(updtag);
                 entity.getId().setTagName(updtag.getName());
-                log.debug("Storing iov {}", entity);
+                log.debug("Storing iov entity {}", entity);
                 final Iov saved = iovRepository.save(entity);
+                log.debug("Saved entity: {}", saved);
                 final IovDto dtoentity = mapper.map(saved, IovDto.class);
                 dtoentity.tagName(tagname);
-                log.debug("Returning iov dto : {}", dtoentity);
+                log.debug("Returning iovDto : {}", dtoentity);
                 return dtoentity;
             }
             else {

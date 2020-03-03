@@ -47,20 +47,20 @@ public class DateFormatterHandler {
     }
 
     /**
+     * Create the formatter if null, or send back the existing formatter.
      * @return DateTimeFormatter
      */
     public DateTimeFormatter getLocformatter() {
-        if (this.locFormatter != null) {
-            return locFormatter;
-        }
-        if (datePATTERN.equals("ISO_OFFSET_DATE_TIME")) {
-            locFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-        }
-        else if (datePATTERN.equals("ISO_LOCAL_DATE_TIME")) {
-            locFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        }
-        else {
-            locFormatter = DateTimeFormatter.ofPattern(datePATTERN);
+        if (this.locFormatter == null) {
+            if (datePATTERN.equals("ISO_OFFSET_DATE_TIME")) {
+                locFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+            }
+            else if (datePATTERN.equals("ISO_LOCAL_DATE_TIME")) {
+                locFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+            }
+            else {
+                locFormatter = DateTimeFormatter.ofPattern(datePATTERN);
+            }
         }
         return locFormatter;
     }

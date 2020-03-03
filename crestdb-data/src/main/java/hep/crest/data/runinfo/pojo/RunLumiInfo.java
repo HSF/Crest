@@ -39,7 +39,7 @@ public class RunLumiInfo implements java.io.Serializable {
     /**
      * The run number.
      */
-    private BigDecimal run;
+    private BigDecimal runNumber;
     /**
      * The lumi block.
      */
@@ -73,7 +73,7 @@ public class RunLumiInfo implements java.io.Serializable {
         this.since = since;
         this.starttime = starttime;
         this.endtime = endtime;
-        this.run = run;
+        this.runNumber = run;
         this.lb = lb;
     }
 
@@ -133,8 +133,8 @@ public class RunLumiInfo implements java.io.Serializable {
      * @return BigDecimal
      */
     @Column(name = "RUN", nullable = false, precision = 38, scale = 0)
-    public BigDecimal getRun() {
-        return run;
+    public BigDecimal getRunNumber() {
+        return runNumber;
     }
 
     /**
@@ -142,8 +142,8 @@ public class RunLumiInfo implements java.io.Serializable {
      *            the BigDecimal
      * @return
      */
-    public void setRun(BigDecimal run) {
-        this.run = run;
+    public void setRunNumber(BigDecimal run) {
+        this.runNumber = run;
     }
 
     /**
@@ -200,6 +200,6 @@ public class RunLumiInfo implements java.io.Serializable {
     @Override
     public String toString() {
         return "RunLumiInfo [since=" + since + ", starttime=" + starttime + ", endtime=" + endtime
-                + ", run=" + run + ", lb=" + lb + ", insertionTime=" + insertionTime + "]";
+                + ", run=" + runNumber + ", lb=" + lb + ", insertionTime=" + insertionTime + "]";
     }
 }

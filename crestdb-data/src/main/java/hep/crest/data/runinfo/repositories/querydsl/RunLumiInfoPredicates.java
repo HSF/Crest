@@ -46,13 +46,13 @@ public final class RunLumiInfoPredicates {
         BooleanExpression pred = null;
 
         if (oper.equals("<")) {
-            pred = QRunLumiInfo.runLumiInfo.run.lt(new BigDecimal(num));
+            pred = QRunLumiInfo.runLumiInfo.runNumber.lt(new BigDecimal(num));
         }
         else if (oper.equals(">")) {
-            pred = QRunLumiInfo.runLumiInfo.run.gt(new BigDecimal(num));
+            pred = QRunLumiInfo.runLumiInfo.runNumber.gt(new BigDecimal(num));
         }
         else if (oper.equals(":")) {
-            pred = QRunLumiInfo.runLumiInfo.run.eq(new BigDecimal(num));
+            pred = QRunLumiInfo.runLumiInfo.runNumber.eq(new BigDecimal(num));
         }
         return pred;
     }
