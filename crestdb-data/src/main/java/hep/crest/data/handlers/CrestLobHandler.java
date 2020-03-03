@@ -62,23 +62,29 @@ public class CrestLobHandler {
     }
 
     /**
+     * Wrapper around the createBlobFromStream method to read data and create Blob
+     * from a file.
+     *
      * @param filelocation
      *            the String
      * @return Blob
+     * @throws IOException
+     *             If an Exception occurred.
      */
-    public Blob createBlobFromFile(String filelocation) {
+    public Blob createBlobFromFile(String filelocation) throws IOException {
         final File f = new File(filelocation);
         try (FileInputStream fstream = new FileInputStream(f);) {
             return createBlobFromStream(fstream);
         }
         catch (final IOException e) {
             log.error("Cannot find file {}", filelocation);
+            throw e;
         }
-
-        return null;
     }
 
     /**
+     * Create a Blob from an InputStream.
+     *
      * @param is
      *            the InputStream
      * @return Blob
@@ -88,16 +94,18 @@ public class CrestLobHandler {
         BufferedOutputStream bstream = null;
         try (Connection conn = ds.getConnection();
                 BufferedInputStream fstream = new BufferedInputStream(is);) {
+            // Use the connection to the DB to create a Blob.
+            // This allow to use the Lob implementation of the underlying database backend.
             blob = conn.createBlob();
             bstream = new BufferedOutputStream(blob.setBinaryStream(1));
             // stream copy runs a high-speed upload across the network
             StreamUtils.copy(fstream, bstream);
-            return blob;
         }
         catch (IOException | SQLException e) {
             log.error("Exception in createBlobFromStream: {}", e.getMessage());
         }
         finally {
+            // Close the streams which are not inside the try-with-resources block.
             try {
                 if (bstream != null) {
                     bstream.close();
@@ -114,6 +122,8 @@ public class CrestLobHandler {
     }
 
     /**
+     * Create a Blob from a byte array.
+     *
      * @param data
      *            the byte[]
      * @return Blob
@@ -124,11 +134,12 @@ public class CrestLobHandler {
         try (Connection conn = ds.getConnection();
                 InputStream is = new ByteArrayInputStream(data);
                 BufferedInputStream fstream = new BufferedInputStream(is);) {
+            // Use the connection to the DB to create a Blob.
+            // This allow to use the Lob implementation of the underlying database backend.
             blob = conn.createBlob();
             bstream = new BufferedOutputStream(blob.setBinaryStream(1));
             // stream copy runs a high-speed upload across the network
             StreamUtils.copy(fstream, bstream);
-            return blob;
         }
         catch (final IOException e) {
             log.error("IO Error creating blob from bytes : {}", e.getMessage());
@@ -137,6 +148,7 @@ public class CrestLobHandler {
             log.error("SQL Error creating blob from bytes : {}", e.getMessage());
         }
         finally {
+            // Close the streams which are not inside the try-with-resources block.
             try {
                 if (bstream != null) {
                     bstream.close();
@@ -150,6 +162,8 @@ public class CrestLobHandler {
     }
 
     /**
+     * Read an InputStream.
+     *
      * @param in
      *            the InputStream
      * @return byte[]
@@ -166,40 +180,48 @@ public class CrestLobHandler {
             }
             fos.flush();
             databarr = fos.toByteArray();
-            return databarr;
         }
         catch (final IOException e) {
             log.error("Exception in readLobs: {}", e.getMessage());
+            // Create an empty byte array to avoid returning null.
+            databarr = new byte[0];
         }
-        return new byte[0];
+        return databarr;
     }
 
     /**
+     * Create a byte array from the Payload entity Lob.
+     *
      * @param dataentity
      *            the Payload
      * @return byte[]
      */
     public byte[] convertToByteArray(Payload dataentity) {
+        byte[] databarr = null;
         try {
             log.debug("Retrieving binary stream from payload entity with the DATA blob alone");
-            byte[] databarr = null;
             final InputStream in = dataentity.getData().getBinaryStream();
             databarr = readLobs(in);
+            // Free memory for Lob
             dataentity.getData().free();
-            return databarr;
         }
         catch (final SQLException e) {
             log.error("Exception : {}", e.getMessage());
+            // Create an empty byte array to avoid returning null.
+            databarr = new byte[0];
         }
-        return new byte[0];
+        return databarr;
     }
 
     /**
+     * Conversion from Payload entity to DTO. It also converts the Lobs.
+     *
      * @param dataentity
      *            the Payload
      * @return PayloadDto
      */
     public PayloadDto convertToDto(Payload dataentity) {
+        PayloadDto dto = null;
         try {
             log.debug("Retrieving binary stream from payload entity including the DATA blob");
             byte[] databarr = null;
@@ -214,7 +236,7 @@ public class CrestLobHandler {
             strinfobarr = readLobs(insi);
             dataentity.getStreamerInfo().free();
 
-            return new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
+            dto = new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
                     .objectType(dataentity.getObjectType()).size(dataentity.getSize())
                     .data(databarr).streamerInfo(strinfobarr)
                     .insertionTime(dataentity.getInsertionTime());
@@ -222,15 +244,18 @@ public class CrestLobHandler {
         catch (final SQLException e) {
             log.error("Exception in convertToDto: {}", e.getMessage());
         }
-        return null;
+        return dto;
     }
 
     /**
+     * Conversion from Payload entity to DTO. It does not convert the data Lob.
+     *
      * @param dataentity
      *            the Payload
      * @return PayloadDto
      */
     public PayloadDto convertToDtoNoData(Payload dataentity) {
+        PayloadDto dto = null;
         try {
             log.debug("Retrieving binary stream from payload entity without the DATA blob");
             byte[] strinfobarr = null;
@@ -242,13 +267,13 @@ public class CrestLobHandler {
 
             log.info("Retrieved payload: {} {} {} ", dataentity.getHash(),
                     dataentity.getObjectType(), dataentity.getVersion());
-            return new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
+            dto = new PayloadDto().hash(dataentity.getHash()).version(dataentity.getVersion())
                     .objectType(dataentity.getObjectType()).size(dataentity.getSize())
                     .streamerInfo(strinfobarr);
         }
         catch (final SQLException e) {
             log.error("Exception in convertToDtoNoData: {} ", e.getMessage());
         }
-        return null;
+        return dto;
     }
 }

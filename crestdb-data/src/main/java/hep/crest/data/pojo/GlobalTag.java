@@ -160,9 +160,12 @@ public class GlobalTag implements java.io.Serializable {
      * @return Date
      */
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "INSERTION_TIME", nullable = false, length = 11)
+    @Column(name = "INSERTION_TIME", nullable = false, updatable = false, length = 11)
     public Date getInsertionTime() {
-        return this.insertionTime;
+        if (insertionTime == null) {
+            return null;
+        }
+        return new Date(this.insertionTime.getTime());
     }
 
     /**
@@ -171,7 +174,9 @@ public class GlobalTag implements java.io.Serializable {
      * @return
      */
     public void setInsertionTime(Date insertionTime) {
-        this.insertionTime = insertionTime;
+        if (insertionTime != null) {
+            this.insertionTime = new Date(insertionTime.getTime());
+        }
     }
 
     /**
@@ -180,7 +185,10 @@ public class GlobalTag implements java.io.Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "SNAPSHOT_TIME", nullable = false, length = 11)
     public Date getSnapshotTime() {
-        return this.snapshotTime;
+        if (snapshotTime == null) {
+            return null;
+        }
+        return new Date(this.snapshotTime.getTime());
     }
 
     /**
@@ -189,7 +197,9 @@ public class GlobalTag implements java.io.Serializable {
      * @return
      */
     public void setSnapshotTime(Date snapshotTime) {
-        this.snapshotTime = snapshotTime;
+        if (snapshotTime != null) {
+            this.snapshotTime = new Date(snapshotTime.getTime());
+        }
     }
 
     /**

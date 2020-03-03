@@ -211,9 +211,12 @@ public class Tag implements java.io.Serializable {
      * @return Date
      */
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "INSERTION_TIME", nullable = false, length = 11)
+    @Column(name = "INSERTION_TIME", nullable = false, updatable = true, length = 11)
     public Date getInsertionTime() {
-        return this.insertionTime;
+        if (insertionTime == null) {
+            return null;
+        }
+        return new Date(this.insertionTime.getTime());
     }
 
     /**
@@ -222,7 +225,9 @@ public class Tag implements java.io.Serializable {
      * @return
      */
     public void setInsertionTime(Date insertionTime) {
-        this.insertionTime = insertionTime;
+        if (insertionTime != null) {
+            this.insertionTime = new Date(insertionTime.getTime());
+        }
     }
 
     /**
@@ -231,7 +236,10 @@ public class Tag implements java.io.Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "MODIFICATION_TIME", nullable = false, length = 11)
     public Date getModificationTime() {
-        return this.modificationTime;
+        if (modificationTime == null) {
+            return null;
+        }
+        return new Date(this.modificationTime.getTime());
     }
 
     /**
@@ -240,7 +248,9 @@ public class Tag implements java.io.Serializable {
      * @return
      */
     public void setModificationTime(Date modificationTime) {
-        this.modificationTime = modificationTime;
+        if (modificationTime != null) {
+            this.modificationTime = new Date(modificationTime.getTime());
+        }
     }
 
     /**

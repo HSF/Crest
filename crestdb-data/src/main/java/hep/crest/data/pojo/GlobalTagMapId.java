@@ -111,7 +111,7 @@ public class GlobalTagMapId implements java.io.Serializable {
         if (other == null) {
             return false;
         }
-        if (!(other instanceof GlobalTagMapId)) {
+        if (this.getClass() != other.getClass()) {
             return false;
         }
         final GlobalTagMapId castOther = (GlobalTagMapId) other;

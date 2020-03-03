@@ -36,7 +36,6 @@ public final class PayloadHandler {
      */
     private static final Integer MAX_LENGTH = 1024;
 
-    
     /**
      * Hidden ctor.
      */
@@ -49,21 +48,23 @@ public final class PayloadHandler {
      * @return byte[]
      */
     public static byte[] getBytesFromInputStream(InputStream is) {
+        byte[] data = null;
         try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             int nRead;
-            final byte[] data = new byte[16384];
+            data = new byte[16384];
 
             while ((nRead = is.read(data, 0, data.length)) != -1) {
                 buffer.write(data, 0, nRead);
                 LOG.debug("Reading data from stream {} ", nRead);
             }
             buffer.flush();
-            return buffer.toByteArray();
+            data = buffer.toByteArray();
         }
         catch (final IOException e) {
             LOG.error("Exception getting bytes from stream : {}", e.getMessage());
+            data = new byte[0];
         }
-        return new byte[0];
+        return data;
     }
 
     /**
@@ -93,6 +94,8 @@ public final class PayloadHandler {
     }
 
     /**
+     * Save the inputStream to the outputStream.
+     *
      * @param uploadedInputStream
      *            the InputStream
      * @param out
@@ -135,8 +138,8 @@ public final class PayloadHandler {
      * @throws PayloadEncodingException
      *             If an Exception occurred
      */
-    public static String saveToFileGetHash(InputStream uploadedInputStream, String uploadedFileLocation)
-            throws PayloadEncodingException {
+    public static String saveToFileGetHash(InputStream uploadedInputStream,
+            String uploadedFileLocation) throws PayloadEncodingException {
 
         try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
             return HashGenerator.hashoutstream(uploadedInputStream, out);
@@ -146,12 +149,14 @@ public final class PayloadHandler {
             throw new PayloadEncodingException(e.getMessage());
         }
         finally {
+            // Close the stream outside the try-with-resource block.
             if (uploadedInputStream != null) {
                 try {
                     uploadedInputStream.close();
                 }
                 catch (final IOException e) {
-                    LOG.error("error closing input stream in saveToFileGetHash");
+                    LOG.error("error closing input stream in saveToFileGetHash: {}",
+                            e.getMessage());
                 }
             }
         }
@@ -170,7 +175,8 @@ public final class PayloadHandler {
             return HashGenerator.hash(uploadedInputStream);
         }
         catch (NoSuchAlgorithmException | IOException e) {
-            throw new PayloadEncodingException("Error in hashing stream");
+            LOG.error("Error in hashing stream : {}", e.getMessage());
+            throw new PayloadEncodingException("Error in hashing stream : " + e.getMessage());
         }
     }
 
@@ -180,7 +186,8 @@ public final class PayloadHandler {
      * @param uploadedFileLocation
      *            the String
      */
-    public static void saveStreamToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
+    public static void saveStreamToFile(InputStream uploadedInputStream,
+            String uploadedFileLocation) {
 
         try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
             StreamUtils.copy(uploadedInputStream, out);
@@ -196,14 +203,16 @@ public final class PayloadHandler {
      * @return byte[]
      */
     public static byte[] readFromFile(String uploadedFileLocation) {
+        byte[] databarr = null;
         try {
             final java.nio.file.Path path = Paths.get(uploadedFileLocation);
-            return Files.readAllBytes(path);
+            databarr = Files.readAllBytes(path);
         }
         catch (final IOException e) {
             LOG.error("Exception in readFromFile: {}", e.getMessage());
+            databarr = new byte[0];
         }
-        return new byte[0];
+        return databarr;
 
     }
 
@@ -213,15 +222,15 @@ public final class PayloadHandler {
      * @return long
      */
     public static long lengthOfFile(String uploadedFileLocation) {
-
+        long flength = 0;
         try {
             final java.nio.file.Path path = Paths.get(uploadedFileLocation);
             Files.size(path);
-            return Files.size(path);
+            flength = Files.size(path);
         }
         catch (final IOException e) {
             LOG.error("Exception in lengthOfFile: {}", e.getMessage());
         }
-        return 0;
+        return flength;
     }
 }

@@ -54,8 +54,12 @@ public class RunInfo implements java.io.Serializable {
      */
     public RunInfo(Date startTime, Date endTime, BigDecimal runNumber) {
         super();
-        this.startTime = startTime;
-        this.endTime = endTime;
+        if (startTime != null) {
+            this.startTime = new Date(startTime.getTime());
+        }
+        if (endTime != null) {
+            this.endTime = new Date(endTime.getTime());
+        }
         this.runNumber = runNumber;
     }
 
@@ -65,7 +69,10 @@ public class RunInfo implements java.io.Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "START_TIME", nullable = false, length = 11)
     public Date getStartTime() {
-        return startTime;
+        if (startTime == null) {
+            return null;
+        }
+        return new Date(startTime.getTime());
     }
 
     /**
@@ -74,7 +81,9 @@ public class RunInfo implements java.io.Serializable {
      * @return
      */
     public void setStartTime(Date starttime) {
-        this.startTime = starttime;
+        if (starttime != null) {
+            this.startTime = new Date(starttime.getTime());
+        }
     }
 
     /**
@@ -83,7 +92,10 @@ public class RunInfo implements java.io.Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "END_TIME", nullable = false, length = 11)
     public Date getEndTime() {
-        return endTime;
+        if (endTime == null) {
+            return null;
+        }
+        return new Date(endTime.getTime());
     }
 
     /**
@@ -92,7 +104,9 @@ public class RunInfo implements java.io.Serializable {
      * @return
      */
     public void setEndTime(Date endtime) {
-        this.endTime = endtime;
+        if (endtime != null) {
+            this.endTime = new Date(endtime.getTime());
+        }
     }
 
     /**
