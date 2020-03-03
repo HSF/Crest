@@ -12,6 +12,7 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class IovId implements java.io.Serializable {
+
     /**
      * Serializer.
      */
@@ -48,7 +49,7 @@ public class IovId implements java.io.Serializable {
     public IovId(String tagName, BigDecimal since, Date insertionTime) {
         this.tagName = tagName;
         this.since = since;
-        this.insertionTime = insertionTime;
+        this.insertionTime = new Date(insertionTime.getTime());
     }
 
     /**
@@ -90,7 +91,10 @@ public class IovId implements java.io.Serializable {
      */
     @Column(name = "INSERTION_TIME", nullable = false, length = 11)
     public Date getInsertionTime() {
-        return this.insertionTime;
+        if (insertionTime == null) {
+            return null;
+        }
+        return new Date(this.insertionTime.getTime());
     }
 
     /**
@@ -99,7 +103,9 @@ public class IovId implements java.io.Serializable {
      * @return
      */
     public void setInsertionTime(Date insertionTime) {
-        this.insertionTime = insertionTime;
+        if (insertionTime != null) {
+            this.insertionTime = new Date(insertionTime.getTime());
+        }
     }
 
     /*
@@ -115,7 +121,7 @@ public class IovId implements java.io.Serializable {
         if (other == null) {
             return false;
         }
-        if (!(other instanceof IovId)) {
+        if (this.getClass() != other.getClass()) {
             return false;
         }
         final IovId castOther = (IovId) other;

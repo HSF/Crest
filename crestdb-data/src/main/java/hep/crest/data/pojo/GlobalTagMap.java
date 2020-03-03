@@ -117,4 +117,5 @@ public class GlobalTagMap implements java.io.Serializable {
     public void setGlobalTag(GlobalTag globalTag) {
         this.globalTag = globalTag;
     }
+
 }
