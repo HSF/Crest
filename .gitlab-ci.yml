@@ -149,7 +149,7 @@ package_cern_web_application:
       - master
     variables:
       - $REMOTE_NAME == "cern"
-  image: node:lts-alpine
+  image: node:10
   script:
    - ./vuecompile.sh
   allow_failure: false
