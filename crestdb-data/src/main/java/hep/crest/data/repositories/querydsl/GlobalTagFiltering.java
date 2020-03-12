@@ -15,6 +15,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import hep.crest.data.exceptions.CdbServiceException;
 
 /**
+ * The utility filtering class to handle SQL requests for folder selection. The
+ * methods used are implemented in @see GlobalTagPredicates.
+ *
  * @author aformic
  *
  */
@@ -36,52 +39,57 @@ public class GlobalTagFiltering implements IFilteringCriteria {
     @Override
     public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria)
             throws CdbServiceException {
-        try {
-            final List<BooleanExpression> expressions = new ArrayList<>();
-            for (final SearchCriteria searchCriteria : criteria) {
-                log.debug("search criteria " + searchCriteria.getKey() + " "
-                        + searchCriteria.getOperation() + " " + searchCriteria.getValue());
-                if (searchCriteria.getKey().equals("workflow")) {
-                    final BooleanExpression wflike = GlobalTagPredicates
-                            .hasWorkflowLike(searchCriteria.getValue().toString());
-                    expressions.add(wflike);
-                }
-                else if (searchCriteria.getKey().equals("name")) {
-                    final BooleanExpression namelike = GlobalTagPredicates
-                            .hasNameLike(searchCriteria.getValue().toString());
-                    expressions.add(namelike);
-                }
-                else if (searchCriteria.getKey().equals("release")) {
-                    final BooleanExpression releaselike = GlobalTagPredicates
-                            .hasReleaseLike(searchCriteria.getValue().toString());
-                    expressions.add(releaselike);
-                }
-                else if (searchCriteria.getKey().equals("scenario")) {
-                    final BooleanExpression scenariolike = GlobalTagPredicates
-                            .hasScenarioLike(searchCriteria.getValue().toString());
-                    expressions.add(scenariolike);
-                }
-                else if (searchCriteria.getKey().equals("validity")) {
-                    final BooleanExpression validityxthan = GlobalTagPredicates.isValidityXThan(
-                            searchCriteria.getOperation(), searchCriteria.getValue().toString());
-                    expressions.add(validityxthan);
-                }
-                else if (searchCriteria.getKey().equals("insertionTime")) {
-                    final BooleanExpression insertionTimexthan = GlobalTagPredicates.isInsertionTimeXThan(
-                            searchCriteria.getOperation(), searchCriteria.getValue().toString());
-                    expressions.add(insertionTimexthan);
-                }
-                else if (searchCriteria.getKey().equals("type")) {
-                    final BooleanExpression typeeq = GlobalTagPredicates
-                            .isType(searchCriteria.getValue().toString());
-                    expressions.add(typeeq);
-                }
-            }
-            return expressions;
-        }
-        catch (final Exception e) {
-            throw new CdbServiceException(e.getMessage());
-        }
-    }
 
+        final List<BooleanExpression> expressions = new ArrayList<>();
+        // Build the list of boolean expressions.
+        for (final SearchCriteria searchCriteria : criteria) {
+            log.debug("search criteria {} {} {}", searchCriteria.getKey(),
+                    searchCriteria.getOperation(), searchCriteria.getValue());
+            final String key = searchCriteria.getKey().toLowerCase();
+            if ("workflow".equals(key)) {
+                // Filter based on the worlflow.
+                final BooleanExpression wflike = GlobalTagPredicates
+                        .hasWorkflowLike(searchCriteria.getValue().toString());
+                expressions.add(wflike);
+            }
+            else if ("name".equals(key)) {
+                // Filter based on the global tag name.
+                final BooleanExpression namelike = GlobalTagPredicates
+                        .hasNameLike(searchCriteria.getValue().toString());
+                expressions.add(namelike);
+            }
+            else if ("release".equals(key)) {
+                // Filter based on the release.
+                final BooleanExpression releaselike = GlobalTagPredicates
+                        .hasReleaseLike(searchCriteria.getValue().toString());
+                expressions.add(releaselike);
+            }
+            else if ("scenario".equals(key)) {
+                // Filter based on the scenario.
+                final BooleanExpression scenariolike = GlobalTagPredicates
+                        .hasScenarioLike(searchCriteria.getValue().toString());
+                expressions.add(scenariolike);
+            }
+            else if ("validity".equals(key)) {
+                // Filter based on the validity.
+                final BooleanExpression validityxthan = GlobalTagPredicates.isValidityXThan(
+                        searchCriteria.getOperation(), searchCriteria.getValue().toString());
+                expressions.add(validityxthan);
+            }
+            else if ("insertionTime".equals(key)) {
+                // Filter based on the insertion time.
+                final BooleanExpression insertionTimexthan = GlobalTagPredicates
+                        .isInsertionTimeXThan(searchCriteria.getOperation(),
+                                searchCriteria.getValue().toString());
+                expressions.add(insertionTimexthan);
+            }
+            else if ("type".equals(key)) {
+                // Filter based on the type of the global tag.
+                final BooleanExpression typeeq = GlobalTagPredicates
+                        .isType(searchCriteria.getValue().toString());
+                expressions.add(typeeq);
+            }
+        }
+        return expressions;
+    }
 }

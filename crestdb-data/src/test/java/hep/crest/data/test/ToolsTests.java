@@ -26,10 +26,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.handlers.HashGenerator;
+import hep.crest.data.repositories.IovDirectoryImplementation;
+import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.data.utils.DirectoryUtilities;
 import hep.crest.data.utils.RunIovConverter;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.TagDto;
 
 /**
  * @author formica
@@ -39,7 +44,7 @@ import hep.crest.data.utils.RunIovConverter;
 @RunWith(SpringRunner.class)
 public class ToolsTests {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(ToolsTests.class);
 
     @Before
     public void setUp() {
@@ -91,7 +96,36 @@ public class ToolsTests {
         assertThat(dirutils.existsFile(payloadpath, "testhash.blob")).isTrue();
         
         dirutils.createTarFile(tagpath.toString(), "/tmp/tagtar");
-    }    
+    }
+    
+    @Test
+    public void testDirectoryImpl() throws Exception {
+        final DirectoryUtilities dirutils = new DirectoryUtilities();
+        assertThat(dirutils.getBasePath().startsWith("/tmp")).isTrue();
+        assertThat(dirutils.getTagfile()).isEqualTo("tag.json"); // Should be true
+        assertThat(dirutils.getIovfile()).isEqualTo("iovs.json"); // Should be true
+        dirutils.createIfNotexistsTag("MY-NEW-TAG");
+        log.info("Created tag : MY-NEW-TAG");
+        final Path tp = dirutils.getTagFilePath("MY-NEW-TAG");
+        log.info("Retrieved file path for tag : {}",tp);
+        assertThat(tp.endsWith("tag.json")).isTrue();
+        
+        final TagDirectoryImplementation fstagrepository = new TagDirectoryImplementation(dirutils);
+        final TagDto tag = DataGenerator.generateTagDto("MY-TAG-01", "time");
+        fstagrepository.save(tag);
+        
+        final IovDirectoryImplementation fsiovrepository = new IovDirectoryImplementation(dirutils);
+        final IovDto iov = DataGenerator.generateIovDto("mydirhash", "MY-TAG-01", new BigDecimal(1000L));
+        fsiovrepository.save(iov);
+        final List<IovDto> iovlist = fsiovrepository.findByTagName("MY-TAG-01");
+        assertThat(iovlist.size()).isGreaterThan(0);
+        try {
+            final List<IovDto> iovemptylist = fsiovrepository.findByTagName("MY-TAG-02");
+            assertThat(iovemptylist.size()).isEqualTo(0);
+        } catch (final CdbServiceException e) {
+            log.error("Cannot find tag MY-TAG-02");
+        }
+    }
    
     @Test
     public void testRunIovTools() throws Exception {
@@ -140,9 +174,9 @@ public class ToolsTests {
         final OutputStream out = new FileOutputStream(new File("/tmp/cdms/payloaddatahash.blob.copy"));
         final BufferedInputStream ds2 = new BufferedInputStream(new FileInputStream(f));
         final String hash4 = HashGenerator.hashoutstream(ds2, out);
-        assertThat(hash).isEqualTo(hash4);
-
+        assertThat(hash).isEqualTo(hash4);        
     }
 
+    
     
 }

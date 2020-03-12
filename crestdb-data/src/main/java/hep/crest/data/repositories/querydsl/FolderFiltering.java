@@ -15,6 +15,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import hep.crest.data.exceptions.CdbServiceException;
 
 /**
+ * The utility filtering class to handle SQL requests for folder selection.
+ * The methods used are implemented in @see FolderPredicates.
  * @author aformic
  *
  */
@@ -24,7 +26,7 @@ public class FolderFiltering implements IFilteringCriteria {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(FolderFiltering.class);
 
     /*
      * (non-Javadoc)
@@ -36,31 +38,31 @@ public class FolderFiltering implements IFilteringCriteria {
     @Override
     public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria)
             throws CdbServiceException {
-        try {
-            final List<BooleanExpression> expressions = new ArrayList<>();
-            for (final SearchCriteria searchCriteria : criteria) {
-                log.debug("search criteria " + searchCriteria.getKey() + " "
-                        + searchCriteria.getOperation() + " " + searchCriteria.getValue());
-                if (searchCriteria.getKey().equals("nodeFullpath")) {
-                    final BooleanExpression namelike = FolderPredicates
-                            .hasNodeFullpathLike(searchCriteria.getValue().toString());
-                    expressions.add(namelike);
-                }
-                else if (searchCriteria.getKey().equals("tagPattern")) {
-                    final BooleanExpression namelike = FolderPredicates
-                            .hasTagPatternLike(searchCriteria.getValue().toString());
-                    expressions.add(namelike);
-                }
-                else if (searchCriteria.getKey().equals("groupRole")) {
-                    final BooleanExpression namelike = FolderPredicates
-                            .hasGroupRoleLike(searchCriteria.getValue().toString());
-                    expressions.add(namelike);
-                }
+        final List<BooleanExpression> expressions = new ArrayList<>();
+        for (final SearchCriteria searchCriteria : criteria) {
+            log.debug("search criteria {} {} {}", searchCriteria.getKey(),
+                    searchCriteria.getOperation(), searchCriteria.getValue());
+            // Set to lower case for comparison
+            final String key = searchCriteria.getKey().toLowerCase();
+            if ("nodefullpath".equals(key)) {
+                // Filter based on nodefullpath
+                final BooleanExpression namelike = FolderPredicates
+                        .hasNodeFullpathLike(searchCriteria.getValue().toString());
+                expressions.add(namelike);
             }
-            return expressions;
+            else if ("tagpattern".equals(key)) {
+                // Filter based on tagpattern
+                final BooleanExpression namelike = FolderPredicates
+                        .hasTagPatternLike(searchCriteria.getValue().toString());
+                expressions.add(namelike);
+            }
+            else if ("grouprole".equals(key)) {
+                // Filter based on grouprole
+                final BooleanExpression namelike = FolderPredicates
+                        .hasGroupRoleLike(searchCriteria.getValue().toString());
+                expressions.add(namelike);
+            }
         }
-        catch (final Exception e) {
-            throw new CdbServiceException(e.getMessage());
-        }
+        return expressions;
     }
 }

@@ -32,7 +32,7 @@ public class IovDirectoryImplementation {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(IovDirectoryImplementation.class);
+    private static final Logger log = LoggerFactory.getLogger(IovDirectoryImplementation.class);
 
     /**
      * Directory utilities.
@@ -51,8 +51,7 @@ public class IovDirectoryImplementation {
      *            the DirectoryUtilities
      */
     public IovDirectoryImplementation(DirectoryUtilities dutils) {
-        super();
-        this.setDirtools(dutils);
+        this.dirtools = dutils;
     }
 
     /**
@@ -87,8 +86,9 @@ public class IovDirectoryImplementation {
             });
         }
         catch (final IOException x) {
-            throw new CdbServiceException("Cannot find iov list for tag " + tagname);
+            log.error("Cannot find iov list for tag {} : {}", tagname, x);
         }
+        return new ArrayList<>();
     }
 
     /**
@@ -113,8 +113,9 @@ public class IovDirectoryImplementation {
             return iovdto;
         }
         catch (final IOException x) {
-            throw new CdbServiceException("IO error " + x.getMessage());
+            log.error("Cannot save iov dto {} : {}", iovdto, x);
         }
+        return null;
     }
 
     /**
@@ -130,7 +131,7 @@ public class IovDirectoryImplementation {
             writer.write(jsonstr);
         }
         catch (final IOException x) {
-            throw new CdbServiceException("Cannot write " + jsonstr + " in JSON file");
+            log.error("Cannot write iov file {} from {} : {}", jsonstr, iovfilepath, x);
         }
     }
 
@@ -147,17 +148,18 @@ public class IovDirectoryImplementation {
             throws CdbServiceException {
 
         try {
-            final Path iovfilepath = dirtools.createIfNotexistsIov(tagname);
             if (iovdtolist == null) {
                 throw new CdbServiceException("Iov list is empty...cannot create file for iovs");
             }
             // FIXME: this is probably inefficient for large number of iovs...to be checked
             final String jsonstr = dirtools.getMapper().writeValueAsString(iovdtolist);
+            final Path iovfilepath = dirtools.createIfNotexistsIov(tagname);
             writeIovFile(jsonstr, iovfilepath);
             return iovdtolist;
         }
         catch (final IOException x) {
-            throw new CdbServiceException("IO error " + x.getMessage());
+            log.error("Cannot save iov list for tag {} : {}", tagname, x);
         }
-    }
+        return new ArrayList<>();
+     }
 }

@@ -62,7 +62,7 @@ import hep.crest.swagger.model.TagSummaryDto;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RepositoryDBTests {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(RepositoryDBTests.class);
 
     @Autowired
     private TagRepository tagrepository;

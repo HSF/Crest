@@ -27,19 +27,20 @@ public class JerseyConfig extends ResourceConfig {
      * Default ctor.
      */
     public JerseyConfig() {
-        register(AdminApi.class);
-        register(GlobaltagsApi.class);
-        register(TagsApi.class);
-        register(GlobaltagmapsApi.class);
-        register(IovsApi.class);
-        register(PayloadsApi.class);
-        register(FsApi.class);
-        register(RuninfoApi.class);
-        register(FoldersApi.class);
-        register(MultiPartFeature.class);
-        register(CacheControlFilter.class);
-        register(CORSFilter.class);
-        property(ServletProperties.FILTER_FORWARD_ON_404, true);
+        super();
+        super.register(AdminApi.class);
+        super.register(GlobaltagsApi.class);
+        super.register(TagsApi.class);
+        super.register(GlobaltagmapsApi.class);
+        super.register(IovsApi.class);
+        super.register(PayloadsApi.class);
+        super.register(FsApi.class);
+        super.register(RuninfoApi.class);
+        super.register(FoldersApi.class);
+        super.register(MultiPartFeature.class);
+        super.register(CacheControlFilter.class);
+        super.register(CORSFilter.class);
+        super.property(ServletProperties.FILTER_FORWARD_ON_404, true);
     }
 
     // @PostConstruct
@@ -64,8 +65,8 @@ public class JerseyConfig extends ResourceConfig {
      * @return
      */
     private void configureSwagger() {
-        this.register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        this.register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        super.register(io.swagger.jaxrs.listing.ApiListingResource.class);
+        super.register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 
         final BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion("1.0");

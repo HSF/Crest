@@ -23,7 +23,7 @@ public final class IovPredicates {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger(IovPredicates.class);
+    private static final Logger log = LoggerFactory.getLogger(IovPredicates.class);
 
     /**
      * Default ctor.
@@ -65,13 +65,13 @@ public final class IovPredicates {
         log.debug("isSinceXThan: argument {} {}", since, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QIov.iov.id.since.lt(since);
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QIov.iov.id.since.gt(since);
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QIov.iov.id.since.eq(since);
         }
         return pred;
@@ -88,13 +88,13 @@ public final class IovPredicates {
         log.debug("isInsertionTimeXThan: argument {} operation {}", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QIov.iov.id.insertionTime.lt(new Date(new Long(num)));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QIov.iov.id.insertionTime.gt(new Date(new Long(num)));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QIov.iov.id.insertionTime.eq(new Date(new Long(num)));
         }
         return pred;

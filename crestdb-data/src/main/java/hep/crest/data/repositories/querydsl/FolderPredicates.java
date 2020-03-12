@@ -20,7 +20,7 @@ public final class FolderPredicates {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger(FolderPredicates.class);
+    private static final Logger log = LoggerFactory.getLogger(FolderPredicates.class);
 
     /**
      * Default ctor.

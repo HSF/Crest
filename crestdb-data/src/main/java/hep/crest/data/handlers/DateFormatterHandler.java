@@ -52,10 +52,10 @@ public class DateFormatterHandler {
      */
     public DateTimeFormatter getLocformatter() {
         if (this.locFormatter == null) {
-            if (datePATTERN.equals("ISO_OFFSET_DATE_TIME")) {
+            if ("ISO_OFFSET_DATE_TIME".equals(datePATTERN)) {
                 locFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
             }
-            else if (datePATTERN.equals("ISO_LOCAL_DATE_TIME")) {
+            else if ("ISO_LOCAL_DATE_TIME".equals(datePATTERN)) {
                 locFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
             }
             else {

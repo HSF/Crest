@@ -23,7 +23,7 @@ public final class GlobalTagPredicates {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger(GlobalTagPredicates.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalTagPredicates.class);
 
     /**
      * Private ctor.
@@ -83,13 +83,13 @@ public final class GlobalTagPredicates {
         log.debug("isValidity: argument {}  operation {}", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QGlobalTag.globalTag.validity.lt(new BigDecimal(num));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QGlobalTag.globalTag.validity.gt(new BigDecimal(num));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QGlobalTag.globalTag.validity.eq(new BigDecimal(num));
         }
         return pred;

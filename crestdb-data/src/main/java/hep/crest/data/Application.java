@@ -25,7 +25,7 @@ public class Application {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     /**
      * A runner to dump information from the server.

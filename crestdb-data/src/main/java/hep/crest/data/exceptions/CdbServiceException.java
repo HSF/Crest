@@ -22,6 +22,16 @@ public class CdbServiceException extends Exception {
         super(message);
     }
 
+    /**
+     * @param message
+     *            the String
+     * @param err
+     *            the Throwable
+     */
+    public CdbServiceException(String message, Throwable err) {
+        super(message, err);
+    }
+
     /*
      * (non-Javadoc)
      *

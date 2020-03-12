@@ -68,7 +68,7 @@ public class RepositoryConfig {
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
@@ -85,7 +85,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadDefaultRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
@@ -101,7 +101,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadPostgresRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
@@ -117,7 +117,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadSqliteRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;

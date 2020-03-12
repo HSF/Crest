@@ -46,7 +46,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(IovGroupsImpl.class);
 
     /**
      * Datasource.
@@ -85,6 +85,9 @@ public class IovGroupsImpl implements IovGroupsCustom {
     }
 
     /**
+     * Use annotations to generate the table name in SQL requests. In general it
+     * adds the schema name.
+     *
      * @return String
      */
     protected String tablename() {
@@ -127,6 +130,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
                 groupsize);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
+        // Set the default group frequency at 1000. This can be changed via groupsize argument.
         Long groupfreq = 1000L;
         if (groupsize != null && groupsize > 0) {
             groupfreq = groupsize;
@@ -151,6 +155,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
                 tagname, groupsize, snap);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
+        // Set the default group frequency at 1000. This can be changed via groupsize argument.
         Long groupfreq = 1000L;
         if (groupsize != null && groupsize > 0) {
             groupfreq = groupsize;
@@ -210,7 +215,9 @@ public class IovGroupsImpl implements IovGroupsCustom {
                 tagname);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
-
+        // sql : count iovs in a tag
+        // select TAG_NAME, COUNT(TAG_NAME) as NIOVS from IOV
+        // where TAG_NAME like ? GROUP BY TAG_NAME
         final String sql = "select TAG_NAME, COUNT(TAG_NAME) as NIOVS from " + tablename
                 + " where TAG_NAME like ? GROUP BY TAG_NAME";
         return jdbcTemplate.query(sql, new Object[] {tagname}, (rs, num) -> {
@@ -220,41 +227,46 @@ public class IovGroupsImpl implements IovGroupsCustom {
             return entity;
         });
     }
-    
+
     /*
      * (non-Javadoc)
      *
-     * @see hep.crest.data.repositories.IovGroupsCustom#getRangeIovPayloadInfo(java.lang
+     * @see
+     * hep.crest.data.repositories.IovGroupsCustom#getRangeIovPayloadInfo(java.lang
      * .String, java.math.BigDecimal, java.math.BigDecimal, java.util.Date)
      */
     @Override
     public List<IovPayloadDto> getRangeIovPayloadInfo(String name, BigDecimal since,
             BigDecimal until, Date snapshot) {
-        log.debug("Select Iov and Payload meta info for tag  {} using JDBCTEMPLATE",
-                name);
+        log.debug("Select Iov and Payload meta info for tag  {} using JDBCTEMPLATE", name);
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
 
+        // sql : select only metadata from payload table and link with the IOV table
+        // select iv.*, pyld.VERSION, pyld.OBJECT_TYPE, pyld.DATA_SIZE from IOV iv
+        // left join PAYLOAD pyld ON pyld.HASH=iv.PAYLOAD_HASH
+        // where iv.TAG_NAME=? AND iv.SINCE>=COALESCE((SELECT max(iov2.SINCE) FROM
+        // IOV iov2 WHERE iov2.TAG_NAME=? AND iov2.SINCE<=? AND iov2.INSERTION_TIME<=? ),0)
+        // AND iv.SINCE<=? AND iv.INSERTION_TIME<=?
+        // order by iv.SINCE ASC, iv.INSERTION_TIME DESC
+
         final String sql = "select iv.TAG_NAME, iv.SINCE, iv.PAYLOAD_HASH, "
-                + " pyld.VERSION, pyld.OBJECT_TYPE, "
-                + " pyld.DATA_SIZE from " + tablename + " iv "
-                + " LEFT JOIN " + payloadTablename() + " pyld "
-                + " ON iv.PAYLOAD_HASH=pyld.HASH "
-                + " where iv.TAG_NAME=? AND iv.SINCE>=COALESCE("
-                + "  (SELECT max(iov2.SINCE) FROM " + tablename + " iov2 "
+                + " pyld.VERSION, pyld.OBJECT_TYPE, " + " pyld.DATA_SIZE from " + tablename + " iv "
+                + " LEFT JOIN " + payloadTablename() + " pyld " + " ON iv.PAYLOAD_HASH=pyld.HASH "
+                + " where iv.TAG_NAME=? AND iv.SINCE>=COALESCE(" + "  (SELECT max(iov2.SINCE) FROM "
+                + tablename + " iov2 "
                 + "  WHERE iov2.TAG_NAME=? AND iov2.SINCE<=? AND iov2.INSERTION_TIME<=? ),0)"
                 + " AND iv.SINCE<=? AND iv.INSERTION_TIME<=? "
                 + " ORDER BY iv.SINCE ASC, iv.INSERTION_TIME DESC";
         return jdbcTemplate.query(sql,
-                new Object[] {name, name, since, snapshot, until, snapshot},
-                (rs, num) -> {
-            final IovPayloadDto entity = new IovPayloadDto();
-            entity.setSince(rs.getBigDecimal("SINCE"));
-            entity.setPayloadHash(rs.getString("PAYLOAD_HASH"));
-            entity.setVersion(rs.getString("VERSION"));
-            entity.setObjectType(rs.getString("OBJECT_TYPE"));
-            entity.setSize(rs.getInt("DATA_SIZE"));
-            return entity;
-        });
+                new Object[] {name, name, since, snapshot, until, snapshot}, (rs, num) -> {
+                    final IovPayloadDto entity = new IovPayloadDto();
+                    entity.setSince(rs.getBigDecimal("SINCE"));
+                    entity.setPayloadHash(rs.getString("PAYLOAD_HASH"));
+                    entity.setVersion(rs.getString("VERSION"));
+                    entity.setObjectType(rs.getString("OBJECT_TYPE"));
+                    entity.setSize(rs.getInt("DATA_SIZE"));
+                    return entity;
+                });
     }
 }

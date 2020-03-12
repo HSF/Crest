@@ -17,6 +17,9 @@ import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 
 /**
+ * The utility filtering class to handle SQL requests for folder selection. The
+ * methods used are implemented in @see RunInfoPredicates.
+ *
  * @author aformic
  *
  */
@@ -26,7 +29,7 @@ public class RunInfoFiltering implements IFilteringCriteria {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(RunInfoFiltering.class);
 
     /*
      * (non-Javadoc)
@@ -38,35 +41,31 @@ public class RunInfoFiltering implements IFilteringCriteria {
     @Override
     public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria)
             throws CdbServiceException {
-        try {
-            final List<BooleanExpression> expressions = new ArrayList<>();
-            for (final SearchCriteria searchCriteria : criteria) {
-                log.debug("search criteria " + searchCriteria.getKey() + " "
-                        + searchCriteria.getOperation() + " " + searchCriteria.getValue());
-                final String key = searchCriteria.getKey().toLowerCase();
-                if (key.equals("runnumber")) {
-                    final BooleanExpression runxthan = RunInfoPredicates.isRunXThan(
-                            searchCriteria.getOperation(), searchCriteria.getValue().toString());
-                    expressions.add(runxthan);
-                }
-                else if (key.equals("starttime")) {
-                    final BooleanExpression startTimexthan = RunInfoPredicates
-                            .isStartTimeXThan(searchCriteria.getOperation(),
-                                    searchCriteria.getValue().toString());
-                    expressions.add(startTimexthan);
-                }
-                else if (key.equals("endtime")) {
-                    final BooleanExpression endTimexthan = RunInfoPredicates
-                            .isEndTimeXThan(searchCriteria.getOperation(),
-                                    searchCriteria.getValue().toString());
-                    expressions.add(endTimexthan);
-                }
+        final List<BooleanExpression> expressions = new ArrayList<>();
+        for (final SearchCriteria searchCriteria : criteria) {
+            log.debug("search criteria {} {} {}", searchCriteria.getKey(),
+                    searchCriteria.getOperation(), searchCriteria.getValue());
+            final String key = searchCriteria.getKey().toLowerCase();
+            if ("runnumber".equals(key)) {
+                // Filter based on the runnumber.
+                final BooleanExpression runxthan = RunInfoPredicates.isRunXThan(
+                        searchCriteria.getOperation(), searchCriteria.getValue().toString());
+                expressions.add(runxthan);
             }
-            return expressions;
+            else if ("starttime".equals(key)) {
+                // Filter based on the start time.
+                final BooleanExpression startTimexthan = RunInfoPredicates.isStartTimeXThan(
+                        searchCriteria.getOperation(), searchCriteria.getValue().toString());
+                expressions.add(startTimexthan);
+            }
+            else if ("endtime".equals(key)) {
+                // Filter based on the end time.
+                final BooleanExpression endTimexthan = RunInfoPredicates.isEndTimeXThan(
+                        searchCriteria.getOperation(), searchCriteria.getValue().toString());
+                expressions.add(endTimexthan);
+            }
         }
-        catch (final Exception e) {
-            throw new CdbServiceException(e.getMessage());
-        }
+        return expressions;
     }
 
 }

@@ -35,7 +35,7 @@ public class CrestLobHandler {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(CrestLobHandler.class);
 
     /**
      * Datasource.

@@ -45,13 +45,13 @@ public final class RunInfoPredicates {
         log.debug("isRunXThan: argument {}  operation {} ", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QRunInfo.runInfo.runNumber.lt(new BigDecimal(num));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QRunInfo.runInfo.runNumber.gt(new BigDecimal(num));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QRunInfo.runInfo.runNumber.eq(new BigDecimal(num));
         }
         return pred;
@@ -68,13 +68,13 @@ public final class RunInfoPredicates {
         log.debug("isStartTimeXThan: argument {}  operation {} ", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QRunInfo.runInfo.startTime.lt(new Date(new Long(num)));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QRunInfo.runInfo.startTime.gt(new Date(new Long(num)));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QRunInfo.runInfo.startTime.eq(new Date(new Long(num)));
         }
         return pred;
@@ -91,13 +91,13 @@ public final class RunInfoPredicates {
         log.debug("isEndTimeXThan: argument {}  operation {} ", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QRunInfo.runInfo.endTime.lt(new Date(new Long(num)));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QRunInfo.runInfo.endTime.gt(new Date(new Long(num)));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QRunInfo.runInfo.endTime.eq(new Date(new Long(num)));
         }
         return pred;

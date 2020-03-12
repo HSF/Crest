@@ -47,7 +47,7 @@ public class MonitoringApiServiceImpl extends MonitoringApiService {
 			}
 			dtolist = monitoringrepo.selectTagInfo(tagpattern);
 			
-			if (dtolist == null) {
+			if (dtolist == null || dtolist.isEmpty()) {
 				final String message = "No resource has been found";
 				final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, message);
 				return Response.status(Response.Status.NOT_FOUND).entity(resp).build();

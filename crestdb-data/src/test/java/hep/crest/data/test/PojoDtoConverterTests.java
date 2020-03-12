@@ -68,7 +68,7 @@ public class PojoDtoConverterTests {
     @Qualifier("mapper")
     private MapperFacade mapper;
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PojoDtoConverterTests.class);
 
     @Test
     public void testGlobalTagConverter() throws Exception {

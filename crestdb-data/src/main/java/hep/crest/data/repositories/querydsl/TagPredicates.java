@@ -22,7 +22,7 @@ public final class TagPredicates {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger(TagPredicates.class);
+    private static final Logger log = LoggerFactory.getLogger(TagPredicates.class);
 
     /**
      * Private Ctor.
@@ -72,13 +72,13 @@ public final class TagPredicates {
         log.debug("isInsertionTimeXThan: argument {} operation {}", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QTag.tag.insertionTime.lt(new Date(new Long(num)));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QTag.tag.insertionTime.gt(new Date(new Long(num)));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QTag.tag.insertionTime.eq(new Date(new Long(num)));
         }
         return pred;
@@ -95,13 +95,13 @@ public final class TagPredicates {
         log.debug("isModificationTimeXThan: argument {} operation {}", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QTag.tag.modificationTime.lt(new Date(new Long(num)));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QTag.tag.modificationTime.gt(new Date(new Long(num)));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QTag.tag.modificationTime.eq(new Date(new Long(num)));
         }
         return pred;

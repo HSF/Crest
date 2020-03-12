@@ -45,7 +45,7 @@ import hep.crest.swagger.model.PayloadDto;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RepositorySqliteTests {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(RepositorySqliteTests.class);
 
     @Autowired
     private TagRepository tagrepository;

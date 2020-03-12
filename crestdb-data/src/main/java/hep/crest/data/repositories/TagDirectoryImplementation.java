@@ -28,7 +28,7 @@ public class TagDirectoryImplementation {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(TagDirectoryImplementation.class);
+    private static final Logger log = LoggerFactory.getLogger(TagDirectoryImplementation.class);
 
     /**
      * The directory tools.
@@ -39,7 +39,6 @@ public class TagDirectoryImplementation {
      * Default ctor.
      */
     public TagDirectoryImplementation() {
-        super();
     }
 
     /**
@@ -47,7 +46,6 @@ public class TagDirectoryImplementation {
      *            the DirectoryUtilities
      */
     public TagDirectoryImplementation(DirectoryUtilities dutils) {
-        super();
         this.dirtools = dutils;
     }
 
@@ -70,6 +68,7 @@ public class TagDirectoryImplementation {
             return true;
         }
         catch (final CdbServiceException e) {
+            log.error("Cannot find tag directory {} : {}", id, e);
             return false;
         }
     }
@@ -86,8 +85,8 @@ public class TagDirectoryImplementation {
             tagfilepath = dirtools.getTagFilePath(id);
             return readTagFile(tagfilepath);
         }
-        catch (final CdbServiceException e1) {
-            log.error("Cannot find file with id {} ", id);
+        catch (final CdbServiceException e) {
+            log.error("Cannot find tag {} : {}", id, e);
         }
         return null;
     }
@@ -112,7 +111,7 @@ public class TagDirectoryImplementation {
             return readValue;
         }
         catch (final IOException e) {
-            log.error("Error in reading tag file from path {}", tagfilepath);
+            log.error("Error in reading tag file from path {}: {}", tagfilepath, e);
         }
         return null;
     }
@@ -140,10 +139,11 @@ public class TagDirectoryImplementation {
      * @return List<TagDto>
      */
     public List<TagDto> findByNameLike(String name) {
-        List<String> filteredByNameList;
+        final List<String> filteredByNameList;
         filteredByNameList = dirtools.getTagDirectories().stream().filter(x -> x.matches(name))
                 .collect(Collectors.toList());
         return filteredByNameList.stream().map(x -> this.findOne(x)).collect(Collectors.toList());
+
     }
 
     /**
@@ -168,11 +168,11 @@ public class TagDirectoryImplementation {
                 return entity;
             }
             else {
-                throw new CdbServiceException("Tag path is null...");
+                throw new CdbServiceException("Tag path is null for " + tagname);
             }
         }
         catch (final IOException x) {
-            throw new CdbServiceException(x.getMessage());
+            throw new CdbServiceException("Cannnot save tag entity for " + tagname, x);
         }
     }
 
@@ -189,7 +189,7 @@ public class TagDirectoryImplementation {
             writer.write(jsonstr);
         }
         catch (final IOException x) {
-            throw new CdbServiceException("Cannot write " + jsonstr + " in JSON file");
+            throw new CdbServiceException("Cannot write " + jsonstr + " in JSON file", x);
         }
     }
 

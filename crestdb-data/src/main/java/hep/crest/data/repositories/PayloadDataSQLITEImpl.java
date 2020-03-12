@@ -39,12 +39,12 @@ import hep.crest.data.repositories.externals.PayloadRequests;
  * @author formica
  *
  */
-public class PayloadDataSQLITEImpl extends PayloadDataGeneral implements PayloadDataBaseCustom {
+public class PayloadDataSQLITEImpl extends AbstractPayloadDataGeneral implements PayloadDataBaseCustom {
 
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PayloadDataSQLITEImpl.class);
 
     /**
      * @param ds

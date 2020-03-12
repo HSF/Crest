@@ -26,7 +26,7 @@ public final class HashGenerator {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger("HashGenerator");
+    private static final Logger log = LoggerFactory.getLogger(HashGenerator.class);
 
     /**
      * MD5.

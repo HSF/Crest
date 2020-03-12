@@ -39,7 +39,7 @@ public class PojoDtoConverterConfig {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PojoDtoConverterConfig.class);
 
     /**
      * @return MapperFactory

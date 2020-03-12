@@ -72,14 +72,8 @@ public class DateSerializer extends JsonSerializer<Date> {
      */
     @Override
     public void serialize(Date ts, JsonGenerator jg, SerializerProvider sp) throws IOException {
-        try {
-            log.debug("Use private version of serializer....{}", getLocformatter());
-            jg.writeString(this.format(ts));
-        }
-        catch (final Exception ex) {
-            log.error("Failed to serialize using format {}: {}", getLocformatter(),
-                    ex.getMessage());
-        }
+        log.debug("Use private version of serializer....{}", getLocformatter());
+        jg.writeString(this.format(ts));
     }
 
     /**
