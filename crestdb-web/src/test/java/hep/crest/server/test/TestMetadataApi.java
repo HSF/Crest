@@ -139,15 +139,4 @@ public class TestMetadataApi {
         log.info("Received response: {}", resp3);
         assertThat(resp3.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
     }
-
-    @Test
-    public void testB_fsApi() throws Exception {
-
-        final ResponseEntity<String> response = this.testRestTemplate.exchange(
-                "/crestapi/fs/tar?tagname=SB-TAG-IOV-01", HttpMethod.POST, null, String.class);
-        log.info("Received response: {}", response);
-        assertThat(response.getStatusCode()).isGreaterThan(HttpStatus.OK);
-
-    }
-
 }

@@ -94,7 +94,9 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
         }
         catch (final AlreadyExistsPojoException e) {
             // Global tag resource exists already. Send a 303.
-            return Response.status(Response.Status.SEE_OTHER).entity(body).build();
+            final String msg = "Global tag already exists for name : " + body.getName();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, msg);
+            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
         }
         catch (final CdbServiceException e) {
             // Error in creation. Send a 500.
@@ -132,7 +134,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
         }
         catch (final NotExistsPojoException e) {
             // Not found. Send a 404.
-            final String message = "Global tag " + name + " not found...";
+            final String message = "Global tag not found for name " + name;
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
@@ -147,8 +149,13 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see hep.crest.server.swagger.api.GlobaltagsApiService#findGlobalTagFetchTags(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * hep.crest.server.swagger.api.GlobaltagsApiService#findGlobalTagFetchTags(java
+     * .lang.String, java.lang.String, java.lang.String,
+     * javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
      */
     @Override
     public Response findGlobalTagFetchTags(String name, String record, String label,
@@ -200,8 +207,13 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see hep.crest.server.swagger.api.GlobaltagsApiService#listGlobalTags(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * hep.crest.server.swagger.api.GlobaltagsApiService#listGlobalTags(java.lang.
+     * String, java.lang.Integer, java.lang.Integer, java.lang.String,
+     * javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
      */
     @Override
     public Response listGlobalTags(String by, Integer page, Integer size, String sort,
