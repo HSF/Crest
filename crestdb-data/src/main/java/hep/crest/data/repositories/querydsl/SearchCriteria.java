@@ -15,15 +15,15 @@ public class SearchCriteria {
     /**
      * The key.
      */
-    private String key;
+    private final String key;
     /**
      * The operation.
      */
-    private String operation;
+    private final String operation;
     /**
      * The value.
      */
-    private Object value;
+    private final Object value;
 
     /**
      * Default Ctor.
@@ -50,14 +50,6 @@ public class SearchCriteria {
     }
 
     /**
-     * @param key
-     *            the key to set
-     */
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    /**
      * @return the operation
      */
     public String getOperation() {
@@ -65,26 +57,10 @@ public class SearchCriteria {
     }
 
     /**
-     * @param operation
-     *            the operation to set
-     */
-    public void setOperation(String operation) {
-        this.operation = operation;
-    }
-
-    /**
      * @return the value
      */
     public Object getValue() {
         return value;
-    }
-
-    /**
-     * @param value
-     *            the value to set
-     */
-    public void setValue(Object value) {
-        this.value = value;
     }
 
     /**

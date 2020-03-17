@@ -20,7 +20,7 @@ import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.security.FolderService;
+import hep.crest.server.services.FolderService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.FoldersApiService;
 import hep.crest.server.swagger.api.NotFoundException;
@@ -30,6 +30,12 @@ import hep.crest.swagger.model.FolderSetDto;
 import hep.crest.swagger.model.GenericMap;
 
 /**
+ * Rest endpoint for folder administration.
+ * The folders do not exist in CMS environment.
+ * They can be used in ATLAS as a way to map old COOL nodes and for authorization purposes.
+ * An important element for this authorization is the base tag name pattern, which impose
+ * a string for all tag names of a given system.
+ *
  * @author formica
  *
  */
@@ -41,7 +47,7 @@ public class FoldersApiServiceImpl extends FoldersApiService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(FoldersApiServiceImpl.class);
 
     /**
      * Helper.
@@ -74,16 +80,18 @@ public class FoldersApiServiceImpl extends FoldersApiService {
             throws NotFoundException {
         log.info("FolderRestController processing request for creating a folder");
         try {
+            // Insert the new folder.
             final FolderDto saved = folderService.insertFolder(body);
             return Response.created(info.getRequestUri()).entity(saved).build();
         }
         catch (final AlreadyExistsPojoException e) {
+            // The folder exists, send a 303
             return Response.status(Response.Status.SEE_OTHER).entity(body).build();
         }
         catch (final CdbServiceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // The folder insertion failed, send a 500...
             final String message = e.getMessage();
+            log.error("Cannot create folder {}: {}", body, e);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -102,15 +110,19 @@ public class FoldersApiServiceImpl extends FoldersApiService {
             UriInfo info) throws NotFoundException {
         try {
             log.debug("Search resource list using by={}, sort={}", by, sort);
+            // Create a default page requests with 10000 size for retrieval.
+            // This method does not allow to set pagination.
             final PageRequest preq = prh.createPageRequest(0, 10000, sort);
             List<FolderDto> dtolist = null;
             List<SearchCriteria> params = null;
             final GenericMap filters = new GenericMap();
-           
-            if (by.equals("none")) {
+            // No search conditions.
+            if ("none".equals(by)) {
+                // Find all folders.
                 dtolist = folderService.findAllFolders(null, preq);
             }
             else {
+                // A search pattern exists, create the criteria.
                 params = prh.createMatcherCriteria(by);
                 for (final SearchCriteria sc : params) {
                     filters.put(sc.getKey(), sc.getValue().toString());
@@ -127,16 +139,20 @@ public class FoldersApiServiceImpl extends FoldersApiService {
                         wherepred = wherepred.and(exp);
                     }
                 }
+                // Search folder using the expression build before.
                 dtolist = folderService.findAllFolders(wherepred, preq);
             }
             if (dtolist == null) {
+                // Nothing found, send a 404. Should be OK with an Empty list ?
                 final String message = "No resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                         message);
                 return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
             }
+            // Prepare the response set.
             final CrestBaseResponse setdto = new FolderSetDto().resources(dtolist)
                     .size((long) dtolist.size()).datatype("folders");
+            // Set the filters.
             if (!filters.isEmpty()) {
                 setdto.filter(filters);
             }
@@ -144,6 +160,7 @@ public class FoldersApiServiceImpl extends FoldersApiService {
 
         }
         catch (final CdbServiceException e) {
+            // Error occurred. Send a 500.
             final String message = e.getMessage();
             log.error("Api method listFolders got exception : {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,

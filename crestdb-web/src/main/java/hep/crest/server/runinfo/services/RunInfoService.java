@@ -4,6 +4,7 @@
 package hep.crest.server.runinfo.services;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +37,7 @@ public class RunInfoService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(RunInfoService.class);
 
     /**
      * Repository.
@@ -61,22 +62,16 @@ public class RunInfoService {
      *             If an Exception occurred
      */
     public List<RunInfoDto> findAllRunInfo(Predicate qry, Pageable req) throws CdbServiceException {
-        try {
-            Iterable<RunInfo> entitylist = null;
-            if (qry == null) {
-                entitylist = runinfoRepository.findAll(req);
-            }
-            else {
-                entitylist = runinfoRepository.findAll(qry, req);
-            }
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
+        Iterable<RunInfo> entitylist = null;
+        if (qry == null) {
+            entitylist = runinfoRepository.findAll(req);
         }
-        catch (final Exception e) {
-            log.error("Exception in retrieving run list using predicate and pagination...");
-            throw new CdbServiceException(
-                    "Cannot find all runs using predicate and pagination: " + e.getMessage());
+        else {
+            entitylist = runinfoRepository.findAll(qry, req);
         }
+
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
     }
 
     /**
@@ -88,17 +83,11 @@ public class RunInfoService {
      */
     @Transactional
     public RunInfoDto insertRunInfo(RunInfoDto dto) throws CdbServiceException {
-        try {
-            log.debug("Create runinfo from dto {}", dto);
-            final RunInfo entity = mapper.map(dto, RunInfo.class);
-            final RunInfo saved = runinfoRepository.save(entity);
-            log.debug("Saved entity: {}", saved);
-            return mapper.map(saved, RunInfoDto.class);
-        }
-        catch (final Exception e) {
-            log.error("Exception in storing run info {}", dto);
-            throw new CdbServiceException("Cannot store runlumi : " + e.getMessage());
-        }
+        log.debug("Create runinfo from dto {}", dto);
+        final RunInfo entity = mapper.map(dto, RunInfo.class);
+        final RunInfo saved = runinfoRepository.save(entity);
+        log.debug("Saved entity: {}", saved);
+        return mapper.map(saved, RunInfoDto.class);
     }
 
     /**
@@ -112,19 +101,18 @@ public class RunInfoService {
      */
     public List<RunInfoDto> selectInclusiveByRun(BigDecimal from, BigDecimal to)
             throws CdbServiceException {
-        try {
-            List<RunInfo> entitylist = null;
-            entitylist = runinfoRepository.findByRunNumberInclusive(from, to);
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
+        List<RunInfo> entitylist = null;
+        entitylist = runinfoRepository.findByRunNumberInclusive(from, to);
+        if (entitylist == null) {
+            log.warn("Empty list for run information retrieved from selectInclusiveByRun {} {}",
+                    from, to);
+            return new ArrayList<>();
         }
-        catch (final Exception e) {
-            log.error("Exception in retrieving run list using run range {} {}...", from, to);
-            throw new CdbServiceException(
-                    "Cannot find all runs using run range: " + e.getMessage());
-        }
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
+
     }
-    
+
     /**
      * @param from
      *            the Date.
@@ -134,19 +122,16 @@ public class RunInfoService {
      *             If an Exception occurred.
      * @return List<RunInfoDto>
      */
-    public List<RunInfoDto> selectInclusiveByDate(Date from, Date to)
-            throws CdbServiceException {
-        try {
-            List<RunInfo> entitylist = null;
-            entitylist = runinfoRepository.findByDateInclusive(from, to);
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
+    public List<RunInfoDto> selectInclusiveByDate(Date from, Date to) throws CdbServiceException {
+        List<RunInfo> entitylist = null;
+        entitylist = runinfoRepository.findByDateInclusive(from, to);
+        if (entitylist == null) {
+            log.warn("Empty list for run information retrieved from selectInclusiveByDate {} {}",
+                    from, to);
+            return new ArrayList<>();
         }
-        catch (final Exception e) {
-            log.error("Exception in retrieving run list using date range {} {}...", from, to);
-            throw new CdbServiceException(
-                    "Cannot find all runs using date range: " + e.getMessage());
-        }
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
 
     }
 

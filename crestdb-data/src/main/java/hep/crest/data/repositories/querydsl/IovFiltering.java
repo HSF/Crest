@@ -6,6 +6,7 @@ package hep.crest.data.repositories.querydsl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class IovFiltering implements IFilteringCriteria {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(IovFiltering.class);
 
     /*
      * (non-Javadoc)
@@ -45,7 +46,7 @@ public class IovFiltering implements IFilteringCriteria {
         for (final SearchCriteria searchCriteria : criteria) {
             log.debug("search criteria {} {} {}", searchCriteria.getKey(),
                     searchCriteria.getOperation(), searchCriteria.getValue());
-            final String key = searchCriteria.getKey().toLowerCase();
+            final String key = searchCriteria.getKey().toLowerCase(Locale.ENGLISH);
             if ("tagname".equals(key)) {
                 // Filter based on the tag name.
                 final BooleanExpression objtyplike = IovPredicates

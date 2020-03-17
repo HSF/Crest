@@ -24,6 +24,16 @@ public class EmptyPojoException extends CdbServiceException {
         super(string);
     }
 
+    /**
+     * @param string
+     *            the String
+     * @param err
+     *            the Throwable
+     */
+    public EmptyPojoException(String string, Throwable err) {
+        super(string, err);
+    }
+
     /*
      * (non-Javadoc)
      *

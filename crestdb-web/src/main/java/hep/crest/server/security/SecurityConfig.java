@@ -23,6 +23,9 @@ import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import hep.crest.data.config.CrestProperties;
 
 /**
+ * Web security configuration.
+ *
+ * @version %I%, %G%
  * @author formica
  *
  */
@@ -32,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     /**
      * Properties.
@@ -109,25 +112,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         log.debug("Configure http security rules");
 
-        if (cprops.getSecurity().equals("active")) {
+        if ("active".equals(cprops.getSecurity())) {
             http.authorizeRequests().antMatchers(HttpMethod.GET, "/**").permitAll()
                     .antMatchers(HttpMethod.POST, "/**").access("hasAuthority('ATLAS-CONDITIONS')")
                     .antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU").and().httpBasic().and()
                     .csrf().disable();
 
         }
-        else if (cprops.getSecurity().equals("none")) {
+        else if ("none".equals(cprops.getSecurity())) {
             log.info("No security enabled for this server....");
             http.authorizeRequests().antMatchers("/**").permitAll().and().httpBasic().and().csrf()
                     .disable();
         }
-        else if (cprops.getSecurity().equals("reco")) {
+        else if ("reco".equals(cprops.getSecurity())) {
             http.authorizeRequests().antMatchers(HttpMethod.POST, "/**").denyAll()
                     .antMatchers(HttpMethod.PUT, "/**").denyAll()
                     .antMatchers(HttpMethod.DELETE, "/**").denyAll().and().httpBasic().and().csrf()
                     .disable();
         }
-        else if (cprops.getSecurity().equals("weak")) {
+        else if ("weak".equals(cprops.getSecurity())) {
             log.info("Low security enabled for this server....");
             http.authorizeRequests().antMatchers(HttpMethod.DELETE, "/**").hasRole("GURU")
                     .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -149,10 +152,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         log.debug("Configure authentication manager");
-        if (cprops.getAuthenticationtype().equals("database")) {
+        if ("database".equals(cprops.getAuthenticationtype())) {
             auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
         }
-        else if (cprops.getAuthenticationtype().equals("ldap")) {
+        else if ("ldap".equals(cprops.getAuthenticationtype())) {
             // here put LDAP
             log.debug("Use ldap authentication: {} {} {} {} ", url, managerDn, userSearchBase,
                     userDnPatterns);

@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -39,22 +40,25 @@ public class DirectoryService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(DirectoryService.class);
+    private static final Logger log = LoggerFactory.getLogger(DirectoryService.class);
 
     /**
      * Repository.
      */
     @Autowired
+    @Qualifier("fstagrepository")
     private TagDirectoryImplementation fstagrepository;
     /**
      * Repository.
      */
     @Autowired
+    @Qualifier("fsiovrepository")
     private IovDirectoryImplementation fsiovrepository;
     /**
      * Repository.
      */
     @Autowired
+    @Qualifier("fspayloadrepository")
     private PayloadDirectoryImplementation fspayloadrepository;
 
     /**
@@ -89,6 +93,21 @@ public class DirectoryService {
     }
 
     /**
+     * @param dto
+     *            the TagDto
+     * @return TagDto or null.
+     */
+    public TagDto insertTag(TagDto dto) {
+        try {
+            return fstagrepository.save(dto);
+        }
+        catch (final CdbServiceException e) {
+            log.error("Cannot save tag {}: {}", dto, e);
+        }
+        return null;
+    }
+
+    /**
      * @param tagname
      *            the String
      * @return List<IovDto>
@@ -98,7 +117,7 @@ public class DirectoryService {
             return fsiovrepository.findByTagName(tagname);
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot find iov list for tag {}: {}", tagname, e.getMessage());
+            log.error("Cannot find iov list for tag {}: {}", tagname, e);
         }
         return new ArrayList<>();
     }
@@ -113,7 +132,7 @@ public class DirectoryService {
             return fspayloadrepository.find(hash);
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot find payload for hash {} : {}", hash, e.getMessage());
+            log.error("Cannot find payload for hash {} : {}", hash, e);
         }
         return null;
     }
@@ -155,10 +174,10 @@ public class DirectoryService {
                     "Dump a list of " + iovlist.size() + " iovs into file system...");
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot dump tag {} in path {} : {}", tagname, path, e.getMessage());
+            log.error("Cannot dump tag {} in path {} : {}", tagname, path, e);
         }
         catch (final NotExistsPojoException e) {
-            log.error("Cannot find payload  : {}", e.getMessage());
+            log.error("Cannot find payload  : {}", e);
         }
         return null;
     }

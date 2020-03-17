@@ -55,7 +55,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
             return jdbcTemplate.query(sql, new Object[] {tagpattern}, new PayloadInfoMapper());
         }
         catch (final EmptyResultDataAccessException e) {
-            log.error("Cannot find tag information for patter {}: {}", tagpattern, e);
+            log.error("Cannot find tag information for pattern {}: {}", tagpattern, e);
         }
         return new ArrayList<>();
     }

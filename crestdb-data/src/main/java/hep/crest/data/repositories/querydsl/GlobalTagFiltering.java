@@ -5,6 +5,7 @@ package hep.crest.data.repositories.querydsl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public class GlobalTagFiltering implements IFilteringCriteria {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(GlobalTagFiltering.class);
 
     /*
      * (non-Javadoc)
@@ -45,7 +46,7 @@ public class GlobalTagFiltering implements IFilteringCriteria {
         for (final SearchCriteria searchCriteria : criteria) {
             log.debug("search criteria {} {} {}", searchCriteria.getKey(),
                     searchCriteria.getOperation(), searchCriteria.getValue());
-            final String key = searchCriteria.getKey().toLowerCase();
+            final String key = searchCriteria.getKey().toLowerCase(Locale.ENGLISH);
             if ("workflow".equals(key)) {
                 // Filter based on the worlflow.
                 final BooleanExpression wflike = GlobalTagPredicates
@@ -76,7 +77,7 @@ public class GlobalTagFiltering implements IFilteringCriteria {
                         searchCriteria.getOperation(), searchCriteria.getValue().toString());
                 expressions.add(validityxthan);
             }
-            else if ("insertionTime".equals(key)) {
+            else if ("insertiontime".equals(key)) {
                 // Filter based on the insertion time.
                 final BooleanExpression insertionTimexthan = GlobalTagPredicates
                         .isInsertionTimeXThan(searchCriteria.getOperation(),

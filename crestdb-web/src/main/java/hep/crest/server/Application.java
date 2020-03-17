@@ -35,7 +35,7 @@ public class Application extends SpringBootServletInitializer {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     /**
      * @param ctx

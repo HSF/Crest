@@ -25,7 +25,7 @@ public final class RunInfoPredicates {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger(RunInfoPredicates.class);
+    private static final Logger log = LoggerFactory.getLogger(RunInfoPredicates.class);
 
     /**
      * Default Ctor.

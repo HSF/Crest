@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.TagService;
 import hep.crest.swagger.model.IovDto;
@@ -27,7 +28,7 @@ public class IovSynchroAspect {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(IovSynchroAspect.class);
 
     /**
      * Properties.
@@ -47,6 +48,7 @@ public class IovSynchroAspect {
     private IovService iovService;
 
     /**
+     * Check synchronization.
      * @param dto
      *            the IovDto
      */
@@ -63,13 +65,15 @@ public class IovSynchroAspect {
         try {
             tagdto = tagService.findOne(dto.getTagName());
         }
-        catch (final CdbServiceException e) {
+        catch (final NotExistsPojoException e) {
             log.error("Error checking synchronization : {}", e.getMessage());
         }
+        
         if (tagdto == null) {
             log.debug("Cannot find synchro for null tag");
             return;
         }
+        // Get synchro type from tag.
         final String synchro = tagdto.getSynchronization();
         if (synchro.equalsIgnoreCase("SV")) {
             log.warn("Can only append IOVs....");

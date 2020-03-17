@@ -22,6 +22,16 @@ public class AlreadyExistsPojoException extends Exception {
         super(string);
     }
 
+    /**
+     * @param string
+     *            the String
+     * @param err
+     *            the Throwable
+     */
+    public AlreadyExistsPojoException(String string, Throwable err) {
+        super(string, err);
+    }
+
     /*
      * (non-Javadoc)
      *

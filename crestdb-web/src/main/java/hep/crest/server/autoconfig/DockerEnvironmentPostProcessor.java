@@ -49,7 +49,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(DockerEnvironmentPostProcessor.class);
 
     static {
         SECRETS_MAP = new HashMap<>();
@@ -77,7 +77,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
             }
         }
         catch (final CdbServiceException e) {
-            log.error("POSTPROCESS ENV Exception {}", e.getMessage());
+            log.error("POSTPROCESS ENV Exception {}", e);
         }
     }
 
@@ -101,7 +101,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
                 String mPassword = getStringFromInputStream(resource.getInputStream());
                 mPassword = mPassword.replaceAll("\\n", "");
                 map.put(springkey, mPassword);
-                if (springkey.equals("store.password")) {
+                if ("store.password".equals(springkey)) {
                     System.setProperty("javax.net.ssl.trustStorePassword", mPassword);
                     System.setProperty("javax.net.ssl.trustStore", "/run/secrets/truststore.jks");
                 }
@@ -112,7 +112,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
             }
         }
         catch (final IOException e) {
-            throw new CdbServiceException(e.getMessage());
+            throw new CdbServiceException("Error getting secrets", e);
         }
     }
 

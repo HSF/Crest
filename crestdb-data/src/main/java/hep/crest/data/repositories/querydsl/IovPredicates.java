@@ -43,18 +43,6 @@ public final class IovPredicates {
     }
 
     /**
-     * @param since
-     *            the BigDecimal
-     * @param until
-     *            the BigDecimal
-     * @return BooleanExpression
-     */
-    public static BooleanExpression hasSinceBetween(BigDecimal since, BigDecimal until) {
-        log.debug("hasSinceBetween: argument {} {}", since, until);
-        return QIov.iov.id.since.between(since, until);
-    }
-
-    /**
      * @param oper
      *            the String
      * @param since

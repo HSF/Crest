@@ -104,7 +104,7 @@ public final class RunIovConverter {
         if (arun == null) {
             return null;
         }
-        if (arun.equals("Inf")) {
+        if ("Inf".equals(arun)) {
             return new BigDecimal(COOL_MAX_DATE);
         }
         final BigInteger coolrun = new BigInteger(arun);
@@ -150,12 +150,12 @@ public final class RunIovConverter {
      * @return The COOL time.
      */
     public static BigDecimal getCoolRunLumi(final String arun, final String lb) {
-        Long runlong = null;
-        Long lblong = null;
         if (arun == null) {
             return null;
         }
-        if (arun.equals("Inf")) {
+        Long runlong = null;
+        Long lblong = null;
+        if ("Inf".equals(arun)) {
             runlong = COOL_MAX_RUN;
             lblong = COOL_MAX_LUMIBLOCK;
         }
@@ -265,7 +265,7 @@ public final class RunIovConverter {
                 }
             }
         }
-        else if (iovBase.equals("time")) {
+        else if ("time".equals(iovBase)) {
             if (time == 0) {
                 return "0";
             }
@@ -316,7 +316,7 @@ public final class RunIovConverter {
         if (iovBase.startsWith("run-")) {
             return getCoolRunLumi(runortime, 0L);
         }
-        else if (iovBase.equals("time")) {
+        else if ("time".equals(iovBase)) {
             return new BigDecimal(runortime * TO_NANOSECONDS);
         }
         else {

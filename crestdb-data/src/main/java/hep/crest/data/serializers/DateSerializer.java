@@ -47,7 +47,7 @@ public class DateSerializer extends JsonSerializer<Date> {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(DateSerializer.class);
 
     /**
      * Date Formatter.
@@ -94,10 +94,10 @@ public class DateSerializer extends JsonSerializer<Date> {
         if (this.locFormatter != null) {
             return locFormatter;
         }
-        if (pattern.equals("ISO_OFFSET_DATE_TIME")) {
+        if ("ISO_OFFSET_DATE_TIME".equals(pattern)) {
             locFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         }
-        else if (pattern.equals("ISO_LOCAL_DATE_TIME")) {
+        else if ("ISO_LOCAL_DATE_TIME".equals(pattern)) {
             locFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         }
         else {

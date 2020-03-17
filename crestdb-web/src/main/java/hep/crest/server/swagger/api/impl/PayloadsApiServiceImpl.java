@@ -57,6 +57,8 @@ import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.PayloadSetDto;
 
 /**
+ * Rest endpoint for payloads.
+ *
  * @author formica
  *
  */
@@ -108,15 +110,20 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     private ObjectMapper jacksonMapper;
 
 
+    /* (non-Javadoc)
+     * @see hep.crest.server.swagger.api.PayloadsApiService#createPayload(hep.crest.swagger.model.PayloadDto, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     */
     @Override
     public Response createPayload(PayloadDto body, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         try {
+            // Create a new payload using the body in the request.
             final PayloadDto saved = payloadService.insertPayload(body);
             log.debug("Saved PayloadDto {}", saved);
             return Response.created(info.getRequestUri()).entity(saved).build();
         }
         catch (final CdbServiceException e) {
+            // Exception, send a 500.
             log.error("Error saving PayloadDto {}", body);
             final String msg = "Error creating payload resource using " + body.toString();
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
@@ -138,17 +145,21 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     public Response createPayloadMultiForm(InputStream fileInputStream,
             FormDataContentDisposition fileDetail, FormDataBodyPart payload,
             SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        this.log.info("PayloadRestController processing request to upload payload ");
+        this.log.info("PayloadRestController processing request to upload payload from stream");
         // PayloadDto payload = new PayloadDto();
         try {
+            // Assume the FormDataBodyPart is a JSON string.
             payload.setMediaType(MediaType.APPLICATION_JSON_TYPE);
+            // Get the DTO.
             final PayloadDto payloaddto = payload.getValueAs(PayloadDto.class);
             log.debug("Received body json " + payloaddto);
+            // Create the payload taking binary content from the input stream.
             final PayloadDto saved = payloadService.insertPayloadAndInputStream(payloaddto,
                     fileInputStream);
             return Response.created(info.getRequestUri()).entity(saved).build();
         }
         catch (final CdbServiceException | NullPointerException e) {
+            // Exception, send 500.
             final String msg = "Error creating payload resource : " + e.getCause();
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -170,15 +181,19 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 "PayloadRestController processing request to download payload {} using format {}",
                 hash, format);
         try {
+            // Get only metadata from the payload.
             final PayloadDto pdto = payloadService.getPayloadMetaInfo(hash);
             final String ptype = pdto.getObjectType();
             log.debug("Found metadata {}", pdto);
-
+            // Get the media type. It utilize the objectType field.
             final MediaType media_type = getMediaType(ptype);
 
             if (format == null || format.equalsIgnoreCase("BLOB")
                     || format.equalsIgnoreCase("BIN")) {
+                // The client requested to get binary data.
+                // Get the payload data.
                 final InputStream in = payloadService.getPayloadData(hash);
+                // Stream data in output.
                 final StreamingOutput stream = new StreamingOutput() {
                     @Override
                     public void write(OutputStream os) throws IOException, WebApplicationException {
@@ -210,6 +225,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 final String rettype = media_type.toString();
                 final String ext = getExtension(ptype);
                 final String fname = hash + "." + ext;
+                // Set the content type in the response, and the file name as well.
                 return Response.ok(stream) /// MediaType.APPLICATION_JSON_TYPE)
                         .header("Content-type", rettype)
                         .header("Content-Disposition", "Inline; filename=\"" + fname + "\"")
@@ -218,8 +234,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                         .build();
             }
             else {
+                // The client requested to get a DTO.
                 log.debug("Retrieve the full pojo with hash {}", hash);
                 final PayloadDto entity = payloadService.getPayload(hash);
+                // Build the DTO Set for the response.
                 final PayloadSetDto psetdto = buildSet(entity, hash);
                 return Response.ok()
                         .header("Content-type", MediaType.APPLICATION_JSON_TYPE.toString())
@@ -227,9 +245,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             }
         }
         catch (final NotExistsPojoException e) {
+            // The Payload hash was not found.
             return notFoundPojo(hash);
         }
         catch (final CdbServiceException e) {
+            // Exception, send a 500.
             final String msg = "Error retrieving payload from hash " + hash;
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -256,6 +276,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 "PayloadRestController processing request to store payload with iov in tag {} and at since {} using format {}",
                 tag, since, format);
         try {
+            // Store payload with multi form
             String fdetailsname = fileDetail.getFileName();
             if (fdetailsname == null || fdetailsname.isEmpty()) {
                 fdetailsname = ".blob";
@@ -263,6 +284,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 final Path p = Paths.get(fdetailsname);
                 fdetailsname = "_"+p.getFileName().toString(); 
             }
+            // Create a temporary file name from tag name and time of validity.
             final String filename = cprops.getDumpdir() + SLASH + tag + "_" + since
                     + fdetailsname;
             if (format == null) {
@@ -271,6 +293,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             final Map<String,String> sinfomap = new HashMap<>();
             sinfomap.put("filename", filename);
             sinfomap.put("format", format);
+            // Create the DTO, the version here is ignored. It could be added from the Form data.
             final PayloadDto pdto = new PayloadDto().objectType(format)
                     .streamerInfo(jacksonMapper.writeValueAsBytes(sinfomap)).version("none");
             final String hash = getHash(fileInputStream, filename);
@@ -495,6 +518,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                         .id(dto.getPayloadHash()).message("Iov already exists in tag "
                                 + dto.getTagName() + " with time " + dto.getSince());
             }
+            catch (final NotExistsPojoException e) {
+                return new HTTPResponse().code(Response.Status.NOT_FOUND.getStatusCode())
+                        .id(dto.getPayloadHash()).message("Tag not found "
+                                + dto.getTagName());
+            }
         }
         final Path temppath = Paths.get(filename);
         try (InputStream is = new FileInputStream(filename);) {
@@ -513,6 +541,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             return new HTTPResponse().code(Response.Status.NOT_MODIFIED.getStatusCode())
                     .id(dto.getPayloadHash()).message("Iov already exists in tag "
                             + dto.getTagName() + " with time " + dto.getSince());
+        }
+        catch (final NotExistsPojoException e) {
+            return new HTTPResponse().code(Response.Status.NOT_FOUND.getStatusCode())
+                    .id(dto.getPayloadHash()).message("Tag not found "
+                            + dto.getTagName());
         }
         finally {
             Files.deleteIfExists(temppath);

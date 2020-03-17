@@ -38,7 +38,7 @@ public class GlobalTagMapService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(GlobalTagMapService.class);
 
     /**
      * Repository.
@@ -78,19 +78,12 @@ public class GlobalTagMapService {
      */
     public List<GlobalTagMapDto> getTagMap(String gtName) throws CdbServiceException {
 
-        try {
-            log.debug("Search for GlobalTagMap entries by GlobalTag name {}", gtName);
-            final Iterable<GlobalTagMap> entitylist = globalTagMapRepository
-                    .findByGlobalTagName(gtName);
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, GlobalTagMapDto.class)).collect(Collectors.toList());
-        }
-        catch (final Exception e) {
-            log.debug(
-                    "Exception in retrieving GlobalTagMap entries using findByGlobalTagName expression...{}",
-                    gtName);
-            throw new CdbServiceException("Cannot find GTMap entries by name: " + e.getMessage());
-        }
+        log.debug("Search for GlobalTagMap entries by GlobalTag name {}", gtName);
+        final Iterable<GlobalTagMap> entitylist = globalTagMapRepository
+                .findByGlobalTagName(gtName);
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, GlobalTagMapDto.class)).collect(Collectors.toList());
+
     }
 
     /**
@@ -101,21 +94,13 @@ public class GlobalTagMapService {
      *             If an Exception occurred
      */
     public List<GlobalTagMapDto> getTagMapByTagName(String tagName) throws CdbServiceException {
-        try {
 
-            log.debug("Search for GlobalTagMap entries by TAG name {}", tagName);
+        log.debug("Search for GlobalTagMap entries by TAG name {}", tagName);
 
-            final Iterable<GlobalTagMap> entitylist = globalTagMapRepository.findByTagName(tagName);
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, GlobalTagMapDto.class)).collect(Collectors.toList());
+        final Iterable<GlobalTagMap> entitylist = globalTagMapRepository.findByTagName(tagName);
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, GlobalTagMapDto.class)).collect(Collectors.toList());
 
-        }
-        catch (final Exception e) {
-            log.debug(
-                    "Exception in retrieving GlobalTagMap entries using findByTagName expression...{}",
-                    tagName);
-            throw new CdbServiceException("Cannot find GTMap entries by name: " + e.getMessage());
-        }
     }
 
     /**
@@ -127,29 +112,23 @@ public class GlobalTagMapService {
      */
     @Transactional
     public GlobalTagMapDto insertGlobalTagMap(GlobalTagMapDto dto) throws CdbServiceException {
-        try {
-            log.debug("Create global tag map from dto {}", dto);
-            final GlobalTagMap entity = new GlobalTagMap();
-            final Optional<GlobalTag> gt = globalTagRepository.findById(dto.getGlobalTagName());
-            final Optional<Tag> tg = tagRepository.findById(dto.getTagName());
+        log.debug("Create global tag map from dto {}", dto);
+        final GlobalTagMap entity = new GlobalTagMap();
+        final Optional<GlobalTag> gt = globalTagRepository.findById(dto.getGlobalTagName());
+        final Optional<Tag> tg = tagRepository.findById(dto.getTagName());
 
-            final GlobalTagMapId id = new GlobalTagMapId(dto.getGlobalTagName(), dto.getRecord(),
-                    dto.getLabel());
-            entity.setId(id);
-            gt.ifPresent(mgt -> {
-                globalTagRepository.save(mgt);
-                entity.setGlobalTag(mgt);
-            });
-            tg.ifPresent(mt -> {
-                entity.setTag(mt);
-            });
-            final GlobalTagMap saved = globalTagMapRepository.save(entity);
-            log.debug("Saved entity: {}", saved);
-            return mapper.map(saved, GlobalTagMapDto.class);
-        }
-        catch (final Exception e) {
-            log.debug("Exception in storing global tag map {}", dto);
-            throw new CdbServiceException("Cannot store global tag map: " + e.getMessage());
-        }
+        final GlobalTagMapId id = new GlobalTagMapId(dto.getGlobalTagName(), dto.getRecord(),
+                dto.getLabel());
+        entity.setId(id);
+        gt.ifPresent(mgt -> {
+            globalTagRepository.save(mgt);
+            entity.setGlobalTag(mgt);
+        });
+        tg.ifPresent(mt -> 
+            entity.setTag(mt)
+        );
+        final GlobalTagMap saved = globalTagMapRepository.save(entity);
+        log.debug("Saved entity: {}", saved);
+        return mapper.map(saved, GlobalTagMapDto.class);
     }
 }

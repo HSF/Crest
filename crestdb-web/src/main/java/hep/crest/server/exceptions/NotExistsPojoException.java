@@ -22,6 +22,16 @@ public class NotExistsPojoException extends Exception {
         super(string);
     }
 
+    /**
+     * @param string
+     *            the String
+     * @param err
+     *            the Throwable
+     */
+    public NotExistsPojoException(String string, Throwable err) {
+        super(string, err);
+    }
+
     /*
      * (non-Javadoc)
      *

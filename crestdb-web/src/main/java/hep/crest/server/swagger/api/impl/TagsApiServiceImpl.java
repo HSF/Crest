@@ -21,6 +21,7 @@ import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
@@ -31,6 +32,8 @@ import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSetDto;
 
 /**
+ * Rest endpoint for tag management.
+ *
  * @author formica
  *
  */
@@ -42,7 +45,7 @@ public class TagsApiServiceImpl extends TagsApiService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(TagsApiServiceImpl.class);
 
     /**
      * Helper.
@@ -75,14 +78,18 @@ public class TagsApiServiceImpl extends TagsApiService {
             throws NotFoundException {
         log.info("TagRestController processing request for creating a tag");
         try {
+            // Create a tag.
             final TagDto saved = tagService.insertTag(body);
+            // Response is 201.
             return Response.created(info.getRequestUri()).entity(saved).build();
         }
         catch (final AlreadyExistsPojoException e) {
+            // Exception, resource exists, send 303.
             log.error("Cannot create tag {}, name already exists...", body);
             return Response.status(Response.Status.SEE_OTHER).entity(body).build();
         }
         catch (final CdbServiceException e) {
+            // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method createTag got exception {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
@@ -103,16 +110,12 @@ public class TagsApiServiceImpl extends TagsApiService {
             UriInfo info) throws NotFoundException {
         log.info("TagRestController processing request for creating a tag");
         try {
+            // Search tag.
             final TagDto dto = tagService.findOne(name);
-            if (dto == null) {
-                log.debug("Cannot update null tag...." + name);
-                final String message = "Tag " + name + " not found...";
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                        message);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-            }
+            // Loop over map body keys.
             for (final String key : body.keySet()) {
-                if (key == "description") {
+                if ("description".equals(key)) {
+                    // Update description.
                     dto.setDescription(body.get(key));
                 }
                 if (key == "timeType") {
@@ -137,12 +140,12 @@ public class TagsApiServiceImpl extends TagsApiService {
             return Response.ok(info.getRequestUri()).entity(saved).build();
 
         }
-        catch (final CdbServiceException e) {
-            final String message = e.getMessage();
-            log.error("Exception in updateTag : {}", e.getMessage());
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+        catch (final NotExistsPojoException e) {
+            // Exception, tag not found, send 404.
+            final String message = "No tag resource has been found for " + name;
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                     message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
         }
     }
 
@@ -155,25 +158,20 @@ public class TagsApiServiceImpl extends TagsApiService {
     @Override
     public Response findTag(String name, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
-        this.log.info("TagRestController processing request for tag name " + name);
+        log.info("TagRestController processing request for tag name " + name);
         try {
             final TagDto dto = tagService.findOne(name);
-            if (dto == null) {
-                log.debug("Entity not found for name " + name);
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                        "Entity not found for name " + name);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-            }
+            // Create the set.
             final TagSetDto respdto = (TagSetDto) new TagSetDto().addResourcesItem(dto).size(1L)
                     .datatype("tags");
             return Response.ok().entity(respdto).build();
         }
-        catch (final Exception e) {
-            log.error("Exception in searching tag {}", name);
-            final String message = e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+        catch (final NotExistsPojoException e) {
+            // Exception, tag not found, send 404.
+            final String message = "No tag resource has been found for " + name;
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                     message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
         }
     }
 
@@ -190,37 +188,36 @@ public class TagsApiServiceImpl extends TagsApiService {
         try {
             log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size,
                     sort);
+            // Create pagination request.
             final PageRequest preq = prh.createPageRequest(page, size, sort);
             List<TagDto> dtolist = null;
             GenericMap filters = null;
             if (by.equals("none")) {
+                // No search conditions, get all tags.
                 dtolist = tagService.findAllTags(null, preq);
             }
             else {
-
+                // Create search conditions for where statement in SQL.
                 final List<SearchCriteria> params = prh.createMatcherCriteria(by);
                 filters = prh.getFilters(params);
                 final List<BooleanExpression> expressions = filtering
                         .createFilteringConditions(params);
                 final BooleanExpression wherepred = prh.getWhere(expressions);
+                // Retrieve tag list using filtering.
                 dtolist = tagService.findAllTags(wherepred, preq);
             }
-            if (dtolist == null) {
-                final String message = "No resource has been found";
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
-                        message);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-            }
+            // Create the Set.
             final CrestBaseResponse respdto = new TagSetDto().resources(dtolist)
                     .format("TagSetDto")
                     .size((long) dtolist.size()).datatype("tags");
             if (filters != null) {
                 respdto.filter(filters);
             }
+            // Response is 200.
             return Response.ok().entity(respdto).build();
-
         }
         catch (final CdbServiceException e) {
+            // Exception, send a 500.
             final String message = e.getMessage();
             log.error("Exception in listTags: {}", e.getMessage());
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,

@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +26,10 @@ import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.swagger.model.GenericMap;
 
 /**
+ * PageRequestHelper is a utility class to treat input parameter from HTTP requests.
+ * It generated then list of criterias and ordering statement. Those will be used in SQL requests.
+ *
+ * @version %I%, %G%
  * @author formica
  *
  */
@@ -47,7 +52,7 @@ public class PageRequestHelper {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PageRequestHelper.class);
 
     /**
      * Default ctor.
@@ -76,7 +81,7 @@ public class PageRequestHelper {
         final List<Order> orderlist = new ArrayList<>();
         while (sortmatcher.find()) {
             Direction direc = Direction.ASC;
-            if (sortmatcher.group(3).equals("DESC")) {
+            if ("DESC".equals(sortmatcher.group(3))) {
                 direc = Direction.DESC;
             }
             final String field = sortmatcher.group(1);
@@ -88,7 +93,8 @@ public class PageRequestHelper {
         int i = 0;
         for (final Order order : orderlist) {
             log.debug("Order @ {} = {} ", i, order);
-            orders[i++] = order;
+            orders[i] = order;
+            i++;
         }
         final Sort msort = Sort.by(orders);
         return PageRequest.of(page, size, msort);
@@ -139,16 +145,17 @@ public class PageRequestHelper {
      */
     public List<SearchCriteria> createMatcherCriteria(String by, String dateformat) {
         DateTimeFormatter dtformatter = null;
-        if (!dateformat.equals("ms")) {
+        if (!"ms".equals(dateformat)) {
             dtformatter = DateTimeFormatter.ofPattern(dateformat);
         }
+        log.debug("Date format used is {}", dateformat);
         final Pattern pattern = Pattern.compile(QRY_PATTERN);
         final Matcher matcher = pattern.matcher(by + ",");
         log.debug("Pattern is {}", pattern);
         log.debug("Matcher is {}", matcher);
         final List<SearchCriteria> params = new ArrayList<>();
         while (matcher.find()) {
-            final String varname = matcher.group(1).toLowerCase();
+            final String varname = matcher.group(1).toLowerCase(Locale.ENGLISH);
             final String op = matcher.group(2);
             String val = matcher.group(3);
             val = val.replaceAll("\\*", "\\%");

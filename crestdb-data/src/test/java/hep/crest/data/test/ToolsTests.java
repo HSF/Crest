@@ -16,6 +16,8 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.junit.Before;
@@ -27,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.handlers.DateFormatterHandler;
 import hep.crest.data.handlers.HashGenerator;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
@@ -174,7 +177,18 @@ public class ToolsTests {
         final OutputStream out = new FileOutputStream(new File("/tmp/cdms/payloaddatahash.blob.copy"));
         final BufferedInputStream ds2 = new BufferedInputStream(new FileInputStream(f));
         final String hash4 = HashGenerator.hashoutstream(ds2, out);
-        assertThat(hash).isEqualTo(hash4);        
+        assertThat(hash).isEqualTo(hash4);     
+        
+        final DateFormatterHandler dh = new DateFormatterHandler();
+        final DateTimeFormatter dtformat =  dh.getLocformatter();
+        final Timestamp ts = dh.format("2011-12-03T10:15:30+01:00");
+        final Long tsmsec = ts.getTime();
+        final String adate = dh.format(ts);
+        log.info("Received date as string {}", adate);
+        assertThat(adate.equals("2011-12-03T09:15:30Z")).isTrue(); // The date is in GMT this time.
+        assertThat(tsmsec).isGreaterThan(0);
+        assertThat(dtformat).isNotNull();
+        
     }
 
     

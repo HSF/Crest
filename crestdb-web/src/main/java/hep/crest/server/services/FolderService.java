@@ -1,7 +1,7 @@
 /**
  *
  */
-package hep.crest.server.security;
+package hep.crest.server.services;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.transaction.Transactional;
-import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,8 @@ import hep.crest.swagger.model.FolderDto;
 import ma.glasnost.orika.MapperFacade;
 
 /**
- * A service to handle folders. This is not yet used in CMS nor ATLAS implementation.
+ * A service to handle folders. This is not yet used in CMS nor ATLAS
+ * implementation.
  *
  * @author formica
  * @author rsipos
@@ -40,7 +40,7 @@ public class FolderService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(FolderService.class);
 
     /**
      * Repository.
@@ -65,20 +65,17 @@ public class FolderService {
      *             If an Exception occurred
      */
     public List<FolderDto> findAllFolders(Predicate qry, Pageable req) throws CdbServiceException {
-        try {
-            Iterable<CrestFolders> entitylist = null;
-            if (qry == null) {
-                entitylist = folderRepository.findAll(req);
-            }
-            else {
-                entitylist = folderRepository.findAll(qry, req);
-            }
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, FolderDto.class)).collect(Collectors.toList());
+        Iterable<CrestFolders> entitylist = null;
+        if (qry == null) {
+            entitylist = folderRepository.findAll(req);
         }
-        catch (final Exception e) {
-            throw new CdbServiceException("Cannot find folder list " + e.getMessage());
+        else {
+            entitylist = folderRepository.findAll(qry, req);
         }
+        
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, FolderDto.class)).collect(Collectors.toList());
+
     }
 
     /**
@@ -87,10 +84,12 @@ public class FolderService {
      * @return FolderDto
      * @throws CdbServiceException
      *             If an Exception occurred
-     * @throws AlreadyExistsPojoException If an Exception occurred because pojo exists
+     * @throws AlreadyExistsPojoException
+     *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public FolderDto insertFolder(FolderDto dto) throws CdbServiceException, AlreadyExistsPojoException {
+    public FolderDto insertFolder(FolderDto dto)
+            throws CdbServiceException, AlreadyExistsPojoException {
         try {
             log.debug("Create global tag from dto {}", dto);
             final CrestFolders entity = mapper.map(dto, CrestFolders.class);
@@ -109,14 +108,6 @@ public class FolderService {
         catch (final AlreadyExistsPojoException e) {
             log.error("Cannot store folder {}  : resource already exists.. ", dto);
             throw e;
-        }
-        catch (final ConstraintViolationException e) {
-            log.error("Cannot store folder {}  : may be the resource already exists.. ", dto);
-            throw new AlreadyExistsPojoException("Folder already exists : " + e.getMessage());
-        }
-        catch (final Exception e) {
-            log.error("Exception in storing folder {}", dto);
-            throw new CdbServiceException("Cannot store folder : " + e.getMessage());
         }
     }
 }

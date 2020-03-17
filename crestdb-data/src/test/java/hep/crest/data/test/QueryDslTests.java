@@ -143,14 +143,52 @@ public class QueryDslTests {
     }
     
     @Test
+    public void testGlobalTags2() throws Exception {
+        final GlobalTag gtag = DataGenerator.generateGlobalTag("MY-TEST-GT-02");
+        globaltagrepository.save(gtag);
+        final IFilteringCriteria filter = new GlobalTagFiltering();
+        final PageRequest preq = createPageRequest(0, 10, "workflow:ASC");
+
+        final List<SearchCriteria> params = createMatcherCriteria("name:M,scenario:%,insertionTime>0,insertionTime<0,insertionTime:0");
+        final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
+        BooleanExpression wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        final Page<GlobalTag> dtolist = globaltagrepository.findAll(wherepred, preq);
+        assertThat(dtolist.getSize()).isGreaterThan(0);
+        
+        final List<SearchCriteria> params2 = createMatcherCriteria("type:T,scenario:%,validity>0,validity<0,validity:0");
+        final List<BooleanExpression> expressions2 = filter.createFilteringConditions(params2);
+        wherepred = null;
+
+        for (final BooleanExpression exp : expressions2) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        final Page<GlobalTag> dtolist2 = globaltagrepository.findAll(wherepred, preq);
+        assertThat(dtolist2.getSize()).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
     public void testTags() throws Exception {
         final Tag tag = DataGenerator.generateTag("MY-TEST-01","time");
         tagrepository.save(tag);
         final IFilteringCriteria filter = new TagFiltering();
         final PageRequest preq = createPageRequest(0, 10, "name:ASC");
 
-        final List<SearchCriteria> params = createMatcherCriteria("name:M,timetype:time,objecttype:%,insertiontime>0");
-        final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
+        List<SearchCriteria> params = createMatcherCriteria("name:M,timetype:time,objecttype:%,insertiontime>-1,insertiontime<2,insertiontime:0");
+        List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
 
         for (final BooleanExpression exp : expressions) {
@@ -163,6 +201,26 @@ public class QueryDslTests {
         }
         final Page<Tag> dtolist = tagrepository.findAll(wherepred, preq);
         assertThat(dtolist.getSize()).isGreaterThan(0);
+        
+        params = createMatcherCriteria("name:M,timetype:time,end:%,modificationtime>0,modificationtime:0,modificationtime<0");
+        expressions = filter.createFilteringConditions(params);
+        wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        final Page<Tag> dtolist2 = tagrepository.findAll(wherepred, preq);
+        assertThat(dtolist2.getSize()).isGreaterThanOrEqualTo(0);
+        
+        final String dumpcriteria = params.get(0).toString();
+        assertThat(dumpcriteria.length()).isGreaterThan(0);
+        final String dumpby = params.get(0).dump();
+        assertThat(dumpby.length()).isGreaterThan(0);
     }
 
     @Test
@@ -197,8 +255,8 @@ public class QueryDslTests {
         final IFilteringCriteria filter = new IovFiltering();
         final PageRequest preq = createPageRequest(0, 10, "id.since:ASC");
 
-        final List<SearchCriteria> params = createMatcherCriteria("tagname:A-TEST-10,since>100,insertiontime>0");
-        final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
+        List<SearchCriteria> params = createMatcherCriteria("tagname:A-TEST-10,since>100,insertiontime>0");
+        List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
 
         for (final BooleanExpression exp : expressions) {
@@ -212,6 +270,20 @@ public class QueryDslTests {
         final Page<Iov> dtolist = iovrepository.findAll(wherepred, preq);
         assertThat(dtolist.getSize()).isGreaterThan(0);
 
+        params = createMatcherCriteria("tagname:A-TEST-10,since:100,insertiontime<2,insertiontime:0");
+        expressions = filter.createFilteringConditions(params);
+        wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        final Page<Iov> dtolist2 = iovrepository.findAll(wherepred, preq);
+        assertThat(dtolist2.getSize()).isGreaterThanOrEqualTo(0);
     }
     
     @Test

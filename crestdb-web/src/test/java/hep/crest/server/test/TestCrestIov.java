@@ -3,6 +3,7 @@ package hep.crest.server.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.TagService;
 import hep.crest.swagger.model.CrestBaseResponse;
@@ -94,6 +96,9 @@ public class TestCrestIov {
         catch (CdbServiceException | AlreadyExistsPojoException e) {
             log.info("got exception of type {}",e.getClass());
         }
+        catch (final NotExistsPojoException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
        
     }
 
@@ -122,6 +127,20 @@ public class TestCrestIov {
         log.info("Received response: " + resptag);
         assertThat(resptag.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        final TagDto t2dto = DataGenerator.generateTagDto("SB-TAG-IOV-02", "run-lumi");
+        log.info("Store tag for payload request: {}", t2dto);
+        final ResponseEntity<TagDto> resptag2 = this.testRestTemplate
+                .postForEntity("/crestapi/tags", t2dto, TagDto.class);
+        log.info("Received response: " + resptag2);
+        assertThat(resptag2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final TagDto t3dto = DataGenerator.generateTagDto("SB-TAG-IOV-03", "time");
+        log.info("Store tag for payload request: {}", t3dto);
+        final ResponseEntity<TagDto> resptag3 = this.testRestTemplate
+                .postForEntity("/crestapi/tags", t3dto, TagDto.class);
+        log.info("Received response: " + resptag3);
+        assertThat(resptag3.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
         // Store iov for payload pdto
         final IovDto iovdto = DataGenerator.generateIovDto(pdto.getHash(), tdto.getName(), new BigDecimal(1000000L));
         log.info("Store iov : {}", iovdto);
@@ -129,6 +148,11 @@ public class TestCrestIov {
                 .postForEntity("/crestapi/iovs", iovdto, IovDto.class);
         log.info("Received response: " + iovresp);
         assertThat(iovresp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final ResponseEntity<String> iovrespalreadythere = this.testRestTemplate
+                .postForEntity("/crestapi/iovs", iovdto, String.class);
+        log.info("Received response: " + iovrespalreadythere);
+        assertThat(iovrespalreadythere.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 
         // Upload batch iovs
         iovdto.setSince(new BigDecimal(2000000L)); // change the since to have a new iov...
@@ -156,11 +180,13 @@ public class TestCrestIov {
         final GenericMap filters2 = new GenericMap();
         filters2.put("tag", tdto.getName());
         setdto.datatype("iovs").filter(filters2);
- 
+        
+        // It should succeed if the tagname is in the IOV resources.
+        // Iovs are already stored so we should get a 303.
         final ResponseEntity<String> iovresp3 = this.testRestTemplate
                 .postForEntity("/crestapi/iovs/storebatch", setdto, String.class);
         log.info("Received response: " + iovresp3);
-        assertThat(iovresp3.getStatusCode()).isEqualTo(HttpStatus.NOT_ACCEPTABLE);
+        assertThat(iovresp3.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
      
         // Check without tagname in iovs
         final GenericMap filters3= new GenericMap();
@@ -178,7 +204,22 @@ public class TestCrestIov {
                 .postForEntity("/crestapi/iovs/storebatch", setdto3, String.class);
         log.info("Received response: " + iovresp4);
         assertThat(iovresp4.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        
+  
+        // Check without tagname at all
+        final GenericMap filters4= new GenericMap();
+        final IovSetDto setdto4 = new IovSetDto();
+        setdto3.format("iovs").size(2L);
+        iovdto.tagName(null); iovdto2.tagName(null);
+        iovdto.since(new BigDecimal(4000000L));
+        iovdto2.since(new BigDecimal(4100000L));
+        setdto3.addResourcesItem(iovdto).addResourcesItem(iovdto2);
+        setdto3.datatype("iovs").filter(filters4);
+
+        final ResponseEntity<String> iovresp5 = this.testRestTemplate
+                .postForEntity("/crestapi/iovs/storebatch", setdto4, String.class);
+        log.info("Received response: " + iovresp5);
+        assertThat(iovresp5.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
 
     @Test
@@ -229,6 +270,8 @@ public class TestCrestIov {
  
     @Test
     public void testB_findiovApi() throws Exception {
+
+        final Long now = Instant.now().toEpochMilli();
 
         final ResponseEntity<String> resp = this.testRestTemplate
                 .exchange("/crestapi/iovs?by=tagname:SB-TAG-IOV-01,insertiontime>0", HttpMethod.GET, null, String.class);
@@ -281,7 +324,37 @@ public class TestCrestIov {
             ok = mapper.readValue(responseBody, IovSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
-        
+        // The next 2 tags do not have IOVs.
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Crest-Query", "ranges");
+        final HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        final ResponseEntity<String> resp3a = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectGroups?tagname=SB-TAG-IOV-02&snapshot="+now, HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved iov groups " + resp3a.getBody());
+            final String responseBody = resp3a.getBody();
+            assertThat(resp3a.getStatusCode()).isEqualTo(HttpStatus.OK);
+            IovSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, IovSetDto.class);
+            assertThat(ok.getSize()).isEqualTo(0);
+        }
+
+        final ResponseEntity<String> resp3b = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectGroups?tagname=SB-TAG-IOV-03&since=0&until=INF", HttpMethod.GET, entity, String.class);
+
+        {
+            log.info("Retrieved iov groups " + resp3b.getBody());
+            final String responseBody = resp3b.getBody();
+            assertThat(resp3b.getStatusCode()).isEqualTo(HttpStatus.OK);
+            IovSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, IovSetDto.class);
+            assertThat(ok.getSize()).isEqualTo(0);
+        }
+
         final ResponseEntity<String> resp4 = this.testRestTemplate
                 .exchange("/crestapi/iovs/selectIovs?tagname=SB-TAG-IOV-01&since=0&until=3900000&snapshot=0", HttpMethod.GET, null, String.class);
 
@@ -334,7 +407,38 @@ public class TestCrestIov {
             ok = mapper.readValue(responseBody, IovSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
+        // dateformat
+        final HttpHeaders headers7a = new HttpHeaders();
+        headers7a.add("dateformat", "ms");
+        final HttpEntity<?> entity7a = new HttpEntity<>(headers7a);
 
+        final ResponseEntity<String> resp7a = this.testRestTemplate
+                .exchange("/crestapi/iovs/lastIov?tagname=SB-TAG-IOV-01&since=now", HttpMethod.GET, entity7a, String.class);
+
+        {
+            log.info("Retrieved iov selection " + resp7a.getBody());
+            final String responseBody = resp7a.getBody();
+            assertThat(resp7a.getStatusCode()).isEqualTo(HttpStatus.OK);
+            IovSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, IovSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
+        // dateformat
+        final HttpHeaders headers7b = new HttpHeaders();
+        headers7b.add("dateformat", "hour");
+        final HttpEntity<?> entity7b = new HttpEntity<>(headers7b);
+
+        final ResponseEntity<String> resp7b = this.testRestTemplate
+                .exchange("/crestapi/iovs/lastIov?tagname=SB-TAG-IOV-01&since=120", HttpMethod.GET, entity7b, String.class);
+
+        {
+            log.info("Retrieved iov selection " + resp7b.getBody());
+            assertThat(resp7b.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        
         final ResponseEntity<String> resp8 = this.testRestTemplate
                 .exchange("/crestapi/iovs/selectIovPayloads?tagname=SB-TAG-IOV-01&since=0&until=3900000&snapshot=0", HttpMethod.GET, null, String.class);
 
@@ -345,6 +449,40 @@ public class TestCrestIov {
             IovPayloadSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, IovPayloadSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
+        final ResponseEntity<String> resp8a = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectIovPayloads?tagname=SB-TAG-IOV-01&since=0&until=INF&snapshot="+now, HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved iov payload selection " + resp8a.getBody());
+            final String responseBody = resp8a.getBody();
+            assertThat(resp8a.getStatusCode()).isEqualTo(HttpStatus.OK);
+            IovPayloadSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, IovPayloadSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
+        final ResponseEntity<String> resp8b = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectIovPayloads?tagname=SB-TAG-IOV-01&since=0&until=sometime&snapshot="+now, HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved iov payload selection " + resp8b.getBody());
+            assertThat(resp8b.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        final ResponseEntity<String> resp9 = this.testRestTemplate
+                .exchange("/crestapi/iovs/selectIovs?tagname=SB-TAG-IOV-01&since=0&until=INF&snapshot="+now, HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved iov selection " + resp9.getBody());
+            final String responseBody = resp9.getBody();
+            assertThat(resp9.getStatusCode()).isEqualTo(HttpStatus.OK);
+            IovSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, IovSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 

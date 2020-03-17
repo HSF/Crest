@@ -37,6 +37,7 @@ import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.annotations.ProfileAndLog;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovPayloadDto;
@@ -54,7 +55,7 @@ public class IovService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(IovService.class);
 
     /**
      * Repository.
@@ -110,30 +111,36 @@ public class IovService {
      */
     public IovDto latest(String tagname, String since, String dateformat)
             throws CdbServiceException {
-        List<SearchCriteria> params = null;
-        final PageRequest preq = prh.createPageRequest(0, 10, "id.since:DESC");
-        if (since.equals("now")) {
-            since = ((Long) Instant.now().getMillis()).toString();
-        }
-        final String by = "tagname:" + tagname + ",since<" + since;
-
-        params = prh.createMatcherCriteria(by, dateformat);
-        final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
-        BooleanExpression wherepred = null;
-
-        for (final BooleanExpression exp : expressions) {
-            if (wherepred == null) {
-                wherepred = exp;
+        try {
+            List<SearchCriteria> params = null;
+            final PageRequest preq = prh.createPageRequest(0, 10, "id.since:DESC");
+            if ("now".equals(since)) {
+                since = ((Long) Instant.now().getMillis()).toString();
             }
-            else {
-                wherepred = wherepred.and(exp);
+            final String by = "tagname:" + tagname + ",since<" + since;
+
+            params = prh.createMatcherCriteria(by, dateformat);
+            final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
+            BooleanExpression wherepred = null;
+
+            for (final BooleanExpression exp : expressions) {
+                if (wherepred == null) {
+                    wherepred = exp;
+                }
+                else {
+                    wherepred = wherepred.and(exp);
+                }
             }
+            final List<IovDto> dtolist = this.findAllIovs(wherepred, preq);
+            if (dtolist != null && !dtolist.isEmpty()) {
+                return dtolist.get(0);
+            }
+            return null;
         }
-        final List<IovDto> dtolist = this.findAllIovs(wherepred, preq);
-        if (dtolist != null && !dtolist.isEmpty()) {
-            return dtolist.get(0);
+        catch (final IllegalArgumentException e) {
+            log.error("Illegal argument : {}", e.getMessage());
+            throw new CdbServiceException("Illegal argument in latest", e);
         }
-        return null;
     }
 
     /**
@@ -146,22 +153,15 @@ public class IovService {
      *             If an Exception occurred
      */
     public List<IovDto> findAllIovs(Predicate qry, Pageable req) throws CdbServiceException {
-        try {
-            Iterable<Iov> entitylist = null;
-            if (qry == null) {
-                entitylist = iovRepository.findAll(req);
-            }
-            else {
-                entitylist = iovRepository.findAll(qry, req);
-            }
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, IovDto.class)).collect(Collectors.toList());
+        Iterable<Iov> entitylist = null;
+        if (qry == null) {
+            entitylist = iovRepository.findAll(req);
         }
-        catch (final Exception e) {
-            log.error("Exception in retrieving iov list using predicate and pagination...");
-            throw new CdbServiceException(
-                    "Cannot find all iovs using predicate and pagination: " + e.getMessage());
+        else {
+            entitylist = iovRepository.findAll(qry, req);
         }
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, IovDto.class)).collect(Collectors.toList());
     }
 
     /**
@@ -177,26 +177,18 @@ public class IovService {
      */
     public List<BigDecimal> selectGroupsByTagNameAndSnapshotTime(String tagname, Date snapshot,
             Long groupsize) throws CdbServiceException {
-        try {
-            log.debug("Search for iovs groups by tag name {} and snapshot time {}", tagname,
-                    snapshot);
-            List<BigDecimal> minsincelist = null;
-            if (snapshot == null) {
-                minsincelist = iovgroupsrepo.selectGroups(tagname, groupsize);
-            }
-            else {
-                minsincelist = iovgroupsrepo.selectSnapshotGroups(tagname, snapshot, groupsize);
-            }
-            if (minsincelist == null) {
-                minsincelist = new ArrayList<>();
-            }
-            return minsincelist;
+        log.debug("Search for iovs groups by tag name {} and snapshot time {}", tagname, snapshot);
+        List<BigDecimal> minsincelist = null;
+        if (snapshot == null) {
+            minsincelist = iovgroupsrepo.selectGroups(tagname, groupsize);
         }
-        catch (final Exception e) {
-            log.error("Exception in retrieving iov groups list using tag {} and group size {}",
-                    tagname, groupsize);
-            throw new CdbServiceException("Cannot find iov groups by tag name: " + e.getMessage());
+        else {
+            minsincelist = iovgroupsrepo.selectSnapshotGroups(tagname, snapshot, groupsize);
         }
+        if (minsincelist == null) {
+            minsincelist = new ArrayList<>();
+        }
+        return minsincelist;
     }
 
     /**
@@ -213,17 +205,11 @@ public class IovService {
     @ProfileAndLog
     public CrestBaseResponse selectGroupDtoByTagNameAndSnapshotTime(String tagname, Date snapshot,
             Long groupsize) throws CdbServiceException {
-        try {
-            final List<BigDecimal> minsincelist = selectGroupsByTagNameAndSnapshotTime(tagname,
-                    snapshot, groupsize);
-            final List<IovDto> iovlist = minsincelist.stream().map(s -> new IovDto().since(s))
-                    .collect(Collectors.toList());
-            return new IovSetDto().resources(iovlist).size((long) iovlist.size()).format("IovSetDto");
-        }
-        catch (final Exception e) {
-            log.error("Exception in retrieving iov groups list using tag and snapshot {}", tagname);
-            throw new CdbServiceException("Cannot find iov groups by tag name: " + e.getMessage());
-        }
+        final List<BigDecimal> minsincelist = selectGroupsByTagNameAndSnapshotTime(tagname,
+                snapshot, groupsize);
+        final List<IovDto> iovlist = minsincelist.stream().map(s -> new IovDto().since(s))
+                .collect(Collectors.toList());
+        return new IovSetDto().resources(iovlist).size((long) iovlist.size()).format("IovSetDto");
     }
 
     /**
@@ -243,36 +229,29 @@ public class IovService {
      */
     public List<IovDto> selectIovsByTagRangeSnapshot(String tagname, BigDecimal since,
             BigDecimal until, Date snapshot, String flag) throws CdbServiceException {
-        try {
-            log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
-                    tagname, since, until, snapshot);
-            Iterable<Iov> entities = null;
-            if (snapshot == null && flag.equals("groups")) {
-                entities = iovRepository.selectLatestByGroup(tagname, since, until);
-            }
-            else if (flag.equals("groups")) {
-                entities = iovRepository.selectSnapshotByGroup(tagname, since, until, snapshot);
-            }
-            else if (flag.equals("ranges")) {
-                if (snapshot == null) {
-                    snapshot = Instant.now().toDate();
-                }
-                entities = iovRepository.getRange(tagname, since, until, snapshot);
-            }
-            if (entities == null) {
-                log.warn("Cannot find iovs for tag {}", tagname);
-                return new ArrayList<>();
-            }
-            return StreamSupport.stream(entities.spliterator(), false)
-                    .map(s -> mapper.map(s, IovDto.class)).collect(Collectors.toList());
+        log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
+                tagname, since, until, snapshot);
+        Iterable<Iov> entities = null;
+        if (snapshot == null && "groups".equals(flag)) {
+            entities = iovRepository.selectLatestByGroup(tagname, since, until);
         }
-        catch (final Exception e) {
-            log.debug("Exception in retrieving iov list using tag {} and snapshot and time range",
-                    tagname);
-            throw new CdbServiceException("Cannot find iov range by tag name: " + e.getMessage());
+        else if ("groups".equals(flag)) {
+            entities = iovRepository.selectSnapshotByGroup(tagname, since, until, snapshot);
         }
+        else if ("ranges".equals(flag)) {
+            if (snapshot == null) {
+                snapshot = Instant.now().toDate();
+            }
+            entities = iovRepository.getRange(tagname, since, until, snapshot);
+        }
+        if (entities == null) {
+            log.warn("Cannot find iovs for tag {}", tagname);
+            return new ArrayList<>();
+        }
+        return StreamSupport.stream(entities.spliterator(), false)
+                .map(s -> mapper.map(s, IovDto.class)).collect(Collectors.toList());
     }
-    
+
     /**
      * @param tagname
      *            the String
@@ -288,28 +267,21 @@ public class IovService {
      */
     public List<IovPayloadDto> selectIovPayloadsByTagRangeSnapshot(String tagname, BigDecimal since,
             BigDecimal until, Date snapshot) throws CdbServiceException {
-        try {
-            log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
-                    tagname, since, until, snapshot);
-            List<IovPayloadDto> entities = null;
-            if (snapshot == null || snapshot.getTime() == 0) {
-                snapshot = Instant.now().toDate(); // Use now for the snapshot
-            }
-            entities = iovgroupsrepo.getRangeIovPayloadInfo(tagname, since, until, snapshot);
+        log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
+                tagname, since, until, snapshot);
+        List<IovPayloadDto> entities = null;
+        if (snapshot == null || snapshot.getTime() == 0) {
+            snapshot = Instant.now().toDate(); // Use now for the snapshot
+        }
+        entities = iovgroupsrepo.getRangeIovPayloadInfo(tagname, since, until, snapshot);
 
-            if (entities == null) {
-                log.warn("Cannot find iovpayloads for tag {} using ranges {} {} and snapshot {}",
-                        tagname, since, until, snapshot);
-                return new ArrayList<>();
-            }
-            return entities;
+        if (entities == null) {
+            log.warn("Cannot find iovpayloads for tag {} using ranges {} {} and snapshot {}",
+                    tagname, since, until, snapshot);
+            return new ArrayList<>();
         }
-        catch (final Exception e) {
-            log.debug("Exception in retrieving iov list using tag {} and snapshot and time range",
-                    tagname);
-            throw new CdbServiceException("Cannot find iov size by tag name: " + e.getMessage());
-        }
-    }    
+        return entities;
+    }
 
     /**
      * @param tagname
@@ -322,18 +294,11 @@ public class IovService {
      */
     public List<IovDto> selectSnapshotByTag(String tagname, Date snapshot)
             throws CdbServiceException {
-        try {
-            log.debug("Search for snapshot by tag name {} using snapshot {}", tagname, snapshot);
-            Iterable<Iov> entities = null;
-            entities = iovRepository.selectSnapshot(tagname, snapshot);
-            return StreamSupport.stream(entities.spliterator(), false)
-                    .map(s -> mapper.map(s, IovDto.class)).collect(Collectors.toList());
-        }
-        catch (final Exception e) {
-            log.error("Exception in retrieving iov list by tag using {}", tagname);
-            throw new CdbServiceException(
-                    "Cannot find iov list by tag name and snapshot: " + e.getMessage());
-        }
+        log.debug("Search for snapshot by tag name {} using snapshot {}", tagname, snapshot);
+        Iterable<Iov> entities = null;
+        entities = iovRepository.selectSnapshot(tagname, snapshot);
+        return StreamSupport.stream(entities.spliterator(), false)
+                .map(s -> mapper.map(s, IovDto.class)).collect(Collectors.toList());
     }
 
     /**
@@ -344,13 +309,7 @@ public class IovService {
      *             If an Exception occurred
      */
     public Long getSizeByTag(String tagname) throws CdbServiceException {
-        try {
-            return iovgroupsrepo.getSize(tagname);
-        }
-        catch (final Exception e) {
-            log.error("Exception in retrieving iov size using tag {}", tagname);
-            throw new CdbServiceException("Cannot find iov size by tag name: " + e.getMessage());
-        }
+        return iovgroupsrepo.getSize(tagname);
     }
 
     /**
@@ -363,15 +322,8 @@ public class IovService {
      *             If an Exception occurred
      */
     public Long getSizeByTagAndSnapshot(String tagname, Date snapshot) throws CdbServiceException {
-        try {
-            return iovgroupsrepo.getSizeBySnapshot(tagname, snapshot);
-        }
-        catch (final Exception e) {
-            log.debug("Exception in retrieving iov size using tag {} and snapshot {}", tagname,
-                    snapshot);
-            throw new CdbServiceException(
-                    "Cannot find iov size by tag name and snapshot: " + e.getMessage());
-        }
+        return iovgroupsrepo.getSizeBySnapshot(tagname, snapshot);
+
     }
 
     /**
@@ -382,14 +334,11 @@ public class IovService {
      *             If an Exception occurred
      */
     public List<TagSummaryDto> getTagSummaryInfo(String tagname) throws CdbServiceException {
-        try {
-            return iovgroupsrepo.getTagSummaryInfo(tagname);
+        List<TagSummaryDto> entitylist = iovgroupsrepo.getTagSummaryInfo(tagname);
+        if (entitylist == null) {
+            entitylist = new ArrayList<>();
         }
-        catch (final Exception e) {
-            log.error("Exception in retrieving iov summary information for tag matching {}",
-                    tagname);
-            throw new CdbServiceException("Cannot find niovs by tag name: " + e.getMessage());
-        }
+        return entitylist;
     }
 
     /**
@@ -402,60 +351,50 @@ public class IovService {
      * @return boolean
      */
     protected boolean existsIov(String tagname, BigDecimal since, String hash) {
-        try {
-            log.debug("Verify if the same IOV is already stored with the same hash....");
-            final Iov tmpiov = iovRepository.findBySinceAndTagNameAndHash(tagname, since, hash);
-            if (tmpiov != null) {
-                return true;
-            }
-        }
-        catch (final Exception e) {
-            log.warn("Searching iov {} {} {} has not found anything...", tagname, since, hash);
-        }
-        return false;
+        log.debug("Verify if the same IOV is already stored with the same hash....");
+        final Iov tmpiov = iovRepository.findBySinceAndTagNameAndHash(tagname, since, hash);
+        return tmpiov != null;
     }
 
     /**
      * @param dto
      *            the IovDto
      * @return IovDto
-     * @throws CdbServiceException
+     * @throws NotExistsPojoException
      *             If an Exception occurred
      * @throws AlreadyExistsPojoException
      *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public IovDto insertIov(IovDto dto) throws CdbServiceException, AlreadyExistsPojoException {
+    public IovDto insertIov(IovDto dto) throws NotExistsPojoException, AlreadyExistsPojoException {
         log.debug("Create iov from dto {}", dto);
         Iov entity = null;
         final String tagname = dto.getTagName();
-        try {
-            entity = mapper.map(dto, Iov.class);
-            // The IOV is not yet stored. Verify that the tag exists before inserting it.
-            final Optional<Tag> tg = tagRepository.findById(tagname);
-            if (tg.isPresent()) {
-                final Tag t = tg.get();
-                t.setModificationTime(null);
-                // Update the tag modification time
-                final Tag updtag = tagRepository.save(t);
-                entity.setTag(updtag);
-                entity.getId().setTagName(updtag.getName());
-                log.debug("Storing iov entity {}", entity);
-                final Iov saved = iovRepository.save(entity);
-                log.debug("Saved entity: {}", saved);
-                final IovDto dtoentity = mapper.map(saved, IovDto.class);
-                dtoentity.tagName(tagname);
-                log.debug("Returning iovDto: {}", dtoentity);
-                return dtoentity;
+        entity = mapper.map(dto, Iov.class);
+        // The IOV is not yet stored. Verify that the tag exists before inserting it.
+        final Optional<Tag> tg = tagRepository.findById(tagname);
+        if (tg.isPresent()) {
+            final Tag t = tg.get();
+            t.setModificationTime(null);
+            // Update the tag modification time
+            final Tag updtag = tagRepository.save(t);
+            entity.setTag(updtag);
+            entity.getId().setTagName(updtag.getName());
+            log.debug("Storing iov entity {}", entity);
+            final Iov stored = iovRepository.findBySinceAndTagNameAndHash(tagname, dto.getSince(),
+                    dto.getPayloadHash());
+            if (stored != null) {
+                throw new AlreadyExistsPojoException("IOV already exists for this since,tag,hash");
             }
-            else {
-                throw new CdbServiceException("Unkown tag : " + tagname);
-            }
+            final Iov saved = iovRepository.save(entity);
+            log.debug("Saved entity: {}", saved);
+            final IovDto dtoentity = mapper.map(saved, IovDto.class);
+            dtoentity.tagName(tagname);
+            log.debug("Returning iovDto: {}", dtoentity);
+            return dtoentity;
         }
-        catch (final Exception e) {
-            log.error("Exception in storing iov {}", dto);
-            throw new CdbServiceException("Cannot store iov : " + e.getMessage());
+        else {
+            throw new NotExistsPojoException("Unkown tag : " + tagname);
         }
     }
-
 }

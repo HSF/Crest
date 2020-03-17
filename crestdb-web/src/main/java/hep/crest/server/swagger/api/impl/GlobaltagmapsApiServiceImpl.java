@@ -22,6 +22,9 @@ import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.GlobalTagMapSetDto;
 
 /**
+ * Rest endpoint to deal with mappings between tags and global tags.
+ * Allows to create and find mappings.
+ *
  * @author formica
  *
  */
@@ -33,7 +36,7 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(GlobaltagmapsApiServiceImpl.class);
 
     /**
      * Service.
@@ -52,15 +55,17 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
     @Override
     public Response createGlobalTagMap(GlobalTagMapDto body, SecurityContext securityContext,
             UriInfo info) throws NotFoundException {
-        this.log.info(
+        log.info(
                 "GlobalTagMapRestController processing request for creating a global tag map entry "
                         + body);
         try {
+            // Insert new mapping resource.
             final GlobalTagMapDto saved = globaltagmapService.insertGlobalTagMap(body);
             return Response.created(info.getRequestUri()).entity(saved).build();
 
         }
         catch (final CdbServiceException e) {
+            // Error in creation. Send a 500.
             final String msg = "Error creating globaltagmap resource using " + body.toString();
             e.printStackTrace();
             final String message = e.getMessage();
@@ -81,17 +86,21 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
     @Override
     public Response findGlobalTagMap(String name, String xCrestMapMode,
             SecurityContext securityContext, UriInfo info) throws NotFoundException {
-        this.log.info("GlobalTagMapRestController processing request to get map for GlobalTag name "
+        log.info("GlobalTagMapRestController processing request to get map for GlobalTag name "
                 + name);
         try {
             List<GlobalTagMapDto> dtolist = null;
+            // If there is no header then set it to Trace mode. Implies that you search tags
+            // associated with a global tag.
             if (xCrestMapMode == null) {
                 xCrestMapMode = "Trace";
             }
             if (xCrestMapMode.equals("Trace")) {
+                // The header is Trace, so search for tags associated to a global tag.
                 dtolist = globaltagmapService.getTagMap(name);
             }
             else {
+                // The header is not Trace, so search for global tags associated to a tag.
                 dtolist = globaltagmapService.getTagMapByTagName(name);
             }
             final GenericMap filters = new GenericMap();
@@ -102,13 +111,16 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
                     .filter(filters)
                     .format("GlobalTagMapSetDto")
                     .size((long) dtolist.size()).datatype("maps");
+            Response.Status status = Response.Status.OK;
             if (dtolist.size() == 0) {
-                return Response.status(Response.Status.NOT_FOUND).entity(setdto).build();
+                // Send a 404 if the collection size is empty.
+                status = Response.Status.NOT_FOUND;
             }
-            return Response.ok().entity(setdto).build();
+            return Response.status(status).entity(setdto).build();
 
         }
         catch (final CdbServiceException e) {
+            // Error in finding mappings. Send a 500.
             final String message = e.getMessage();
             log.error("Internal error searching maps : {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,

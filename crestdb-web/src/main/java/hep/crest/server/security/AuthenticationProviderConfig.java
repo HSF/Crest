@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 
 /**
+ * This class configure the authentication of the application.
+ *
+ * @version %I%, %G%
  * @author formica
  *
  */
@@ -20,6 +23,8 @@ import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 public class AuthenticationProviderConfig {
 
     /**
+     * Provide a user details service to load user from specific DB tables.
+     *
      * @param ds
      *            the DataSource
      * @return UserDetailsService

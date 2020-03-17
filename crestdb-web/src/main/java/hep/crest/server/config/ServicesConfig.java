@@ -18,6 +18,9 @@ import hep.crest.server.swagger.api.MonitoringApi;
 import hep.crest.server.swagger.api.RuninfoApi;
 
 /**
+ * Services configuration.
+ *
+ * @version %I%, %G%
  * @author formica
  *
  */
@@ -34,15 +37,20 @@ public class ServicesConfig {
     private CrestProperties cprops;
 
     /**
+     * Activate configuration only on some profiles. This will add API classes like
+     * RunInfo and Monitoring.
+     *
      * @return JerseyConfig
      */
-    @Profile({ "prod", "wildfly", "ssl", "cmsprep", "oracle", "test"})
+    @Profile({ "prod", "wildfly", "ssl", "cmsprep", "oracle", "test" })
     @Bean(name = "jerseyConfig")
     public JerseyConfig getJerseyResource() {
         final JerseyConfig jc = new JerseyConfig();
+        // Register APIs for monitoring.
         jc.jerseyregister(RuninfoApi.class);
         jc.jerseyregister(MonitoringApi.class);
-        if (!cprops.getSecurity().equals("none")) {
+        if (!"none".equals(cprops.getSecurity())) {
+            // Register authorization filter.
             jc.jerseyregister(AuthorizationFilter.class);
         }
         jc.init();
@@ -50,13 +58,16 @@ public class ServicesConfig {
     }
 
     /**
+     * Activate configuration for test or local profiles. Used also for SVOM.
+     *
      * @return JerseyConfig
      */
     @Profile({ "default", "dev", "h2", "sqlite", "postgres", "mysql", "pgsvom" })
     @Bean(name = "jerseyConfig")
     public JerseyConfig getJerseyDefaultResource() {
         final JerseyConfig jc = new JerseyConfig();
-        if (!cprops.getSecurity().equals("none")) {
+        if (!"none".equals(cprops.getSecurity())) {
+            // Register authorization filter.
             jc.jerseyregister(AuthorizationFilter.class);
         }
         jc.init();
@@ -64,11 +75,14 @@ public class ServicesConfig {
     }
 
     /**
+     * The jackson mapper.
+     *
      * @return ObjectMapper
      */
     @Bean(name = "jacksonMapper")
     public ObjectMapper getJacksonMapper() {
         final ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        // Disable the serialization features for DATEs.
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.setSerializationInclusion(Include.NON_NULL);
         return mapper;

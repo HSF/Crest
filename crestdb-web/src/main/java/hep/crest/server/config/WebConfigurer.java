@@ -12,6 +12,7 @@ import hep.crest.data.config.CrestProperties;
 /**
  * Web configuration.
  *
+ * @version %I%, %G%
  * @author formica
  *
  */
@@ -21,7 +22,7 @@ class WebConfigurer implements WebMvcConfigurer {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(WebConfigurer.class);
 
     /**
      * Properties.

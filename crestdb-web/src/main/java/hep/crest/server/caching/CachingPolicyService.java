@@ -27,7 +27,7 @@ public class CachingPolicyService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(CachingPolicyService.class);
 
     /**
      * Properties.

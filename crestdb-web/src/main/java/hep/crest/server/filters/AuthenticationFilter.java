@@ -33,7 +33,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     /**
      * Authentication scheme.
@@ -60,10 +60,22 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             .status(Response.Status.INTERNAL_SERVER_ERROR).build();
 
     /**
+     * The injection works basically only if we register correctly this filter in JerseyConfig.
+     * This uninitialized statement is not passing sonarqube but it should not be corrected.
      * Resource.
      */
     @Context
     private ResourceInfo resourceInfo;
+
+    
+    /**
+     * Default ctor.
+     */
+    public AuthenticationFilter() {
+        if (resourceInfo == null) {
+            log.error("Cannot get ResourceInfo from context");
+        }
+    }
 
     /*
      * (non-Javadoc)
@@ -107,7 +119,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             try {
                 usernameAndPassword = new String(Base64.getDecoder().decode(encodedUserPassword));
             }
-            catch (final Exception e) {
+            catch (final IllegalArgumentException e) {
+                log.error("Cannot get username and password : {}", e);
                 requestContext.abortWith(SERVER_ERROR);
                 return;
             }
@@ -140,11 +153,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         final String password = tokenizer.nextToken();
 
         // Verifying Username and password
-        if (username.equalsIgnoreCase("reader") && password.equalsIgnoreCase("password")) {
+        if ("reader".equalsIgnoreCase(username) && "password".equalsIgnoreCase(password)) {
             log.debug("Found reader user....");
             return true;
         }
-        else if (!(username.equalsIgnoreCase("admin") && password.equalsIgnoreCase("password"))) {
+        else if (!("admin".equalsIgnoreCase(username) && "password".equalsIgnoreCase(password))) {
             return false;
         }
         return false;
@@ -169,7 +182,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         // Access the database and do this part yourself : get the user role
         // e.g.: userMgr.getUserRole(username)
         String userRole = "ADMIN";
-        if (username.equalsIgnoreCase("reader")) {
+        if ("reader".equalsIgnoreCase(username)) {
             userRole = "READER";
         }
         // Step 2. Verify user role

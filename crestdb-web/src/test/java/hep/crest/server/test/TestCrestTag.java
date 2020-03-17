@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.TagService;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSetDto;
@@ -69,9 +70,10 @@ public class TestCrestTag {
             log.info("got exception of type {}",e.getClass());
         }
         try {
-            tagservice.findOne(null);
+            final TagDto dtonull = tagservice.findOne(null);
+            assertThat(dtonull).isNull();
         }
-        catch (final CdbServiceException e) {
+        catch (final NotExistsPojoException e) {
             log.info("got exception of type {}",e.getClass());
         }
         final List<String> ids = new ArrayList<>();
@@ -215,13 +217,22 @@ public class TestCrestTag {
                 .exchange("/crestapi/tags?by=name:TAG,insertiontime>0", HttpMethod.GET, null, String.class);
 
         {
-            log.info("Retrieved global tag list " + resp2.getBody());
+            log.info("Retrieved tag list " + resp2.getBody());
             final String responseBody = resp2.getBody();
             assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.OK);
             TagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, TagSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
+        final ResponseEntity<String> resp2a = this.testRestTemplate
+                .exchange("/crestapi/tags?by=name:PIPPO,insertiontime<0", HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved null tag list " + resp2a.getBody());
+            final String responseBody = resp2a.getBody();
+            assertThat(resp2a.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
         }
 
     }

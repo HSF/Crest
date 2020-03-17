@@ -27,7 +27,7 @@ public class PayloadService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PayloadService.class);
 
     /**
      * Repository.
@@ -101,19 +101,13 @@ public class PayloadService {
      */
     @Transactional
     public PayloadDto insertPayload(PayloadDto dto) throws CdbServiceException {
-        try {
-            log.debug("Save payload dto {}", dto);
-            if (dto.getSize() == null) {
-                dto.setSize(dto.getData().length);
-            }
-            final PayloadDto saved = payloaddataRepository.save(dto);
-            log.debug("Saved entity: {}", saved);
-            return saved;
+        log.debug("Save payload dto {}", dto);
+        if (dto.getSize() == null) {
+            dto.setSize(dto.getData().length);
         }
-        catch (final Exception e) {
-            log.error("Exception in storing payload {}", dto);
-            throw new CdbServiceException("Cannot store payload dto : " + e.getMessage());
-        }
+        final PayloadDto saved = payloaddataRepository.save(dto);
+        log.debug("Saved entity: {}", saved);
+        return saved;
     }
 
     /**
@@ -128,16 +122,10 @@ public class PayloadService {
     @Transactional
     public PayloadDto insertPayloadAndInputStream(PayloadDto dto, InputStream is)
             throws CdbServiceException {
-        try {
-            log.debug("Save payload {} creating blob from inputstream...", dto);
-            final PayloadDto saved = payloaddataRepository.save(dto, is);
-            log.debug("Saved entity: {}", saved);
-            return saved;
-        }
-        catch (final Exception e) {
-            log.debug("Exception in storing payload {}", dto);
-            throw new CdbServiceException("Cannot store payload : " + e.getMessage());
-        }
+        log.debug("Save payload {} creating blob from inputstream...", dto);
+        final PayloadDto saved = payloaddataRepository.save(dto, is);
+        log.debug("Saved entity: {}", saved);
+        return saved;
     }
 
 }

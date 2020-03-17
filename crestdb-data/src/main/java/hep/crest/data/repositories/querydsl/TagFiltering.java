@@ -5,6 +5,7 @@ package hep.crest.data.repositories.querydsl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class TagFiltering implements IFilteringCriteria {
         for (final SearchCriteria searchCriteria : criteria) {
             log.debug("search criteria {} {} {}", searchCriteria.getKey(),
                     searchCriteria.getOperation(), searchCriteria.getValue());
-            final String key = searchCriteria.getKey().toLowerCase();
+            final String key = searchCriteria.getKey().toLowerCase(Locale.ENGLISH);
             if ("objecttype".equals(key) || "payloadspec".equals(key)) {
                 // Filter based on object type or payload spec (this depends on the versions:
                 // ATLAS or CMS).

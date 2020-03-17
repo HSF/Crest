@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.TagRepository;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.TagDto;
 import ma.glasnost.orika.MapperFacade;
 
@@ -36,7 +38,7 @@ public class TagService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(TagService.class);
 
     /**
      * Repository.
@@ -63,9 +65,8 @@ public class TagService {
             log.debug("Search for tag by name if exists: {}", tagname);
             return tagRepository.existsById(tagname);
         }
-        catch (final Exception e) {
-            log.error("Exception in checking if tag exists...{}", tagname);
-            throw new CdbServiceException("Cannot decide tag existence: " + e.getMessage());
+        catch (final IllegalArgumentException | InvalidDataAccessApiUsageException e) {
+            throw new CdbServiceException("Wrong tagname " + tagname, e);
         }
     }
 
@@ -75,36 +76,31 @@ public class TagService {
      *             If an Exception occurred
      */
     public long count() throws CdbServiceException {
-        try {
-            log.debug("Search for tag count...");
-            return tagRepository.count();
-        }
-        catch (final Exception e) {
-            log.error("Exception in retrieving tag count...");
-            throw new CdbServiceException("Cannot retreive tag count: " + e.getMessage());
-        }
+        log.debug("Search for tag count...");
+        return tagRepository.count();
+
     }
 
     /**
      * @param id
      *            the String
      * @return TagDto
-     * @throws CdbServiceException
-     *             If an Exception occurred
+     * @throws NotExistsPojoException
+     *             If object was not found
      */
-    public TagDto findOne(String id) throws CdbServiceException {
+    public TagDto findOne(String id) throws NotExistsPojoException {
         try {
             log.debug("Search for tag by Id...{}", id);
             final Optional<Tag> entity = tagRepository.findById(id);
             if (entity.isPresent()) {
                 return mapper.map(entity.get(), TagDto.class);
             }
+            throw new NotExistsPojoException(id);
         }
-        catch (final Exception e) {
-            log.error("Exception in retrieving tag by id...");
-            throw new CdbServiceException("Cannot retreive tag by id: " + e.getMessage());
+        catch (final IllegalArgumentException | InvalidDataAccessApiUsageException e) {
+            log.error("Should never happen, wrong id was used {} : {}", id, e);
         }
-        return null; // This will trigger a response 404
+        return null;
     }
 
     /**
@@ -115,15 +111,11 @@ public class TagService {
      *             If an Exception occurred
      */
     public List<TagDto> findAllTags(Iterable<String> ids) throws CdbServiceException {
-        try {
-            log.debug("Search for all tags by Id list...");
-            final Iterable<Tag> entitylist = tagRepository.findAllById(ids);
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, TagDto.class)).collect(Collectors.toList());
-        }
-        catch (final Exception e) {
-            throw new CdbServiceException("Cannot find tag list by Id list" + e.getMessage());
-        }
+        log.debug("Search for all tags by Id list...");
+        final Iterable<Tag> entitylist = tagRepository.findAllById(ids);
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, TagDto.class)).collect(Collectors.toList());
+
     }
 
     /**
@@ -136,20 +128,16 @@ public class TagService {
      *             If an Exception occurred
      */
     public List<TagDto> findAllTags(Predicate qry, Pageable req) throws CdbServiceException {
-        try {
-            Iterable<Tag> entitylist = null;
-            if (qry == null) {
-                entitylist = tagRepository.findAll(req);
-            }
-            else {
-                entitylist = tagRepository.findAll(qry, req);
-            }
-            return StreamSupport.stream(entitylist.spliterator(), false)
-                    .map(s -> mapper.map(s, TagDto.class)).collect(Collectors.toList());
+        Iterable<Tag> entitylist = null;
+        if (qry == null) {
+            entitylist = tagRepository.findAll(req);
         }
-        catch (final Exception e) {
-            throw new CdbServiceException("Cannot find global tag list " + e.getMessage());
+        else {
+            entitylist = tagRepository.findAll(qry, req);
         }
+        return StreamSupport.stream(entitylist.spliterator(), false)
+                .map(s -> mapper.map(s, TagDto.class)).collect(Collectors.toList());
+
     }
 
     /**
@@ -180,10 +168,7 @@ public class TagService {
             log.error("Exception in storing tag {}: resource already exists", dto);
             throw e;
         }
-        catch (final Exception e) {
-            log.error("Exception in storing tag {}", dto);
-            throw new CdbServiceException("Cannot store tag : " + e.getMessage());
-        }
+
     }
 
     /**
@@ -192,34 +177,28 @@ public class TagService {
      * @param dto
      *            the TagDto
      * @return TagDto of the updated entity.
-     * @throws CdbServiceException
+     * @throws NotExistsPojoException
      *             If an Exception occurred
      */
     @Transactional
-    public TagDto updateTag(TagDto dto) throws CdbServiceException {
-        try {
-            log.debug("Update tag from dto {}", dto);
-            final Tag entity = mapper.map(dto, Tag.class);
-            final Optional<Tag> tmpt = tagRepository.findById(entity.getName());
-            if (!tmpt.isPresent()) {
-                log.debug("Cannot update tag {} : resource does not exists.. ", dto);
-                throw new CdbServiceException("Tag does not exists for name " + dto.getName());
-            }
-            final Tag toupd = tmpt.get();
-            toupd.setDescription(dto.getDescription());
-            toupd.setObjectType(dto.getPayloadSpec());
-            toupd.setSynchronization(dto.getSynchronization());
-            toupd.setEndOfValidity(dto.getEndOfValidity());
-            toupd.setLastValidatedTime(dto.getLastValidatedTime());
-            toupd.setTimeType(dto.getTimeType());
-            final Tag saved = tagRepository.save(toupd);
-            log.debug("Updated entity: {}", saved);
-            return mapper.map(saved, TagDto.class);
+    public TagDto updateTag(TagDto dto) throws NotExistsPojoException {
+        log.debug("Update tag from dto {}", dto);
+        final Tag entity = mapper.map(dto, Tag.class);
+        final Optional<Tag> tmpt = tagRepository.findById(entity.getName());
+        if (!tmpt.isPresent()) {
+            log.debug("Cannot update tag {} : resource does not exists.. ", dto);
+            throw new NotExistsPojoException("Tag does not exists for name " + dto.getName());
         }
-        catch (final Exception e) {
-            log.error("Exception in storing tag {}", dto);
-            throw new CdbServiceException("Cannot store tag : " + e.getMessage());
-        }
+        final Tag toupd = tmpt.get();
+        toupd.setDescription(dto.getDescription());
+        toupd.setObjectType(dto.getPayloadSpec());
+        toupd.setSynchronization(dto.getSynchronization());
+        toupd.setEndOfValidity(dto.getEndOfValidity());
+        toupd.setLastValidatedTime(dto.getLastValidatedTime());
+        toupd.setTimeType(dto.getTimeType());
+        final Tag saved = tagRepository.save(toupd);
+        log.debug("Updated entity: {}", saved);
+        return mapper.map(saved, TagDto.class);
     }
 
     /**
@@ -230,15 +209,9 @@ public class TagService {
      */
     @Transactional
     public void removeTag(String name) throws CdbServiceException {
-        try {
-            log.debug("Remove tag {}", name);
-            tagRepository.deleteById(name);
-            log.debug("Removed entity: {}", name);
-        }
-        catch (final Exception e) {
-            log.error("Exception in removing tag {}", name);
-            throw new CdbServiceException("Cannot remove tag : " + e.getMessage());
-        }
+        log.debug("Remove tag {}", name);
+        tagRepository.deleteById(name);
+        log.debug("Removed entity: {}", name);
     }
 
 }

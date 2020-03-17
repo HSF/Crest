@@ -106,13 +106,13 @@ public final class GlobalTagPredicates {
         log.debug("isInsertionTimeXThan: argument {} operation {}", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QGlobalTag.globalTag.insertionTime.lt(new Date(new Long(num)));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QGlobalTag.globalTag.insertionTime.gt(new Date(new Long(num)));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QGlobalTag.globalTag.insertionTime.eq(new Date(new Long(num)));
         }
         return pred;

@@ -5,6 +5,7 @@ package hep.crest.data.repositories.querydsl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class FolderFiltering implements IFilteringCriteria {
             log.debug("search criteria {} {} {}", searchCriteria.getKey(),
                     searchCriteria.getOperation(), searchCriteria.getValue());
             // Set to lower case for comparison
-            final String key = searchCriteria.getKey().toLowerCase();
+            final String key = searchCriteria.getKey().toLowerCase(Locale.ENGLISH);
             if ("nodefullpath".equals(key)) {
                 // Filter based on nodefullpath
                 final BooleanExpression namelike = FolderPredicates

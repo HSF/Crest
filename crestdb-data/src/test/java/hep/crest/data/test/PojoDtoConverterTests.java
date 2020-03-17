@@ -34,6 +34,7 @@ import hep.crest.data.security.pojo.CrestUser;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.FolderSetDto;
+import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.GlobalTagMapSetDto;
@@ -48,6 +49,7 @@ import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.PayloadSetDto;
 import hep.crest.swagger.model.PayloadTagInfoDto;
 import hep.crest.swagger.model.RunInfoDto;
+import hep.crest.swagger.model.RunInfoSetDto;
 import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.RunLumiSetDto;
 import hep.crest.swagger.model.TagDto;
@@ -288,6 +290,24 @@ public class PojoDtoConverterTests {
         assertThat(dto1.getRunNumber()).isEqualTo(entity.getRunNumber());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
+        
+        final RunInfoSetDto setdto = new RunInfoSetDto();
+        setdto.datatype("RunInfoSetDto");
+        final GenericMap filterm = new GenericMap();
+        filterm.put("run", "1000");
+        assertThat(filterm.containsKey("run")).isTrue();
+        
+        setdto.filter(filterm);
+        setdto.addResourcesItem(dto1);
+        setdto.format("RunInfo");
+        
+        final RunInfoSetDto setdto2 = new RunInfoSetDto();
+        setdto2.datatype("RunInfoSetDto");
+        setdto2.addResourcesItem(dto1);
+        assertThat(setdto2.equals(setdto)).isFalse();
+        assertThat(setdto.toString()).isNotNull();
+        setdto2.filter(setdto.getFilter());
+        setdto2.format(setdto.getFormat());
     }
 
     @Test
@@ -324,6 +344,18 @@ public class PojoDtoConverterTests {
         assertThat(dto1.getNodeFullpath()).isEqualTo(entity.getNodeFullpath());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
+        
+        dto1.setGroupRole("somerole");
+        dto1.setNodeDescription("some node desc");
+        dto1.setSchemaName("some_schema");
+        dto1.setTagPattern("some_anode");
+        dto1.setNodeName("anode");
+        dto1.setNodeFullpath("/some/anode");
+  
+        final FolderDto dto2 = DataGenerator.generateFolderDto("T0BLOB", "/MDT/T0BLOB",
+                "COOLOFL_MDT");
+        assertThat(dto1.equals(dto2)).isFalse();
+        
     }
 
     @Test
@@ -443,7 +475,14 @@ public class PojoDtoConverterTests {
         ptdto.setTotvolume(1.3F);
         assertThat(ptdto.toString().length()).isGreaterThan(0);
         assertThat(ptdto.hashCode()).isNotNull();
-
+        
+        final PayloadTagInfoDto ptdto2 = new PayloadTagInfoDto();
+        ptdto2.avgvolume(ptdto.getAvgvolume());
+        ptdto2.tagname(ptdto.getTagname());
+        ptdto2.totvolume(ptdto.getTotvolume());
+        ptdto2.niovs(ptdto.getNiovs());
+        assertThat(ptdto2.equals(ptdto)).isTrue();
+        
         final CrestUser user = new CrestUser("user", "password");
         user.setId("someid");
         user.setUsername("anothername");

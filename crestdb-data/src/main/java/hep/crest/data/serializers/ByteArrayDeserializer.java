@@ -38,7 +38,7 @@ public class ByteArrayDeserializer extends JsonDeserializer<byte[]> {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(ByteArrayDeserializer.class);
 
     /*
      * (non-Javadoc)

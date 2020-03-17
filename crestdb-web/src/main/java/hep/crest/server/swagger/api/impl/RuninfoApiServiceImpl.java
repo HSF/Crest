@@ -37,6 +37,8 @@ import hep.crest.swagger.model.RunInfoDto;
 import hep.crest.swagger.model.RunInfoSetDto;
 
 /**
+ * Rest endpoint for run information.
+ *
  * @author formica
  *
  */
@@ -82,10 +84,13 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
         log.info("RunInfoRestController processing request for creating a run info entry using "
                 + body);
         try {
+            // Create a list of resources
             final List<RunInfoDto> dtolist = body.getResources();
             final List<RunInfoDto> savedlist = new ArrayList<>();
             for (final RunInfoDto runInfoDto : dtolist) {
+                // Create a RunInfo resource.
                 final RunInfoDto saved = runinfoService.insertRunInfo(runInfoDto);
+                // Add to the saved list for the response.
                 savedlist.add(saved);
             }
             final CrestBaseResponse respdto = new RunInfoSetDto().resources(savedlist)
@@ -93,6 +98,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             return Response.created(info.getRequestUri()).entity(respdto).build();
         }
         catch (final CdbServiceException e) {
+            // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method createRunLumiInfo got exception : {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
@@ -114,18 +120,21 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
         try {
             log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size,
                     sort);
-
+            // Find a RunInfo resource.
             final CrestBaseResponse setdto = findRunInfo(by, page, size, sort);
             if (setdto == null) {
+                // Return 404.
                 final String message = "No resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                         message);
                 return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
             }
+            // Return 200.
             return Response.ok().entity(setdto).build();
 
         }
         catch (final CdbServiceException e) {
+            // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method listRunLumiInfo got exception : {}", message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -147,13 +156,17 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
         try {
             log.debug("Search resource list using from={}, to={}, format={}, mode={}", from, to,
                     format, mode);
+            // Select RunInfo in a range.
             List<RunInfoDto> dtolist = new ArrayList<>();
             if (mode.equalsIgnoreCase("runrange")) {
+                // Interpret as Runs
                 final BigDecimal bfrom = new BigDecimal(from);
                 final BigDecimal bto = new BigDecimal(to);
+                // Inclusive selection.
                 dtolist = runinfoService.selectInclusiveByRun(bfrom, bto);
             }
             else if (mode.equalsIgnoreCase("daterange")) {
+                // Interpret as Dates
                 Timestamp tsfrom = null;
                 Timestamp tsto = null;
                 if (format.equals("iso")) {
@@ -171,9 +184,11 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
                     tsfrom = new Timestamp(new Long(from));
                     tsto = new Timestamp(new Long(to));
                 }
+                // Inclusive selection.
                 dtolist = runinfoService.selectInclusiveByDate(new Date(tsfrom.getTime()),
                         new Date(tsto.getTime()));
             }
+            // Create response Set.
             final CrestBaseResponse setdto = new RunInfoSetDto().resources(dtolist)
                     .size((long) dtolist.size()).datatype("runs");
             final GenericMap filters = new GenericMap();
@@ -186,6 +201,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             return Response.ok().entity(setdto).build();
         }
         catch (final CdbServiceException e) {
+            // Exception, send 500.
             final String message = e.getMessage();
             log.error("findRunLumiInfo got Exception : {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
