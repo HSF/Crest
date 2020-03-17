@@ -56,33 +56,33 @@ public class IovSynchroAspect {
     public void checkSynchro(IovDto dto) {
         log.debug("Iov insertion should verify the tag synchronization type : {}",
                 dto.getTagName());
-
-        if (cprops.getSynchro().equals("none")) {
+        // Get synchro property
+        if ("none".equals(cprops.getSynchro())) {
             log.warn("synchronization checks are disabled in this configuration....");
             return;
         }
+        // Synchronization aspect is enabled.
         TagDto tagdto = null;
         try {
             tagdto = tagService.findOne(dto.getTagName());
         }
         catch (final NotExistsPojoException e) {
-            log.error("Error checking synchronization : {}", e.getMessage());
-        }
-        
-        if (tagdto == null) {
-            log.debug("Cannot find synchro for null tag");
+            log.error("Error checking synchronization, tag does not exists : {}", e);
             return;
         }
+        
         // Get synchro type from tag.
         final String synchro = tagdto.getSynchronization();
-        if (synchro.equalsIgnoreCase("SV")) {
+        
+        // Synchro for single version type. Can only append IOVs.
+        if ("SV".equalsIgnoreCase(synchro)) {
             log.warn("Can only append IOVs....");
             IovDto latest = null;
             try {
                 latest = iovService.latest(tagdto.getName(), "now", "ms");
             }
             catch (final CdbServiceException e) {
-                log.error("Error checking SV synchronization : {}", e.getMessage());
+                log.error("Error checking SV synchronization : {}", e);
             }
             if (latest == null) {
                 log.info("No iov could be retrieved");
@@ -95,6 +95,7 @@ public class IovSynchroAspect {
             }
         }
         else {
+            // Nothing here, synchro type is not implemented.
             log.debug("Synchro type not found....");
         }
     }
