@@ -22,6 +22,7 @@ import hep.crest.data.repositories.TagMetaDBImpl;
 import hep.crest.data.repositories.TagMetaDataBaseCustom;
 import hep.crest.data.repositories.TagMetaPostgresImpl;
 import hep.crest.data.repositories.TagMetaSQLITEImpl;
+import hep.crest.data.utils.DirectoryUtilities;
 
 /**
  * Repository configuration.
@@ -80,7 +81,7 @@ public class RepositoryConfig {
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
@@ -96,7 +97,7 @@ public class RepositoryConfig {
     public TagMetaDataBaseCustom tagmetaDefaultRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final TagMetaDBImpl bean = new TagMetaDBImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
@@ -112,7 +113,7 @@ public class RepositoryConfig {
     public TagMetaDataBaseCustom tagmetaPostgresRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final TagMetaPostgresImpl bean = new TagMetaPostgresImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
@@ -128,7 +129,7 @@ public class RepositoryConfig {
     public TagMetaDataBaseCustom tagmetaSqliteRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final TagMetaSQLITEImpl bean = new TagMetaSQLITEImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
