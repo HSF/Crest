@@ -36,7 +36,7 @@ public class DirectoryUtilities {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(DirectoryUtilities.class);
+    private static final Logger log = LoggerFactory.getLogger(DirectoryUtilities.class);
 
     /**
      * Name of the tag file.
@@ -55,6 +55,7 @@ public class DirectoryUtilities {
      * Charset.
      */
     private final Charset charset = Charset.forName("UTF-8");
+
     /**
      * Mapper.
      */
@@ -203,7 +204,7 @@ public class DirectoryUtilities {
     public Path getTagPath(String basedir, String tagname) throws CdbServiceException {
         final Path tagpath = Paths.get(basedir, tagname);
         if (!tagpath.toFile().exists()) {
-            throw new CdbServiceException("Cannot find directory for tag name " + tagname);
+            throw new CdbServiceException("DirectoryUtility: cannot find directory for tag name " + tagname);
         }
         return tagpath;
     }
@@ -221,7 +222,7 @@ public class DirectoryUtilities {
         final Path tagpath = getTagPath(basedir, tagname);
         final Path tagfilepath = Paths.get(tagpath.toString(), TAG_FILE);
         if (!tagfilepath.toFile().exists()) {
-            throw new CdbServiceException("Cannot find tag file for tag name " + tagname);
+            throw new CdbServiceException("DirectoryUtility: cannot find tag file for tag name " + tagname);
         }
         return tagfilepath;
     }
@@ -239,7 +240,7 @@ public class DirectoryUtilities {
         final Path tagpath = getTagPath(basedir, tagname);
         final Path iovfilepath = Paths.get(tagpath.toString(), IOV_FILE);
         if (!iovfilepath.toFile().exists()) {
-            throw new CdbServiceException("Cannot find iov file for tag name " + tagname);
+            throw new CdbServiceException("DirectoryUtility: cannot find iov file for tag name " + tagname);
         }
         return iovfilepath;
     }
@@ -259,7 +260,7 @@ public class DirectoryUtilities {
                     .collect(Collectors.toList());
         }
         catch (final IOException e) {
-            log.error("Error getting tags directories from {}", basedirpath);
+            log.error("Error getting tags directories from {}: {}", basedirpath, e);
         }
         return new ArrayList<>();
     }
@@ -278,7 +279,7 @@ public class DirectoryUtilities {
                 Files.createDirectories(base);
             }
             catch (final IOException e) {
-                log.error("Error creating base directory {}", base);
+                log.error("Error creating base directory {}: {}", base, e);
             }
         }
         return base;
@@ -291,14 +292,14 @@ public class DirectoryUtilities {
      */
     public Path getPayloadPath(String basedir) {
         final Path ppath = Paths.get(basedir, PAYLOAD_DIR);
-        log.info("creating directory if does not exists {}", ppath);
+        log.info("Creating directory if does not exists {}", ppath);
         if (!ppath.toFile().exists()) {
             // create the directory
             try {
                 Files.createDirectories(ppath);
             }
             catch (final IOException e) {
-                log.error("Error creating directory for payload {}", ppath);
+                log.error("Error creating directory for payload {}: {}", ppath, e);
             }
         }
         return ppath;
@@ -327,7 +328,7 @@ public class DirectoryUtilities {
                 return tagpath;
             }
             catch (final IOException e) {
-                log.error("Error creating directory for tag {}", tagpath);
+                log.error("Error creating directory for tag {}: {}", tagpath, e);
             }
         }
         return null;
@@ -346,7 +347,7 @@ public class DirectoryUtilities {
         final String tagname = name;
         final Path tagpath = Paths.get(basedir, tagname);
         if (!tagpath.toFile().exists()) {
-            throw new CdbServiceException("Cannot find tag for tag name " + tagname);
+            throw new CdbServiceException("Cannot find tag directory for tag name " + tagname);
         }
         else {
             try {
@@ -358,7 +359,7 @@ public class DirectoryUtilities {
             }
             catch (final IOException e) {
                 throw new CdbServiceException(
-                        "Error in finding or creating iov file for tag " + name);
+                        "Error in creating iov file for tag " + name, e);
             }
         }
     }
@@ -410,7 +411,7 @@ public class DirectoryUtilities {
             return outtarfile;
         }
         catch (final IOException e) {
-            log.error("Cannot create tar file from source {} in dir {}", source, outdir);
+            log.error("Cannot create tar file from source {} in dir {}: {}", source, outdir, e);
         }
         return "none";
     }

@@ -104,7 +104,7 @@ public final class RunIovConverter {
         if (arun == null) {
             return null;
         }
-        if (arun.equals("Inf")) {
+        if ("Inf".equals(arun)) {
             return new BigDecimal(COOL_MAX_DATE);
         }
         final BigInteger coolrun = new BigInteger(arun);
@@ -150,12 +150,12 @@ public final class RunIovConverter {
      * @return The COOL time.
      */
     public static BigDecimal getCoolRunLumi(final String arun, final String lb) {
-        Long runlong = null;
-        Long lblong = null;
         if (arun == null) {
             return null;
         }
-        if (arun.equals("Inf")) {
+        Long runlong = null;
+        Long lblong = null;
+        if ("Inf".equals(arun)) {
             runlong = COOL_MAX_RUN;
             lblong = COOL_MAX_LUMIBLOCK;
         }
@@ -222,9 +222,11 @@ public final class RunIovConverter {
         String iovstr = "";
         if (iovBase.startsWith("run-")) {
             if (time == RunIovConverter.COOL_MAX_DATE) {
-                return "Inf";
+                iovstr = "Inf";
             }
-            iovstr = time.toString();
+            else {
+                iovstr = time.toString();
+            }
         }
         else {
             if (time == 0) {
@@ -252,16 +254,18 @@ public final class RunIovConverter {
         endofatlasyear.set(2100, 1, 1);
         if (iovBase.startsWith("run-")) {
             if (time == RunIovConverter.COOL_MAX_DATE) {
-                return "Inf";
+                iovstr = "Inf";
             }
-            final Long run = getRun(time);
-            final Long lb = getLumi(time);
-            iovstr = run + " - " + lb;
-            if (lb == COOL_MAX_LUMIBLOCK) {
-                iovstr = run + " - maxlb";
+            else {
+                final Long run = getRun(time);
+                final Long lb = getLumi(time);
+                iovstr = run + " - " + lb;
+                if (lb == COOL_MAX_LUMIBLOCK) {
+                    iovstr = run + " - maxlb";
+                }
             }
         }
-        else if (iovBase.equals("time")) {
+        else if ("time".equals(iovBase)) {
             if (time == 0) {
                 return "0";
             }
@@ -277,22 +281,24 @@ public final class RunIovConverter {
             // Try to guess...
             // Suppose that it is a time....
             if (time == 0) {
-                return "0";
+                iovstr = "0";
             }
-            if (time == RunIovConverter.COOL_MAX_DATE) {
-                return "Inf";
+            else if (time == RunIovConverter.COOL_MAX_DATE) {
+                iovstr = "Inf";
             }
-            final Long timeInMilliSec = time / TO_NANOSECONDS;
-            final Date iov = new Date(timeInMilliSec);
-            iovstr = iov.toString();
+            else {
+                final Long timeInMilliSec = time / TO_NANOSECONDS;
+                final Date iov = new Date(timeInMilliSec);
+                iovstr = iov.toString();
 
-            final Calendar iovcal = Calendar.getInstance();
-            iovcal.setTime(iov);
-            final int iovyear = iovcal.get(Calendar.YEAR);
-            if (iovyear > endofatlasyear.get(Calendar.YEAR)) {
-                final Long run = getRun(new BigInteger(time.toString()));
-                final Long lb = getLumi(new BigInteger(time.toString()));
-                iovstr = run + " - " + lb;
+                final Calendar iovcal = Calendar.getInstance();
+                iovcal.setTime(iov);
+                final int iovyear = iovcal.get(Calendar.YEAR);
+                if (iovyear > endofatlasyear.get(Calendar.YEAR)) {
+                    final Long run = getRun(new BigInteger(time.toString()));
+                    final Long lb = getLumi(new BigInteger(time.toString()));
+                    iovstr = run + " - " + lb;
+                }
             }
         }
         return iovstr;
@@ -310,7 +316,7 @@ public final class RunIovConverter {
         if (iovBase.startsWith("run-")) {
             return getCoolRunLumi(runortime, 0L);
         }
-        else if (iovBase.equals("time")) {
+        else if ("time".equals(iovBase)) {
             return new BigDecimal(runortime * TO_NANOSECONDS);
         }
         else {
