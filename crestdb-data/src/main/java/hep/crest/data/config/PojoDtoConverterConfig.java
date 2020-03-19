@@ -39,7 +39,7 @@ public class PojoDtoConverterConfig {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PojoDtoConverterConfig.class);
 
     /**
      * @return MapperFactory
@@ -87,6 +87,7 @@ public class PojoDtoConverterConfig {
         mapperFactory.classMap(Tag.class, TagDto.class).field("objectType", "payloadSpec")
                 .exclude("globalTagMaps").byDefault().register();
     }
+
     /**
      * @param mapperFactory
      *            the MapperFactory
@@ -97,6 +98,7 @@ public class PojoDtoConverterConfig {
                 .field("id.insertionTime", "insertionTime").field("payloadHash", "payloadHash")
                 .register();
     }
+
     /**
      * @param mapperFactory
      *            the MapperFactory
