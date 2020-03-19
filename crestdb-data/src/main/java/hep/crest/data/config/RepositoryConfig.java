@@ -9,7 +9,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import hep.crest.data.handlers.CrestLobHandler;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovGroupsImpl;
@@ -45,7 +44,10 @@ public class RepositoryConfig {
      */
     @Bean(name = "fstagrepository")
     public TagDirectoryImplementation tagdirectoryRepository() {
-        return new TagDirectoryImplementation();
+        final TagDirectoryImplementation tdi = new TagDirectoryImplementation();
+        final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
+        tdi.setDirtools(du);
+        return tdi;
     }
 
     /**
@@ -53,7 +55,10 @@ public class RepositoryConfig {
      */
     @Bean(name = "fsiovrepository")
     public IovDirectoryImplementation iovdirectoryRepository() {
-        return new IovDirectoryImplementation();
+        final IovDirectoryImplementation idi = new IovDirectoryImplementation();
+        final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
+        idi.setDirtools(du);
+        return idi;
     }
 
     /**
@@ -61,8 +66,11 @@ public class RepositoryConfig {
      */
     @Bean(name = "fspayloadrepository")
     public PayloadDirectoryImplementation payloaddirectoryRepository() {
-        return new PayloadDirectoryImplementation();
-    }
+        final PayloadDirectoryImplementation pdi = new PayloadDirectoryImplementation();
+        final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
+        pdi.setDirtools(du);
+        return pdi;
+   }
 
     /**
      * @param mainDataSource
@@ -137,7 +145,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadDefaultRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
@@ -148,12 +156,12 @@ public class RepositoryConfig {
      *            the DataSource
      * @return PayloadDataBaseCustom
      */
-    @Profile({ "postgres" })
+    @Profile({ "postgres", "pgsvom" })
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadPostgresRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
@@ -169,20 +177,20 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadSqliteRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
-        if (!cprops.getSchemaname().equals("none")) {
+        if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
         return bean;
     }
 
-    /**
-     * @param mainDataSource
-     *            the DataSource
-     * @return LobHandler
-     */
-    @Bean(name = "lobhandler")
-    public CrestLobHandler loadHandler(@Qualifier("dataSource") DataSource mainDataSource) {
-        return new CrestLobHandler(mainDataSource);
-    }
+//    /**
+//     * @param mainDataSource
+//     *            the DataSource
+//     * @return LobHandler
+//     */
+//    @Bean(name = "lobhandler")
+//    public CrestLobHandler loadHandler(@Qualifier("dataSource") DataSource mainDataSource) {
+//        return new CrestLobHandler(mainDataSource);
+//    }
 
 }
