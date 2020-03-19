@@ -16,6 +16,8 @@ import java.time.format.DateTimeFormatter;
 public class DateFormatterHandler {
 
     /**
+     * Correspond to string like: 2011-12-03T10:15:30+01:00 .
+     * @see java.time.format.DateTimeFormatter
      * The pattern: default to ISO_OFFSET_DATE_TIME.
      */
     private static String datePATTERN = "ISO_OFFSET_DATE_TIME";
@@ -52,10 +54,10 @@ public class DateFormatterHandler {
      */
     public DateTimeFormatter getLocformatter() {
         if (this.locFormatter == null) {
-            if (datePATTERN.equals("ISO_OFFSET_DATE_TIME")) {
+            if ("ISO_OFFSET_DATE_TIME".equals(datePATTERN)) {
                 locFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
             }
-            else if (datePATTERN.equals("ISO_LOCAL_DATE_TIME")) {
+            else if ("ISO_LOCAL_DATE_TIME".equals(datePATTERN)) {
                 locFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
             }
             else {

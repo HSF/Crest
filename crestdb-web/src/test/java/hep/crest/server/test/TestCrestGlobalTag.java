@@ -323,7 +323,7 @@ public class TestCrestGlobalTag {
         final ResponseEntity<String> respmaptagsnull = this.testRestTemplate
                 .exchange("/crestapi/globaltagmaps/NOT-THERE", HttpMethod.GET, null, String.class);
         {
-            log.info("Retrieved associated tags for global tag {} should give 0", dto.getName());
+            log.info("Retrieved associated tags for global tag NOT-THERE should give 0");
             final String responseBody = respmaptagsnull.getBody();
             assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagMapSetDto ok;

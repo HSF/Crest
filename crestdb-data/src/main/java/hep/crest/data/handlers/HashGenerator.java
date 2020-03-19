@@ -26,7 +26,7 @@ public final class HashGenerator {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger("HashGenerator");
+    private static final Logger log = LoggerFactory.getLogger(HashGenerator.class);
 
     /**
      * MD5.
@@ -206,4 +206,5 @@ public final class HashGenerator {
         digestHash = sb.toString();
         return digestHash;
     }
+
 }

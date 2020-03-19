@@ -8,34 +8,40 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.identity.IdentityColumnSupport;
 
 /**
+ * This code was taken from internet.
  * @author formica
  *
  */
 public class SQLiteDialect extends Dialect {
 
+    private static final String INTEGER = "integer";
+    private static final String BLOB = "blob";
+    /**
+     * Ctor. Register types.
+     */
     public SQLiteDialect() {
-        registerColumnType(Types.BIT, "integer");
-        registerColumnType(Types.TINYINT, "tinyint");
-        registerColumnType(Types.SMALLINT, "smallint");
-        registerColumnType(Types.INTEGER, "integer");
-        registerColumnType(Types.BIGINT, "bigint");
-        registerColumnType(Types.FLOAT, "float");
-        registerColumnType(Types.REAL, "real");
-        registerColumnType(Types.DOUBLE, "double");
-        registerColumnType(Types.NUMERIC, "numeric");
-        registerColumnType(Types.DECIMAL, "decimal");
-        registerColumnType(Types.CHAR, "char");
-        registerColumnType(Types.VARCHAR, "varchar");
-        registerColumnType(Types.LONGVARCHAR, "longvarchar");
-        registerColumnType(Types.DATE, "date");
-        registerColumnType(Types.TIME, "time");
-        registerColumnType(Types.TIMESTAMP, "timestamp");
-        registerColumnType(Types.BINARY, "blob");
-        registerColumnType(Types.VARBINARY, "blob");
-        registerColumnType(Types.LONGVARBINARY, "blob");
-        registerColumnType(Types.BLOB, "blob");
-        registerColumnType(Types.CLOB, "clob");
-        registerColumnType(Types.BOOLEAN, "integer");
+        super.registerColumnType(Types.BIT, INTEGER);  //NOSONAR
+        super.registerColumnType(Types.TINYINT, "tinyint");  //NOSONAR
+        super.registerColumnType(Types.SMALLINT, "smallint");  //NOSONAR
+        super.registerColumnType(Types.INTEGER, INTEGER);  //NOSONAR
+        super.registerColumnType(Types.BIGINT, "bigint");  //NOSONAR
+        super.registerColumnType(Types.FLOAT, "float");
+        super.registerColumnType(Types.REAL, "real");
+        super.registerColumnType(Types.DOUBLE, "double");
+        super.registerColumnType(Types.NUMERIC, "numeric");
+        super.registerColumnType(Types.DECIMAL, "decimal");
+        super.registerColumnType(Types.CHAR, "char");
+        super.registerColumnType(Types.VARCHAR, "varchar");
+        super.registerColumnType(Types.LONGVARCHAR, "longvarchar");
+        super.registerColumnType(Types.DATE, "date");
+        super.registerColumnType(Types.TIME, "time");
+        super.registerColumnType(Types.TIMESTAMP, "timestamp");
+        super.registerColumnType(Types.BINARY, BLOB);
+        super.registerColumnType(Types.VARBINARY, BLOB);
+        super.registerColumnType(Types.LONGVARBINARY, BLOB);
+        super.registerColumnType(Types.BLOB, BLOB);
+        super.registerColumnType(Types.CLOB, "clob");
+        super.registerColumnType(Types.BOOLEAN, INTEGER);
     }
 
     @Override

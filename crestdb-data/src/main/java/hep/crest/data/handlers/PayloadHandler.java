@@ -29,7 +29,7 @@ public final class PayloadHandler {
     /**
      * Logger.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(PayloadHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(PayloadHandler.class);
 
     /**
      * Max length for reading.
@@ -55,13 +55,13 @@ public final class PayloadHandler {
 
             while ((nRead = is.read(data, 0, data.length)) != -1) {
                 buffer.write(data, 0, nRead);
-                LOG.debug("Reading data from stream {} ", nRead);
+                log.debug("Reading data from stream {} ", nRead);
             }
             buffer.flush();
             data = buffer.toByteArray();
         }
         catch (final IOException e) {
-            LOG.error("Exception getting bytes from stream : {}", e.getMessage());
+            log.error("Exception getting bytes from stream : {}", e.getMessage());
             data = new byte[0];
         }
         return data;
@@ -88,7 +88,7 @@ public final class PayloadHandler {
             out.flush();
         }
         catch (final IOException e) {
-            LOG.error("Exception saving stream to file: {}", e.getMessage());
+            log.error("Exception saving stream to file: {}", e.getMessage());
             throw new CdbServiceException("Cannot save stream to file " + uploadedFileLocation);
         }
     }
@@ -112,7 +112,7 @@ public final class PayloadHandler {
             out.flush();
         }
         catch (final IOException e) {
-            LOG.error("Exception in saveToOutStream : {}", e.getMessage());
+            log.error("Exception in saveToOutStream : {}", e.getMessage());
         }
         finally {
             try {
@@ -120,7 +120,7 @@ public final class PayloadHandler {
                 out.close();
             }
             catch (final IOException e) {
-                LOG.error("Exception in saveToOutStream when closing : {}", e.getMessage());
+                log.error("Exception in saveToOutStream when closing : {}", e.getMessage());
             }
         }
     }
@@ -145,7 +145,7 @@ public final class PayloadHandler {
             return HashGenerator.hashoutstream(uploadedInputStream, out);
         }
         catch (NoSuchAlgorithmException | IOException e) {
-            LOG.error("Cannot generate hash : {}", e.getMessage());
+            log.error("Cannot generate hash : {}", e.getMessage());
             throw new PayloadEncodingException(e.getMessage());
         }
         finally {
@@ -155,7 +155,7 @@ public final class PayloadHandler {
                     uploadedInputStream.close();
                 }
                 catch (final IOException e) {
-                    LOG.error("error closing input stream in saveToFileGetHash: {}",
+                    log.error("error closing input stream in saveToFileGetHash: {}",
                             e.getMessage());
                 }
             }
@@ -175,7 +175,7 @@ public final class PayloadHandler {
             return HashGenerator.hash(uploadedInputStream);
         }
         catch (NoSuchAlgorithmException | IOException e) {
-            LOG.error("Error in hashing stream : {}", e.getMessage());
+            log.error("Error in hashing stream : {}", e.getMessage());
             throw new PayloadEncodingException("Error in hashing stream : " + e.getMessage());
         }
     }
@@ -193,7 +193,7 @@ public final class PayloadHandler {
             StreamUtils.copy(uploadedInputStream, out);
         }
         catch (final IOException e) {
-            LOG.error("Exception in saveStreamToFile: {}", e.getMessage());
+            log.error("Exception in saveStreamToFile: {}", e.getMessage());
         }
     }
 
@@ -209,7 +209,7 @@ public final class PayloadHandler {
             databarr = Files.readAllBytes(path);
         }
         catch (final IOException e) {
-            LOG.error("Exception in readFromFile: {}", e.getMessage());
+            log.error("Exception in readFromFile: {}", e.getMessage());
             databarr = new byte[0];
         }
         return databarr;
@@ -229,7 +229,7 @@ public final class PayloadHandler {
             flength = Files.size(path);
         }
         catch (final IOException e) {
-            LOG.error("Exception in lengthOfFile: {}", e.getMessage());
+            log.error("Exception in lengthOfFile: {}", e.getMessage());
         }
         return flength;
     }
