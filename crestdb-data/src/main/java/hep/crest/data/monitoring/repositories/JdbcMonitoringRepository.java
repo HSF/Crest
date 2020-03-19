@@ -3,6 +3,7 @@
  */
 package hep.crest.data.monitoring.repositories;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -27,7 +28,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(JdbcMonitoringRepository.class);
 
     /**
      * The datasource.
@@ -47,15 +48,15 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         String sql;
         try {
+            // Create the sql string using a query defined in a package.
+            // This will work only in Oracle.
             sql = "select tag_name, niovs, tot_volume, avg_volume from table (CREST_TOOLS.F_GETTAGSUMMARY(?))";
             log.debug("Execute query {} using {}", sql, tagpattern);
             return jdbcTemplate.query(sql, new Object[] {tagpattern}, new PayloadInfoMapper());
         }
-        catch (final EmptyResultDataAccessException emptyResultDataAccessException) {
-            throw new CdbServiceException(emptyResultDataAccessException.getMessage());
+        catch (final EmptyResultDataAccessException e) {
+            log.error("Cannot find tag information for pattern {}: {}", tagpattern, e);
         }
-        catch (final Exception e) {
-            throw new CdbServiceException(e.getMessage());
-        }
+        return new ArrayList<>();
     }
 }

@@ -1,7 +1,5 @@
 /**
- * 
- */
-/**
+ * @version %I%, %G% 
  * @author formica
  *
  */
