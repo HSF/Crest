@@ -85,7 +85,7 @@ allprojects  {
 sonarqube {
 	properties{
 		property 'sonar.coverage.exclusions', "**/hep/crest/swagger/model/*"
-    property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
+    	property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*"
 	}
 }
 
