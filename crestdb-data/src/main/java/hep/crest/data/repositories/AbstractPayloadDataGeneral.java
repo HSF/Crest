@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,12 +31,12 @@ import hep.crest.swagger.model.PayloadDto;
  * @author formica
  *
  */
-public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
+public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCustom {
 
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(AbstractPayloadDataGeneral.class);
     /**
      * The Data Source.
      */
@@ -54,7 +55,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
      * @param ds
      *            the DataSource
      */
-    public PayloadDataGeneral(DataSource ds) {
+    public AbstractPayloadDataGeneral(DataSource ds) {
         super();
         this.ds = ds;
     }
@@ -120,8 +121,8 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
         try {
             savedentity = this.saveBlobAsBytes(entity);
         }
-        catch (final Exception e) {
-            log.error("Error in save paylod dto : {}", e.getMessage());
+        catch (final CdbServiceException e) {
+            log.error("Error in save paylod dto : {}", e);
         }
         return savedentity;
     }
@@ -140,7 +141,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
             savedentity = this.saveBlobAsStream(entity, is);
         }
         catch (final CdbServiceException e) {
-            log.error("Exception during payload dto insertion: {}", e.getMessage());
+            log.error("Exception during payload dto insertion: {}", e);
         }
         return savedentity;
     }
@@ -193,8 +194,8 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
                 return entity;
             });
         }
-        catch (final Exception e) {
-            log.warn("Could not find entry for hash {}", id);
+        catch (final DataAccessException e) {
+            log.warn("Could not find entry for hash {}: {}", id, e);
         }
         return null;
     }
@@ -227,8 +228,8 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
                 return entity;
             });
         }
-        catch (final Exception e) {
-            log.warn("Could not find entry for hash {}", id);
+        catch (final DataAccessException e) {
+            log.warn("Could not find meta info entry for hash {}: {}", id, e);
         }
         return null;
 
@@ -278,7 +279,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
                     entity.getHash());
         }
         catch (final SQLException e) {
-            log.error("Sql exception when storing payload with sql {} : {}", sql, e.getMessage());
+            log.error("Sql exception when storing payload with sql {} : {}", sql, e);
         }
         finally {
             try {
@@ -287,7 +288,7 @@ public abstract class PayloadDataGeneral implements PayloadDataBaseCustom {
                 }
             }
             catch (final IOException e) {
-                log.error("Error in closing streams...potential leak");
+                log.error("Error in closing streams...potential leak: {}", e);
             }
         }
     }

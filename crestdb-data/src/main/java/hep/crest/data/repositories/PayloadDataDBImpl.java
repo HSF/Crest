@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,12 +40,12 @@ import hep.crest.data.repositories.externals.PayloadRequests;
  * @author formica
  *
  */
-public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadDataBaseCustom {
+public class PayloadDataDBImpl extends AbstractPayloadDataGeneral implements PayloadDataBaseCustom {
 
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PayloadDataDBImpl.class);
 
     /**
      * @param ds
@@ -78,14 +79,14 @@ public class PayloadDataDBImpl extends PayloadDataGeneral implements PayloadData
             final String tablename = this.tablename();
 
             final String sql = PayloadRequests.getFindDataQuery(tablename);
-            return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
-                return rs.getBlob("DATA").getBinaryStream();
-            });
+            return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) ->
+                rs.getBlob("DATA").getBinaryStream()
+            );
         }
-        catch (final Exception e) {
-            log.error("Cannot find payload with data for hash {}", id);
-            return null;
+        catch (final DataAccessException e) {
+            log.error("Cannot find payload with data for hash {}: {}", id, e);
         }
+        return null;
     }
 
     /*

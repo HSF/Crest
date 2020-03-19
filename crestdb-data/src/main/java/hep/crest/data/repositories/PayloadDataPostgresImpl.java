@@ -45,12 +45,12 @@ import hep.crest.swagger.model.PayloadDto;
  * @author formica
  *
  */
-public class PayloadDataPostgresImpl extends PayloadDataGeneral implements PayloadDataBaseCustom {
+public class PayloadDataPostgresImpl extends AbstractPayloadDataGeneral implements PayloadDataBaseCustom {
 
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PayloadDataPostgresImpl.class);
 
     /**
      * The null long.
@@ -127,8 +127,8 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                     rs.close();
                 }
             }
-            catch (SQLException | NullPointerException e) {
-                log.error("Error in closing result set : {}", e.getMessage());
+            catch (final SQLException e) {
+                log.error("Error in closing result set : {}", e);
             }
         }
         return null;
@@ -155,7 +155,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             obj.close();
         }
         catch (final SQLException e) {
-            log.error("cannot read large object in postgres {} : {}", oid, e.getMessage());
+            log.error("cannot read large object in postgres {} : {}", oid, e);
         }
         finally {
             if (obj != null) {
@@ -210,7 +210,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
             return oid;
         }
         catch (SQLException | IOException e) {
-            log.error("Exception in getting large object id: {}", e.getMessage());
+            log.error("Exception in getting large object id: {}", e);
         }
         finally {
             try {
@@ -221,8 +221,8 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                     lobj = null;
                 }
             }
-            catch (SQLException | NullPointerException e) {
-                log.error("Error in closing result set : {}", e.getMessage());
+            catch (final SQLException e) {
+                log.error("Error in closing result set : {}", e);
             }
         }
         return LONGNULL;
@@ -305,7 +305,7 @@ public class PayloadDataPostgresImpl extends PayloadDataGeneral implements Paylo
                 sis.close();
             }
             catch (final IOException e) {
-                log.error("Error in closing streams...potential leak");
+                log.error("Error in closing streams...potential leak: {}", e);
             }
         }
     }

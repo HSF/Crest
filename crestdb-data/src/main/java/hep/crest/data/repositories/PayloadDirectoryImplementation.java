@@ -26,7 +26,7 @@ public class PayloadDirectoryImplementation {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(PayloadDirectoryImplementation.class);
+    private static final Logger log = LoggerFactory.getLogger(PayloadDirectoryImplementation.class);
 
     /**
      * Directory tools.
@@ -92,8 +92,9 @@ public class PayloadDirectoryImplementation {
             return dirtools.getMapper().readValue(jsonstring, PayloadDto.class);
         }
         catch (final IOException x) {
-            throw new CdbServiceException("Cannot find iov list for hash " + hash);
+            log.error("Cannot find payload for hash {}: {}", hash, x);
         }
+        return null;
     }
 
     /**
@@ -118,11 +119,12 @@ public class PayloadDirectoryImplementation {
             }
             final Path payloadfilepath = Paths.get(payloadhashdir.toString(), payloadfilename);
             if (!payloadfilepath.toFile().exists()) {
+                // The payload does not exists: create the new file.
                 Files.createFile(payloadfilepath);
             }
             else {
-                throw new CdbServiceException(
-                        "Payload file " + payloadfilepath + "already exists for hash " + hash);
+                // The payload already exists. Return directly the hash.
+                return hash;
             }
             final String jsonstr = dirtools.getMapper().writeValueAsString(dto);
 
@@ -130,7 +132,8 @@ public class PayloadDirectoryImplementation {
             return hash;
         }
         catch (final IOException x) {
-            throw new CdbServiceException("IO error " + x.getMessage());
+            log.error("Cannot save payload for hash {}: {}", dto.getHash(), x);
+            throw new CdbServiceException("Cannot save payload", x);
         }
     }
 
