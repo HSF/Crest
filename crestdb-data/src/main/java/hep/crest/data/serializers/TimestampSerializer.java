@@ -40,7 +40,7 @@ public class TimestampSerializer extends JsonSerializer<Timestamp> {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(TimestampSerializer.class);
 
     /**
      * The Date formatter handler.
@@ -58,12 +58,7 @@ public class TimestampSerializer extends JsonSerializer<Timestamp> {
     @Override
     public void serialize(Timestamp ts, JsonGenerator jg, SerializerProvider sp)
             throws IOException {
-        try {
-            log.debug("Use private version of serializer....{}", handler.getLocformatter());
-            jg.writeString(handler.format(ts));
-        }
-        catch (final Exception ex) {
-            log.error("Failed to serialize using format {}", handler.getLocformatter());
-        }
+        log.debug("Use private version of serializer....{}", handler.getLocformatter());
+        jg.writeString(handler.format(ts));
     }
 }

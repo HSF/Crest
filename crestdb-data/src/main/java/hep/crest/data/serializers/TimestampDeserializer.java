@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -38,11 +37,10 @@ import hep.crest.data.handlers.DateFormatterHandler;
 @Component
 public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 
-
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(TimestampDeserializer.class);
 
     /**
      * The Date formatter handler.
@@ -59,13 +57,8 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
      */
     @Override
     public Timestamp deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-        try {
-            final String tstampstr = jp.getText();
-            return handler.format(tstampstr);
-        }
-        catch (final Exception ex) {
-            log.error("Failed to deserialize using format {}", handler.getLocformatter());
-            throw new JsonParseException(jp, ex.getMessage(), jp.getCurrentLocation());
-        }
+        log.debug("Use private version of deserializer....{}", handler.getLocformatter());
+        final String tstampstr = jp.getText();
+        return handler.format(tstampstr);
     }
 }
