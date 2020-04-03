@@ -100,10 +100,7 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
             final CrestBaseResponse setdto = new GlobalTagMapSetDto().resources(dtolist)
                     .filter(filters).format("GlobalTagMapSetDto").size((long) dtolist.size())
                     .datatype("maps");
-            if (dtolist.size() == 0) {
-                return Response.status(Response.Status.NOT_FOUND).entity(setdto).build();
-            }
-            return Response.ok().entity(setdto).build();
+             return Response.ok().entity(setdto).build();
 
         }
         catch (final CdbServiceException e) {

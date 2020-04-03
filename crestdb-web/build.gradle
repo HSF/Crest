@@ -54,8 +54,8 @@ tasks.withType(Checkstyle) {
   }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+//sourceCompatibility = 1.8
+//targetCompatibility = 1.8
 
 springBoot {
     // This statement tells the Gradle Spring Boot plugin

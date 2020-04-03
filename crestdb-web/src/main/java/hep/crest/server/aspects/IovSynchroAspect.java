@@ -1,7 +1,7 @@
 /**
  * 
  */
-package hep.crest.server.synchronizationpolicy;
+package hep.crest.server.aspects;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -47,6 +47,13 @@ public class IovSynchroAspect {
     private IovService iovService;
 
     /**
+     * The execution insertion point is the method insertIov of the IovService. The idea is that when a new IOV is
+     * inserted, then we can verify the policy to adopt by checking the TAG synchronization field.
+     * Here some examples:
+     *  - SV : IOVs can only be appended
+     *  - ...: yet to be defined
+     * We should complete this aspect in order to implement a mechanism to STOP the insertion in case of not
+     * conformance with the policy. May be one should use the joinpoint or modify the dto argument.
      * @param dto
      *            the IovDto
      */
@@ -54,13 +61,15 @@ public class IovSynchroAspect {
     public void checkSynchro(IovDto dto) {
         log.debug("Iov insertion should verify the tag synchronization type : {}",
                 dto.getTagName());
-
-        if (cprops.getSynchro().equals("none")) {
+        // Verify if synchronization policy is requested
+        if ("none".equals(cprops.getSynchro())) {
             log.warn("synchronization checks are disabled in this configuration....");
             return;
         }
+        // Synchro policy is active.
         TagDto tagdto = null;
         try {
+            // Load the tag
             tagdto = tagService.findOne(dto.getTagName());
         }
         catch (final CdbServiceException e) {
@@ -70,8 +79,9 @@ public class IovSynchroAspect {
             log.debug("Cannot find synchro for null tag");
             return;
         }
+        // Check the synchro policy
         final String synchro = tagdto.getSynchronization();
-        if (synchro.equalsIgnoreCase("SV")) {
+        if ("SV".equalsIgnoreCase(synchro)) {
             log.warn("Can only append IOVs....");
             IovDto latest = null;
             try {
