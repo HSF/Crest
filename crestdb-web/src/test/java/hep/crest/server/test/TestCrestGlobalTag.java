@@ -110,8 +110,8 @@ public class TestCrestGlobalTag {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         log.info("Try to store global tag again : {} ", dto);
-        final ResponseEntity<GlobalTagDto> response1 = this.testRestTemplate
-                .postForEntity("/crestapi/globaltags", dto, GlobalTagDto.class);
+        final ResponseEntity<String> response1 = this.testRestTemplate
+                .postForEntity("/crestapi/globaltags", dto, String.class);
         log.info("Received response: {}", response1);
         assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 
@@ -188,7 +188,7 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
             assertThat(ok.getSize()).isEqualTo(1);
         }
-
+        // This should not find the GT
         final ResponseEntity<String> resp1null = this.testRestTemplate
                 .exchange("/crestapi/globaltags/SOME-GT", HttpMethod.GET, null, String.class);
         {
@@ -215,7 +215,7 @@ public class TestCrestGlobalTag {
         {
             log.info("Retrieved global tag list " + resp2a.getBody());
             final String responseBody = resp2a.getBody();
-            assertThat(resp2a.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(resp2a.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
@@ -228,7 +228,7 @@ public class TestCrestGlobalTag {
         {
             log.info("Retrieved global tag list " + resp2b.getBody());
             final String responseBody = resp2b.getBody();
-            assertThat(resp2b.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(resp2b.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);

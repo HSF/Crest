@@ -6,16 +6,12 @@ package hep.crest.server.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +20,10 @@ import com.querydsl.core.types.Predicate;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
+import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.GlobalTagRepository;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.exceptions.EmptyPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.swagger.model.GlobalTagDto;
-import hep.crest.swagger.model.TagDto;
-import ma.glasnost.orika.MapperFacade;
 
 /**
  * @author formica
@@ -52,33 +45,26 @@ public class GlobalTagService {
     private GlobalTagRepository globalTagRepository;
 
     /**
-     * Mapper.
-     */
-    @Autowired
-    @Qualifier("mapper")
-    private MapperFacade mapper;
-
-    /**
      * @param qry
      *            the Predicate
      * @param req
      *            the Pageable
-     * @return List<GlobalTagDto>
-     * @throws CdbServiceException
-     *             If an Exception occurred
+     * @return List<GlobalTag>
      */
-    public List<GlobalTagDto> findAllGlobalTags(Predicate qry, Pageable req)
-            throws CdbServiceException {
+    public Iterable<GlobalTag> findAllGlobalTags(Predicate qry, Pageable req) {
         Iterable<GlobalTag> entitylist = null;
         if (qry == null) {
-            entitylist = globalTagRepository.findAll(req);
+            if (req == null) {
+                entitylist = globalTagRepository.findAll();
+            }
+            else {
+                entitylist = globalTagRepository.findAll(req);
+            }
         }
         else {
             entitylist = globalTagRepository.findAll(qry, req);
         }
-        return StreamSupport.stream(entitylist.spliterator(), false)
-                .map(s -> mapper.map(s, GlobalTagDto.class)).collect(Collectors.toList());
-
+        return entitylist;
     }
 
     /**
@@ -86,34 +72,15 @@ public class GlobalTagService {
      *            the String
      * @throws NotExistsPojoException
      *             If object was not found
-     * @return GlobalTagDto
+     * @return GlobalTag
      */
-    public GlobalTagDto findOne(String globaltagname) throws NotExistsPojoException {
+    public GlobalTag findOne(String globaltagname) throws NotExistsPojoException {
         log.debug("Search for global tag by name {}", globaltagname);
         final GlobalTag entity = globalTagRepository.findByName(globaltagname);
         if (entity == null) {
             throw new NotExistsPojoException("Cannot find global tag " + globaltagname);
         }
-        return mapper.map(entity, GlobalTagDto.class);
-    }
-
-    /**
-     * @param gt
-     *            the GlobalTag
-     * @return List<TagDto>
-     * @throws EmptyPojoException
-     *             If an Exception occurred
-     */
-    private List<TagDto> getTagsFromGT(GlobalTag gt) throws EmptyPojoException {
-        if (gt == null) {
-            throw new EmptyPojoException("Cannot load tags from a null global tag...");
-        }
-        final Set<GlobalTagMap> gtMaps = gt.getGlobalTagMaps();
-        final List<TagDto> tagDtos = new ArrayList<>();
-        for (final GlobalTagMap globalTagMap : gtMaps) {
-            tagDtos.add(mapper.map(globalTagMap.getTag(), TagDto.class));
-        }
-        return tagDtos;
+        return entity;
     }
 
     /**
@@ -123,14 +90,14 @@ public class GlobalTagService {
      *            the String
      * @param label
      *            the String
-     * @return List<TagDto>
-     * @throws CdbServiceException
+     * @return List<Tag>
+     * @throws NotExistsPojoException
      *             If an Exception occurred
      */
-    public List<TagDto> getGlobalTagByNameFetchTags(String globaltagname, String record,
-            String label) throws CdbServiceException {
+    public List<Tag> getGlobalTagByNameFetchTags(String globaltagname, String record, String label)
+            throws NotExistsPojoException {
         GlobalTag entity = null;
-        log.debug("Search for (record, label) specified tag list for GT: {}", globaltagname);
+        log.debug("Search for (record, label) specified tag list for GlobalTag={}", globaltagname);
         if ("none".equals(record)) {
             record = "";
         }
@@ -147,70 +114,73 @@ public class GlobalTagService {
             entity = globalTagRepository.findByNameAndFetchSpecifiedTagsEagerly(globaltagname,
                     record, label);
         }
-        return getTagsFromGT(entity);
+        if (entity == null) {
+            throw new NotExistsPojoException("Cannot fetch tags for " + globaltagname);
+        }
+        final List<Tag> taglist = new ArrayList<>();
+        for (final GlobalTagMap globalTagMap : entity.getGlobalTagMaps()) {
+            taglist.add(globalTagMap.getTag());
+        }
+        return taglist;
     }
 
     /**
-     * @param dto
-     *            the GlobalTagDto
-     * @return GlobalTagDto
+     * @param entity
+     *            the GlobalTag
+     * @return GlobalTag
      * @throws CdbServiceException
      *             If an Exception occurred
      * @throws AlreadyExistsPojoException
      *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public GlobalTagDto insertGlobalTag(GlobalTagDto dto)
+    public GlobalTag insertGlobalTag(GlobalTag entity)
             throws CdbServiceException, AlreadyExistsPojoException {
         try {
-            log.debug("Create global tag from dto {}", dto);
-            final GlobalTag entity = mapper.map(dto, GlobalTag.class);
+            log.debug("Create GlobalTag from {}", entity);
             final Optional<GlobalTag> tmpgt = globalTagRepository.findById(entity.getName());
             if (tmpgt.isPresent()) {
-                log.error("global tag {} already exists..", tmpgt.get());
+                log.warn("GlobalTag {} already exists.", tmpgt.get());
                 throw new AlreadyExistsPojoException(
-                        "Global tag already exists for name " + dto.getName());
+                        "GlobalTag already exists for name " + entity.getName());
             }
-            log.debug("Saving global tag entity {}", entity);
             final GlobalTag saved = globalTagRepository.save(entity);
-            log.debug("Saved entity: {}", saved);
-            return mapper.map(saved, GlobalTagDto.class);
+            log.debug("Saved entity {}", saved);
+            return saved;
         }
-        catch (final AlreadyExistsPojoException e) {
-            log.error("Cannot store global tag {} : resource already exists..{}", dto, e);
-            throw e;
+        catch (final RuntimeException e) {
+            log.error("Error in storing GlobalTag {}: {}", entity.getName(), e);
+            throw new CdbServiceException("insertGlobalTag Exception", e);
         }
     }
 
     /**
-     * @param dto
-     *            the GlobaTagDto
-     * @return GlobalTagDto
+     * @param entity
+     *            the GlobaTag
+     * @return GlobalTag
      * @throws NotExistsPojoException
      *             If object was not found
      */
     @Transactional
-    public GlobalTagDto updateGlobalTag(GlobalTagDto dto) throws NotExistsPojoException {
-        log.debug("Create global tag from dto {}", dto);
-        final GlobalTag entity = mapper.map(dto, GlobalTag.class);
+    public GlobalTag updateGlobalTag(GlobalTag entity) throws NotExistsPojoException {
+        log.debug("Update GlobalTag from {}", entity);
         final Optional<GlobalTag> tmpoptgt = globalTagRepository.findById(entity.getName());
         if (!tmpoptgt.isPresent()) {
-            log.debug("Cannot update global tag {} : resource does not exists.. ", dto);
+            log.debug("Cannot update GlobalTag {} : resource does not exists.. ", entity.getName());
             throw new NotExistsPojoException(
-                    "Global tag does not exists for name " + dto.getName());
+                    "GlobalTag does not exists for name " + entity.getName());
         }
         final GlobalTag toupd = tmpoptgt.get();
-        toupd.setDescription(dto.getDescription());
-        toupd.setRelease(dto.getRelease());
-        toupd.setScenario(dto.getScenario());
-        toupd.setSnapshotTime(dto.getSnapshotTime());
-        final char type = dto.getType() != null ? dto.getType().charAt(0) : 'N';
-        toupd.setType(type);
-        toupd.setValidity(dto.getValidity());
-        toupd.setWorkflow(dto.getWorkflow());
+        toupd.setDescription(entity.getDescription());
+        toupd.setRelease(entity.getRelease());
+        toupd.setScenario(entity.getScenario());
+        toupd.setSnapshotTime(entity.getSnapshotTime());
+        toupd.setType(entity.getType());
+        toupd.setValidity(entity.getValidity());
+        toupd.setWorkflow(entity.getWorkflow());
         final GlobalTag saved = globalTagRepository.save(toupd);
         log.debug("Saved entity: {}", saved);
-        return mapper.map(saved, GlobalTagDto.class);
+        return saved;
     }
 
     /**

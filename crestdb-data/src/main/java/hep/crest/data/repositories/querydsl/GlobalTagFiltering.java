@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 
-import hep.crest.data.exceptions.CdbServiceException;
-
 /**
  * The utility filtering class to handle SQL requests for folder selection. The
  * methods used are implemented in @see GlobalTagPredicates.
@@ -38,15 +36,14 @@ public class GlobalTagFiltering implements IFilteringCriteria {
      * .util.List, java.lang.Object)
      */
     @Override
-    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria)
-            throws CdbServiceException {
+    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria) {
 
         final List<BooleanExpression> expressions = new ArrayList<>();
         // Build the list of boolean expressions.
         for (final SearchCriteria searchCriteria : criteria) {
             log.debug("search criteria {} {} {}", searchCriteria.getKey(),
                     searchCriteria.getOperation(), searchCriteria.getValue());
-            final String key = searchCriteria.getKey().toLowerCase(Locale.ENGLISH);
+            final String key = searchCriteria.getKey().toLowerCase(Locale.US);
             if ("workflow".equals(key)) {
                 // Filter based on the worlflow.
                 final BooleanExpression wflike = GlobalTagPredicates

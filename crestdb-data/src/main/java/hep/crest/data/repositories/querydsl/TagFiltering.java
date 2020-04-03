@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 
-import hep.crest.data.exceptions.CdbServiceException;
-
 /**
  * The utility filtering class to handle SQL requests for folder selection. The
  * methods used are implemented in @see TagPredicates.
@@ -38,8 +36,7 @@ public class TagFiltering implements IFilteringCriteria {
      * .util.List, java.lang.Object)
      */
     @Override
-    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria)
-            throws CdbServiceException {
+    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria) {
         final List<BooleanExpression> expressions = new ArrayList<>();
         // Build the list of boolean expressions.
         for (final SearchCriteria searchCriteria : criteria) {

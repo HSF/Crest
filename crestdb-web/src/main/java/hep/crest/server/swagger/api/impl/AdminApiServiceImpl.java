@@ -7,9 +7,11 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.GlobalTag;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.GlobalTagService;
 import hep.crest.server.services.TagService;
@@ -17,6 +19,7 @@ import hep.crest.server.swagger.api.AdminApiService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.GlobalTagDto;
+import ma.glasnost.orika.MapperFacade;
 
 /**
  * Rest endpoint for administration task. 
@@ -45,6 +48,14 @@ public class AdminApiServiceImpl extends AdminApiService {
 	 */
 	@Autowired
 	private TagService tagService;
+	
+    /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
+
 
     /* (non-Javadoc)
      * @see hep.crest.server.swagger.api.AdminApiService#removeGlobalTag(java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
@@ -87,38 +98,43 @@ public class AdminApiServiceImpl extends AdminApiService {
     public Response updateGlobalTag(String name, GlobalTagDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		log.info("AdminRestController processing request for updating a global tag using "+body);
 		try {
+		    final char type = body.getType() != null ? body.getType().charAt(0) : 'N';
+
 		    // Find the global tag corresponding to input name.
-			final GlobalTagDto dtoentity = globalTagService.findOne(name);
+			final GlobalTag entity = globalTagService.findOne(name);
+//	        final char type = entity.getType() != null ? entity.getType() : 'N';
+
 			// Compare fields to set them from the input body object provided by the client.
-			if (dtoentity.getDescription() != body.getDescription()) {
+			if (entity.getDescription() != body.getDescription()) {
 	            // change description.
-				dtoentity.setDescription(body.getDescription());
+			    entity.setDescription(body.getDescription());
 			}
-			if (dtoentity.getRelease() != body.getRelease()) {
+			if (entity.getRelease() != body.getRelease()) {
                 // change release.
-				dtoentity.setRelease(body.getRelease());
+			    entity.setRelease(body.getRelease());
 			}
-			if (dtoentity.getWorkflow() != body.getWorkflow()) {
+			if (entity.getWorkflow() != body.getWorkflow()) {
                 // change workflow.
-				dtoentity.setWorkflow(body.getWorkflow());
+			    entity.setWorkflow(body.getWorkflow());
 			}
-			if (dtoentity.getScenario() != body.getScenario()) {
+			if (entity.getScenario() != body.getScenario()) {
                 // change scenario.
-				dtoentity.setScenario(body.getScenario());
+			    entity.setScenario(body.getScenario());
 			}
-			if (dtoentity.getType() != body.getType()) {
+			if (entity.getType() != type) {
                 // change type.
-				dtoentity.setType(body.getType());
+			    entity.setType(type);
 			}
 			// Update the global tag.
-			final GlobalTagDto saved = globalTagService.updateGlobalTag(dtoentity);
-			return Response.ok().entity(saved).build();
+			final GlobalTag saved = globalTagService.updateGlobalTag(entity);
+			final GlobalTagDto dto = mapper.map(saved, GlobalTagDto.class);
+			return Response.ok().entity(dto).build();
 			
 		} catch (final NotExistsPojoException e) {
 			final String msg = "Error updating GlobalTag resource using "+body;
 			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-		} catch (final Exception e) {
+		} catch (final RuntimeException e) {
 			final String msg = "Error updating GlobalTag resource using "+body;
 			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();

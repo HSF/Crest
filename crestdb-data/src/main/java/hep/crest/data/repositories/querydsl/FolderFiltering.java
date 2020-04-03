@@ -13,11 +13,10 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 
-import hep.crest.data.exceptions.CdbServiceException;
-
 /**
- * The utility filtering class to handle SQL requests for folder selection.
- * The methods used are implemented in @see FolderPredicates.
+ * The utility filtering class to handle SQL requests for folder selection. The
+ * methods used are implemented in @see FolderPredicates.
+ *
  * @author aformic
  *
  */
@@ -37,8 +36,7 @@ public class FolderFiltering implements IFilteringCriteria {
      * .util.List, java.lang.Object)
      */
     @Override
-    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria)
-            throws CdbServiceException {
+    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria) {
         final List<BooleanExpression> expressions = new ArrayList<>();
         for (final SearchCriteria searchCriteria : criteria) {
             log.debug("search criteria {} {} {}", searchCriteria.getKey(),

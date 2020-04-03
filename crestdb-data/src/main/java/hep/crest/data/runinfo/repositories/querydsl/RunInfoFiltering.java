@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 
@@ -40,8 +39,7 @@ public class RunInfoFiltering implements IFilteringCriteria {
      * .util.List, java.lang.Object)
      */
     @Override
-    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria)
-            throws CdbServiceException {
+    public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria) {
         final List<BooleanExpression> expressions = new ArrayList<>();
         for (final SearchCriteria searchCriteria : criteria) {
             log.debug("search criteria {} {} {}", searchCriteria.getKey(),

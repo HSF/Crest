@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.GlobalTag;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.DirectoryService;
@@ -39,7 +40,6 @@ import hep.crest.server.services.GlobalTagService;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.PayloadService;
 import hep.crest.server.services.TagService;
-import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
@@ -96,14 +96,14 @@ public class TestCrestServices {
 
     @Test
     public void testA_Globaltags() {
-        final GlobalTagDto dto = DataGenerator.generateGlobalTagDto("TEST-GT");
+        final GlobalTag dto = DataGenerator.generateGlobalTag("TEST-GT");
         try {
-            final GlobalTagDto saved = globaltagService.insertGlobalTag(dto);
-            saved.description("this is an updated description");
-            final GlobalTagDto updated = globaltagService.updateGlobalTag(saved);
+            final GlobalTag saved = globaltagService.insertGlobalTag(dto);
+            saved.setDescription("this is an updated description");
+            final GlobalTag updated = globaltagService.updateGlobalTag(saved);
             assertThat(updated.getDescription()).isNotEqualTo(dto.getDescription());
-            updated.name("ANOTHER-UNEXISTING-GT");
-            updated.description("this should not be updated");
+            updated.setName("ANOTHER-NOTEXISTING-GT");
+            updated.setDescription("this should not be updated");
             globaltagService.updateGlobalTag(updated);
         }
         catch (CdbServiceException | AlreadyExistsPojoException e) {

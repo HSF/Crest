@@ -22,12 +22,14 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 
+import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.swagger.model.GenericMap;
 
 /**
- * PageRequestHelper is a utility class to treat input parameter from HTTP requests.
- * It generated then list of criterias and ordering statement. Those will be used in SQL requests.
+ * PageRequestHelper is a utility class to treat input parameter from HTTP
+ * requests. It generated then list of criterias and ordering statement. Those
+ * will be used in SQL requests.
  *
  * @version %I%, %G%
  * @author formica
@@ -219,5 +221,30 @@ public class PageRequestHelper {
             filters.put(sc.getKey(), sc.getValue().toString());
         }
         return filters;
+    }
+
+    /**
+     * @param filter
+     *            the IFilteringCriteria
+     * @param by
+     *            the String
+     * @return BooleanExpression
+     */
+    public BooleanExpression buildWhere(IFilteringCriteria filter, String by) {
+        final List<SearchCriteria> params = createMatcherCriteria(by);
+        final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
+        return getWhere(expressions);
+    }
+
+    /**
+     * @param filter
+     *            the IFilteringCriteria
+     * @param params
+     *            the List<SearchCriteria>
+     * @return BooleanExpression
+     */
+    public BooleanExpression buildWhere(IFilteringCriteria filter, List<SearchCriteria> params) {
+        final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
+        return getWhere(expressions);
     }
 }
