@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import hep.crest.data.pojo.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -369,7 +370,7 @@ public class IovsApiServiceImpl extends IovsApiService {
         log.info("IovRestController processing request for iovs groups using tag name {}", tagname);
         try {
             // Search for tag in order to load the time type:
-            final TagDto tagentity = tagService.findOne(tagname);
+            final Tag tagentity = tagService.findOne(tagname);
 
             // Apply caching on iov groups selections.
             // Use cache service to detect if a tag was modified.
@@ -456,7 +457,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             // Start IOV selection in the given time range.
             List<IovDto> dtolist = null;
             // Search if tag exists.
-            final TagDto tagentity = tagService.findOne(tagname);
+            final Tag tagentity = tagService.findOne(tagname);
             log.debug("Found tag " + tagentity);
             // Apply caching on iov selections.
             // Use cache service to detect if a tag was modified.
@@ -646,7 +647,7 @@ public class IovsApiServiceImpl extends IovsApiService {
         try {
             List<IovPayloadDto> dtolist = null;
             // Retrieve all iovs
-            final TagDto tagentity = tagService.findOne(tagname);
+            final Tag tagentity = tagService.findOne(tagname);
             log.debug("Found tag " + tagentity);
 
             log.debug("Setting iov range to : {}, {}", since, until);

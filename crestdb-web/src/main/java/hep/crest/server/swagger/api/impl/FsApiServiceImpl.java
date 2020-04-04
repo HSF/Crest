@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import hep.crest.data.pojo.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +67,8 @@ public class FsApiServiceImpl extends FsApiService {
         log.info("FileSystemRestController processing request for tag name " + tagname);
         try {
             // Find a tag using tagname in input.
-            final TagDto dto = tagService.findOne(tagname);
-            log.debug("Found tag {}", dto.getName());
+            final Tag entity = tagService.findOne(tagname);
+            log.debug("Found tag {}", entity.getName());
             final String reqid = request.getSession().getId() + new Date().getTime();
             
             // Tag was found: load iovs for the given tag

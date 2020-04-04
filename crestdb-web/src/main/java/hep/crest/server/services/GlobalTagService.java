@@ -128,30 +128,22 @@ public class GlobalTagService {
      * @param entity
      *            the GlobalTag
      * @return GlobalTag
-     * @throws CdbServiceException
-     *             If an Exception occurred
      * @throws AlreadyExistsPojoException
      *             If an Exception occurred because pojo exists
      */
     @Transactional
     public GlobalTag insertGlobalTag(GlobalTag entity)
-            throws CdbServiceException, AlreadyExistsPojoException {
-        try {
-            log.debug("Create GlobalTag from {}", entity);
-            final Optional<GlobalTag> tmpgt = globalTagRepository.findById(entity.getName());
-            if (tmpgt.isPresent()) {
-                log.warn("GlobalTag {} already exists.", tmpgt.get());
-                throw new AlreadyExistsPojoException(
-                        "GlobalTag already exists for name " + entity.getName());
-            }
-            final GlobalTag saved = globalTagRepository.save(entity);
-            log.debug("Saved entity {}", saved);
-            return saved;
+            throws AlreadyExistsPojoException {
+        log.debug("Create GlobalTag from {}", entity);
+        final Optional<GlobalTag> tmpgt = globalTagRepository.findById(entity.getName());
+        if (tmpgt.isPresent()) {
+            log.warn("GlobalTag {} already exists.", tmpgt.get());
+            throw new AlreadyExistsPojoException(
+                    "GlobalTag already exists for name " + entity.getName());
         }
-        catch (final RuntimeException e) {
-            log.error("Error in storing GlobalTag {}: {}", entity.getName(), e);
-            throw new CdbServiceException("insertGlobalTag Exception", e);
-        }
+        final GlobalTag saved = globalTagRepository.save(entity);
+        log.debug("Saved entity {}", saved);
+        return saved;
     }
 
     /**

@@ -123,6 +123,11 @@ subprojects {
 	}
 
 	dependencies {
+		// JAX-B dependencies for JDK 9+
+		compile "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
+		compile "org.glassfish.jaxb:jaxb-runtime:2.3.2"
+		// javassist for JDK 9+
+		compile "org.javassist:javassist:3.23.1-GA"
 		compile "io.swagger:swagger-annotations:$swagger_annotations_version"
 		compile "io.swagger:swagger-core:$swagger_core_version"
 		compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"

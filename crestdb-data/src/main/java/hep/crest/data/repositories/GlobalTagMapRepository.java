@@ -3,6 +3,7 @@
  */
 package hep.crest.data.repositories;
 
+import hep.crest.data.pojo.GlobalTagMapId;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,7 @@ import hep.crest.data.pojo.GlobalTagMap;
  */
 @Repository
 public interface GlobalTagMapRepository
-        extends CrudRepository<GlobalTagMap, String>, GlobalTagMapBaseRepository {
+        extends CrudRepository<GlobalTagMap, GlobalTagMapId>, GlobalTagMapBaseRepository {
 
     /*
      * (non-Javadoc)
@@ -23,7 +24,7 @@ public interface GlobalTagMapRepository
      * Object)
      */
     @Override
-    void deleteById(String id);
+    void deleteById(GlobalTagMapId id);
 
     /*
      * (non-Javadoc)

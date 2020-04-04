@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
 
+import hep.crest.data.pojo.Tag;
+import ma.glasnost.orika.MapperFacade;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -69,6 +71,8 @@ public class TestCrestServices {
     @Autowired
     @Qualifier("jacksonMapper")
     private ObjectMapper mapper;
+    @Autowired
+    private MapperFacade mapperFacade;
 
     @Before
     public void setUp() {
@@ -106,7 +110,7 @@ public class TestCrestServices {
             updated.setDescription("this should not be updated");
             globaltagService.updateGlobalTag(updated);
         }
-        catch (CdbServiceException | AlreadyExistsPojoException e) {
+        catch ( AlreadyExistsPojoException e) {
             log.info("Cannot save global tag {}: {}", dto, e);
         }
         catch (final NotExistsPojoException e) {
@@ -118,15 +122,16 @@ public class TestCrestServices {
     public void testB_Tags() {
         final TagDto dto = DataGenerator.generateTagDto("MY-TEST-01","time");
         try {
-            final TagDto saved = tagService.insertTag(dto);
-            saved.description("this is an updated tag description");
-            final TagDto updated = tagService.updateTag(saved);
+            Tag entity = mapperFacade.map(dto, Tag.class);
+            final Tag saved = tagService.insertTag(entity);
+            saved.setDescription("this is an updated tag description");
+            final Tag updated = tagService.updateTag(saved);
             assertThat(updated.getDescription()).isNotEqualTo(dto.getDescription());
-            updated.name("ANOTHER-UNEXISTING-TAG");
-            updated.description("this should not be updated");
+            updated.setName("ANOTHER-UNEXISTING-TAG");
+            updated.setDescription("this should not be updated");
             tagService.updateTag(updated);
         }
-        catch (CdbServiceException | AlreadyExistsPojoException e) {
+        catch ( AlreadyExistsPojoException e) {
             log.info("Cannot save global tag {}: {}", dto, e);
         }
         catch (final NotExistsPojoException e) {

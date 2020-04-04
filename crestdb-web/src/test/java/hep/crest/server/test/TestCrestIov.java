@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
+import hep.crest.data.pojo.Tag;
+import ma.glasnost.orika.MapperFacade;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,11 +68,15 @@ public class TestCrestIov {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private MapperFacade mapperFacade;
+
     @Test
     public void test_IovService() {
         final TagDto dto = DataGenerator.generateTagDto("SVC-TAG-02", "test");
         try {
-            final TagDto saved = tagservice.insertTag(dto);
+            Tag entity = mapperFacade.map(dto, Tag.class);
+            final Tag saved = tagservice.insertTag(entity);
             assertThat(saved).isNotNull();
             final IovDto iovdto0 = DataGenerator.generateIovDto("afakehashiov01", dto.getName(), new BigDecimal(0L));
             iovservice.insertIov(iovdto0);

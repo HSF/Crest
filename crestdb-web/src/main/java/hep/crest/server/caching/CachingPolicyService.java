@@ -1,19 +1,17 @@
 package hep.crest.server.caching;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
+import hep.crest.data.config.CrestProperties;
+import hep.crest.data.pojo.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import hep.crest.data.config.CrestProperties;
-import hep.crest.swagger.model.TagDto;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * A class to get the cache control.
@@ -76,10 +74,10 @@ public class CachingPolicyService {
      * @param request
      *            the Request
      * @param tagentity
-     *            the TagDto
+     *            the Tag
      * @return ResponseBuilder
      */
-    public ResponseBuilder verifyLastModified(Request request, TagDto tagentity) {
+    public ResponseBuilder verifyLastModified(Request request, Tag tagentity) {
         final Date lastModified = tagentity.getModificationTime();
         log.debug("Use tag modification time {}", lastModified);
         final ResponseBuilder builder = request.evaluatePreconditions(lastModified);

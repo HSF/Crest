@@ -3,29 +3,22 @@
  */
 package hep.crest.server.services;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import javax.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
-import hep.crest.data.pojo.GlobalTagMapId;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.GlobalTagMapRepository;
 import hep.crest.data.repositories.GlobalTagRepository;
 import hep.crest.data.repositories.TagRepository;
-import hep.crest.swagger.model.GlobalTagMapDto;
-import ma.glasnost.orika.MapperFacade;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.Optional;
 
 /**
  * @author formica
@@ -55,12 +48,6 @@ public class GlobalTagMapService {
      */
     @Autowired
     private TagRepository tagRepository;
-    /**
-     * Mapper.
-     */
-    @Autowired
-    @Qualifier("mapper")
-    private MapperFacade mapper;
 
     /**
      * @return the globalTagMapRepository
@@ -71,64 +58,75 @@ public class GlobalTagMapService {
 
     /**
      * @param gtName
-     *            the String
-     * @return List<GlobalTagMapDto>
+     *            the String represnting the GlobalTag name
+     * @return Iterable<GlobalTagMap>
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public List<GlobalTagMapDto> getTagMap(String gtName) throws CdbServiceException {
-
+    public Iterable<GlobalTagMap> getTagMap(String gtName) throws CdbServiceException {
         log.debug("Search for GlobalTagMap entries by GlobalTag name {}", gtName);
-        final Iterable<GlobalTagMap> entitylist = globalTagMapRepository
-                .findByGlobalTagName(gtName);
-        return StreamSupport.stream(entitylist.spliterator(), false)
-                .map(s -> mapper.map(s, GlobalTagMapDto.class)).collect(Collectors.toList());
-
+        try {
+            return globalTagMapRepository
+                    .findByGlobalTagName(gtName);
+        }
+        catch (RuntimeException e) {
+            throw new CdbServiceException("Error in searching GlobalTagMap entries for " + gtName, e);
+        }
     }
 
     /**
      * @param tagName
      *            the String
-     * @return List<GlobalTagMapDto>
+     * @return Iterable<GlobalTagMapDto>
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public List<GlobalTagMapDto> getTagMapByTagName(String tagName) throws CdbServiceException {
-
-        log.debug("Search for GlobalTagMap entries by TAG name {}", tagName);
-
-        final Iterable<GlobalTagMap> entitylist = globalTagMapRepository.findByTagName(tagName);
-        return StreamSupport.stream(entitylist.spliterator(), false)
-                .map(s -> mapper.map(s, GlobalTagMapDto.class)).collect(Collectors.toList());
-
+    public Iterable<GlobalTagMap> getTagMapByTagName(String tagName) throws CdbServiceException {
+        log.debug("Search for GlobalTagMap entries by Tag name {}", tagName);
+        try {
+            return globalTagMapRepository
+                    .findByTagName(tagName);
+        }
+        catch (RuntimeException e) {
+            throw new CdbServiceException("Error in searching GlobalTagMap entries for " + tagName, e);
+        }
     }
 
     /**
-     * @param dto
-     *            the GlobalTagMapDto
-     * @return GlobalTagMapDto
-     * @throws CdbServiceException
+     * @param entity
+     *            the GlobalTagMap
+     * @return GlobalTagMap
+     * @throws NotExistsPojoException
+     *             If an Exception occurred
+     * @throws AlreadyExistsPojoException
      *             If an Exception occurred
      */
     @Transactional
-    public GlobalTagMapDto insertGlobalTagMap(GlobalTagMapDto dto) throws CdbServiceException {
-        log.debug("Create global tag map from dto {}", dto);
-        final GlobalTagMap entity = new GlobalTagMap();
-        final Optional<GlobalTag> gt = globalTagRepository.findById(dto.getGlobalTagName());
-        final Optional<Tag> tg = tagRepository.findById(dto.getTagName());
-
-        final GlobalTagMapId id = new GlobalTagMapId(dto.getGlobalTagName(), dto.getRecord(),
-                dto.getLabel());
-        entity.setId(id);
-        gt.ifPresent(mgt -> {
-            globalTagRepository.save(mgt);
-            entity.setGlobalTag(mgt);
-        });
-        tg.ifPresent(mt -> 
-            entity.setTag(mt)
-        );
+    public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity)
+            throws NotExistsPojoException, AlreadyExistsPojoException {
+        log.debug("Create GlobalTagMap from {}", entity);
+        String gtname = entity.getId().getGlobalTagName();
+        String tagname = entity.getTag().getName();
+        Optional<GlobalTagMap> map = globalTagMapRepository.findById(entity.getId());
+        if (map.isPresent()) {
+            log.warn("GlobalTagMap {} already exists.", map.get());
+            throw new AlreadyExistsPojoException(
+                    "GlobalTagMap already exists for ID " + entity.getId());
+        }
+        final Optional<GlobalTag> gt = globalTagRepository.findById(gtname);
+        if (!gt.isPresent()) {
+            log.warn("GlobalTag {} does not exists.", gtname);
+            throw new NotExistsPojoException("GlobalTag does not exists for name " + gtname);
+        }
+        final Optional<Tag> tg = tagRepository.findById(tagname);
+        if (!tg.isPresent()) {
+            log.warn("Tag {} does not exists.", tagname);
+            throw new NotExistsPojoException("Tag does not exists for name " + tagname);
+        }
+        entity.setGlobalTag(gt.get());
+        entity.setTag(tg.get());
         final GlobalTagMap saved = globalTagMapRepository.save(entity);
         log.debug("Saved entity: {}", saved);
-        return mapper.map(saved, GlobalTagMapDto.class);
+        return saved;
     }
 }

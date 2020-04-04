@@ -1,25 +1,26 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.GlobalTagMap;
+import hep.crest.server.controllers.EntityDtoHelper;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.GlobalTagMapService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.GlobaltagmapsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
-import hep.crest.swagger.model.CrestBaseResponse;
-import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.GlobalTagMapDto;
-import hep.crest.swagger.model.GlobalTagMapSetDto;
+import hep.crest.swagger.model.*;
+import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+import java.util.List;
 
 /**
  * Rest endpoint to deal with mappings between tags and global tags.
@@ -43,6 +44,17 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
      */
     @Autowired
     private GlobalTagMapService globaltagmapService;
+    /**
+     * Helper.
+     */
+    @Autowired
+    EntityDtoHelper edh;
+    /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
 
     /*
      * (non-Javadoc)
@@ -60,18 +72,33 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
                         + body);
         try {
             // Insert new mapping resource.
-            final GlobalTagMapDto saved = globaltagmapService.insertGlobalTagMap(body);
-            return Response.created(info.getRequestUri()).entity(saved).build();
+            GlobalTagMap entity = mapper.map(body, GlobalTagMap.class);
+            final GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
+            GlobalTagMapDto dto = mapper.map(saved, GlobalTagMapDto.class);
 
+            return Response.created(info.getRequestUri()).entity(dto).build();
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Error in creation. Send a 500.
-            final String msg = "Error creating globaltagmap resource using " + body.toString();
-            e.printStackTrace();
             final String message = e.getMessage();
+            log.error("Api method createGlobalTagMap got exception : {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    msg + " : " + message);
+                    message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+        }
+        catch (NotExistsPojoException e) {
+            // Not found. Send a 404.
+            log.warn("Api method createGlobalTagMap cannot find resource : {}", body);
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
+                    "Cannot find GlobalTag or Tag to create the mapping");
+            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+        }
+        catch (AlreadyExistsPojoException e) {
+            // See other. Send a 303.
+            log.warn("createGlobalTagMap resource exists : {}", e);
+            final String msg = "GlobalTagMap already exists : " + body;
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, msg);
+            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
         }
     }
 
@@ -88,36 +115,34 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
             SecurityContext securityContext, UriInfo info) throws NotFoundException {
         log.info("GlobalTagMapRestController processing request to get map for GlobalTag name "
                 + name);
+        // Prepare filters
+        final GenericMap filters = new GenericMap();
+        filters.put("name", name);
+        filters.put("mode", xCrestMapMode);
         try {
-            List<GlobalTagMapDto> dtolist = null;
+            Iterable<GlobalTagMap> entitylist = null;
             // If there is no header then set it to Trace mode. Implies that you search tags
-            // associated with a global tag.
+            // associated with a global tag. The input name will be considered as a GlobalTag name.
             if (xCrestMapMode == null) {
                 xCrestMapMode = "Trace";
             }
-            if (xCrestMapMode.equals("Trace")) {
+            if ("trace".equalsIgnoreCase(xCrestMapMode)) {
                 // The header is Trace, so search for tags associated to a global tag.
-                dtolist = globaltagmapService.getTagMap(name);
+                entitylist = globaltagmapService.getTagMap(name);
             }
             else {
                 // The header is not Trace, so search for global tags associated to a tag.
-                dtolist = globaltagmapService.getTagMapByTagName(name);
+                // The input name is considered a Tag name.
+                entitylist = globaltagmapService.getTagMapByTagName(name);
             }
-            final GenericMap filters = new GenericMap();
-            filters.put("name", name);
-            filters.put("mode", xCrestMapMode);
+            List<GlobalTagMapDto> dtolist = edh.entityToDtoList(entitylist, GlobalTagMapDto.class);
             final CrestBaseResponse setdto = new GlobalTagMapSetDto()
                     .resources(dtolist)
                     .filter(filters)
                     .format("GlobalTagMapSetDto")
                     .size((long) dtolist.size()).datatype("maps");
             Response.Status status = Response.Status.OK;
-            if (dtolist.size() == 0) {
-                // Send a 404 if the collection size is empty.
-                status = Response.Status.NOT_FOUND;
-            }
             return Response.status(status).entity(setdto).build();
-
         }
         catch (final CdbServiceException e) {
             // Error in finding mappings. Send a 500.

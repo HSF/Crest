@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import hep.crest.data.pojo.Tag;
+import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +84,13 @@ public class DirectoryService {
      */
     @Autowired
     private CrestProperties cprops;
+
+    /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
 
     /**
      * @param tagname
@@ -159,9 +168,10 @@ public class DirectoryService {
             fsiovrepository.setDirtools(du);
             fspayloadrepository.setDirtools(du);
 
-            final TagDto seltag = tagservice.findOne(tagname);
+            final Tag seltag = tagservice.findOne(tagname);
             final List<IovDto> iovlist = iovservice.selectSnapshotByTag(tagname, snapshot);
-            fstagrepository.save(seltag);
+            TagDto dto = mapper.map(seltag, TagDto.class);
+            fstagrepository.save(dto);
             fsiovrepository.saveAll(tagname, iovlist);
             for (final IovDto iovDto : iovlist) {
                 final PayloadDto pyld = pyldservice.getPayload(iovDto.getPayloadHash());

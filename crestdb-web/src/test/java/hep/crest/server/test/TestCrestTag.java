@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import hep.crest.data.pojo.Tag;
+import ma.glasnost.orika.MapperFacade;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,16 +53,19 @@ public class TestCrestTag {
     @Autowired
     @Qualifier("jacksonMapper")
     private ObjectMapper mapper;
+    @Autowired
+    private MapperFacade mapperFacade;
 
     @Test
     public void test_TagService() {
         final TagDto dto = DataGenerator.generateTagDto("SVC-TAG-01", "test");
       
         try {
-            final TagDto saved = tagservice.insertTag(dto);
+            Tag entity = mapperFacade.map(dto, Tag.class);
+            final Tag saved = tagservice.insertTag(entity);
             assertThat(saved).isNotNull();
         }
-        catch (CdbServiceException | AlreadyExistsPojoException e) {
+        catch (AlreadyExistsPojoException e) {
             log.info("got exception of type {}",e.getClass());
         }
         try {
@@ -70,7 +75,7 @@ public class TestCrestTag {
             log.info("got exception of type {}",e.getClass());
         }
         try {
-            final TagDto dtonull = tagservice.findOne(null);
+            final Tag dtonull = tagservice.findOne(null);
             assertThat(dtonull).isNull();
         }
         catch (final NotExistsPojoException e) {
@@ -78,12 +83,7 @@ public class TestCrestTag {
         }
         final List<String> ids = new ArrayList<>();
         ids.add("SVC-TAG-01");
-        try {
-            tagservice.findAllTags(ids);
-        }
-        catch (final CdbServiceException e) {
-            log.info("got exception of type {}",e.getClass());
-        }
+        tagservice.findAllTags(ids);
     }
 
     @Test
@@ -140,6 +140,8 @@ public class TestCrestTag {
 
     @Test
     public void testC_findTags() throws Exception {
+
+        // Successfull create new tag
         final TagDto dto = DataGenerator.generateTagDto("B-TAG-03", "test");
         log.info("Store tag : {} ", dto);
         final ResponseEntity<TagDto> response = this.testRestTemplate
@@ -147,13 +149,15 @@ public class TestCrestTag {
         log.info("Received response: {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // Successfull create new tag
         final TagDto dto1 = DataGenerator.generateTagDto("B-TAG-04", "test");
-        log.info("Store tag : {} ", dto);
+        log.info("Store tag : {} ", dto1);
         final ResponseEntity<TagDto> response1 = this.testRestTemplate
                 .postForEntity("/crestapi/tags", dto1, TagDto.class);
         log.info("Received response: {}", response1);
         assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // Successfull list tags
         final ResponseEntity<String> resp = this.testRestTemplate.exchange("/crestapi/tags",
                 HttpMethod.GET, null, String.class);
 
@@ -167,6 +171,7 @@ public class TestCrestTag {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
+        // Successfull find one tag resource
         final ResponseEntity<String> resp1 = this.testRestTemplate
                 .exchange("/crestapi/tags/" + dto1.getName(), HttpMethod.GET, null, String.class);
         {
@@ -230,9 +235,19 @@ public class TestCrestTag {
                 .exchange("/crestapi/tags?by=name:PIPPO,insertiontime<0", HttpMethod.GET, null, String.class);
 
         {
-            log.info("Retrieved null tag list " + resp2a.getBody());
+            log.info("Retrieved null tag list {} with status {}", resp2a.getBody(), resp2a.getStatusCode());
             final String responseBody = resp2a.getBody();
             assertThat(resp2a.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
+        }
+
+        // This should trigger a runtime exception on server side. The field used in the SORT expression does not exists.
+        final ResponseEntity<String> resp2b = this.testRestTemplate
+                .exchange("/crestapi/tags?by=name:PIPPO,insertiontime:0&sort=PIPPO:DESC", HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved bad sql tag list {} with status {}", resp2b.getBody(), resp2b.getStatusCode());
+            final String responseBody = resp2b.getBody();
+            assertThat(resp2b.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.NOT_FOUND);
         }
 
     }

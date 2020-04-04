@@ -5,6 +5,7 @@ package hep.crest.data.repositories;
 
 import java.util.List;
 
+import hep.crest.data.pojo.GlobalTagMapId;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +21,7 @@ import hep.crest.data.pojo.GlobalTagMap;
  */
 @Transactional(readOnly = true)
 public interface GlobalTagMapBaseRepository
-        extends PagingAndSortingRepository<GlobalTagMap, String> {
+        extends PagingAndSortingRepository<GlobalTagMap, GlobalTagMapId> {
 
     /**
      * @param gtag

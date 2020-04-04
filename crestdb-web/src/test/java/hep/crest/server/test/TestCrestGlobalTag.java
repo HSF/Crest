@@ -81,9 +81,6 @@ public class TestCrestGlobalTag {
             catch (final JsonParseException e) {
                 e.printStackTrace();
             }
-            catch (final JsonMappingException e) {
-                e.printStackTrace();
-            }
             catch (final IOException e) {
                 e.printStackTrace();
             }
@@ -215,7 +212,7 @@ public class TestCrestGlobalTag {
         {
             log.info("Retrieved global tag list " + resp2a.getBody());
             final String responseBody = resp2a.getBody();
-            assertThat(resp2a.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(resp2a.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
@@ -228,7 +225,7 @@ public class TestCrestGlobalTag {
         {
             log.info("Retrieved global tag list " + resp2b.getBody());
             final String responseBody = resp2b.getBody();
-            assertThat(resp2b.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(resp2b.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
@@ -324,6 +321,7 @@ public class TestCrestGlobalTag {
         log.info("Received response: {}", respmaptag);
         assertThat(respmaptag.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // Search for mappings
         final ResponseEntity<String> resptags = this.testRestTemplate.exchange(
                 "/crestapi/globaltags/" + dto.getName() + "/tags?record=B-TAGGT&label=none",
                 HttpMethod.GET, null, String.class);
@@ -336,13 +334,21 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, TagSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
-        
+        final ResponseEntity<String> resptagsall = this.testRestTemplate.exchange(
+                "/crestapi/globaltags/" + dto.getName() + "/tags?record=B-TAGGT&label=pippo",
+                HttpMethod.GET, null, String.class);
+        {
+            log.info("Retrieved associated tags for global tag {} using bot record and label");
+            assertThat(resptagsall.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
+
+        // Search for mapping on not existing global tag
         final ResponseEntity<String> resptags2 = this.testRestTemplate.exchange(
-                "/crestapi/globaltags/NOT-THERE/tags?record=B-TAGGT&label=TEST",
+                "/crestapi/globaltags/NOT-THERE/tags",
                 HttpMethod.GET, null, String.class);
         {
             log.info("Retrieved associated tags for global tag NOT-THERE...should fail");
-            assertThat(resptags2.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(resptags2.getStatusCode()).isEqualTo(HttpStatus.OK);
         }
 
         // Associate the tag B-TAGGT-02 to an not existing global tag
@@ -352,7 +358,7 @@ public class TestCrestGlobalTag {
         final ResponseEntity<String> respmaptag1 = this.testRestTemplate
                 .postForEntity("/crestapi/globaltagmaps", maptagdto1, String.class);
         log.info("Received response: {}", respmaptag1);
-        assertThat(respmaptag1.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(respmaptag1.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
         // Retrieve global tag maps
         final ResponseEntity<String> respmaptags = this.testRestTemplate.exchange(
@@ -370,7 +376,7 @@ public class TestCrestGlobalTag {
         // Retrieve global tag maps for not existing gtag
         final ResponseEntity<String> respmaptagsnull = this.testRestTemplate
                 .exchange("/crestapi/globaltagmaps/NOT-THERE", HttpMethod.GET, null, String.class);
-        assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // Retrieve global tag maps from tagname using backtrace
         final HttpHeaders headers = new HttpHeaders();

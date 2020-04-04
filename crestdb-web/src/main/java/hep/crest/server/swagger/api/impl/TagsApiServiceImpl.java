@@ -2,11 +2,17 @@ package hep.crest.server.swagger.api.impl;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import hep.crest.data.pojo.Tag;
+import hep.crest.server.controllers.EntityDtoHelper;
+import hep.crest.swagger.model.*;
+import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +32,11 @@ import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.TagsApiService;
-import hep.crest.swagger.model.CrestBaseResponse;
-import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.swagger.model.TagSetDto;
 
 /**
  * Rest endpoint for tag management.
  *
  * @author formica
- *
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen",
         date = "2017-09-05T16:23:23.401+02:00")
@@ -52,6 +53,11 @@ public class TagsApiServiceImpl extends TagsApiService {
      */
     @Autowired
     private PageRequestHelper prh;
+    /**
+     * Helper.
+     */
+    @Autowired
+    EntityDtoHelper edh;
 
     /**
      * Filtering.
@@ -65,6 +71,16 @@ public class TagsApiServiceImpl extends TagsApiService {
      */
     @Autowired
     private TagService tagService;
+    /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
+    /**
+     * Resource bundle.
+     */
+    private final ResourceBundle bundle = ResourceBundle.getBundle("messages", new Locale("US"));
 
     /*
      * (non-Javadoc)
@@ -79,16 +95,18 @@ public class TagsApiServiceImpl extends TagsApiService {
         log.info("TagRestController processing request for creating a tag");
         try {
             // Create a tag.
-            final TagDto saved = tagService.insertTag(body);
+            Tag entity = mapper.map(body, Tag.class);
+            final Tag saved = tagService.insertTag(entity);
+            TagDto dto = mapper.map(saved, TagDto.class);
             // Response is 201.
-            return Response.created(info.getRequestUri()).entity(saved).build();
+            return Response.created(info.getRequestUri()).entity(dto).build();
         }
         catch (final AlreadyExistsPojoException e) {
             // Exception, resource exists, send 303.
             log.error("Cannot create tag {}, name already exists...", body);
             return Response.status(Response.Status.SEE_OTHER).entity(body).build();
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method createTag got exception {}", message);
@@ -107,37 +125,38 @@ public class TagsApiServiceImpl extends TagsApiService {
      */
     @Override
     public Response updateTag(String name, GenericMap body, SecurityContext securityContext,
-            UriInfo info) throws NotFoundException {
+                              UriInfo info) throws NotFoundException {
         log.info("TagRestController processing request for creating a tag");
         try {
             // Search tag.
-            final TagDto dto = tagService.findOne(name);
+            final Tag entity = tagService.findOne(name);
             // Loop over map body keys.
             for (final String key : body.keySet()) {
                 if ("description".equals(key)) {
                     // Update description.
-                    dto.setDescription(body.get(key));
+                    entity.setDescription(body.get(key));
                 }
                 if (key == "timeType") {
-                    dto.setTimeType(body.get(key));
+                    entity.setTimeType(body.get(key));
                 }
                 if (key == "lastValidatedTime") {
                     final BigDecimal val = new BigDecimal(body.get(key));
-                    dto.setLastValidatedTime(val);
+                    entity.setLastValidatedTime(val);
                 }
                 if (key == "endOfValidity") {
                     final BigDecimal val = new BigDecimal(body.get(key));
-                    dto.setEndOfValidity(val);
+                    entity.setEndOfValidity(val);
                 }
                 if (key == "synchronization") {
-                    dto.setSynchronization(body.get(key));
+                    entity.setSynchronization(body.get(key));
                 }
                 if (key == "payloadSpec") {
-                    dto.setPayloadSpec(body.get(key));
+                    entity.setObjectType(body.get(key));
                 }
             }
-            final TagDto saved = tagService.updateTag(dto);
-            return Response.ok(info.getRequestUri()).entity(saved).build();
+            final Tag saved = tagService.updateTag(entity);
+            TagDto dto = mapper.map(saved, TagDto.class);
+            return Response.ok(info.getRequestUri()).entity(dto).build();
 
         }
         catch (final NotExistsPojoException e) {
@@ -159,18 +178,21 @@ public class TagsApiServiceImpl extends TagsApiService {
     public Response findTag(String name, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         log.info("TagRestController processing request for tag name " + name);
+        final GenericMap filters = new GenericMap();
+        filters.put("name", name);
         try {
-            final TagDto dto = tagService.findOne(name);
+            final Tag entity = tagService.findOne(name);
+            TagDto dto = mapper.map(entity, TagDto.class);
             // Create the set.
             final TagSetDto respdto = (TagSetDto) new TagSetDto().addResourcesItem(dto).size(1L)
-                    .datatype("tags");
+                    .filter(filters).datatype("tags");
             return Response.ok().entity(respdto).build();
         }
         catch (final NotExistsPojoException e) {
-            // Exception, tag not found, send 404.
-            final String message = "No tag resource has been found for " + name;
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
-                    message);
+            // Not found. Send a 404.
+            log.warn("Api method findGlobalTag cannot find resource : {}", name);
+            final CrestBaseResponse resp = new TagSetDto()
+                    .format("TagSetDto").filter(filters).size(0L).datatype("tags");
             return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
         }
     }
@@ -184,42 +206,38 @@ public class TagsApiServiceImpl extends TagsApiService {
      */
     @Override
     public Response listTags(String by, Integer page, Integer size, String sort,
-            SecurityContext securityContext, UriInfo info) throws NotFoundException {
+                             SecurityContext securityContext, UriInfo info) throws NotFoundException {
         try {
             log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size,
                     sort);
+            // Create filters
+            GenericMap filters = prh.getFilters(prh.createMatcherCriteria(by));
             // Create pagination request.
             final PageRequest preq = prh.createPageRequest(page, size, sort);
-            List<TagDto> dtolist = null;
-            GenericMap filters = null;
-            if (by.equals("none")) {
-                // No search conditions, get all tags.
-                dtolist = tagService.findAllTags(null, preq);
+            BooleanExpression wherepred = null;
+            if (!"none".equals(by)) {
+                // Create search conditions for where statement in SQL
+                wherepred = prh.buildWhere(filtering, by);
             }
-            else {
-                // Create search conditions for where statement in SQL.
-                final List<SearchCriteria> params = prh.createMatcherCriteria(by);
-                filters = prh.getFilters(params);
-                final List<BooleanExpression> expressions = filtering
-                        .createFilteringConditions(params);
-                final BooleanExpression wherepred = prh.getWhere(expressions);
-                // Retrieve tag list using filtering.
-                dtolist = tagService.findAllTags(wherepred, preq);
-            }
+            // Retrieve tag list using filtering.
+            Iterable<Tag> entitylist = tagService.findAllTags(wherepred, preq);
+            List<TagDto> dtolist = edh.entityToDtoList(entitylist, TagDto.class);
             // Create the Set.
-            final CrestBaseResponse respdto = new TagSetDto().resources(dtolist)
+            final CrestBaseResponse setdto = new TagSetDto().resources(dtolist)
                     .format("TagSetDto")
                     .size((long) dtolist.size()).datatype("tags");
             if (filters != null) {
-                respdto.filter(filters);
+                setdto.filter(filters);
             }
             // Response is 200.
-            return Response.ok().entity(respdto).build();
+            return Response.ok().entity(setdto).build();
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
+            // Error from server. Send a 500.
             final String message = e.getMessage();
-            log.error("Exception in listTags: {}", e.getMessage());
+            log.error("listTags service exception : {}", message);
+            final String error = bundle.getString("log.tag.notfound");
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
