@@ -1,0 +1,47 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+caching:
+  iovsgroups_maxage: 600
+  iovsgroups_snapshot_maxage: 3600
+  iovs_maxage: 600
+  iovs_snapshot_maxage: 3600
+  payloads_maxage: 604800
+  timetype_groupsize: 3600  # expressed in seconds
+  runtype_groupsize: 100    # expressed in run numbers
+
+# schemaname : ATLAS_PHYS_COND or none
+# security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)
+crest:
+  dumpdir: /tmp
+  schemaname: none
+  security: none
+  synchro: none
+  webstaticdir: /tmp/data/web
+  dbfile: /tmp/crestdbtest.sqlite
+  apiname: /crestapi
+  authenticationtype: none
+server:
+    port: 8090
+    servlet.path: /    
+    connection-timeout: 60s
+spring:
+    profiles: sqlite
+    jersey:
+      application-path: ${crest.apiname}
+    datasource:
+      url: jdbc:sqlite:${crest.dbfile}?cache=shared
+      driverClassName: org.sqlite.JDBC
+      type: org.sqlite.SQLiteDataSource
+      username:
+      password:
+    jpa:
+      properties:
+        hibernate.dialect: hep.crest.data.dialect.SQLiteDialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: create
+        hibernate.show_sql: false        
+        

@@ -132,14 +132,4 @@ public class RepositoryConfig {
         return bean;
     }
 
-//    /**
-//     * @param mainDataSource
-//     *            the DataSource
-//     * @return LobHandler
-//     */
-//    @Bean(name = "lobhandler")
-//    public CrestLobHandler loadHandler(@Qualifier("dataSource") DataSource mainDataSource) {
-//        return new CrestLobHandler(mainDataSource);
-//    }
-
 }

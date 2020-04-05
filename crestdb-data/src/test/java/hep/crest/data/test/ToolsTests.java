@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import hep.crest.data.config.CrestProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -191,6 +192,25 @@ public class ToolsTests {
         
     }
 
-    
+    @Test
+    public void propertyTest() {
+
+        CrestProperties props = new CrestProperties();
+        props.setApiname("api");
+        props.setAuthenticationtype("BASIC");
+        props.setDumpdir("/tmp");
+        props.setSchemaname("CREST");
+        props.setSecurity("none");
+        props.setSynchro("all");
+        props.setWebstaticdir("/tmp");
+        assertThat(props.toString().length()).isGreaterThan(0);
+        assertThat(props.getApiname()).isEqualTo("api");
+        assertThat(props.getAuthenticationtype()).isEqualTo("BASIC");
+        assertThat(props.getDumpdir()).isEqualTo("/tmp");
+        assertThat(props.getSchemaname()).isEqualTo("CREST");
+        assertThat(props.getSecurity()).isEqualTo("none");
+        assertThat(props.getSynchro()).isEqualTo("all");
+        assertThat(props.getWebstaticdir()).isEqualTo("/tmp");
+    }
     
 }

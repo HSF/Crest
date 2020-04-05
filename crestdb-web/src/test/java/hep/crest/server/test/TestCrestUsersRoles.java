@@ -2,6 +2,7 @@ package hep.crest.server.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import hep.crest.server.security.UserResource;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,4 +71,16 @@ public class TestCrestUsersRoles {
         roleRepository.save(grolentity);
     }
 
+    @Test
+    public void userResourceTest() {
+        UserResource resource = new UserResource();
+        resource.setId("user");
+        resource.setUsername("crest");
+        resource.setPassword("guessit");
+        assertThat(resource.toString().length()).isGreaterThan(0);
+        assertThat(resource.getId()).isEqualTo("user");
+        assertThat(resource.getUsername()).isEqualTo("crest");
+        assertThat(resource.getPassword()).isEqualTo("guessit");
+        assertThat(resource.hashCode()).isNotZero();
+    }
 }

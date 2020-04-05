@@ -53,7 +53,11 @@ public class RepositorySqliteTests {
     @Autowired
     @Qualifier("dataSource") 
     private DataSource mainDataSource;
-    
+
+//    @Autowired
+//    @Qualifier("sqliteDatasource")
+//    private DataSource sqliteDataSource;
+
     @Before
     public void setUp() {
         final Path bpath = Paths.get("/tmp/cdms");
@@ -132,5 +136,22 @@ public class RepositorySqliteTests {
         final Tag savedtag = tagrepository.save(mtag);
         assertThat(savedtag).isNotNull();
     }
+
+/* This does not work because the datasource is not defined.
+    @Test
+    public void testSqliteDatasource() throws Exception {
+        final PayloadDataBaseCustom repobean = new PayloadDataSQLITEImpl(sqliteDataSource);
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+        final PayloadDto dto = DataGenerator.generatePayloadDto("myhashsqlite1config", "mydataconfig", "mystreamerconfig",
+                "test",time);
+        log.debug("Save payload {}", dto);
+        if (dto.getSize() == null) {
+            dto.setSize(dto.getData().length);
+        }
+        final PayloadDto saved = repobean.save(dto);
+        assertThat(saved).isNotNull();
+    }
+*/
 
 }
