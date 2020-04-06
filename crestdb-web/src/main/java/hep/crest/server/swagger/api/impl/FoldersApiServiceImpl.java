@@ -1,23 +1,9 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Component;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
-
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
-import hep.crest.data.repositories.querydsl.SearchCriteria;
+import hep.crest.data.security.pojo.CrestFolders;
+import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.services.FolderService;
@@ -28,6 +14,18 @@ import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.FolderSetDto;
 import hep.crest.swagger.model.GenericMap;
+import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+import java.util.List;
 
 /**
  * Rest endpoint for folder administration.
@@ -54,6 +52,18 @@ public class FoldersApiServiceImpl extends FoldersApiService {
      */
     @Autowired
     private PageRequestHelper prh;
+    /**
+     * Helper.
+     */
+    @Autowired
+    EntityDtoHelper edh;
+
+    /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
 
     /**
      * Filtering.
@@ -81,14 +91,16 @@ public class FoldersApiServiceImpl extends FoldersApiService {
         log.info("FolderRestController processing request for creating a folder");
         try {
             // Insert the new folder.
-            final FolderDto saved = folderService.insertFolder(body);
-            return Response.created(info.getRequestUri()).entity(saved).build();
+            CrestFolders entity = mapper.map(body, CrestFolders.class);
+            final CrestFolders saved = folderService.insertFolder(entity);
+            FolderDto dto = mapper.map(saved, FolderDto.class);
+            return Response.created(info.getRequestUri()).entity(dto).build();
         }
         catch (final AlreadyExistsPojoException e) {
             // The folder exists, send a 303
             return Response.status(Response.Status.SEE_OTHER).entity(body).build();
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // The folder insertion failed, send a 500...
             final String message = e.getMessage();
             log.error("Cannot create folder {}: {}", body, e);
@@ -110,56 +122,28 @@ public class FoldersApiServiceImpl extends FoldersApiService {
             UriInfo info) throws NotFoundException {
         try {
             log.debug("Search resource list using by={}, sort={}", by, sort);
+            // Create filters
+            GenericMap filters = prh.getFilters(prh.createMatcherCriteria(by));
             // Create a default page requests with 10000 size for retrieval.
             // This method does not allow to set pagination.
             final PageRequest preq = prh.createPageRequest(0, 10000, sort);
-            List<FolderDto> dtolist = null;
-            List<SearchCriteria> params = null;
-            final GenericMap filters = new GenericMap();
-            // No search conditions.
-            if ("none".equals(by)) {
-                // Find all folders.
-                dtolist = folderService.findAllFolders(null, preq);
+            BooleanExpression wherepred = null;
+            if (!"none".equals(by)) {
+                // Create search conditions for where statement in SQL
+                wherepred = prh.buildWhere(filtering, by);
             }
-            else {
-                // A search pattern exists, create the criteria.
-                params = prh.createMatcherCriteria(by);
-                for (final SearchCriteria sc : params) {
-                    filters.put(sc.getKey(), sc.getValue().toString());
-                }
-                final List<BooleanExpression> expressions = filtering
-                        .createFilteringConditions(params);
-                BooleanExpression wherepred = null;
-
-                for (final BooleanExpression exp : expressions) {
-                    if (wherepred == null) {
-                        wherepred = exp;
-                    }
-                    else {
-                        wherepred = wherepred.and(exp);
-                    }
-                }
-                // Search folder using the expression build before.
-                dtolist = folderService.findAllFolders(wherepred, preq);
-            }
-            if (dtolist == null) {
-                // Nothing found, send a 404. Should be OK with an Empty list ?
-                final String message = "No resource has been found";
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
-                        message);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-            }
-            // Prepare the response set.
+            // Search for global tags using where conditions.
+            Iterable<CrestFolders> entitylist = folderService.findAllFolders(wherepred, preq);
+            final List<FolderDto> dtolist = edh.entityToDtoList(entitylist, FolderDto.class);
+            Response.Status rstatus = Response.Status.OK;
             final CrestBaseResponse setdto = new FolderSetDto().resources(dtolist)
-                    .size((long) dtolist.size()).datatype("folders");
-            // Set the filters.
-            if (!filters.isEmpty()) {
+                    .format("FodlerSetDto").size((long) dtolist.size()).datatype("folders");
+            if (filters != null) {
                 setdto.filter(filters);
             }
-            return Response.ok().entity(setdto).build();
-
+            return Response.status(rstatus).entity(setdto).build();
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Error occurred. Send a 500.
             final String message = e.getMessage();
             log.error("Api method listFolders got exception : {}", message);

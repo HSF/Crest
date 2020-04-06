@@ -1,6 +1,5 @@
 package hep.crest.server.swagger.api.impl;
 
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
@@ -9,7 +8,10 @@ import hep.crest.server.services.GlobalTagMapService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.GlobaltagmapsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
-import hep.crest.swagger.model.*;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.GenericMap;
+import hep.crest.swagger.model.GlobalTagMapDto;
+import hep.crest.swagger.model.GlobalTagMapSetDto;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +146,7 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
             Response.Status status = Response.Status.OK;
             return Response.status(status).entity(setdto).build();
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Error in finding mappings. Send a 500.
             final String message = e.getMessage();
             log.error("Internal error searching maps : {}", message);

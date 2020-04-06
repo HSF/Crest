@@ -1,27 +1,24 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.util.Date;
-import java.util.concurrent.Future;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
 import hep.crest.data.pojo.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.DirectoryService;
 import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.FsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
-import hep.crest.swagger.model.TagDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+import java.util.Date;
+import java.util.concurrent.Future;
 
 /**
  * Rest enpoint to deal with filesystem storage for conditions data. It requires
@@ -87,7 +84,7 @@ public class FsApiServiceImpl extends FsApiService {
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, msg);
             return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
         }
-        catch (final Exception e) {
+        catch (final RuntimeException e) {
             // An error occurred. Send a 500.
             final String msg = "Error retrieving Tag resource to create tar file...";
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);

@@ -1,16 +1,18 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.GlobalTag;
+import hep.crest.data.pojo.GlobalTagMap;
+import hep.crest.data.pojo.GlobalTagMapId;
 import hep.crest.data.pojo.Tag;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.server.services.*;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.testutils.DataGenerator;
 import ma.glasnost.orika.MapperFacade;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -31,21 +33,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.List;
 
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.pojo.GlobalTag;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.server.services.DirectoryService;
-import hep.crest.server.services.GlobalTagService;
-import hep.crest.server.services.IovService;
-import hep.crest.server.services.PayloadService;
-import hep.crest.server.services.TagService;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.testutils.DataGenerator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -57,6 +53,8 @@ public class TestCrestServices {
 
     @Autowired
     private GlobalTagService globaltagService;
+    @Autowired
+    private GlobalTagMapService globaltagmapService;
     @Autowired
     private TagService tagService;
     @Autowired
@@ -167,8 +165,66 @@ public class TestCrestServices {
             e.printStackTrace();
         }
     }
-    
     @Test
+    public void testC_Mappings() {
+
+        // Create a mapping with everything
+        try {
+            final GlobalTag gt = DataGenerator.generateGlobalTag("TEST-GT-FORMAP-01");
+            final GlobalTag gts = globaltagService.insertGlobalTag(gt);
+            // We create a tag BUT without saveing it
+            final Tag tag = DataGenerator.generateTag("MY-TEST-FORMAP-01","time");
+            Tag ts = tagService.insertTag(tag);
+            GlobalTagMapId mapid = new GlobalTagMapId();
+            mapid.setGlobalTagName(gt.getName());
+            mapid.setLabel("somelabel");
+            mapid.setRecord("somerecord");
+            GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
+            GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
+            assertThat(saved).isNotNull();
+        }
+        catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
+            log.info("Exception : {}", e);
+        }
+
+        // Create a mapping wih a not existing tag
+        try {
+            final GlobalTag gt = DataGenerator.generateGlobalTag("TEST-GT-FORMAP-02");
+            final GlobalTag gts = globaltagService.insertGlobalTag(gt);
+            // We create a tag BUT without saveing it
+            final Tag tag = DataGenerator.generateTag("MY-TEST-FORMAP-02","time");
+            GlobalTagMapId mapid = new GlobalTagMapId();
+            mapid.setGlobalTagName(gt.getName());
+            mapid.setLabel("somelabel");
+            mapid.setRecord("somerecord");
+            GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
+            GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
+        }
+        catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
+            log.info("Exception : {}", e);
+        }
+        // Create a mapping wih an existing MAPID
+        try {
+            // These two already exists as a mapping
+            final GlobalTag gt = DataGenerator.generateGlobalTag("TEST-GT-FORMAP-02");
+            final Tag tag = DataGenerator.generateTag("MY-TEST-FORMAP-02","time");
+            GlobalTagMapId mapid = new GlobalTagMapId();
+            mapid.setGlobalTagName(gt.getName());
+            mapid.setLabel("somelabel");
+            mapid.setRecord("somerecord");
+            GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
+            GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
+        }
+        catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
+            log.info("Exception : {}", e);
+        }
+
+        // Now try get mappings with null arguments
+        globaltagmapService.getTagMap(null);
+        globaltagmapService.getTagMapByTagName(null);
+
+    }
+        @Test
     public void testD_Directory() {
         directoryService.dumpTag("MY-TEST-01", null, "");
         final TagDto tobesaved = DataGenerator.generateTagDto("MY-TEST-02","time");

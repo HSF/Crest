@@ -3,7 +3,6 @@
  */
 package hep.crest.server.services;
 
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.Tag;
@@ -50,46 +49,25 @@ public class GlobalTagMapService {
     private TagRepository tagRepository;
 
     /**
-     * @return the globalTagMapRepository
-     */
-    public GlobalTagMapRepository getGlobalTagMapRepository() {
-        return globalTagMapRepository;
-    }
-
-    /**
      * @param gtName
      *            the String represnting the GlobalTag name
      * @return Iterable<GlobalTagMap>
-     * @throws CdbServiceException
-     *             If an Exception occurred
      */
-    public Iterable<GlobalTagMap> getTagMap(String gtName) throws CdbServiceException {
+    public Iterable<GlobalTagMap> getTagMap(String gtName) {
         log.debug("Search for GlobalTagMap entries by GlobalTag name {}", gtName);
-        try {
-            return globalTagMapRepository
-                    .findByGlobalTagName(gtName);
-        }
-        catch (RuntimeException e) {
-            throw new CdbServiceException("Error in searching GlobalTagMap entries for " + gtName, e);
-        }
+        return globalTagMapRepository
+                .findByGlobalTagName(gtName);
     }
 
     /**
      * @param tagName
      *            the String
      * @return Iterable<GlobalTagMapDto>
-     * @throws CdbServiceException
-     *             If an Exception occurred
      */
-    public Iterable<GlobalTagMap> getTagMapByTagName(String tagName) throws CdbServiceException {
+    public Iterable<GlobalTagMap> getTagMapByTagName(String tagName) {
         log.debug("Search for GlobalTagMap entries by Tag name {}", tagName);
-        try {
-            return globalTagMapRepository
-                    .findByTagName(tagName);
-        }
-        catch (RuntimeException e) {
-            throw new CdbServiceException("Error in searching GlobalTagMap entries for " + tagName, e);
-        }
+        return globalTagMapRepository
+                .findByTagName(tagName);
     }
 
     /**
