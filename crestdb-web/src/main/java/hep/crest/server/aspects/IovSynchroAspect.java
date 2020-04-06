@@ -4,12 +4,11 @@
 package hep.crest.server.aspects;
 
 import hep.crest.data.config.CrestProperties;
-import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Tag;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.TagService;
-import hep.crest.swagger.model.IovDto;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
@@ -48,22 +47,22 @@ public class IovSynchroAspect {
 
     /**
      * Check synchronization.
-     * @param dto
-     *            the IovDto
+     * @param entity
+     *            the Iov
      */
-    @Before("execution(* hep.crest.server.services.IovService.insertIov(*)) && args(dto)")
-    public void checkSynchro(IovDto dto) {
+    @Before("execution(* hep.crest.server.services.IovService.insertIov(*)) && args(entity)")
+    public void checkSynchro(Iov entity) {
         log.debug("Iov insertion should verify the tag synchronization type : {}",
-                dto.getTagName());
+                entity.getTag().getName());
         // Get synchro property
         if ("none".equals(cprops.getSynchro())) {
             log.warn("synchronization checks are disabled in this configuration....");
             return;
         }
         // Synchronization aspect is enabled.
-        Tag entity = null;
+        Tag tagentity = null;
         try {
-            entity = tagService.findOne(dto.getTagName());
+            tagentity = tagService.findOne(entity.getTag().getName());
         }
         catch (final NotExistsPojoException e) {
             log.error("Error checking synchronization, tag does not exists : {}", e);
@@ -71,26 +70,21 @@ public class IovSynchroAspect {
         }
         
         // Get synchro type from tag.
-        final String synchro = entity.getSynchronization();
+        final String synchro = tagentity.getSynchronization();
         
         // Synchro for single version type. Can only append IOVs.
         if ("SV".equalsIgnoreCase(synchro)) {
             log.warn("Can only append IOVs....");
-            IovDto latest = null;
-            try {
-                latest = iovService.latest(entity.getName(), "now", "ms");
-            }
-            catch (final CdbServiceException e) {
-                log.error("Error checking SV synchronization : {}", e);
-            }
+            Iov latest = null;
+            latest = iovService.latest(tagentity.getName(), "now", "ms");
             if (latest == null) {
                 log.info("No iov could be retrieved");
             }
-            else if (latest.getSince().compareTo(dto.getSince()) <= 0) {
-                log.info("IOV in insert has correct time");
+            else if (latest.getId().getSince().compareTo(entity.getId().getSince()) <= 0) {
+                log.info("IOV in insert has correct time respect to last IOV : {} > {}", entity, latest);
             }
             else {
-                log.error("IOV in insert has wrong time....cannot insert");
+                log.warn("IOV in insert has WRONG time respect to last IOV : {} < {}", entity, latest);
             }
         }
         else {

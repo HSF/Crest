@@ -1,60 +1,41 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriInfo;
-
-import org.glassfish.jersey.media.multipart.BodyPartEntity;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.PayloadHandler;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Tag;
 import hep.crest.server.annotations.CacheControlCdb;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.PayloadService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.PayloadsApiService;
-import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.HTTPResponse;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.IovSetDto;
-import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.PayloadSetDto;
+import hep.crest.swagger.model.*;
+import ma.glasnost.orika.MapperFacade;
+import org.glassfish.jersey.media.multipart.BodyPartEntity;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.*;
+import java.io.*;
+import java.math.BigDecimal;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Rest endpoint for payloads.
@@ -108,6 +89,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Inject
     private ObjectMapper jacksonMapper;
+    /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
 
 
     /* (non-Javadoc)
@@ -507,21 +494,28 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 // pdto.hash(hash).streamerInfo(pdto.getObjectType().getBytes());
                 pdto.size(pdto.getData().length);
                 final PayloadDto saved = payloadService.insertPayload(pdto);
-                final IovDto savediov = iovService.insertIov(dto);
+                String tagname = dto.getTagName();
+                Iov entity = mapper.map(dto, Iov.class);
+                entity.setTag(new Tag(tagname));
+                final Iov savediov = iovService.insertIov(entity);
+                IovDto saveddto = mapper.map(savediov, IovDto.class);
+                dto.tagName(tagname);
+
                 log.debug("Created payload {} and iov {} ", saved, savediov);
                 return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
                         .id(savediov.getPayloadHash()).message("Iov created in tag "
-                                + dto.getTagName() + " with time " + savediov.getSince());
-            }
-            catch (final AlreadyExistsPojoException e) {
-                return new HTTPResponse().code(Response.Status.NOT_MODIFIED.getStatusCode())
-                        .id(dto.getPayloadHash()).message("Iov already exists in tag "
-                                + dto.getTagName() + " with time " + dto.getSince());
+                                + dto.getTagName() + " with time " + saveddto.getSince());
             }
             catch (final NotExistsPojoException e) {
                 return new HTTPResponse().code(Response.Status.NOT_FOUND.getStatusCode())
                         .id(dto.getPayloadHash()).message("Tag not found "
                                 + dto.getTagName());
+            }
+            catch (RuntimeException e) {
+                final String msg = "Apit method saveIovAndPayload got exception " + e.getMessage();
+                new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                        .id(dto.getPayloadHash()).message("Runtime error for "
+                        + dto.getTagName());
             }
         }
         final Path temppath = Paths.get(filename);
@@ -531,26 +525,35 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             pdto.size((int) tempchan.size());
             tempchan.close();
             final PayloadDto saved = payloadService.insertPayloadAndInputStream(pdto, is);
-            final IovDto savediov = iovService.insertIov(dto);
-            log.debug("Create payload {} and iov {} ", saved, savediov);
+            String tagname = dto.getTagName();
+            Iov entity = mapper.map(dto, Iov.class);
+            entity.setTag(new Tag(tagname));
+            final Iov savediov = iovService.insertIov(entity);
+            IovDto saveddto = mapper.map(savediov, IovDto.class);
+            dto.tagName(tagname);
+            log.debug("Create payload {} and iov {} ", saved, saveddto);
             return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
                     .id(savediov.getPayloadHash()).message("Iov created in tag " + dto.getTagName()
-                            + " with time " + savediov.getSince());
-        }
-        catch (final AlreadyExistsPojoException e) {
-            return new HTTPResponse().code(Response.Status.NOT_MODIFIED.getStatusCode())
-                    .id(dto.getPayloadHash()).message("Iov already exists in tag "
-                            + dto.getTagName() + " with time " + dto.getSince());
+                            + " with time " + saveddto.getSince());
         }
         catch (final NotExistsPojoException e) {
             return new HTTPResponse().code(Response.Status.NOT_FOUND.getStatusCode())
                     .id(dto.getPayloadHash()).message("Tag not found "
                             + dto.getTagName());
         }
+        catch (RuntimeException e) {
+            final String msg = "Apit method saveIovAndPayload got exception " + e.getMessage();
+            new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                    .id(dto.getPayloadHash()).message("Runtime error for "
+                    + dto.getTagName());
+        }
         finally {
             Files.deleteIfExists(temppath);
             log.debug("Removed temporary file");
         }
+        return new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                .id(dto.getPayloadHash()).message("Internal error for "
+                + dto.getTagName());
     }
 
     /*

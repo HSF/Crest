@@ -1,20 +1,22 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
+import com.querydsl.core.types.dsl.BooleanExpression;
+import hep.crest.data.config.CrestProperties;
+import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Tag;
+import hep.crest.data.repositories.querydsl.IFilteringCriteria;
+import hep.crest.server.caching.CachingPolicyService;
+import hep.crest.server.caching.CachingProperties;
+import hep.crest.server.controllers.EntityDtoHelper;
+import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.server.services.IovService;
+import hep.crest.server.services.TagService;
+import hep.crest.server.swagger.api.ApiResponseMessage;
+import hep.crest.server.swagger.api.IovsApiService;
+import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.swagger.model.*;
+import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,31 +24,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
-
-import hep.crest.data.config.CrestProperties;
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.repositories.querydsl.IFilteringCriteria;
-import hep.crest.data.repositories.querydsl.SearchCriteria;
-import hep.crest.server.caching.CachingPolicyService;
-import hep.crest.server.caching.CachingProperties;
-import hep.crest.server.controllers.PageRequestHelper;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.server.services.IovService;
-import hep.crest.server.services.TagService;
-import hep.crest.server.swagger.api.ApiResponseMessage;
-import hep.crest.server.swagger.api.IovsApiService;
-import hep.crest.server.swagger.api.NotFoundException;
-import hep.crest.swagger.model.CrestBaseResponse;
-import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.IovPayloadDto;
-import hep.crest.swagger.model.IovPayloadSetDto;
-import hep.crest.swagger.model.IovSetDto;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.swagger.model.TagSummaryDto;
-import hep.crest.swagger.model.TagSummarySetDto;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Rest endpoint for iov management. It allows to create and find iovs.
@@ -69,6 +53,11 @@ public class IovsApiServiceImpl extends IovsApiService {
      */
     @Autowired
     private PageRequestHelper prh;
+    /**
+     * Helper.
+     */
+    @Autowired
+    EntityDtoHelper edh;
 
     /**
      * Filtering.
@@ -100,6 +89,12 @@ public class IovsApiServiceImpl extends IovsApiService {
      */
     @Autowired
     private CachingProperties cprops;
+    /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
 
     /*
      * (non-Javadoc)
@@ -114,19 +109,27 @@ public class IovsApiServiceImpl extends IovsApiService {
         log.info("IovRestController processing request for creating an iov");
         try {
             // Create a new IOV.
-            final IovDto saved = iovService.insertIov(body);
-            return Response.created(info.getRequestUri()).entity(saved).build();
+            String tagname = body.getTagName();
+            Iov entity = mapper.map(body, Iov.class);
+            entity.setTag(new Tag(tagname));
+            final Iov saved = iovService.insertIov(entity);
+            IovDto dto = mapper.map(saved, IovDto.class);
+            dto.tagName(tagname);
+            return Response.created(info.getRequestUri()).entity(dto).build();
 
         }
         catch (final NotExistsPojoException e) {
             // Exception. Send a 404.
-            log.error("Exception in creating iov : {}", e.getMessage());
+            log.error("Exception in creating iov, tag resource does not exists : {}", e.getMessage());
             return notFoundPojo(body.getTagName());
         }
-        catch (final AlreadyExistsPojoException e) {
-            // IOV exists already. Send a 303.
-            log.error("Iov already exists : {}", e.getMessage());
-            return alreadyExistsPojo("IOV already exists");
+        catch (final RuntimeException e) {
+            // Exception. Send a 500.
+            final String message = e.getMessage();
+            log.error("Api method createIov got exception creating resource {}: {}", body, message);
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
     }
 
@@ -145,8 +148,6 @@ public class IovsApiServiceImpl extends IovsApiService {
         // Get filters map and initializa tag name.
         final GenericMap filters = dto.getFilter();
         String tagName = "unknown";
-
-        // Method to upload multiple IOVs.
 
         // Check the filter map. If it exists it should contain the tag name.
         if (filters != null && filters.containsKey("tagName")) {
@@ -179,25 +180,31 @@ public class IovsApiServiceImpl extends IovsApiService {
                     return Response.status(Response.Status.NOT_ACCEPTABLE).entity(resp).build();
                 }
                 // Create new iov.
-                final IovDto saved = iovService.insertIov(iovDto);
+                Iov entity = mapper.map(iovDto, Iov.class);
+                entity.setTag(new Tag(iovDto.getTagName()));
+                final Iov saved = iovService.insertIov(entity);
+                IovDto saveddto = mapper.map(saved, IovDto.class);
+                saveddto.tagName(iovDto.getTagName());
                 // Add to saved list.
-                savedList.add(saved);
+                savedList.add(saveddto);
             }
             // Prepare the Set for the response.
             final CrestBaseResponse saveddto = new IovSetDto().resources(savedList).filter(filters)
                     .format("IovSetDto").size((long) savedList.size()).datatype("iovs");
             // Send 201.
             return Response.created(info.getRequestUri()).entity(saveddto).build();
-
         }
         catch (final NotExistsPojoException e) {
             // Exception. Send a 404.
             return notFoundPojo(tagName);
         }
-        catch (final AlreadyExistsPojoException e) {
-            // IOV exists already. Send a 303.
-            log.error("Iov already exists : {}", e.getMessage());
-            return alreadyExistsPojo("IOV already exists");
+        catch (final RuntimeException e) {
+            // Exception. Send a 500.
+            final String message = e.getMessage();
+            log.error("Api method storeBatchIovMultiForm got exception creating resources: {}", message);
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
     }
 
@@ -220,12 +227,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             if (dateformat == null) {
                 dateformat = "ms";
             }
-            // Parse the input parameters to create pagination and
-            // sorting PageRequest.
-            List<SearchCriteria> params = null;
-            final PageRequest preq = prh.createPageRequest(page, size, sort);
-            List<IovDto> dtolist = null;
-            // The tagname inside search string is mandatory.
+            // A filter on tag name should be mandatory in by.
             if (!by.matches("(.*)tag.ame(.*)")) {
                 // If the tagname is not among the parameter then return a 406.
                 final String message = "Cannot search iovs without a tagname selection.";
@@ -233,43 +235,29 @@ public class IovsApiServiceImpl extends IovsApiService {
                         message);
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(resp).build();
             }
-            // Prepare the criteria.
-            params = prh.createMatcherCriteria(by, dateformat);
-            final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
+            // Create filters
+            GenericMap filters = prh.getFilters(prh.createMatcherCriteria(by));
+            // Create pagination request
+            final PageRequest preq = prh.createPageRequest(page, size, sort);
             BooleanExpression wherepred = null;
-
-            for (final BooleanExpression exp : expressions) {
-                if (wherepred == null) {
-                    wherepred = exp;
-                }
-                else {
-                    wherepred = wherepred.and(exp);
-                }
+            if (!"none".equals(by)) {
+                // Create search conditions for where statement in SQL
+                wherepred = prh.buildWhere(filtering, by);
             }
-            // Find all iovs with where conditions.
-            dtolist = iovService.findAllIovs(wherepred, preq);
-            if (dtolist == null) {
-                // Empty list. Send 404. Should we use a Set ?
-                final String message = "No resource has been found";
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
-                        message);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-            }
-            // Retrieve the tagname used in order to store it in the response as a filter.
-            final String tagname = prh.getParam(params, "tagname");
-            final GenericMap filters = new GenericMap();
-            filters.put("tagName", tagname);
-            // Prepare the response set.
+            // Search for global tags using where conditions.
+            Iterable<Iov> entitylist = iovService.findAllIovs(wherepred, preq);
+            final List<IovDto> dtolist = edh.entityToDtoList(entitylist, IovDto.class);
+            Response.Status rstatus = Response.Status.OK;
+            // Prepare the Set.
             final CrestBaseResponse saveddto = new IovSetDto().resources(dtolist).filter(filters)
                     .format("IovSetDto").size((long) dtolist.size()).datatype("iovs");
             // Send a response and status 200.
-            return Response.ok().entity(saveddto).build();
-
+            return Response.status(rstatus).entity(saveddto).build();
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Exception. Send a 500.
             final String message = e.getMessage();
-            log.error("Internal error searching for iovs : {}", message);
+            log.error("Api method findAllIovs got exception : {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -312,10 +300,10 @@ public class IovsApiServiceImpl extends IovsApiService {
             return Response.ok().entity(respdto).build();
 
         }
-        catch (final Exception e) {
+        catch (final RuntimeException e) {
             // Exception, send a response with 500.
             final String message = e.getMessage();
-            log.error("Error in getting size for tagname {} : {}", tagname, message);
+            log.error("Api method getSize got exception counting iov for tag {}: {}", tagname, message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -345,10 +333,10 @@ public class IovsApiServiceImpl extends IovsApiService {
             // Send a response 200. Even if the result is an empty list.
             return Response.ok().entity(respdto).build();
         }
-        catch (final Exception e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
-            log.error("Error in getting size by tagname {} : {}", tagname, e.getMessage());
             final String message = e.getMessage();
+            log.error("Api method getSizeByTag got exception in summary for tag {}: {}", tagname, message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -426,11 +414,11 @@ public class IovsApiServiceImpl extends IovsApiService {
             // The tag was not found.
             return notFoundPojo(tagname);
         }
-        catch (final Exception e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
-            final String msg = "Error in selectGroups : " + tagname + ", " + snapshot;
-            log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
+            final String msg = "groups for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
+            log.error("Api method selectGroups got exception: {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -455,7 +443,6 @@ public class IovsApiServiceImpl extends IovsApiService {
                 tagname, since, until);
         try {
             // Start IOV selection in the given time range.
-            List<IovDto> dtolist = null;
             // Search if tag exists.
             final Tag tagentity = tagService.findOne(tagname);
             log.debug("Found tag " + tagentity);
@@ -497,8 +484,11 @@ public class IovsApiServiceImpl extends IovsApiService {
                 xCrestQuery = "groups";
             }
             // Retrieve IOV list.
-            dtolist = iovService.selectIovsByTagRangeSnapshot(tagname, rsince, runtil, snap,
+            Iterable<Iov> entitylist = iovService.selectIovsByTagRangeSnapshot(tagname, rsince, runtil, snap,
                     xCrestQuery);
+            // create dto list
+            List<IovDto> dtolist = edh.entityToDtoList(entitylist, IovDto.class);
+
             // Prepare the response set.
             final IovSetDto respdto = new IovSetDto();
             ((IovSetDto) respdto.datatype("iovs")).resources(dtolist).size((long) dtolist.size());
@@ -517,11 +507,11 @@ public class IovsApiServiceImpl extends IovsApiService {
             // The tag was not found.
             return notFoundPojo(tagname);
         }
-        catch (final Exception e) {
+        catch (final RuntimeException e) {
             // Exception. Send a 500.
-            final String msg = "Error in selectIovs : " + tagname + ", " + snapshot;
-            log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
+            final String msg = "iovs for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
+            log.error("Api method selectIovs got exception: {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -547,10 +537,12 @@ public class IovsApiServiceImpl extends IovsApiService {
             // Search if tag exists.
             tagService.findOne(tagname);
             // Select IOVs using tag and snapshot. All IOVs will be retrieved.
-            final List<IovDto> entitylist = iovService.selectSnapshotByTag(tagname, snap);
+            final Iterable<Iov> entitylist = iovService.selectSnapshotByTag(tagname, snap);
+            // Create dto list
+            List<IovDto> dtolist = edh.entityToDtoList(entitylist, IovDto.class);
             // Create the Set for the response.
             final IovSetDto respdto = new IovSetDto();
-            respdto.resources(entitylist).size((long) entitylist.size());
+            respdto.resources(dtolist).size((long) dtolist.size());
             final GenericMap filters = new GenericMap();
             filters.put("tagName", tagname);
             filters.put("snapshot", snapshot.toString());
@@ -564,11 +556,11 @@ public class IovsApiServiceImpl extends IovsApiService {
             // The tag was not found.
             return notFoundPojo(tagname);
         }
-        catch (final Exception e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
-            final String msg = "Error in selectSnapshot : " + tagname + ", " + snapshot;
-            log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
+            final String msg = "iovs for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
+            log.error("Api method selectSnapshot got exception: {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -597,7 +589,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             // Search if tag exists.
             tagService.findOne(tagname);
             // Get the last IOV.
-            final IovDto last = iovService.latest(tagname, since, dateformat);
+            final Iov last = iovService.latest(tagname, since, dateformat);
             if (last == null) {
                 final String message = "No resource has been found";
                 final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
@@ -609,7 +601,8 @@ public class IovsApiServiceImpl extends IovsApiService {
             filters.put("since", since);
             // Store the last IOV into a list for Set creation.
             final List<IovDto> dtolist = new ArrayList<>();
-            dtolist.add(last);
+            IovDto dto = mapper.map(last, IovDto.class);
+            dtolist.add(dto);
             final CrestBaseResponse saveddto = new IovSetDto().resources(dtolist).filter(filters)
                     .size(1L).datatype("iovs");
             saveddto.format("IovSetDto");
@@ -620,10 +613,11 @@ public class IovsApiServiceImpl extends IovsApiService {
             // Tag does not exists, send a 404.
             return notFoundPojo(tagname);
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
-            final String message = e.getMessage();
-            log.error("Internal error searching for iovs : {}", message);
+            final String msg = "iovs for " + tagname + ", " + snapshot;
+            final String message = msg + " -- " + e.getMessage();
+            log.error("Api method lastIov got exception: {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
@@ -687,11 +681,11 @@ public class IovsApiServiceImpl extends IovsApiService {
         catch (final NotExistsPojoException e) {
             return notFoundPojo(tagname);
         }
-        catch (final Exception e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
-            final String msg = "Error in selectIovPayloads : " + tagname + ", " + snapshot;
-            log.error("Exception catched by REST controller for {} : {}", msg, e.getMessage());
+            final String msg = "iovs for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
+            log.error("Api method selectIovPayloads got exception: {}", message);
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                     message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();

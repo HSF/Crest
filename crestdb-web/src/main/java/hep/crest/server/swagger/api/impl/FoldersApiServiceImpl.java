@@ -98,7 +98,10 @@ public class FoldersApiServiceImpl extends FoldersApiService {
         }
         catch (final AlreadyExistsPojoException e) {
             // The folder exists, send a 303
-            return Response.status(Response.Status.SEE_OTHER).entity(body).build();
+            log.warn("createFolder resource exists : {}", e);
+            final String msg = "CrestFolder already exists for name : " + body.getNodeFullpath();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, msg);
+            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
         }
         catch (final RuntimeException e) {
             // The folder insertion failed, send a 500...
