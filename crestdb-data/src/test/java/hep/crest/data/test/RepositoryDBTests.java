@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Blob;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,7 +37,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import hep.crest.data.config.PojoDtoConverterConfig;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.handlers.CrestLobHandler;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.IovId;
@@ -114,7 +112,7 @@ public class RepositoryDBTests {
     public void testPayload() throws Exception {
 
         final PayloadDataBaseCustom repobean = new PayloadDataDBImpl(mainDataSource);
-        final CrestLobHandler lobhandler = new CrestLobHandler(mainDataSource);
+//        final CrestLobHandler lobhandler = new CrestLobHandler(mainDataSource);
         final Instant now = Instant.now();
         final Date time = new Date(now.toEpochMilli());
 
@@ -157,7 +155,7 @@ public class RepositoryDBTests {
         final OutputStream out = new FileOutputStream(
                 new File("/tmp/cdms/payloadatacopy.blob.copy"));
         PayloadHandler.saveToOutStream(ds, out);
-        lobhandler.createBlobFromFile("/tmp/cdms/payloadatacopy.blob.copy");
+//        lobhandler.createBlobFromFile("/tmp/cdms/payloadatacopy.blob.copy");
 
         final PayloadDto loadedblob1 = repobean.find(savedfromblob.getHash());
         assertThat(loadedblob1).isNull();
@@ -169,11 +167,11 @@ public class RepositoryDBTests {
 
         final long fsize = PayloadHandler.lengthOfFile("/tmp/cdms/payloadatacopy.blob.copy");
         assertThat(fsize).isGreaterThan(0);
-        final Blob bldata = lobhandler.createBlobFromByteArr(parr);
-        assertThat(bldata).isNotNull();
-        final Blob bldatastr = lobhandler
-                .createBlobFromStream(new BufferedInputStream(new FileInputStream(f)));
-        assertThat(bldatastr).isNotNull();
+//        final Blob bldata = lobhandler.createBlobFromByteArr(parr);
+//        assertThat(bldata).isNotNull();
+//        final Blob bldatastr = lobhandler
+//                .createBlobFromStream(new BufferedInputStream(new FileInputStream(f)));
+//        assertThat(bldatastr).isNotNull();
 
         final String fhash = PayloadHandler.saveToFileGetHash(
                 new BufferedInputStream(new FileInputStream(f)),
@@ -296,17 +294,17 @@ public class RepositoryDBTests {
     
     @Test
     public void testLobHandlers() {
-        final CrestLobHandler clh = new CrestLobHandler(mainDataSource);
+        //final CrestLobHandler clh = new CrestLobHandler(mainDataSource);
         DataGenerator.generatePayloadData("/tmp/cdms/payloadataforhandler.blob", "none");
         final File f = new File("/tmp/cdms/payloadataforhandler.blob");
         final PayloadDataDBImpl repobean = new PayloadDataDBImpl(mainDataSource);
 
         try {
-            final Blob b = clh.createBlobFromFile("/tmp/cdms/payloadataforhandler.blob");
-            assertThat(b).isNotNull();
+            //final Blob b = clh.createBlobFromFile("/tmp/cdms/payloadataforhandler.blob");
+            //assertThat(b).isNotNull();
             final InputStream ds = new BufferedInputStream(new FileInputStream(f));
-            final Blob bs = clh.createBlobFromStream(ds);
-            assertThat(bs).isNotNull();
+            //final Blob bs = clh.createBlobFromStream(ds);
+            //assertThat(bs).isNotNull();
             final Instant now = Instant.now();
             final Date time = new Date(now.toEpochMilli());
             ds.close();

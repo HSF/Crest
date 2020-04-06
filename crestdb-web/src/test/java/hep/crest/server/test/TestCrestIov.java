@@ -7,8 +7,6 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
-import hep.crest.data.pojo.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +27,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Tag;
+import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
@@ -45,6 +45,7 @@ import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSummarySetDto;
 import hep.crest.testutils.DataGenerator;
+import ma.glasnost.orika.MapperFacade;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -70,36 +71,54 @@ public class TestCrestIov {
 
     @Autowired
     private MapperFacade mapperFacade;
+    /**
+     * Helper.
+     */
+    @Autowired
+    private EntityDtoHelper edh;
 
     @Test
     public void test_IovService() {
         final TagDto dto = DataGenerator.generateTagDto("SVC-TAG-02", "test");
         try {
-            Tag entity = mapperFacade.map(dto, Tag.class);
+            final Tag entity = mapperFacade.map(dto, Tag.class);
             final Tag saved = tagservice.insertTag(entity);
             assertThat(saved).isNotNull();
             final IovDto iovdto0 = DataGenerator.generateIovDto("afakehashiov01", dto.getName(), new BigDecimal(0L));
-            iovservice.insertIov(iovdto0);
+            final Iov ioventity = mapperFacade.map(iovdto0, Iov.class);
+            ioventity.setTag(new Tag(iovdto0.getTagName()));
+            iovservice.insertIov(ioventity);
+            assertThat(iovservice.existsIov("SVC-TAG-02", new BigDecimal(0L), "afakehashiov01")).isTrue();
+            
             final IovDto iovdto1 = DataGenerator.generateIovDto("afakehashiov01", dto.getName(), new BigDecimal(3100000L));
-            iovservice.insertIov(iovdto1);
+            final Iov ioventity1 = mapperFacade.map(iovdto1, Iov.class);
+            ioventity1.setTag(new Tag(iovdto1.getTagName()));
+            iovservice.insertIov(ioventity1);
             final IovDto iovdto2 = DataGenerator.generateIovDto("afakehashiov01", dto.getName(), new BigDecimal(4100000L));
-            iovservice.insertIov(iovdto2);
+            final Iov ioventity2 = mapperFacade.map(iovdto2, Iov.class);
+            ioventity2.setTag(new Tag(iovdto2.getTagName()));
+            iovservice.insertIov(ioventity2);
             final PageRequest preq = prh.createPageRequest(0, 100, "id.since:DESC");
-            final List<IovDto> iovlist = iovservice.findAllIovs(null, preq);
-            assertThat(iovlist.size()).isGreaterThan(0);
+            final Iterable<Iov> iovlist = iovservice.findAllIovs(null, preq);
+            final List<IovDto> dtolist = edh.entityToDtoList(iovlist, IovDto.class);
+            assertThat(dtolist.size()).isGreaterThan(0);
             
             final Long niovs = iovservice.getSizeByTagAndSnapshot(dto.getName(), new Date());
             assertThat(niovs).isGreaterThan(0);
             
             final List<IovPayloadDto> iplist = iovservice.selectIovPayloadsByTagRangeSnapshot(dto.getName(), new BigDecimal(0L), new BigDecimal(4100000L), new Date());
             assertThat(iplist.size()).isGreaterThan(0);
+            final List<IovPayloadDto> iplistempty = iovservice.selectIovPayloadsByTagRangeSnapshot(dto.getName(), new BigDecimal(9999999990L), new BigDecimal(9999999999L), new Date());
+            assertThat(iplistempty.size()).isLessThan(2);
             
-            final List<IovDto> ilist = iovservice.selectIovsByTagRangeSnapshot(dto.getName(),new BigDecimal(1000L), new BigDecimal(4200000L), new Date(),"groups");
+            final Iterable<Iov> iovlist1 =  iovservice.selectIovsByTagRangeSnapshot(dto.getName(),new BigDecimal(1000L), new BigDecimal(4200000L), new Date(),"groups");
+            final List<IovDto> ilist = edh.entityToDtoList(iovlist1, IovDto.class);
             assertThat(ilist.size()).isGreaterThan(0);
-            final List<IovDto> ilist2 = iovservice.selectIovsByTagRangeSnapshot(dto.getName(),new BigDecimal(1000L), new BigDecimal(4200000L), new Date(),"ranges");
+            final Iterable<Iov> iovlist2 =  iovservice.selectIovsByTagRangeSnapshot(dto.getName(),new BigDecimal(1000L), new BigDecimal(4200000L), new Date(),"ranges");
+            final List<IovDto> ilist2 = edh.entityToDtoList(iovlist2, IovDto.class);
             assertThat(ilist2.size()).isGreaterThan(0);
         }
-        catch (CdbServiceException | AlreadyExistsPojoException e) {
+        catch (RuntimeException | AlreadyExistsPojoException e) {
             log.info("got exception of type {}",e.getClass());
         }
         catch (final NotExistsPojoException e) {
@@ -158,7 +177,7 @@ public class TestCrestIov {
         final ResponseEntity<String> iovrespalreadythere = this.testRestTemplate
                 .postForEntity("/crestapi/iovs", iovdto, String.class);
         log.info("Received response: " + iovrespalreadythere);
-        assertThat(iovrespalreadythere.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
+        assertThat(iovrespalreadythere.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 
         // Upload batch iovs
         iovdto.setSince(new BigDecimal(2000000L)); // change the since to have a new iov...
@@ -188,11 +207,12 @@ public class TestCrestIov {
         setdto.datatype("iovs").filter(filters2);
         
         // It should succeed if the tagname is in the IOV resources.
-        // Iovs are already stored so we should get a 303.
+        // Iovs are already stored so we should get a 303. Attention, in recent version we just give
+        // a 500, because of the constraint violation.
         final ResponseEntity<String> iovresp3 = this.testRestTemplate
                 .postForEntity("/crestapi/iovs/storebatch", setdto, String.class);
         log.info("Received response: " + iovresp3);
-        assertThat(iovresp3.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
+        assertThat(iovresp3.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
      
         // Check without tagname in iovs
         final GenericMap filters3= new GenericMap();
@@ -441,7 +461,7 @@ public class TestCrestIov {
 
         {
             log.info("Retrieved iov selection " + resp7b.getBody());
-            assertThat(resp7b.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(resp7b.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
 
         

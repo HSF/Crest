@@ -17,11 +17,9 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
-import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
@@ -58,13 +56,13 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
      * Helper.
      */
     @Autowired
-    PageRequestHelper prh;
+    private PageRequestHelper prh;
 
     /**
      * Helper.
      */
     @Autowired
-    EntityDtoHelper edh;
+    private EntityDtoHelper edh;
 
     /**
      * Filtering.
@@ -77,7 +75,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
      * Service.
      */
     @Autowired
-    GlobalTagService globaltagService;
+    private GlobalTagService globaltagService;
 
     /**
      * Mapper.
@@ -219,7 +217,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             log.debug("Search resource list using by={}, page={}, size={}, sort={}", by, page, size,
                     sort);
             // Create filters
-            GenericMap filters = prh.getFilters(prh.createMatcherCriteria(by));
+            final GenericMap filters = prh.getFilters(prh.createMatcherCriteria(by));
             // Create pagination request
             final PageRequest preq = prh.createPageRequest(page, size, sort);
             BooleanExpression wherepred = null;
@@ -228,9 +226,9 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
                 wherepred = prh.buildWhere(filtering, by);
             }
             // Search for global tags using where conditions.
-            Iterable<GlobalTag> entitylist = globaltagService.findAllGlobalTags(wherepred, preq);
+            final Iterable<GlobalTag> entitylist = globaltagService.findAllGlobalTags(wherepred, preq);
             final List<GlobalTagDto> dtolist = edh.entityToDtoList(entitylist, GlobalTagDto.class);
-            Response.Status rstatus = Response.Status.OK;
+            final Response.Status rstatus = Response.Status.OK;
             final CrestBaseResponse setdto = new GlobalTagSetDto().resources(dtolist)
                     .format("GlobalTagSetDto").size((long) dtolist.size()).datatype("globaltags");
             if (filters != null) {

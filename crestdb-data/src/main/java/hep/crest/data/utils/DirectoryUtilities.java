@@ -280,6 +280,7 @@ public class DirectoryUtilities {
             }
             catch (final IOException e) {
                 log.error("Error creating base directory {}: {}", base, e);
+                return null;
             }
         }
         return base;
@@ -300,6 +301,7 @@ public class DirectoryUtilities {
             }
             catch (final IOException e) {
                 log.error("Error creating directory for payload {}: {}", ppath, e);
+                return null;
             }
         }
         return ppath;
@@ -322,9 +324,7 @@ public class DirectoryUtilities {
             try {
                 Files.createDirectories(tagpath);
                 final Path tagfilepath = Paths.get(basedir, tagname, TAG_FILE);
-                if (!tagfilepath.toFile().exists()) {
-                    Files.createFile(tagfilepath);
-                }
+                Files.createFile(tagfilepath);
                 return tagpath;
             }
             catch (final IOException e) {
@@ -352,16 +352,14 @@ public class DirectoryUtilities {
         else {
             try {
                 final Path iovfilepath = Paths.get(basedir, tagname, IOV_FILE);
-                if (!iovfilepath.toFile().exists()) {
-                    Files.createFile(iovfilepath);
-                }
+                Files.createFile(iovfilepath);
                 return iovfilepath;
             }
             catch (final IOException e) {
-                throw new CdbServiceException(
-                        "Error in creating iov file for tag " + name, e);
+                log.error("Error creating iov file for tag  {}: {}", name, e);
             }
         }
+        return null;
     }
 
     /**
@@ -396,11 +394,11 @@ public class DirectoryUtilities {
      * @return String
      */
     public String createTarFile(String source, String outdir) {
-        try (FileOutputStream fos = new FileOutputStream(outdir.concat(".tar.gz"));
+        final String outtarfile = outdir.concat(".tar.gz");
+        try (FileOutputStream fos = new FileOutputStream(outtarfile);
                 GZIPOutputStream gos = new GZIPOutputStream(new BufferedOutputStream(fos));
                 TarArchiveOutputStream tarOs = new TarArchiveOutputStream(gos);) {
             // Using input name to create output name
-            final String outtarfile = outdir.concat(".tar.gz");
             final File folder = new File(source);
             final File[] fileNames = folder.listFiles();
             for (final File file : fileNames) {

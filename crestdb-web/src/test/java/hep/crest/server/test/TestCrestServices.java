@@ -1,19 +1,15 @@
 package hep.crest.server.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.pojo.GlobalTag;
-import hep.crest.data.pojo.GlobalTagMap;
-import hep.crest.data.pojo.GlobalTagMapId;
-import hep.crest.data.pojo.Tag;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.server.services.*;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.testutils.DataGenerator;
-import ma.glasnost.orika.MapperFacade;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -33,15 +29,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.GlobalTag;
+import hep.crest.data.pojo.GlobalTagMap;
+import hep.crest.data.pojo.GlobalTagMapId;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Tag;
+import hep.crest.server.controllers.EntityDtoHelper;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.server.services.DirectoryService;
+import hep.crest.server.services.GlobalTagMapService;
+import hep.crest.server.services.GlobalTagService;
+import hep.crest.server.services.IovService;
+import hep.crest.server.services.PayloadService;
+import hep.crest.server.services.TagService;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.testutils.DataGenerator;
+import ma.glasnost.orika.MapperFacade;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -71,6 +80,12 @@ public class TestCrestServices {
     private ObjectMapper mapper;
     @Autowired
     private MapperFacade mapperFacade;
+    /**
+     * Helper.
+     */
+    @Autowired
+    private EntityDtoHelper edh;
+
 
     @Before
     public void setUp() {
@@ -108,7 +123,7 @@ public class TestCrestServices {
             updated.setDescription("this should not be updated");
             globaltagService.updateGlobalTag(updated);
         }
-        catch ( AlreadyExistsPojoException e) {
+        catch ( final AlreadyExistsPojoException e) {
             log.info("Cannot save global tag {}: {}", dto, e);
         }
         catch (final NotExistsPojoException e) {
@@ -120,7 +135,7 @@ public class TestCrestServices {
     public void testB_Tags() {
         final TagDto dto = DataGenerator.generateTagDto("MY-TEST-01","time");
         try {
-            Tag entity = mapperFacade.map(dto, Tag.class);
+            final Tag entity = mapperFacade.map(dto, Tag.class);
             final Tag saved = tagService.insertTag(entity);
             saved.setDescription("this is an updated tag description");
             final Tag updated = tagService.updateTag(saved);
@@ -129,7 +144,7 @@ public class TestCrestServices {
             updated.setDescription("this should not be updated");
             tagService.updateTag(updated);
         }
-        catch ( AlreadyExistsPojoException e) {
+        catch ( final AlreadyExistsPojoException e) {
             log.info("Cannot save global tag {}: {}", dto, e);
         }
         catch (final NotExistsPojoException e) {
@@ -150,19 +165,21 @@ public class TestCrestServices {
         }
         final IovDto iovdto = DataGenerator.generateIovDto("afakehashp10", "MY-TEST-01", new BigDecimal(1000L));
         try {
-            iovService.insertIov(iovdto);
+            final Iov ioventity = mapperFacade.map(iovdto, Iov.class);
+            ioventity.setTag(new Tag(iovdto.getTagName()));
+
+            iovService.insertIov(ioventity);
         }
-        catch (NotExistsPojoException | AlreadyExistsPojoException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        catch (final NotExistsPojoException e) {
+            log.error("Exception in iov insertion {}", e);
         }
         try {
-            final List<IovDto> iovlist = iovService.findAllIovs(null, PageRequest.of(0,10));
-            assertThat(iovlist.size()).isGreaterThan(0);
+            final Iterable<Iov> iovlist = iovService.findAllIovs(null, PageRequest.of(0,10));
+            final List<IovDto> dtolist = edh.entityToDtoList(iovlist, IovDto.class);
+            assertThat(dtolist.size()).isGreaterThan(0);
         }
-        catch (final CdbServiceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        catch (final RuntimeException e) {
+            log.error("Exception in iov retrieval {}", e);
         }
     }
     @Test
@@ -174,13 +191,13 @@ public class TestCrestServices {
             final GlobalTag gts = globaltagService.insertGlobalTag(gt);
             // We create a tag BUT without saveing it
             final Tag tag = DataGenerator.generateTag("MY-TEST-FORMAP-01","time");
-            Tag ts = tagService.insertTag(tag);
-            GlobalTagMapId mapid = new GlobalTagMapId();
+            final Tag ts = tagService.insertTag(tag);
+            final GlobalTagMapId mapid = new GlobalTagMapId();
             mapid.setGlobalTagName(gt.getName());
             mapid.setLabel("somelabel");
             mapid.setRecord("somerecord");
-            GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
-            GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
+            final GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
+            final GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
             assertThat(saved).isNotNull();
         }
         catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
@@ -193,12 +210,12 @@ public class TestCrestServices {
             final GlobalTag gts = globaltagService.insertGlobalTag(gt);
             // We create a tag BUT without saveing it
             final Tag tag = DataGenerator.generateTag("MY-TEST-FORMAP-02","time");
-            GlobalTagMapId mapid = new GlobalTagMapId();
+            final GlobalTagMapId mapid = new GlobalTagMapId();
             mapid.setGlobalTagName(gt.getName());
             mapid.setLabel("somelabel");
             mapid.setRecord("somerecord");
-            GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
-            GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
+            final GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
+            final GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
         }
         catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
             log.info("Exception : {}", e);
@@ -208,12 +225,12 @@ public class TestCrestServices {
             // These two already exists as a mapping
             final GlobalTag gt = DataGenerator.generateGlobalTag("TEST-GT-FORMAP-02");
             final Tag tag = DataGenerator.generateTag("MY-TEST-FORMAP-02","time");
-            GlobalTagMapId mapid = new GlobalTagMapId();
+            final GlobalTagMapId mapid = new GlobalTagMapId();
             mapid.setGlobalTagName(gt.getName());
             mapid.setLabel("somelabel");
             mapid.setRecord("somerecord");
-            GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
-            GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
+            final GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
+            final GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
         }
         catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
             log.info("Exception : {}", e);

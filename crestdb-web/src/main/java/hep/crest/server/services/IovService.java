@@ -3,24 +3,15 @@
  */
 package hep.crest.server.services;
 
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import hep.crest.data.pojo.Iov;
-import hep.crest.data.pojo.Tag;
-import hep.crest.data.repositories.IovGroupsCustom;
-import hep.crest.data.repositories.IovRepository;
-import hep.crest.data.repositories.PayloadDataBaseCustom;
-import hep.crest.data.repositories.TagRepository;
-import hep.crest.data.repositories.querydsl.IFilteringCriteria;
-import hep.crest.data.repositories.querydsl.SearchCriteria;
-import hep.crest.server.annotations.ProfileAndLog;
-import hep.crest.server.controllers.PageRequestHelper;
-import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.swagger.model.CrestBaseResponse;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.IovPayloadDto;
-import hep.crest.swagger.model.IovSetDto;
-import hep.crest.swagger.model.TagSummaryDto;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
+
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +21,24 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Tag;
+import hep.crest.data.repositories.IovGroupsCustom;
+import hep.crest.data.repositories.IovRepository;
+import hep.crest.data.repositories.PayloadDataBaseCustom;
+import hep.crest.data.repositories.TagRepository;
+import hep.crest.data.repositories.querydsl.IFilteringCriteria;
+import hep.crest.server.annotations.ProfileAndLog;
+import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.IovSetDto;
+import hep.crest.swagger.model.TagSummaryDto;
 
 /**
  * @author formica
@@ -95,22 +97,17 @@ public class IovService {
      * @return IovDto
      */
     public Iov latest(String tagname, String since, String dateformat) {
-        List<SearchCriteria> params = null;
+
         final PageRequest preq = prh.createPageRequest(0, 10, "id.since:DESC");
         if ("now".equals(since)) {
             since = ((Long) Instant.now().getMillis()).toString();
         }
         final String by = "tagname:" + tagname + ",since<" + since;
-
-        params = prh.createMatcherCriteria(by, dateformat);
-        final List<BooleanExpression> expressions = filtering.createFilteringConditions(params);
-        BooleanExpression wherepred = prh.buildWhere(filtering, by);
+        final BooleanExpression wherepred = prh.buildWhere(filtering, by);
 
         final Iterable<Iov> entitylist = this.findAllIovs(wherepred, preq);
-        if (entitylist != null) {
-            if (entitylist.iterator().hasNext()) {
-                return entitylist.iterator().next();
-            }
+        if (entitylist != null && entitylist.iterator().hasNext()) {
+            return entitylist.iterator().next();
         }
         return null;
     }
@@ -121,14 +118,12 @@ public class IovService {
      * @param req
      *            the Pageable
      * @return Iterable<Iov>
-     * @throws IllegalArgumentException
-     *             If an Exception occurred
      */
-    public Iterable<Iov> findAllIovs(Predicate qry, Pageable req) throws IllegalArgumentException {
-        Iterable<Iov> entitylist = null;
+    public Iterable<Iov> findAllIovs(Predicate qry, Pageable req) {
         if (req == null) {
             throw new IllegalArgumentException("Pagination parameter are mandatory for IOVs");
         }
+        Iterable<Iov> entitylist = null;
         if (qry == null) {
             entitylist = iovRepository.findAll(req);
         }
@@ -148,7 +143,7 @@ public class IovService {
      * @return List<BigDecimal>
      */
     public List<BigDecimal> selectGroupsByTagNameAndSnapshotTime(String tagname, Date snapshot,
-                                                                 Long groupsize) {
+            Long groupsize) {
         log.debug("Search for iovs groups by tag name {} and snapshot time {}", tagname, snapshot);
         List<BigDecimal> minsincelist = null;
         if (snapshot == null) {
@@ -174,7 +169,7 @@ public class IovService {
      */
     @ProfileAndLog
     public CrestBaseResponse selectGroupDtoByTagNameAndSnapshotTime(String tagname, Date snapshot,
-                                                                    Long groupsize) {
+            Long groupsize) {
         final List<BigDecimal> minsincelist = selectGroupsByTagNameAndSnapshotTime(tagname,
                 snapshot, groupsize);
         final List<IovDto> iovlist = minsincelist.stream().map(s -> new IovDto().since(s))
@@ -196,7 +191,7 @@ public class IovService {
      * @return Iterable<Iov>
      */
     public Iterable<Iov> selectIovsByTagRangeSnapshot(String tagname, BigDecimal since,
-                                                     BigDecimal until, Date snapshot, String flag) {
+            BigDecimal until, Date snapshot, String flag) {
         log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
                 tagname, since, until, snapshot);
         Iterable<Iov> entities = null;
@@ -231,7 +226,7 @@ public class IovService {
      * @return List<IovPayloadDto>
      */
     public List<IovPayloadDto> selectIovPayloadsByTagRangeSnapshot(String tagname, BigDecimal since,
-                                                                   BigDecimal until, Date snapshot) {
+            BigDecimal until, Date snapshot) {
         log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
                 tagname, since, until, snapshot);
         List<IovPayloadDto> entities = null;
@@ -305,7 +300,7 @@ public class IovService {
      *            the String
      * @return boolean
      */
-    protected boolean existsIov(String tagname, BigDecimal since, String hash) {
+    public boolean existsIov(String tagname, BigDecimal since, String hash) {
         log.debug("Verify if the same IOV is already stored with the same hash....");
         final Iov tmpiov = iovRepository.findBySinceAndTagNameAndHash(tagname, since, hash);
         return tmpiov != null;
