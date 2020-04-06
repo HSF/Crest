@@ -246,6 +246,9 @@ public class ToolsTests {
         final String hash4 = HashGenerator.hashoutstream(ds2, out);
         assertThat(hash).isEqualTo(hash4);
 
+        final String hash5 = HashGenerator.shaJava(barr);
+        assertThat(hash5).isNotNull();
+
         final DateFormatterHandler dh = new DateFormatterHandler();
         final DateTimeFormatter dtformat = dh.getLocformatter();
         final Timestamp ts = dh.format("2011-12-03T10:15:30+01:00");
