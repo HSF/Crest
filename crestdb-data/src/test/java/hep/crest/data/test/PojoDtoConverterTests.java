@@ -494,6 +494,8 @@ public class PojoDtoConverterTests {
         assertThat(user.getId()).isEqualTo("someid");
         assertThat(user.getUsername()).isEqualTo("anothername");
         assertThat(user.getPassword()).isEqualTo("anewpass");
+        final CrestUser usr1 = new CrestUser();
+        assertThat(usr1).isNotNull();
         
         final CrestRoles role = new CrestRoles("roleid", "admin");
         role.setRole("guest");
@@ -501,7 +503,9 @@ public class PojoDtoConverterTests {
         role.setId("anotherroleid");
         assertThat(role.getId()).isEqualTo("anotherroleid");
         assertThat(role.getRole()).isEqualTo("guest");
-    }
+        final CrestRoles rol1 = new CrestRoles();
+        assertThat(rol1).isNotNull();
+     }
 
     @Test
     public void testDeserializer() {
