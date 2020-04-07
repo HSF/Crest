@@ -31,6 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.DateFormatterHandler;
 import hep.crest.data.handlers.HashGenerator;
 import hep.crest.data.repositories.IovDirectoryImplementation;
@@ -280,6 +281,20 @@ public class ToolsTests {
         assertThat(props.getSecurity()).isEqualTo("none");
         assertThat(props.getSynchro()).isEqualTo("all");
         assertThat(props.getWebstaticdir()).isEqualTo("/tmp");
+    }
+
+
+    @Test
+    public void exceptionTest() {
+        final NullPointerException np = new NullPointerException("null");
+        final CdbServiceException es = new CdbServiceException("message");
+        assertThat(es.getMessage()).contains("message");
+        final CdbServiceException ees = new CdbServiceException("message", np);
+        assertThat(ees.getCause()).isNotNull();
+        final PayloadEncodingException e = new PayloadEncodingException("message");
+        assertThat(e.getMessage()).contains("message");
+        final PayloadEncodingException ee = new PayloadEncodingException(np);
+        assertThat(ee.getCause()).isNotNull();
     }
 
 }

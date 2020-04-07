@@ -6,3 +6,4 @@
  *
  */
 package hep.crest.server.config;
+// Configuration package.

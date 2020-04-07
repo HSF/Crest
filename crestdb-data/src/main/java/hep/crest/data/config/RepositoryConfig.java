@@ -42,6 +42,7 @@ public class RepositoryConfig {
     @Bean(name = "fstagrepository")
     public TagDirectoryImplementation tagdirectoryRepository() {
         final TagDirectoryImplementation tdi = new TagDirectoryImplementation();
+        // Initialize directory utilities.
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
         tdi.setDirtools(du);
         return tdi;
@@ -53,6 +54,7 @@ public class RepositoryConfig {
     @Bean(name = "fsiovrepository")
     public IovDirectoryImplementation iovdirectoryRepository() {
         final IovDirectoryImplementation idi = new IovDirectoryImplementation();
+        // Initialize directory utilities.
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
         idi.setDirtools(du);
         return idi;
@@ -64,6 +66,7 @@ public class RepositoryConfig {
     @Bean(name = "fspayloadrepository")
     public PayloadDirectoryImplementation payloaddirectoryRepository() {
         final PayloadDirectoryImplementation pdi = new PayloadDirectoryImplementation();
+        // Initialize directory utilities.
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
         pdi.setDirtools(du);
         return pdi;
@@ -77,6 +80,7 @@ public class RepositoryConfig {
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
@@ -94,6 +98,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadDefaultRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
@@ -110,6 +115,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadPostgresRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
@@ -126,6 +132,7 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadSqliteRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }

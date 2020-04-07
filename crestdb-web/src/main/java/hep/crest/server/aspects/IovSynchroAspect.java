@@ -3,18 +3,19 @@
  */
 package hep.crest.server.aspects;
 
-import hep.crest.data.config.CrestProperties;
-import hep.crest.data.pojo.Iov;
-import hep.crest.data.pojo.Tag;
-import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.server.services.IovService;
-import hep.crest.server.services.TagService;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import hep.crest.data.config.CrestProperties;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Tag;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.server.services.IovService;
+import hep.crest.server.services.TagService;
 
 /**
  * @author formica
@@ -76,14 +77,18 @@ public class IovSynchroAspect {
         if ("SV".equalsIgnoreCase(synchro)) {
             log.warn("Can only append IOVs....");
             Iov latest = null;
+            // Get latest IOV.
             latest = iovService.latest(tagentity.getName(), "now", "ms");
             if (latest == null) {
+                // No latest is present.
                 log.info("No iov could be retrieved");
             }
             else if (latest.getId().getSince().compareTo(entity.getId().getSince()) <= 0) {
+                // Latest is before the new one.
                 log.info("IOV in insert has correct time respect to last IOV : {} > {}", entity, latest);
             }
             else {
+                // Latest is after the new one.
                 log.warn("IOV in insert has WRONG time respect to last IOV : {} < {}", entity, latest);
             }
         }

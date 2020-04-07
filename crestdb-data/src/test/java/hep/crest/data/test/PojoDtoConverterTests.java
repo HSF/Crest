@@ -490,10 +490,17 @@ public class PojoDtoConverterTests {
         user.setId("someid");
         user.setUsername("anothername");
         assertThat(user.toString().length()).isGreaterThan(0);
-
+        user.setPassword("anewpass");
+        assertThat(user.getId()).isEqualTo("someid");
+        assertThat(user.getUsername()).isEqualTo("anothername");
+        assertThat(user.getPassword()).isEqualTo("anewpass");
+        
         final CrestRoles role = new CrestRoles("roleid", "admin");
         role.setRole("guest");
         assertThat(role.toString().length()).isGreaterThan(0);
+        role.setId("anotherroleid");
+        assertThat(role.getId()).isEqualTo("anotherroleid");
+        assertThat(role.getRole()).isEqualTo("guest");
     }
 
     @Test
