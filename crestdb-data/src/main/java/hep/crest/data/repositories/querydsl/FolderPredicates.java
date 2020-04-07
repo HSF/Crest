@@ -6,7 +6,6 @@ package hep.crest.data.repositories.querydsl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.security.pojo.QCrestFolders;
@@ -59,12 +58,4 @@ public final class FolderPredicates {
         return QCrestFolders.crestFolders.groupRole.like("%" + gr + "%");
     }
 
-    /**
-     * @param exp
-     *            the BooleanExpression
-     * @return Predicate
-     */
-    public static Predicate where(BooleanExpression exp) {
-        return exp;
-    }
 }

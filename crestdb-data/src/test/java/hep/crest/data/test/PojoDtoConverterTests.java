@@ -3,8 +3,26 @@
  */
 package hep.crest.data.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.GlobalTagMapId;
@@ -16,8 +34,6 @@ import hep.crest.data.runinfo.pojo.RunInfo;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.data.security.pojo.CrestRoles;
 import hep.crest.data.security.pojo.CrestUser;
-import hep.crest.data.serializers.ByteArrayDeserializer;
-import hep.crest.data.serializers.TimestampDeserializer;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.FolderSetDto;
@@ -44,23 +60,6 @@ import hep.crest.swagger.model.TagSetDto;
 import hep.crest.swagger.model.TagSummaryDto;
 import hep.crest.swagger.model.TagSummarySetDto;
 import ma.glasnost.orika.MapperFacade;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author formica
@@ -499,50 +498,29 @@ public class PojoDtoConverterTests {
 
     @Test
     public void testDeserializer() {
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-
-        module.addDeserializer(Timestamp.class, new TimestampDeserializer());
-        module.addDeserializer(byte[], new ByteArrayDeserializer());
-        module.addDeserializer(Timestamp.class, new TimestampDeserializer());
-    }
-
-    public class TestItem {
-        private byte[] data;
-        private Timestamp instime;
-        private Date insdate;
-        private String name;
-
-        public byte[] getData() {
-            return data;
+        final ObjectMapper locmapper = new ObjectMapper();
+//        final SimpleModule module = new SimpleModule();
+//
+//        module.addDeserializer(Timestamp.class, new TimestampDeserializer());
+//        module.addDeserializer(byte[].class, new ByteArrayDeserializer());
+        
+        final String json = "{ \"data\" : \"VGhpcyBpcyBhIG5vcm1hbCB0ZXh0Cg==\", " +
+                "\"instime\" : \"2011-12-03T10:15:30+01:00\", " +
+                "\"insdate\" : \"2020-12-03T22:15:30+01:00\", " +
+                "\"name\" : \"MyTest\"}";
+        
+        try {
+            log.info("Try to deserialize json {}", json);
+            final TestItem m = locmapper.readValue(json, TestItem.class);
+            assertThat(m.getName()).isEqualTo("MyTest");
+            
+            final String jsonout = locmapper.writeValueAsString(m);
+            log.info("Serialized object is {}", jsonout);
+            assertThat(jsonout).contains("MyTest");
         }
-
-        public void setData(byte[] data) {
-            this.data = data;
-        }
-
-        public Timestamp getInstime() {
-            return instime;
-        }
-
-        public void setInstime(Timestamp instime) {
-            this.instime = instime;
-        }
-
-        public Date getInsdate() {
-            return insdate;
-        }
-
-        public void setInsdate(Date insdate) {
-            this.insdate = insdate;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
+        catch (final IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 }

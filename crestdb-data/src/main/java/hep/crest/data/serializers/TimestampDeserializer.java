@@ -22,7 +22,6 @@ import java.sql.Timestamp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -34,7 +33,7 @@ import hep.crest.data.handlers.DateFormatterHandler;
  * @author formica
  *
  */
-@Component
+//@//Component
 public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 
     /**
@@ -59,6 +58,7 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
     public Timestamp deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         log.debug("Use private version of deserializer....{}", handler.getLocformatter());
         final String tstampstr = jp.getText();
+        log.info("try to decode string {} to timestamp", tstampstr);
         return handler.format(tstampstr);
     }
 }

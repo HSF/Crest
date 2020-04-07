@@ -183,7 +183,7 @@ public class DataGenerator {
         entity.setSchemaName(schema);
         entity.setNodeFullpath(fullpath);
         entity.setNodeName(name);
-        entity.setTagPattern("MY-TEST");
+        entity.setTagPattern(name+"-MY-TEST");
         entity.setNodeDescription("Some node");
         entity.setGroupRole("TEST");
         return entity;

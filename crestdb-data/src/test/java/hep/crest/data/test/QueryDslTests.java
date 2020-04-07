@@ -48,6 +48,7 @@ import hep.crest.data.repositories.GlobalTagRepository;
 import hep.crest.data.repositories.IovRepository;
 import hep.crest.data.repositories.PayloadDataDBImpl;
 import hep.crest.data.repositories.TagRepository;
+import hep.crest.data.repositories.querydsl.FolderFiltering;
 import hep.crest.data.repositories.querydsl.GlobalTagFiltering;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.IovFiltering;
@@ -56,6 +57,8 @@ import hep.crest.data.repositories.querydsl.TagFiltering;
 import hep.crest.data.runinfo.pojo.RunInfo;
 import hep.crest.data.runinfo.repositories.RunInfoRepository;
 import hep.crest.data.runinfo.repositories.querydsl.RunInfoFiltering;
+import hep.crest.data.security.pojo.CrestFolders;
+import hep.crest.data.security.pojo.FolderRepository;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.PayloadDto;
 
@@ -86,6 +89,9 @@ public class QueryDslTests {
 
     @Autowired
     private RunInfoRepository runrepository;
+
+    @Autowired
+    private FolderRepository folderRepository;
 
     @Autowired
     @Qualifier("dataSource") 
@@ -329,7 +335,7 @@ public class QueryDslTests {
         final IFilteringCriteria filter = new RunInfoFiltering();
         final PageRequest preq = createPageRequest(0, 10, "runNumber:ASC");
 
-        final List<SearchCriteria> params = createMatcherCriteria("runNumber>10,startTime>0");
+        final List<SearchCriteria> params = createMatcherCriteria("runNumber>10,runNumber<1000,startTime>0,endtime>0,startTime<"+end.getTime()+",endtime<"+(end.getTime()+1));
         final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
 
@@ -344,6 +350,33 @@ public class QueryDslTests {
         final Page<RunInfo> dtolist = runrepository.findAll(wherepred, preq);
         assertThat(dtolist.getSize()).isGreaterThan(0);        
     }
+    
+    @Test
+    public void testFolders() throws Exception {
+        final CrestFolders folder = DataGenerator.generateFolder("MDTRT","/MDT/RT","COOLOFL_MDT");
+        folderRepository.save(folder);
+        final CrestFolders folder1 = DataGenerator.generateFolder("MUONALIGNBARREL","/MUONALIGN/MDT/BARREL","COOLOFL_MUONALIGN");
+        folderRepository.save(folder1);
+        final IFilteringCriteria filter = new FolderFiltering();
+        final PageRequest preq = createPageRequest(0, 10, "nodeFullpath:ASC");
+
+        final List<SearchCriteria> params = createMatcherCriteria("nodeFullpath:M,tagpattern:TEST,grouprole:TEST");
+        final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
+        BooleanExpression wherepred = null;
+
+        for (final BooleanExpression exp : expressions) {
+            if (wherepred == null) {
+                wherepred = exp;
+            }
+            else {
+                wherepred = wherepred.and(exp);
+            }
+        }
+        final Page<CrestFolders> dtolist = folderRepository.findAll(wherepred, preq);
+        assertThat(dtolist.getSize()).isGreaterThan(0);
+        
+    }
+
     
     protected PageRequest createPageRequest(Integer page, Integer size, String sort) {
 

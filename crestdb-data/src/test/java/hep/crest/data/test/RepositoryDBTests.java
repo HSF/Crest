@@ -289,7 +289,6 @@ public class RepositoryDBTests {
 
         final List<CrestFolders> flist = folderRepository.findBySchemaName("COOLOFL_MDT");
         assertThat(flist.size()).isGreaterThan(0);
-
     }
     
     @Test

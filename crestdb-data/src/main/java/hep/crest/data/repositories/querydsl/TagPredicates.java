@@ -8,7 +8,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.pojo.QTag;
@@ -107,12 +106,4 @@ public final class TagPredicates {
         return pred;
     }
 
-    /**
-     * @param exp
-     *            the BooleanExpression
-     * @return Predicate
-     */
-    public static Predicate where(BooleanExpression exp) {
-        return exp;
-    }
 }
