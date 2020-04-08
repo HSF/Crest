@@ -3,7 +3,26 @@
  */
 package hep.crest.data.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import hep.crest.data.config.CrestProperties;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.DateFormatterHandler;
+import hep.crest.data.handlers.HashGenerator;
+import hep.crest.data.repositories.IovDirectoryImplementation;
+import hep.crest.data.repositories.TagDirectoryImplementation;
+import hep.crest.data.test.tools.DataGenerator;
+import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.data.utils.RunIovConverter;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.TagDto;
+import org.joda.time.Instant;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -20,27 +39,7 @@ import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import org.joda.time.Instant;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import hep.crest.data.config.CrestProperties;
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.handlers.DateFormatterHandler;
-import hep.crest.data.handlers.HashGenerator;
-import hep.crest.data.repositories.IovDirectoryImplementation;
-import hep.crest.data.repositories.TagDirectoryImplementation;
-import hep.crest.data.test.tools.DataGenerator;
-import hep.crest.data.utils.DirectoryUtilities;
-import hep.crest.data.utils.RunIovConverter;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.TagDto;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author formica
@@ -158,6 +157,14 @@ public class ToolsTests {
         catch (final CdbServiceException e) {
             log.error("Cannot find tag MY-TAG-02");
         }
+        final IovDto iov1 = DataGenerator.generateIovDto("mydirhash", "MY-TAG-01",
+                new BigDecimal(1000L));
+        iov1.tagName(null);
+        IovDto saved1 = fsiovrepository.save(iov1);
+        assertThat(saved1).isNull();
+
+        fsiovrepository.saveAll("MY-TAG", null);
+        fsiovrepository.findByTagName(null);
     }
 
     @Test
@@ -250,6 +257,13 @@ public class ToolsTests {
         final String hash5 = HashGenerator.shaJava(barr);
         assertThat(hash5).isNotNull();
 
+        String hash6 = HashGenerator.md5Spring(barr);
+        assertThat(hash5).isNotNull();
+
+        String hash7 = HashGenerator.md5Spring("Testing some byte array");
+        assertThat(hash5).isNotNull();
+
+        // Date format handler, used in serialization classes
         final DateFormatterHandler dh = new DateFormatterHandler();
         final DateTimeFormatter dtformat = dh.getLocformatter();
         final Timestamp ts = dh.format("2011-12-03T10:15:30+01:00");
@@ -260,6 +274,13 @@ public class ToolsTests {
         assertThat(tsmsec).isGreaterThan(0);
         assertThat(dtformat).isNotNull();
 
+        DateFormatterHandler dfh = new DateFormatterHandler();
+        dfh.setDatePATTERN("ISO_LOCAL_DATE_TIME");
+        DateTimeFormatter df = dfh.getLocformatter();
+        assertThat(df).isNotNull();
+        dfh.setDatePATTERN("ISO_DATE_TIME");
+        DateTimeFormatter df1 = dfh.getLocformatter();
+        assertThat(df1).isNotNull();
     }
 
     @Test

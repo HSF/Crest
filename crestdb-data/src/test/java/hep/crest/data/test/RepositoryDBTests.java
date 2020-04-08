@@ -1,39 +1,5 @@
 package hep.crest.data.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.sql.DataSource;
-
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import hep.crest.data.config.PojoDtoConverterConfig;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
@@ -54,10 +20,43 @@ import hep.crest.data.security.pojo.FolderRepository;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.data.utils.DirectoryUtilities;
 import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSummaryDto;
 import ma.glasnost.orika.MapperFacade;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.sql.DataSource;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -112,7 +111,6 @@ public class RepositoryDBTests {
     public void testPayload() throws Exception {
 
         final PayloadDataBaseCustom repobean = new PayloadDataDBImpl(mainDataSource);
-//        final CrestLobHandler lobhandler = new CrestLobHandler(mainDataSource);
         final Instant now = Instant.now();
         final Date time = new Date(now.toEpochMilli());
 
@@ -233,6 +231,10 @@ public class RepositoryDBTests {
                 new Date(), 10L);
         assertThat(groupsnap.size()).isGreaterThan(0);
 
+        final List<IovPayloadDto> pdtolist = iovsrepobean.getRangeIovPayloadInfo("A-TEST-01", new BigDecimal(99L),
+                new BigDecimal(1200L), new Date());
+        assertThat(pdtolist.size()).isGreaterThanOrEqualTo(0);
+
     }
 
     @Test
@@ -246,6 +248,12 @@ public class RepositoryDBTests {
         final List<TagDto> taglist = tagrepo.findByNameLike("A-TEST.*");
         assertThat(taglist.size()).isGreaterThan(0);
         assertThat(tagrepo.exists("A-TEST-02")).isTrue();
+
+        final List<TagDto> alltaglist = tagrepo.findAll();
+        assertThat(alltaglist.size()).isGreaterThan(0);
+
+        long ntags = tagrepo.count();
+        assertThat(ntags).isGreaterThan(0);
 
         final PayloadDirectoryImplementation pyldrepo = new PayloadDirectoryImplementation(
                 new DirectoryUtilities());

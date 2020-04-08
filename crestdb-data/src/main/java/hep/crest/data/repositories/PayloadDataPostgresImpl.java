@@ -17,6 +17,17 @@
  **/
 package hep.crest.data.repositories;
 
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.pojo.Payload;
+import hep.crest.data.repositories.externals.PayloadRequests;
+import hep.crest.swagger.model.PayloadDto;
+import org.postgresql.largeobject.LargeObject;
+import org.postgresql.largeobject.LargeObjectManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,19 +36,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
-
-import javax.sql.DataSource;
-
-import org.postgresql.largeobject.LargeObject;
-import org.postgresql.largeobject.LargeObjectManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.pojo.Payload;
-import hep.crest.data.repositories.externals.PayloadRequests;
-import hep.crest.swagger.model.PayloadDto;
 
 /**
  * An implementation for requests using Postgres database.
@@ -308,37 +306,6 @@ public class PayloadDataPostgresImpl extends AbstractPayloadDataGeneral implemen
                 log.error("Error in closing streams...potential leak: {}", e);
             }
         }
-    }
-
-    /**
-     * @param metainfoentity
-     *            the PayloadDto
-     * @return Payload
-     */
-    protected PayloadDto saveMetaInfo(PayloadDto metainfoentity) {
-
-        final String tablename = this.tablename();
-
-        final String sql = PayloadRequests.getInsertMetaQuery(tablename);
-
-        log.info("Insert Payload Meta Info {} using JDBCTEMPLATE", metainfoentity.getHash());
-        try (Connection conn = super.getDs().getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);) {
-            ps.setString(1, metainfoentity.getHash());
-            ps.setString(2, metainfoentity.getObjectType());
-            ps.setString(3, metainfoentity.getVersion());
-            ps.setBytes(4, metainfoentity.getStreamerInfo());
-            ps.setDate(5, new java.sql.Date(metainfoentity.getInsertionTime().getTime()));
-            ps.setInt(6, metainfoentity.getSize());
-            log.debug("Dump preparedstatement {}", ps);
-            ps.execute();
-            conn.commit();
-            return find(metainfoentity.getHash());
-        }
-        catch (final SQLException e) {
-            log.error("Sql Exception when saving meta info : {}", e.getMessage());
-        }
-        return null;
     }
 
     /*
