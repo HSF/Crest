@@ -5,6 +5,8 @@ import hep.crest.data.repositories.querydsl.GlobalTagFiltering;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +46,19 @@ public class TestCrestHelpers {
 
         IFilteringCriteria filtering = new GlobalTagFiltering();
         BooleanExpression exp = prh.buildWhere(filtering, clist);
+    }
+
+    @Test
+    public void testB_ExceptionTest() {
+        final NullPointerException np = new NullPointerException("null");
+        final AlreadyExistsPojoException es = new AlreadyExistsPojoException("message");
+        assertThat(es.getMessage()).contains("message");
+        final AlreadyExistsPojoException ees = new AlreadyExistsPojoException("message", np);
+        assertThat(ees.getCause()).isNotNull();
+        final NotExistsPojoException e = new NotExistsPojoException("message");
+        assertThat(e.getMessage()).contains("message");
+        final NotExistsPojoException ee = new NotExistsPojoException("message", np);
+        assertThat(ee.getCause()).isNotNull();
     }
 
 }

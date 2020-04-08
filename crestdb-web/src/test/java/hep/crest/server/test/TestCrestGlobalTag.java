@@ -1,11 +1,15 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.server.swagger.api.ApiResponseMessage;
+import hep.crest.swagger.model.GlobalTagDto;
+import hep.crest.swagger.model.GlobalTagMapDto;
+import hep.crest.swagger.model.GlobalTagMapSetDto;
+import hep.crest.swagger.model.GlobalTagSetDto;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
+import hep.crest.testutils.DataGenerator;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,18 +29,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
 
-import hep.crest.server.swagger.api.ApiResponseMessage;
-import hep.crest.swagger.model.GlobalTagDto;
-import hep.crest.swagger.model.GlobalTagMapDto;
-import hep.crest.swagger.model.GlobalTagMapSetDto;
-import hep.crest.swagger.model.GlobalTagSetDto;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.swagger.model.TagSetDto;
-import hep.crest.testutils.DataGenerator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -320,6 +317,19 @@ public class TestCrestGlobalTag {
                 .postForEntity("/crestapi/globaltagmaps", maptagdto, GlobalTagMapDto.class);
         log.info("Received response: {}", respmaptag);
         assertThat(respmaptag.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        // Associate the tag B-TAGGT-02 to the global tag B-GT-02 again; it should fail
+        final ResponseEntity<String> respmaptagalreadythere = this.testRestTemplate
+                .postForEntity("/crestapi/globaltagmaps", maptagdto, String.class);
+        log.info("Received response: {}", respmaptagalreadythere);
+        assertThat(respmaptagalreadythere.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
+
+        // Associate but use a null name for global tag: it should fail
+        maptagdto.setGlobalTagName(null);
+        final ResponseEntity<String> respmaptagfail = this.testRestTemplate
+                .postForEntity("/crestapi/globaltagmaps", maptagdto, String.class);
+        log.info("Received response: {}", respmaptagfail);
+        assertThat(respmaptagfail.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 
         // Search for mappings
         final ResponseEntity<String> resptags = this.testRestTemplate.exchange(
