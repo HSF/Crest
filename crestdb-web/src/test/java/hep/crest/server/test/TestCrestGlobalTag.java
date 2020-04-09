@@ -114,12 +114,13 @@ public class TestCrestGlobalTag {
         body.setDescription("Description has changed");
         body.validity(new BigDecimal(1990L));
         body.scenario("update");
+        body.type("new");
         final HttpEntity<GlobalTagDto> updrequest = new HttpEntity<GlobalTagDto>(body);
 
         final ResponseEntity<String> respupd = this.testRestTemplate
                 .exchange("/crestapi/admin/globaltags/" + dto.getName(), HttpMethod.PUT, updrequest, String.class);
         {
-            log.info("Update tag {} ", body.getName());
+            log.info("Update global tag {} ", body.getName());
             final String responseBody = respupd.getBody();
             assertThat(respupd.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagDto ok;
@@ -127,6 +128,19 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, GlobalTagDto.class);
             assertThat(ok).isNotNull();
             assertThat(ok.getScenario()).isEqualTo("update");
+        }
+        final ResponseEntity<String> respupdfail = this.testRestTemplate
+                .exchange("/crestapi/admin/globaltags/NOT-THERE", HttpMethod.PUT, updrequest, String.class);
+        {
+            log.info("Update global tag NOT-THERE ");
+            assertThat(respupdfail.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        final ResponseEntity<String> resprmnotthere = this.testRestTemplate
+                .exchange("/crestapi/admin/globaltags/NOT-THERE", HttpMethod.DELETE, null, String.class);
+        {
+            log.info("Remove global tag NOT-THERE ");
+            assertThat(resprmnotthere.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         dto.name(null);

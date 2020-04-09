@@ -1,16 +1,5 @@
 package hep.crest.server.swagger.api.impl;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.GlobalTagService;
@@ -20,6 +9,15 @@ import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.GlobalTagDto;
 import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 
 /**
  * Rest endpoint for administration task. 
@@ -67,10 +65,10 @@ public class AdminApiServiceImpl extends AdminApiService {
 		    // Remove the global tag identified by name.
 			globalTagService.removeGlobalTag(name);
 			return Response.ok().build();
-		} catch (final CdbServiceException e) {
+		} catch (final RuntimeException e) {
 			final String msg = "Error removing globaltag resource using " + name;
 			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
     
@@ -84,10 +82,10 @@ public class AdminApiServiceImpl extends AdminApiService {
 		    // Remove the tag with name.
 			tagService.removeTag(name);
 			return Response.ok().build();
-		} catch (final CdbServiceException e) {
+		} catch (final RuntimeException e) {
 			final String msg = "Error removing tag resource using " + name + " : "+e.getMessage();
 			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
     

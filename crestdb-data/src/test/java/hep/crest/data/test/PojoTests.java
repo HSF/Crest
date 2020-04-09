@@ -49,14 +49,23 @@ public class PojoTests {
         mapid3.setLabel("somelabel2");
         mapid3.setGlobalTagName("TGT-01");
 
-        assertThat(mapid).isNotEqualTo(mapid2);
-        assertThat(mapid).isNotEqualTo(mapid3);
+        assertThat(mapid.equals(mapid2)).isFalse();
+        assertThat(mapid.equals(mapid3)).isFalse();
+
         assertThat(mapid.hashCode()).isNotZero();
+
+        mapid3.setRecord("somerecord2");
+        mapid3.setLabel("somelabel");
+        mapid3.setGlobalTagName("TGT-01");
+        assertThat(mapid.equals(mapid3)).isFalse();
+        assertThat(mapid3.equals(null)).isFalse();
 
         Tag tag = new Tag("TAG-01");
         GlobalTag gtag = new GlobalTag("GT-01");
         GlobalTagMap map = new GlobalTagMap(mapid, tag, gtag);
         assertThat(map.getGlobalTag().getName()).isEqualTo("GT-01");
+
+        assertThat(map.equals(null)).isFalse();
     }
 
     @Test
@@ -75,9 +84,10 @@ public class PojoTests {
         iovid2.setSince(new BigDecimal(now));
         iovid2.setTagName(null);
 
-        assertThat(iovid).isNotEqualTo(iovid1);
+        assertThat(iovid2.equals(iovid)).isFalse();
         assertThat(iovid.hashCode()).isNotZero();
-        assertThat(iovid2).isNotEqualTo(iovid1);
+        assertThat(iovid2.equals(iovid1)).isFalse();
+        assertThat(iovid2.equals(null)).isFalse();
     }
 
     @Test

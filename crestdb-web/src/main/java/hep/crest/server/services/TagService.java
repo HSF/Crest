@@ -92,8 +92,7 @@ public class TagService {
      */
     public Iterable<Tag> findAllTags(Iterable<String> ids) {
         log.debug("Search for all tags by Id list...");
-        final Iterable<Tag> entitylist = tagRepository.findAllById(ids);
-        return entitylist;
+        return tagRepository.findAllById(ids);
     }
 
     /**
@@ -173,11 +172,9 @@ public class TagService {
     /**
      * @param name
      *            the String
-     * @throws CdbServiceException
-     *             If an Exception occurred
      */
     @Transactional
-    public void removeTag(String name) throws CdbServiceException {
+    public void removeTag(String name) {
         log.debug("Remove tag {}", name);
         tagRepository.deleteById(name);
         log.debug("Removed entity: {}", name);

@@ -83,19 +83,19 @@ public class GlobalTagMapService {
     public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity)
             throws NotExistsPojoException, AlreadyExistsPojoException {
         log.debug("Create GlobalTagMap from {}", entity);
-        String gtname = entity.getId().getGlobalTagName();
-        String tagname = entity.getTag().getName();
         Optional<GlobalTagMap> map = globalTagMapRepository.findById(entity.getId());
         if (map.isPresent()) {
             log.warn("GlobalTagMap {} already exists.", map.get());
             throw new AlreadyExistsPojoException(
                     "GlobalTagMap already exists for ID " + entity.getId());
         }
+        String gtname = entity.getId().getGlobalTagName();
         final Optional<GlobalTag> gt = globalTagRepository.findById(gtname);
         if (!gt.isPresent()) {
             log.warn("GlobalTag {} does not exists.", gtname);
             throw new NotExistsPojoException("GlobalTag does not exists for name " + gtname);
         }
+        String tagname = entity.getTag().getName();
         final Optional<Tag> tg = tagRepository.findById(tagname);
         if (!tg.isPresent()) {
             log.warn("Tag {} does not exists.", tagname);

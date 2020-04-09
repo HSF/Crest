@@ -3,27 +3,23 @@
  */
 package hep.crest.server.services;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import javax.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
 import com.querydsl.core.types.Predicate;
-
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.GlobalTagRepository;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author formica
@@ -178,11 +174,9 @@ public class GlobalTagService {
     /**
      * @param name
      *            the String
-     * @throws CdbServiceException
-     *             If an Exception occurred
      */
     @Transactional
-    public void removeGlobalTag(String name) throws CdbServiceException {
+    public void removeGlobalTag(String name) {
         log.debug("Remove global tag {}", name);
         globalTagRepository.deleteById(name);
         log.debug("Removed entity: {}", name);
