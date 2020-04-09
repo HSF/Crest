@@ -150,10 +150,8 @@ public class TagDirectoryImplementation {
      * @param entity
      *            the TagDto
      * @return TagDto
-     * @throws CdbServiceException
-     *             If an Exception occurred
      */
-    public TagDto save(TagDto entity) throws CdbServiceException {
+    public TagDto save(TagDto entity) {
         final String tagname = entity.getName();
         try {
             final Path tagpath = dirtools.createIfNotexistsTag(tagname);
@@ -167,13 +165,11 @@ public class TagDirectoryImplementation {
                 writeTagFile(jsonstr, filepath);
                 return entity;
             }
-            else {
-                throw new CdbServiceException("Tag path is null for " + tagname);
-            }
         }
-        catch (final IOException x) {
-            throw new CdbServiceException("Cannnot save tag entity for " + tagname, x);
+        catch (final RuntimeException | CdbServiceException | IOException x) {
+            log.error("Cannot save tag dto {} : {}", entity, x);
         }
+        return null;
     }
 
     /**

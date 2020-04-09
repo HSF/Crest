@@ -3,14 +3,6 @@
  */
 package hep.crest.data.repositories;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.utils.DirectoryUtilities;
-import hep.crest.swagger.model.IovDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -19,6 +11,16 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.swagger.model.IovDto;
 
 /**
  * An implementation for IOVs stored in file system.
@@ -69,9 +71,9 @@ public class IovDirectoryImplementation {
      *             If an Exception occurred
      */
     public List<IovDto> findByTagName(String tagname) throws CdbServiceException {
-        final Path iovfilepath = dirtools.getIovFilePath(tagname);
+        //final Path iovfilepath = dirtools.getIovFilePath(tagname);
         final StringBuilder buf = new StringBuilder();
-        try (BufferedReader reader = Files.newBufferedReader(iovfilepath, dirtools.getCharset())) {
+        try (BufferedReader reader = Files.newBufferedReader(dirtools.getIovFilePath(tagname), dirtools.getCharset())) {
             String line = null;
             while ((line = reader.readLine()) != null) {
                 log.debug(line);

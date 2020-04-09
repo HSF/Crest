@@ -1,13 +1,5 @@
 package hep.crest.data.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import hep.crest.data.exceptions.CdbServiceException;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.utils.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +14,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import hep.crest.data.exceptions.CdbServiceException;
 
 /**
  * An utility class to deal with disk based storage.
@@ -174,8 +176,9 @@ public class DirectoryUtilities {
      * @param name
      *            the String
      * @return Path
+     * @throws CdbServiceException If an Exception occurred
      */
-    public Path createIfNotexistsTag(String name) {
+    public Path createIfNotexistsTag(String name) throws CdbServiceException {
         return createIfNotexistsTag(locbasedir, name);
     }
 
@@ -311,8 +314,12 @@ public class DirectoryUtilities {
      * @param name
      *            the String
      * @return Path
+     * @throws CdbServiceException If an Exception occurred
      */
-    public Path createIfNotexistsTag(String basedir, String name) {
+    public Path createIfNotexistsTag(String basedir, String name) throws CdbServiceException {
+        if (name == null) {
+            throw new CdbServiceException("Cannot use null tag name");
+        }
         final String tagname = name;
         final Path tagpath = Paths.get(basedir, tagname);
         if (tagpath.toFile().exists()) {

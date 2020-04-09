@@ -3,6 +3,20 @@
  */
 package hep.crest.server.services;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Future;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.stereotype.Service;
+
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
@@ -17,19 +31,6 @@ import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
 import ma.glasnost.orika.MapperFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.stereotype.Service;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.Future;
 
 /**
  * An implementation for filesystem based storage.
@@ -113,13 +114,7 @@ public class DirectoryService {
      * @return TagDto or null.
      */
     public TagDto insertTag(TagDto dto) {
-        try {
-            return fstagrepository.save(dto);
-        }
-        catch (final CdbServiceException e) {
-            log.error("Cannot save tag {}: {}", dto, e);
-        }
-        return null;
+        return fstagrepository.save(dto);
     }
 
     /**
@@ -176,8 +171,8 @@ public class DirectoryService {
 
             final Tag seltag = tagservice.findOne(tagname);
             final Iterable<Iov> iovlist = iovservice.selectSnapshotByTag(tagname, snapshot);
-            TagDto dto = mapper.map(seltag, TagDto.class);
-            List<IovDto> dtolist = edh.entityToDtoList(iovlist, IovDto.class);
+            final TagDto dto = mapper.map(seltag, TagDto.class);
+            final List<IovDto> dtolist = edh.entityToDtoList(iovlist, IovDto.class);
             fstagrepository.save(dto);
             fsiovrepository.saveAll(tagname, dtolist);
             for (final IovDto iovDto : dtolist) {

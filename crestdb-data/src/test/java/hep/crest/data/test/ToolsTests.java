@@ -3,26 +3,7 @@
  */
 package hep.crest.data.test;
 
-import hep.crest.data.config.CrestProperties;
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.handlers.DateFormatterHandler;
-import hep.crest.data.handlers.HashGenerator;
-import hep.crest.data.repositories.IovDirectoryImplementation;
-import hep.crest.data.repositories.TagDirectoryImplementation;
-import hep.crest.data.test.tools.DataGenerator;
-import hep.crest.data.utils.DirectoryUtilities;
-import hep.crest.data.utils.RunIovConverter;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.TagDto;
-import org.joda.time.Instant;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -39,7 +20,27 @@ import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.joda.time.Instant;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import hep.crest.data.config.CrestProperties;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.DateFormatterHandler;
+import hep.crest.data.handlers.HashGenerator;
+import hep.crest.data.repositories.IovDirectoryImplementation;
+import hep.crest.data.repositories.TagDirectoryImplementation;
+import hep.crest.data.test.tools.DataGenerator;
+import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.data.utils.RunIovConverter;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.TagDto;
 
 /**
  * @author formica
@@ -143,7 +144,14 @@ public class ToolsTests {
         final TagDirectoryImplementation fstagrepository = new TagDirectoryImplementation(dirutils);
         final TagDto tag = DataGenerator.generateTagDto("MY-TAG-01", "time");
         fstagrepository.save(tag);
-
+        try {
+            tag.name(null);
+            fstagrepository.save(tag);
+        } catch (final RuntimeException e) {
+            log.info("Cannot store tag");
+        }
+        
+        
         final IovDirectoryImplementation fsiovrepository = new IovDirectoryImplementation(dirutils);
         final IovDto iov = DataGenerator.generateIovDto("mydirhash", "MY-TAG-01",
                 new BigDecimal(1000L));
@@ -160,7 +168,7 @@ public class ToolsTests {
         final IovDto iov1 = DataGenerator.generateIovDto("mydirhash", "MY-TAG-01",
                 new BigDecimal(1000L));
         iov1.tagName(null);
-        IovDto saved1 = fsiovrepository.save(iov1);
+        final IovDto saved1 = fsiovrepository.save(iov1);
         assertThat(saved1).isNull();
 
         fsiovrepository.saveAll("MY-TAG", null);
@@ -257,10 +265,10 @@ public class ToolsTests {
         final String hash5 = HashGenerator.shaJava(barr);
         assertThat(hash5).isNotNull();
 
-        String hash6 = HashGenerator.md5Spring(barr);
+        final String hash6 = HashGenerator.md5Spring(barr);
         assertThat(hash5).isNotNull();
 
-        String hash7 = HashGenerator.md5Spring("Testing some byte array");
+        final String hash7 = HashGenerator.md5Spring("Testing some byte array");
         assertThat(hash5).isNotNull();
 
         // Date format handler, used in serialization classes
@@ -274,12 +282,12 @@ public class ToolsTests {
         assertThat(tsmsec).isGreaterThan(0);
         assertThat(dtformat).isNotNull();
 
-        DateFormatterHandler dfh = new DateFormatterHandler();
+        final DateFormatterHandler dfh = new DateFormatterHandler();
         dfh.setDatePATTERN("ISO_LOCAL_DATE_TIME");
-        DateTimeFormatter df = dfh.getLocformatter();
+        final DateTimeFormatter df = dfh.getLocformatter();
         assertThat(df).isNotNull();
         dfh.setDatePATTERN("ISO_DATE_TIME");
-        DateTimeFormatter df1 = dfh.getLocformatter();
+        final DateTimeFormatter df1 = dfh.getLocformatter();
         assertThat(df1).isNotNull();
     }
 
