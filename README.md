@@ -173,7 +173,7 @@ http://crest-undertow.web.cern.ch/ext/web/ui/index.html
 
 Note that in principle you can get the same links working (a part from the hostname) if you run the server locally.
 
-The same kind of visualisation is available directly in gitlab when accessing the [specification file](./swagger_crestdb/swagger_schemas/swagger/json/crestdb_full.json).
+The same kind of visualisation is available directly in gitlab when accessing the [specification file](./swagger_schemas/swagger/json/crestdb_full.json).
 
 ### Swagger code generation
 In order to regenerate the API we use the JSON schemas and templates which are store in the directories:
