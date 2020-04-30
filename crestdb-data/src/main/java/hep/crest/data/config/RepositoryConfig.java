@@ -2,6 +2,8 @@ package hep.crest.data.config;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +31,11 @@ import hep.crest.data.utils.DirectoryUtilities;
 @Configuration
 @ComponentScan("hep.crest.data.repositories")
 public class RepositoryConfig {
+
+    /**
+     * Logger.
+     */
+    private static final Logger log = LoggerFactory.getLogger(RepositoryConfig.class);
 
     /**
      * The properties.
@@ -102,6 +109,7 @@ public class RepositoryConfig {
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
+        log.info("Creating default repository implementation.");
         return bean;
     }
 
@@ -119,6 +127,7 @@ public class RepositoryConfig {
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
+        log.info("Creating postegres repository implementation.");
         return bean;
     }
 
@@ -136,6 +145,7 @@ public class RepositoryConfig {
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
+        log.info("Creating sqlite repository implementation.");
         return bean;
     }
 

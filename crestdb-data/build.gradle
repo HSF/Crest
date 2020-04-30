@@ -63,6 +63,7 @@ dependencies {
     compile group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
     
 	testCompile("org.springframework.boot:spring-boot-starter-test") 
+	testImplementation 'org.testcontainers:postgresql:1.10.6'	
 }
 
 jar {
