@@ -85,7 +85,8 @@ allprojects  {
 sonarqube {
 	properties{
 		property "sonar.coverage.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/data/dialect/*,**/hep/crest/server/filters/*,**/hep/crest/server/aspects/*,**/hep/crest/server/security/*,**/hep/crest/server/autoconfig/*"
-    	property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/data/dialect/*,**/hep/crest/server/filters/*,**/hep/crest/server/swagger/api/*,**/hep/crest/server/security/*"
+    	//property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/data/dialect/*,**/hep/crest/server/filters/*,**/hep/crest/server/swagger/api/*,**/hep/crest/server/security/*"
+        property "sonar.exclusions", "**/generated/**/Q*.java,**/hep/crest/swagger/model/*,**/hep/crest/data/dialect/*,**/hep/crest/server/filters/*,**/hep/crest/server/swagger/api/*,**/hep/crest/server/security/*"
 	}
 }
 
