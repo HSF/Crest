@@ -1,36 +1,7 @@
 package hep.crest.data.test;
 
 
-import hep.crest.data.handlers.PayloadHandler;
-import hep.crest.data.pojo.GlobalTag;
-import hep.crest.data.repositories.GlobalTagRepository;
-import hep.crest.data.repositories.PayloadDataBaseCustom;
-import hep.crest.data.repositories.PayloadDataPostgresImpl;
-import hep.crest.data.repositories.TagRepository;
-import hep.crest.data.test.tools.DataGenerator;
-import hep.crest.swagger.model.PayloadDto;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.testcontainers.containers.PostgreSQLContainer;
-
-import javax.sql.DataSource;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -43,7 +14,34 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Date;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.sql.DataSource;
+
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.PostgreSQLContainer;
+
+import hep.crest.data.handlers.PayloadHandler;
+import hep.crest.data.pojo.GlobalTag;
+import hep.crest.data.repositories.GlobalTagRepository;
+import hep.crest.data.repositories.PayloadDataBaseCustom;
+import hep.crest.data.test.tools.DataGenerator;
+import hep.crest.swagger.model.PayloadDto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
