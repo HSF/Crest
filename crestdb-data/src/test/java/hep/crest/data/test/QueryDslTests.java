@@ -1,42 +1,7 @@
 package hep.crest.data.test;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.sql.DataSource;
-
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
-
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.GlobalTagMapId;
@@ -61,6 +26,38 @@ import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.data.security.pojo.FolderRepository;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.PayloadDto;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -348,7 +345,23 @@ public class QueryDslTests {
             }
         }
         final Page<RunInfo> dtolist = runrepository.findAll(wherepred, preq);
-        assertThat(dtolist.getSize()).isGreaterThan(0);        
+        assertThat(dtolist.getSize()).isGreaterThan(0);
+
+        final List<SearchCriteria> params1 = createMatcherCriteria("runNumber:100,startTime:"+start.getTime()+",endtime:"+end.getTime());
+        final List<BooleanExpression> expressions1 = filter.createFilteringConditions(params1);
+        BooleanExpression wherepred1 = null;
+
+        for (final BooleanExpression exp : expressions1) {
+            if (wherepred1 == null) {
+                wherepred1 = exp;
+            }
+            else {
+                wherepred1 = wherepred1.and(exp);
+            }
+        }
+        final Page<RunInfo> dtolist1 = runrepository.findAll(wherepred1, preq);
+        assertThat(dtolist1.getSize()).isGreaterThanOrEqualTo(0);
+
     }
     
     @Test

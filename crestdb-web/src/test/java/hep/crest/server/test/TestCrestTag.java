@@ -1,12 +1,14 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Tag;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.server.services.TagService;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
+import hep.crest.testutils.DataGenerator;
 import ma.glasnost.orika.MapperFacade;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -26,15 +28,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.server.services.TagService;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.swagger.model.TagSetDto;
-import hep.crest.testutils.DataGenerator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -149,6 +147,21 @@ public class TestCrestTag {
         log.info("Received response: {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // Successfull create new tag to remove it
+        final TagDto dtorm = DataGenerator.generateTagDto("B-TAG-RM", "test");
+        log.info("Store tag : {} ", dtorm);
+        final ResponseEntity<TagDto> responserm = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dtorm, TagDto.class);
+        log.info("Received response: {}", responserm);
+        assertThat(responserm.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final ResponseEntity<String> resprm = this.testRestTemplate
+                .exchange("/crestapi/admin/tags/B-TAG-RM", HttpMethod.DELETE, null, String.class);
+        {
+            log.info("Remove tag B-TAG-RM ");
+            assertThat(resprm.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
+
         // Successfull create new tag
         final TagDto dto1 = DataGenerator.generateTagDto("B-TAG-04", "test");
         log.info("Store tag : {} ", dto1);
@@ -184,6 +197,7 @@ public class TestCrestTag {
             assertThat(ok.getSize()).isEqualTo(1);
         }
 
+        // Update a tag
         final TagDto body = dto1;
         body.setDescription("another description updated");
         body.endOfValidity(new BigDecimal(1000L));
@@ -216,6 +230,13 @@ public class TestCrestTag {
         {
             log.info("Retrieved tag SOME-T should return null");
             assertThat(resp1null.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        final ResponseEntity<String> resprmnotthere = this.testRestTemplate
+                .exchange("/crestapi/admin/tags/NOT-THERE", HttpMethod.DELETE, null, String.class);
+        {
+            log.info("Remove tag NOT-THERE ");
+            assertThat(resprmnotthere.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         final ResponseEntity<String> resp2 = this.testRestTemplate

@@ -1,17 +1,20 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
+import com.querydsl.core.types.dsl.BooleanExpression;
 import hep.crest.data.pojo.Tag;
+import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.server.controllers.EntityDtoHelper;
-import hep.crest.swagger.model.*;
+import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.server.services.TagService;
+import hep.crest.server.swagger.api.ApiResponseMessage;
+import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.server.swagger.api.TagsApiService;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.GenericMap;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,18 +23,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
-
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.repositories.querydsl.IFilteringCriteria;
-import hep.crest.data.repositories.querydsl.SearchCriteria;
-import hep.crest.server.controllers.PageRequestHelper;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.exceptions.NotExistsPojoException;
-import hep.crest.server.services.TagService;
-import hep.crest.server.swagger.api.ApiResponseMessage;
-import hep.crest.server.swagger.api.NotFoundException;
-import hep.crest.server.swagger.api.TagsApiService;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Rest endpoint for tag management.
