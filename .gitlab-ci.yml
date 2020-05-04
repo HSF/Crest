@@ -75,7 +75,7 @@ package_svom_application:
     - ./crestdb-web/build/libs/crest.war
     expire_in: 1 week
   only:
-  - svom-dc1
+  - cms-v0
 
 release:
   stage: release
@@ -86,7 +86,7 @@ release:
       - docker build --rm --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
       - docker push $CONTAINER_IMAGE
   only:
-  - svom-dc1
+  - cms-v0
 
 webui:
   stage: webui
@@ -94,7 +94,7 @@ webui:
     - docker info
     - docker build --tag=$WEB_CONTAINER_IMAGE ./web-ui/crest-ui/
   only:
-  - svom-dc1
+  - cms-v0
 
 # build_svom_docker_image:
 #   stage: build
