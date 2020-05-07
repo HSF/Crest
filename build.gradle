@@ -155,7 +155,7 @@ subprojects {
 	}
 
 	task wrapper(type: Wrapper) {
-	   gradleVersion = '5.2.1' //version required
+	   gradleVersion = '6.4' //version required
 	}
 
 	// Clean files and directories used for unit testing
