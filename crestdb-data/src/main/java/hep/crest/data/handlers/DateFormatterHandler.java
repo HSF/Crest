@@ -28,6 +28,13 @@ public class DateFormatterHandler {
     private DateTimeFormatter locFormatter = null;
 
     /**
+     * Set other pattern options.
+     * @param datePATTERN the String.
+     */
+    public static void setDatePATTERN(String datePATTERN) {
+        DateFormatterHandler.datePATTERN = datePATTERN;
+    }
+    /**
      * @param tstamp
      *            the String
      * @return Timestamp

@@ -29,7 +29,7 @@ import javax.validation.constraints.*;
  * An Set containing IovPayloadDto objects.
  */
 @ApiModel(description = "An Set containing IovPayloadDto objects.")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-12-02T15:19:14.556+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-12-26T18:15:33.531+01:00")
 public class IovPayloadSetDto extends CrestBaseResponse  {
   @JsonProperty("format")
   private String format = "IovPayloadSetDto";

@@ -2,6 +2,8 @@ package hep.crest.data.config;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -18,10 +20,6 @@ import hep.crest.data.repositories.PayloadDataPostgresImpl;
 import hep.crest.data.repositories.PayloadDataSQLITEImpl;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
-import hep.crest.data.repositories.TagMetaDBImpl;
-import hep.crest.data.repositories.TagMetaDataBaseCustom;
-import hep.crest.data.repositories.TagMetaPostgresImpl;
-import hep.crest.data.repositories.TagMetaSQLITEImpl;
 import hep.crest.data.utils.DirectoryUtilities;
 
 /**
@@ -35,6 +33,11 @@ import hep.crest.data.utils.DirectoryUtilities;
 public class RepositoryConfig {
 
     /**
+     * Logger.
+     */
+    private static final Logger log = LoggerFactory.getLogger(RepositoryConfig.class);
+
+    /**
      * The properties.
      */
     @Autowired
@@ -46,6 +49,7 @@ public class RepositoryConfig {
     @Bean(name = "fstagrepository")
     public TagDirectoryImplementation tagdirectoryRepository() {
         final TagDirectoryImplementation tdi = new TagDirectoryImplementation();
+        // Initialize directory utilities.
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
         tdi.setDirtools(du);
         return tdi;
@@ -57,6 +61,7 @@ public class RepositoryConfig {
     @Bean(name = "fsiovrepository")
     public IovDirectoryImplementation iovdirectoryRepository() {
         final IovDirectoryImplementation idi = new IovDirectoryImplementation();
+        // Initialize directory utilities.
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
         idi.setDirtools(du);
         return idi;
@@ -68,6 +73,7 @@ public class RepositoryConfig {
     @Bean(name = "fspayloadrepository")
     public PayloadDirectoryImplementation payloaddirectoryRepository() {
         final PayloadDirectoryImplementation pdi = new PayloadDirectoryImplementation();
+        // Initialize directory utilities.
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
         pdi.setDirtools(du);
         return pdi;
@@ -81,54 +87,7 @@ public class RepositoryConfig {
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
-        if (!"none".equals(cprops.getSchemaname())) {
-            bean.setDefaultTablename(cprops.getSchemaname());
-        }
-        return bean;
-    }
-
-    /**
-     * @param mainDataSource
-     *            the DataSource
-     * @return TagMetaDataBaseCustom
-     */
-    @Profile({ "test", "default", "prod", "h2", "wildfly", "ssl", "dev", "mysql" })
-    @Bean(name = "tagmetarepo")
-    public TagMetaDataBaseCustom tagmetaDefaultRepository(
-            @Qualifier("dataSource") DataSource mainDataSource) {
-        final TagMetaDBImpl bean = new TagMetaDBImpl(mainDataSource);
-        if (!"none".equals(cprops.getSchemaname())) {
-            bean.setDefaultTablename(cprops.getSchemaname());
-        }
-        return bean;
-    }
-
-    /**
-     * @param mainDataSource
-     *            the DataSource
-     * @return TagMetaDataBaseCustom
-     */
-    @Profile({ "postgres" })
-    @Bean(name = "tagmetarepo")
-    public TagMetaDataBaseCustom tagmetaPostgresRepository(
-            @Qualifier("dataSource") DataSource mainDataSource) {
-        final TagMetaPostgresImpl bean = new TagMetaPostgresImpl(mainDataSource);
-        if (!"none".equals(cprops.getSchemaname())) {
-            bean.setDefaultTablename(cprops.getSchemaname());
-        }
-        return bean;
-    }
-
-    /**
-     * @param mainDataSource
-     *            the DataSource
-     * @return TagMetaDataBaseCustom
-     */
-    @Profile({ "sqlite" })
-    @Bean(name = "tagmetarepo")
-    public TagMetaDataBaseCustom tagmetaSqliteRepository(
-            @Qualifier("dataSource") DataSource mainDataSource) {
-        final TagMetaSQLITEImpl bean = new TagMetaSQLITEImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
@@ -146,9 +105,11 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadDefaultRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataDBImpl bean = new PayloadDataDBImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
+        log.info("Creating default repository implementation.");
         return bean;
     }
 
@@ -162,9 +123,11 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadPostgresRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataPostgresImpl bean = new PayloadDataPostgresImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
+        log.info("Creating postegres repository implementation.");
         return bean;
     }
 
@@ -178,20 +141,12 @@ public class RepositoryConfig {
     public PayloadDataBaseCustom payloadSqliteRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
         final PayloadDataSQLITEImpl bean = new PayloadDataSQLITEImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());
         }
+        log.info("Creating sqlite repository implementation.");
         return bean;
     }
-
-//    /**
-//     * @param mainDataSource
-//     *            the DataSource
-//     * @return LobHandler
-//     */
-//    @Bean(name = "lobhandler")
-//    public CrestLobHandler loadHandler(@Qualifier("dataSource") DataSource mainDataSource) {
-//        return new CrestLobHandler(mainDataSource);
-//    }
 
 }
