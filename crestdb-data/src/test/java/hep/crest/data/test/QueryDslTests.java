@@ -20,8 +20,9 @@ import hep.crest.data.repositories.querydsl.IovFiltering;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.data.repositories.querydsl.TagFiltering;
 import hep.crest.data.runinfo.pojo.RunInfo;
-import hep.crest.data.runinfo.repositories.RunInfoRepository;
-import hep.crest.data.runinfo.repositories.querydsl.RunInfoFiltering;
+import hep.crest.data.runinfo.pojo.RunLumiInfo;
+import hep.crest.data.runinfo.repositories.RunLumiInfoRepository;
+import hep.crest.data.runinfo.repositories.querydsl.RunLumiInfoFiltering;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.data.security.pojo.FolderRepository;
 import hep.crest.data.test.tools.DataGenerator;
@@ -85,7 +86,7 @@ public class QueryDslTests {
     private GlobalTagMapRepository tagmaprepository;
 
     @Autowired
-    private RunInfoRepository runrepository;
+    private RunLumiInfoRepository runrepository;
 
     @Autowired
     private FolderRepository folderRepository;
@@ -325,11 +326,11 @@ public class QueryDslTests {
     public void testRunLumi() throws Exception {
         final Date start = new Date();
         final Date end = new Date(start.getTime()+3600000);
-        final RunInfo entity = DataGenerator.generateRunInfo(start, end, new BigDecimal(100L));
+        final RunLumiInfo entity = DataGenerator.generateRunLumiInfo(start, end, new BigDecimal(100L));
         
         runrepository.save(entity);
 
-        final IFilteringCriteria filter = new RunInfoFiltering();
+        final IFilteringCriteria filter = new RunLumiInfoFiltering();
         final PageRequest preq = createPageRequest(0, 10, "runNumber:ASC");
 
         final List<SearchCriteria> params = createMatcherCriteria("runNumber>10,runNumber<1000,startTime>0,endtime>0,startTime<"+end.getTime()+",endtime<"+(end.getTime()+1));
@@ -344,7 +345,7 @@ public class QueryDslTests {
                 wherepred = wherepred.and(exp);
             }
         }
-        final Page<RunInfo> dtolist = runrepository.findAll(wherepred, preq);
+        final Page<RunLumiInfo> dtolist = runrepository.findAll(wherepred, preq);
         assertThat(dtolist.getSize()).isGreaterThan(0);
 
         final List<SearchCriteria> params1 = createMatcherCriteria("runNumber:100,startTime:"+start.getTime()+",endtime:"+end.getTime());
@@ -359,7 +360,7 @@ public class QueryDslTests {
                 wherepred1 = wherepred1.and(exp);
             }
         }
-        final Page<RunInfo> dtolist1 = runrepository.findAll(wherepred1, preq);
+        final Page<RunLumiInfo> dtolist1 = runrepository.findAll(wherepred1, preq);
         assertThat(dtolist1.getSize()).isGreaterThanOrEqualTo(0);
 
     }

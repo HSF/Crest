@@ -14,6 +14,7 @@ import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataDBImpl;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
+import hep.crest.data.repositories.TagMetaDBImpl;
 import hep.crest.data.repositories.TagRepository;
 import hep.crest.data.security.pojo.CrestFolders;
 import hep.crest.data.security.pojo.FolderRepository;
@@ -23,6 +24,7 @@ import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovPayloadDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagMetaDto;
 import hep.crest.swagger.model.TagSummaryDto;
 import ma.glasnost.orika.MapperFacade;
 import org.junit.Before;
@@ -165,11 +167,6 @@ public class RepositoryDBTests {
 
         final long fsize = PayloadHandler.lengthOfFile("/tmp/cdms/payloadatacopy.blob.copy");
         assertThat(fsize).isGreaterThan(0);
-        final Blob bldata = lobhandler.createBlobFromByteArr(parr);
-        assertThat(bldata).isNotNull();
-        final Blob bldatastr = lobhandler
-                .createBlobFromStream(new BufferedInputStream(new FileInputStream(f)));
-        assertThat(bldatastr).isNotNull();
 
         final String fhash = PayloadHandler.saveToFileGetHash(
                 new BufferedInputStream(new FileInputStream(f)),
