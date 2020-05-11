@@ -5,6 +5,7 @@ package hep.crest.data.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
@@ -69,7 +72,7 @@ public class PojoDtoConverterTests {
     @Qualifier("mapper")
     private MapperFacade mapper;
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PojoDtoConverterTests.class);
 
     @Test
     public void testGlobalTagConverter() throws Exception {
@@ -279,15 +282,34 @@ public class PojoDtoConverterTests {
 
     @Test
     public void testRunInfoConverter() throws Exception {
-        final RunLumiInfoDto dto1 = DataGenerator.generateRunLumiInfoDto(new BigDecimal(1000L),
-                new BigDecimal(222222L), new BigDecimal(100L));
+        final Date start = new Date();
+        final Date end = new Date(start.getTime()+3600000);
+        final RunInfoDto dto1 = DataGenerator.generateRunInfoDto(start, end, new BigDecimal(100L));
 
         assertThat(dto1.toString().length()).isGreaterThan(0);
         assertThat(dto1.hashCode()).isNotNull();
-        final RunLumiInfo entity = mapper.map(dto1, RunLumiInfo.class);
+        final RunInfo entity = mapper.map(dto1, RunInfo.class);
         assertThat(dto1.getRunNumber()).isEqualTo(entity.getRunNumber());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
+        
+        final RunInfoSetDto setdto = new RunInfoSetDto();
+        setdto.datatype("RunInfoSetDto");
+        final GenericMap filterm = new GenericMap();
+        filterm.put("run", "1000");
+        assertThat(filterm.containsKey("run")).isTrue();
+        
+        setdto.filter(filterm);
+        setdto.addResourcesItem(dto1);
+        setdto.format("RunInfo");
+        
+        final RunInfoSetDto setdto2 = new RunInfoSetDto();
+        setdto2.datatype("RunInfoSetDto");
+        setdto2.addResourcesItem(dto1);
+        assertThat(setdto2.equals(setdto)).isFalse();
+        assertThat(setdto.toString()).isNotNull();
+        setdto2.filter(setdto.getFilter());
+        setdto2.format(setdto.getFormat());
     }
 
     @Test
@@ -324,6 +346,18 @@ public class PojoDtoConverterTests {
         assertThat(dto1.getNodeFullpath()).isEqualTo(entity.getNodeFullpath());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
+        
+        dto1.setGroupRole("somerole");
+        dto1.setNodeDescription("some node desc");
+        dto1.setSchemaName("some_schema");
+        dto1.setTagPattern("some_anode");
+        dto1.setNodeName("anode");
+        dto1.setNodeFullpath("/some/anode");
+  
+        final FolderDto dto2 = DataGenerator.generateFolderDto("T0BLOB", "/MDT/T0BLOB",
+                "COOLOFL_MDT");
+        assertThat(dto1.equals(dto2)).isFalse();
+        
     }
 
     @Test
@@ -467,15 +501,60 @@ public class PojoDtoConverterTests {
         ptdto.setTotvolume(1.3F);
         assertThat(ptdto.toString().length()).isGreaterThan(0);
         assertThat(ptdto.hashCode()).isNotNull();
-
+        
+        final PayloadTagInfoDto ptdto2 = new PayloadTagInfoDto();
+        ptdto2.avgvolume(ptdto.getAvgvolume());
+        ptdto2.tagname(ptdto.getTagname());
+        ptdto2.totvolume(ptdto.getTotvolume());
+        ptdto2.niovs(ptdto.getNiovs());
+        assertThat(ptdto2.equals(ptdto)).isTrue();
+        
         final CrestUser user = new CrestUser("user", "password");
         user.setId("someid");
         user.setUsername("anothername");
         assertThat(user.toString().length()).isGreaterThan(0);
-
+        user.setPassword("anewpass");
+        assertThat(user.getId()).isEqualTo("someid");
+        assertThat(user.getUsername()).isEqualTo("anothername");
+        assertThat(user.getPassword()).isEqualTo("anewpass");
+        final CrestUser usr1 = new CrestUser();
+        assertThat(usr1).isNotNull();
+        
         final CrestRoles role = new CrestRoles("roleid", "admin");
         role.setRole("guest");
         assertThat(role.toString().length()).isGreaterThan(0);
-    }
+        role.setId("anotherroleid");
+        assertThat(role.getId()).isEqualTo("anotherroleid");
+        assertThat(role.getRole()).isEqualTo("guest");
+        final CrestRoles rol1 = new CrestRoles();
+        assertThat(rol1).isNotNull();
+     }
 
+    @Test
+    public void testDeserializer() {
+        final ObjectMapper locmapper = new ObjectMapper();
+//        final SimpleModule module = new SimpleModule();
+//
+//        module.addDeserializer(Timestamp.class, new TimestampDeserializer());
+//        module.addDeserializer(byte[].class, new ByteArrayDeserializer());
+        
+        final String json = "{ \"data\" : \"VGhpcyBpcyBhIG5vcm1hbCB0ZXh0Cg==\", " +
+                "\"instime\" : \"2011-12-03T10:15:30+01:00\", " +
+                "\"insdate\" : \"2020-12-03T22:15:30+01:00\", " +
+                "\"name\" : \"MyTest\"}";
+        
+        try {
+            log.info("Try to deserialize json {}", json);
+            final TestItem m = locmapper.readValue(json, TestItem.class);
+            assertThat(m.getName()).isEqualTo("MyTest");
+            
+            final String jsonout = locmapper.writeValueAsString(m);
+            log.info("Serialized object is {}", jsonout);
+            assertThat(jsonout).contains("MyTest");
+        }
+        catch (final IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 }
