@@ -9,7 +9,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.pojo.QIov;
@@ -23,7 +22,7 @@ public final class IovPredicates {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger(IovPredicates.class);
+    private static final Logger log = LoggerFactory.getLogger(IovPredicates.class);
 
     /**
      * Default ctor.
@@ -43,18 +42,6 @@ public final class IovPredicates {
     }
 
     /**
-     * @param since
-     *            the BigDecimal
-     * @param until
-     *            the BigDecimal
-     * @return BooleanExpression
-     */
-    public static BooleanExpression hasSinceBetween(BigDecimal since, BigDecimal until) {
-        log.debug("hasSinceBetween: argument {} {}", since, until);
-        return QIov.iov.id.since.between(since, until);
-    }
-
-    /**
      * @param oper
      *            the String
      * @param since
@@ -65,13 +52,13 @@ public final class IovPredicates {
         log.debug("isSinceXThan: argument {} {}", since, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QIov.iov.id.since.lt(since);
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QIov.iov.id.since.gt(since);
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QIov.iov.id.since.eq(since);
         }
         return pred;
@@ -87,24 +74,17 @@ public final class IovPredicates {
     public static BooleanExpression isInsertionTimeXThan(String oper, String num) {
         log.debug("isInsertionTimeXThan: argument {} operation {}", num, oper);
         BooleanExpression pred = null;
-        if (oper.equals("<")) {
+
+        if ("<".equals(oper)) {
             pred = QIov.iov.id.insertionTime.lt(new Date(new Long(num)));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QIov.iov.id.insertionTime.gt(new Date(new Long(num)));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QIov.iov.id.insertionTime.eq(new Date(new Long(num)));
         }
         return pred;
     }
 
-    /**
-     * @param exp
-     *            the BooleanExpression
-     * @return Predicate
-     */
-    public static Predicate where(BooleanExpression exp) {
-        return exp;
-    }
 }

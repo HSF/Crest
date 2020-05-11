@@ -22,7 +22,6 @@ import java.util.Base64;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -32,7 +31,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
  * @author formica
  *
  */
-@Component
+//@//Component
 public class ByteArrayDeserializer extends JsonDeserializer<byte[]> {
 
     /**
@@ -50,8 +49,9 @@ public class ByteArrayDeserializer extends JsonDeserializer<byte[]> {
      */
     @Override
     public byte[] deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-        log.debug("Trying to deserialize json parser {}", jp);
-        final String blobstr = new String(jp.getTextCharacters());
+        log.info("Trying to deserialize json parser {}: {}", jp, jp.getText());
+        final String blobstr = new String(jp.getText());
+        log.info("try to decode string {} to byte[]", blobstr);
         return Base64.getDecoder().decode(blobstr);
     }
 }

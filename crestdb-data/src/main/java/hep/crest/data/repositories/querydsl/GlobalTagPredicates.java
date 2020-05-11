@@ -9,7 +9,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import hep.crest.data.pojo.QGlobalTag;
@@ -23,7 +22,7 @@ public final class GlobalTagPredicates {
     /**
      * Logger.
      */
-    private static Logger log = LoggerFactory.getLogger(GlobalTagPredicates.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalTagPredicates.class);
 
     /**
      * Private ctor.
@@ -83,13 +82,13 @@ public final class GlobalTagPredicates {
         log.debug("isValidity: argument {}  operation {}", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QGlobalTag.globalTag.validity.lt(new BigDecimal(num));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QGlobalTag.globalTag.validity.gt(new BigDecimal(num));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QGlobalTag.globalTag.validity.eq(new BigDecimal(num));
         }
         return pred;
@@ -106,13 +105,13 @@ public final class GlobalTagPredicates {
         log.debug("isInsertionTimeXThan: argument {} operation {}", num, oper);
         BooleanExpression pred = null;
 
-        if (oper.equals("<")) {
+        if ("<".equals(oper)) {
             pred = QGlobalTag.globalTag.insertionTime.lt(new Date(new Long(num)));
         }
-        else if (oper.equals(">")) {
+        else if (">".equals(oper)) {
             pred = QGlobalTag.globalTag.insertionTime.gt(new Date(new Long(num)));
         }
-        else if (oper.equals(":")) {
+        else if (":".equals(oper)) {
             pred = QGlobalTag.globalTag.insertionTime.eq(new Date(new Long(num)));
         }
         return pred;
@@ -131,12 +130,4 @@ public final class GlobalTagPredicates {
         return pred;
     }
 
-    /**
-     * @param exp
-     *            the BooleanExpression
-     * @return Predicate
-     */
-    public static Predicate where(BooleanExpression exp) {
-        return exp;
-    }
 }

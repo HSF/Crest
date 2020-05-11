@@ -32,8 +32,7 @@ public interface IovGroupsCustom {
      *            the String
      * @param snap
      *            the Date
-     * @param groupsize
-     *            the Long
+     * @param groupsize the Long
      * @return List<BigDecimal>
      */
     List<BigDecimal> selectSnapshotGroups(String tagname, Date snap, Long groupsize);

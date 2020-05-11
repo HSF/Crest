@@ -101,10 +101,8 @@ public class PayloadDirectoryImplementation {
      * @param dto
      *            the PayloadDto
      * @return String
-     * @throws CdbServiceException
-     *             If an Exception occurred
      */
-    public String save(PayloadDto dto) throws CdbServiceException {
+    public String save(PayloadDto dto) {
 
         try {
             final String hash = dto.getHash();
@@ -131,10 +129,10 @@ public class PayloadDirectoryImplementation {
             this.writeBuffer(jsonstr, payloadfilepath);
             return hash;
         }
-        catch (final IOException x) {
-            log.error("Cannot save payload for hash {}: {}", dto.getHash(), x);
-            throw new CdbServiceException("Cannot save payload", x);
+        catch (final RuntimeException | IOException x) {
+            log.error("Cannot save payload dto {} : {}", dto, x);
         }
+        return null;
     }
 
     /**

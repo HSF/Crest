@@ -22,7 +22,6 @@ import java.sql.Timestamp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -34,7 +33,7 @@ import hep.crest.data.handlers.DateFormatterHandler;
  * @author formica
  *
  */
-@Component
+//@//Component
 public class TimestampSerializer extends JsonSerializer<Timestamp> {
 
     /**

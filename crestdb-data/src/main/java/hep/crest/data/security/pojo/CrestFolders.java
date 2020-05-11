@@ -126,7 +126,7 @@ public class CrestFolders {
     /**
      * @return String
      */
-    @Column(name = "CREST_NODE_DESCRIPTION", unique = true, nullable = false, length = 2000)
+    @Column(name = "CREST_NODE_DESCRIPTION", unique = false, nullable = false, length = 2000)
     public String getNodeDescription() {
         return nodeDescription;
     }

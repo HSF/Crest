@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package hep.crest.data.repositories;
 
@@ -15,6 +15,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import hep.crest.data.exceptions.CdbServiceException;
@@ -70,9 +71,9 @@ public class IovDirectoryImplementation {
      *             If an Exception occurred
      */
     public List<IovDto> findByTagName(String tagname) throws CdbServiceException {
-        final Path iovfilepath = dirtools.getIovFilePath(tagname);
+        //final Path iovfilepath = dirtools.getIovFilePath(tagname);
         final StringBuilder buf = new StringBuilder();
-        try (BufferedReader reader = Files.newBufferedReader(iovfilepath, dirtools.getCharset())) {
+        try (BufferedReader reader = Files.newBufferedReader(dirtools.getIovFilePath(tagname), dirtools.getCharset())) {
             String line = null;
             while ((line = reader.readLine()) != null) {
                 log.debug(line);
@@ -85,7 +86,7 @@ public class IovDirectoryImplementation {
             return dirtools.getMapper().readValue(jsonstring, new TypeReference<List<IovDto>>() {
             });
         }
-        catch (final IOException x) {
+        catch (final RuntimeException | IOException x) {
             log.error("Cannot find iov list for tag {} : {}", tagname, x);
         }
         return new ArrayList<>();
@@ -95,10 +96,8 @@ public class IovDirectoryImplementation {
      * @param iovdto
      *            the IovDto
      * @return IovDto
-     * @throws CdbServiceException
-     *             If an Exception occurred
      */
-    public IovDto save(IovDto iovdto) throws CdbServiceException {
+    public IovDto save(IovDto iovdto) {
 
         try {
             final String tagname = iovdto.getTagName();
@@ -112,7 +111,7 @@ public class IovDirectoryImplementation {
 
             return iovdto;
         }
-        catch (final IOException x) {
+        catch (final RuntimeException | CdbServiceException | JsonProcessingException x) {
             log.error("Cannot save iov dto {} : {}", iovdto, x);
         }
         return null;
@@ -141,15 +140,13 @@ public class IovDirectoryImplementation {
      * @param iovdtolist
      *            the List<IovDto>
      * @return List<IovDto>
-     * @throws CdbServiceException
-     *             If an Exception occurred
      */
-    public List<IovDto> saveAll(String tagname, List<IovDto> iovdtolist)
-            throws CdbServiceException {
+    public List<IovDto> saveAll(String tagname, List<IovDto> iovdtolist) {
 
         try {
             if (iovdtolist == null) {
-                throw new CdbServiceException("Iov list is empty...cannot create file for iovs");
+                log.error("Cannot save empty iov list for tag {}", tagname);
+                return new ArrayList<>();
             }
             // FIXME: this is probably inefficient for large number of iovs...to be checked
             final String jsonstr = dirtools.getMapper().writeValueAsString(iovdtolist);
@@ -157,9 +154,9 @@ public class IovDirectoryImplementation {
             writeIovFile(jsonstr, iovfilepath);
             return iovdtolist;
         }
-        catch (final IOException x) {
+        catch (final IOException | CdbServiceException x) {
             log.error("Cannot save iov list for tag {} : {}", tagname, x);
         }
         return new ArrayList<>();
-     }
+    }
 }
