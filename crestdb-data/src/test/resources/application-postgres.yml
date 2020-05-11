@@ -1,0 +1,40 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+server:
+    port: 8090
+    servlet-path: /
+spring:
+  profiles: postgres
+  jersey:
+    application-path: /crestapi
+  datasource:
+    driverClassName: org.postgresql.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connection-test-query: SELECT 1
+      maximum-pool-size: 2
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQL9Dialect
+      hibernate.jdbc.fetch_size: 300
+# This should be changed for production to "validate"
+      hibernate.hbm2ddl.auto: update
+      ##hibernate.ddl-auto: create-drop
+      hibernate.show_sql: false
+      hibernate.jdbc.lob.non_contextual_creation: true
+      hibernate.jdbc.use_streams_for_binary: false
+      hibernate.connection.autocommit: false
+#      hibernate.default_schema: public
+crest:
+  security: none
+  dbfile: none
+  authenticationtype: database
+  dumpdir: /tmp/crest-dump/
+  schemaname: none
+  synchro: none
+  webstaticdir: /tmp
+        
