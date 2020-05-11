@@ -1,26 +1,30 @@
 package hep.crest.data.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Blob;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.sql.DataSource;
-
+import hep.crest.data.config.PojoDtoConverterConfig;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.PayloadHandler;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.IovId;
+import hep.crest.data.pojo.Tag;
+import hep.crest.data.repositories.IovDirectoryImplementation;
+import hep.crest.data.repositories.IovGroupsImpl;
+import hep.crest.data.repositories.IovRepository;
+import hep.crest.data.repositories.PayloadDataBaseCustom;
+import hep.crest.data.repositories.PayloadDataDBImpl;
+import hep.crest.data.repositories.PayloadDirectoryImplementation;
+import hep.crest.data.repositories.TagDirectoryImplementation;
+import hep.crest.data.repositories.TagRepository;
+import hep.crest.data.security.pojo.CrestFolders;
+import hep.crest.data.security.pojo.FolderRepository;
+import hep.crest.data.test.tools.DataGenerator;
+import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSummaryDto;
+import ma.glasnost.orika.MapperFacade;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -34,29 +38,25 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import hep.crest.data.handlers.CrestLobHandler;
-import hep.crest.data.handlers.PayloadHandler;
-import hep.crest.data.pojo.Iov;
-import hep.crest.data.pojo.IovId;
-import hep.crest.data.pojo.Tag;
-import hep.crest.data.repositories.IovDirectoryImplementation;
-import hep.crest.data.repositories.IovGroupsImpl;
-import hep.crest.data.repositories.IovRepository;
-import hep.crest.data.repositories.PayloadDataBaseCustom;
-import hep.crest.data.repositories.PayloadDataDBImpl;
-import hep.crest.data.repositories.PayloadDirectoryImplementation;
-import hep.crest.data.repositories.TagDirectoryImplementation;
-import hep.crest.data.repositories.TagMetaDBImpl;
-import hep.crest.data.repositories.TagRepository;
-import hep.crest.data.security.pojo.CrestFolders;
-import hep.crest.data.security.pojo.FolderRepository;
-import hep.crest.data.test.tools.DataGenerator;
-import hep.crest.data.utils.DirectoryUtilities;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.swagger.model.TagMetaDto;
-import hep.crest.swagger.model.TagSummaryDto;
+import javax.sql.DataSource;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -64,7 +64,7 @@ import hep.crest.swagger.model.TagSummaryDto;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RepositoryDBTests {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(RepositoryDBTests.class);
 
     @Autowired
     private TagRepository tagrepository;
@@ -78,6 +78,8 @@ public class RepositoryDBTests {
     @Autowired
     @Qualifier("dataSource")
     private DataSource mainDataSource;
+
+    private MapperFacade mapper;
 
     @Before
     public void setUp() {
@@ -101,13 +103,14 @@ public class RepositoryDBTests {
                 e.printStackTrace();
             }
         }
+        final PojoDtoConverterConfig cf = new PojoDtoConverterConfig();
+        mapper = cf.createOrikaMapperFactory().getMapperFacade();
     }
 
     @Test
     public void testPayload() throws Exception {
 
         final PayloadDataBaseCustom repobean = new PayloadDataDBImpl(mainDataSource);
-        final CrestLobHandler lobhandler = new CrestLobHandler(mainDataSource);
         final Instant now = Instant.now();
         final Date time = new Date(now.toEpochMilli());
 
@@ -150,7 +153,7 @@ public class RepositoryDBTests {
         final OutputStream out = new FileOutputStream(
                 new File("/tmp/cdms/payloadatacopy.blob.copy"));
         PayloadHandler.saveToOutStream(ds, out);
-        lobhandler.createBlobFromFile("/tmp/cdms/payloadatacopy.blob.copy");
+//        lobhandler.createBlobFromFile("/tmp/cdms/payloadatacopy.blob.copy");
 
         final PayloadDto loadedblob1 = repobean.find(savedfromblob.getHash());
         assertThat(loadedblob1).isNull();
@@ -249,6 +252,10 @@ public class RepositoryDBTests {
                 new Date(), 10L);
         assertThat(groupsnap.size()).isGreaterThan(0);
 
+        final List<IovPayloadDto> pdtolist = iovsrepobean.getRangeIovPayloadInfo("A-TEST-01", new BigDecimal(99L),
+                new BigDecimal(1200L), new Date());
+        assertThat(pdtolist.size()).isGreaterThanOrEqualTo(0);
+
     }
 
     @Test
@@ -262,6 +269,12 @@ public class RepositoryDBTests {
         final List<TagDto> taglist = tagrepo.findByNameLike("A-TEST.*");
         assertThat(taglist.size()).isGreaterThan(0);
         assertThat(tagrepo.exists("A-TEST-02")).isTrue();
+
+        final List<TagDto> alltaglist = tagrepo.findAll();
+        assertThat(alltaglist.size()).isGreaterThan(0);
+
+        long ntags = tagrepo.count();
+        assertThat(ntags).isGreaterThan(0);
 
         final PayloadDirectoryImplementation pyldrepo = new PayloadDirectoryImplementation(
                 new DirectoryUtilities());
@@ -305,7 +318,59 @@ public class RepositoryDBTests {
 
         final List<CrestFolders> flist = folderRepository.findBySchemaName("COOLOFL_MDT");
         assertThat(flist.size()).isGreaterThan(0);
+    }
+    
+    @Test
+    public void testLobHandlers() {
+        //final CrestLobHandler clh = new CrestLobHandler(mainDataSource);
+        DataGenerator.generatePayloadData("/tmp/cdms/payloadataforhandler.blob", "none");
+        final File f = new File("/tmp/cdms/payloadataforhandler.blob");
+        final PayloadDataDBImpl repobean = new PayloadDataDBImpl(mainDataSource);
 
+        try {
+            //final Blob b = clh.createBlobFromFile("/tmp/cdms/payloadataforhandler.blob");
+            //assertThat(b).isNotNull();
+            final InputStream ds = new BufferedInputStream(new FileInputStream(f));
+            //final Blob bs = clh.createBlobFromStream(ds);
+            //assertThat(bs).isNotNull();
+            final Instant now = Instant.now();
+            final Date time = new Date(now.toEpochMilli());
+            ds.close();
+            final PayloadDto dto = DataGenerator.generatePayloadDto("myhash3", "mynewdataforhandler",
+                    "mystreamer", "test", time);
+            if (dto.getSize() == null) {
+                dto.setSize(dto.getData().length);
+            }
+            final PayloadDto saved = repobean.save(dto);
+            assertThat(saved).isNotNull();
+            final InputStream ds1 = new BufferedInputStream(new FileInputStream(f));
+            final byte[] barr = PayloadHandler.getBytesFromInputStream(ds1);
+            assertThat(barr.length).isGreaterThan(0);
+            
+        }
+        catch (final IOException e) {
+            log.error("Cannot create or operate on blob: {}", e);
+        }
+        catch (final CdbServiceException e) {
+            log.error("Cannot save payload: {}", e);
+        }
+        try {
+            final File fbad = new File("/tmp/cdms/payloadataforhandler.blob");
+            final BufferedInputStream dsbad = new BufferedInputStream(new FileInputStream(fbad));
+            dsbad.close();
+            PayloadHandler.getHashFromStream(dsbad);
+        }
+        catch (final PayloadEncodingException e) {
+            log.error("Bad stream");
+        }
+        catch (final FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (final IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }
