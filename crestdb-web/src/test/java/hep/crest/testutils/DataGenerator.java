@@ -3,13 +3,6 @@
  */
 package hep.crest.testutils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Date;
-
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.GlobalTagMapId;
@@ -27,6 +20,13 @@ import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagMetaDto;
 import hep.crest.swagger.model.TagSummaryDto;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * @author formica
@@ -142,19 +142,19 @@ public class DataGenerator {
         return dto;
     }
 
-    public static RunLumiInfoDto generateRunLumiInfoDto(BigDecimal since, BigDecimal run, BigDecimal lb) {
+    public static RunLumiInfoDto generateRunLumiInfoDto(BigDecimal since, BigDecimal endtime, BigDecimal run) {
         final RunLumiInfoDto dto = new RunLumiInfoDto();
-        dto.since(since).lb(lb).runNumber(run);
-        dto.starttime(new BigDecimal(0L)).endtime(new BigDecimal(99L));
+        dto.since(since).lb(new BigDecimal(100L)).runNumber(run);
+        dto.starttime(since).endtime(endtime);
         return dto;
     }
 
-    public static RunLumiInfo generateRunLumiInfo(BigDecimal since, BigDecimal run, BigDecimal lb) {
+    public static RunLumiInfo generateRunLumiInfo(BigDecimal since, BigDecimal endtime, BigDecimal run) {
         final RunLumiInfo entity = new RunLumiInfo();
         entity.setRunNumber(run);
-        entity.setEndtime(new BigDecimal(99L));
-        entity.setStarttime(new BigDecimal(1L));
-        entity.setLb(lb);
+        entity.setEndtime(endtime);
+        entity.setStarttime(since);
+        entity.setLb(new BigDecimal(100L));
         entity.setSince(since);
         return entity;
     }

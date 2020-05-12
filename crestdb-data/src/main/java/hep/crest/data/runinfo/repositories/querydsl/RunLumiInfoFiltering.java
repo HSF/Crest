@@ -17,7 +17,7 @@ import java.util.List;
  * @author aformic
  *
  */
-@Component("runlumiFiltering")
+@Component("runFiltering")
 public class RunLumiInfoFiltering implements IFilteringCriteria {
 
     /**

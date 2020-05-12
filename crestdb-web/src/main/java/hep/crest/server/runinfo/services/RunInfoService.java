@@ -121,7 +121,8 @@ public class RunInfoService {
      */
     public List<RunLumiInfoDto> selectInclusiveByDate(Date from, Date to) throws CdbServiceException {
         List<RunLumiInfo> entitylist = null;
-        entitylist = runinfoRepository.findByDateInclusive(new BigDecimal(from.getTime()), new BigDecimal(to.getTime()));
+        entitylist = runinfoRepository.findByDateInclusive(new BigDecimal(from.getTime()),
+                new BigDecimal(to.getTime()));
         if (entitylist == null) {
             log.warn("Empty list for run information retrieved from selectInclusiveByDate {} {}",
                     from, to);
