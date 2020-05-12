@@ -24,7 +24,7 @@ public class CacheControlFilter implements ContainerResponseFilter {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(CacheControlFilter.class);
 
     /**
      * The header for Frontier cache control settings.

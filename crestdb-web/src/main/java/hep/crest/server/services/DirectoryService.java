@@ -12,20 +12,25 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.IovDirectoryImplementation;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
+import ma.glasnost.orika.MapperFacade;
 
 /**
  * An implementation for filesystem based storage.
@@ -39,24 +44,32 @@ public class DirectoryService {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(DirectoryService.class);
+    private static final Logger log = LoggerFactory.getLogger(DirectoryService.class);
 
     /**
      * Repository.
      */
     @Autowired
+    @Qualifier("fstagrepository")
     private TagDirectoryImplementation fstagrepository;
     /**
      * Repository.
      */
     @Autowired
+    @Qualifier("fsiovrepository")
     private IovDirectoryImplementation fsiovrepository;
     /**
      * Repository.
      */
     @Autowired
+    @Qualifier("fspayloadrepository")
     private PayloadDirectoryImplementation fspayloadrepository;
 
+    /**
+     * Helper.
+     */
+    @Autowired
+    private EntityDtoHelper edh;
     /**
      * Service.
      */
@@ -80,12 +93,28 @@ public class DirectoryService {
     private CrestProperties cprops;
 
     /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
+
+    /**
      * @param tagname
      *            the String
      * @return TagDto
      */
     public TagDto getTag(String tagname) {
         return fstagrepository.findOne(tagname);
+    }
+
+    /**
+     * @param dto
+     *            the TagDto
+     * @return TagDto or null.
+     */
+    public TagDto insertTag(TagDto dto) {
+        return fstagrepository.save(dto);
     }
 
     /**
@@ -98,7 +127,7 @@ public class DirectoryService {
             return fsiovrepository.findByTagName(tagname);
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot find iov list for tag {}: {}", tagname, e.getMessage());
+            log.error("Cannot find iov list for tag {}: {}", tagname, e);
         }
         return new ArrayList<>();
     }
@@ -113,7 +142,7 @@ public class DirectoryService {
             return fspayloadrepository.find(hash);
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot find payload for hash {} : {}", hash, e.getMessage());
+            log.error("Cannot find payload for hash {} : {}", hash, e);
         }
         return null;
     }
@@ -140,11 +169,13 @@ public class DirectoryService {
             fsiovrepository.setDirtools(du);
             fspayloadrepository.setDirtools(du);
 
-            final TagDto seltag = tagservice.findOne(tagname);
-            final List<IovDto> iovlist = iovservice.selectSnapshotByTag(tagname, snapshot);
-            fstagrepository.save(seltag);
-            fsiovrepository.saveAll(tagname, iovlist);
-            for (final IovDto iovDto : iovlist) {
+            final Tag seltag = tagservice.findOne(tagname);
+            final Iterable<Iov> iovlist = iovservice.selectSnapshotByTag(tagname, snapshot);
+            final TagDto dto = mapper.map(seltag, TagDto.class);
+            final List<IovDto> dtolist = edh.entityToDtoList(iovlist, IovDto.class);
+            fstagrepository.save(dto);
+            fsiovrepository.saveAll(tagname, dtolist);
+            for (final IovDto iovDto : dtolist) {
                 final PayloadDto pyld = pyldservice.getPayload(iovDto.getPayloadHash());
                 fspayloadrepository.save(pyld);
             }
@@ -152,13 +183,13 @@ public class DirectoryService {
             final String outtar = du.createTarFile(outdir, tarpath);
             log.debug("Created output tar file {}", outtar);
             return new AsyncResult<>(
-                    "Dump a list of " + iovlist.size() + " iovs into file system...");
+                    "Dump a list of " + dtolist.size() + " iovs into file system...");
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot dump tag {} in path {} : {}", tagname, path, e.getMessage());
+            log.error("Cannot dump tag {} in path {} : {}", tagname, path, e);
         }
         catch (final NotExistsPojoException e) {
-            log.error("Cannot find payload  : {}", e.getMessage());
+            log.error("Cannot find payload  : {}", e);
         }
         return null;
     }

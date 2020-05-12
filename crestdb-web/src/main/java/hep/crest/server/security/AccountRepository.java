@@ -17,17 +17,16 @@ public class AccountRepository {
      * @return UserResource
      */
     public UserResource findByUsername(String username) {
-        if (username.equals("reader")) {
-            return new UserResource("reader", "r_password");
+        UserResource user = null;
+        if ("reader".equals(username)) {
+            user = new UserResource("reader", "r_password");
         }
-        else if (username.equals("admin")) {
-            return new UserResource("admin", "a_password");
+        else if ("admin".equals(username)) {
+            user = new UserResource("admin", "a_password");
         }
-        else if (username.equals("guest")) {
-            return new UserResource("guest", "g_password");
+        else if ("guest".equals(username)) {
+            user = new UserResource("guest", "g_password");
         }
-        else {
-            return null;
-        }
+        return user;
     }
 }

@@ -36,7 +36,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(AuthorizationFilter.class);
 
     /**
      * Response for denied access.
@@ -46,22 +46,28 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     /**
      * Response for forbidden access.
      */
+    @SuppressWarnings("unused")
     private static final Response ACCESS_FORBIDDEN = Response.status(Response.Status.FORBIDDEN)
             .build();
     /**
      * Response for server access error.
      */
+    @SuppressWarnings("unused")
     private static final Response SERVER_ERROR = Response
             .status(Response.Status.INTERNAL_SERVER_ERROR).build();
 
     /**
-     * Resource.
+     * The injection works basically only if we register correctly this filter in
+     * JerseyConfig. This uninitialized statement is not passing sonarqube but it
+     * should not be corrected. Resource.
      */
     @Context
     private ResourceInfo resourceInfo;
 
     /**
-     * Context.
+     * The injection works basically only if we register correctly this filter in
+     * JerseyConfig. This uninitialized statement is not passing sonarqube but it
+     * should not be corrected. Context.
      */
     @Context
     private SecurityContext securityContext;
@@ -92,8 +98,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         for (final GrantedAuthority grantedAuthority : authorities) {
             log.info("User has authority : {}", grantedAuthority);
         }
-        if (false) {
-            requestContext.abortWith(ACCESS_FORBIDDEN);
-        }
+        // In future we can imagine to activate the access authorization with code like:
+        //        if <SOME CONDITION ON THE ROLE>
+        //          requestContext . abortWith ( ACCESS_FORBIDDEN )
     }
 }
