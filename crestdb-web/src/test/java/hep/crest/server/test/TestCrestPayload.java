@@ -211,6 +211,37 @@ public class TestCrestPayload {
         log.info("Upload request gave response: {}", resp1);
         assertThat(resp1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        final HttpHeaders headers2 = new HttpHeaders();
+        headers2.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers2.add("X-Crest-PayloadFormat", "PNG");
+        final MultiValueMap<String, String> map2a = new LinkedMultiValueMap<String, String>();
+        map2a.add("file", new String(bindata));
+        map2a.add("since", "2000000");
+        map2a.add("endtime", "0");
+        map2a.add("tag", tagname);
+        final HttpEntity<MultiValueMap<String, String>> request2a = new HttpEntity<MultiValueMap<String, String>>(
+                map2a, headers2);
+        final ResponseEntity<String> resp2a = this.testRestTemplate
+                .postForEntity("/crestapi/payloads/store", request2a, String.class);
+
+        log.info("Upload request gave response: {}", resp2a);
+        assertThat(resp2a.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final HttpHeaders headers3 = new HttpHeaders();
+        headers3.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers3.add("X-Crest-PayloadFormat", "PDF");
+        final MultiValueMap<String, String> map3a = new LinkedMultiValueMap<String, String>();
+        map3a.add("since", "2000000");
+        map3a.add("endtime", "0");
+        map3a.add("tag", tagname);
+        final HttpEntity<MultiValueMap<String, String>> request3a = new HttpEntity<MultiValueMap<String, String>>(
+                map3a, headers3);
+        final ResponseEntity<String> resp3a = this.testRestTemplate
+                .postForEntity("/crestapi/payloads/store", request3a, String.class);
+
+        log.info("Upload request gave response: {}", resp3a);
+        assertThat(resp3a.getStatusCode()).isGreaterThan(HttpStatus.OK);
+
         // Upload batch using external files
         final IovDto iovdto1 = DataGenerator.generateIovDto("file:///tmp/pyld1.json", tagname, new BigDecimal(2000000L));
         final IovDto iovdto2 = DataGenerator.generateIovDto("file:///tmp/pyld2.json", tagname, new BigDecimal(2100000L));

@@ -302,7 +302,7 @@
 				],
 				"summary": "Create an entry for run information.",
 				"description": "Run informations go into a separate table.",
-				"operationId": "createRunLumiInfo",
+				"operationId": "createRunInfo",
 				"consumes": [
 					"application/json"
 				],
@@ -314,10 +314,10 @@
 					{
 						"in": "body",
 						"name": "body",
-						"description": "A json string that is used to construct a runlumiinfodto object: { run: xxx, ... }",
+						"description": "A json string that is used to construct a list of runlumiinfodto object: { run: xxx, ... }",
 						"required": true,
 						"schema": {
-							"$ref": "#/definitions/RunLumiInfoDto"
+							"$ref": "#/definitions/RunLumiSetDto"
 						}
 					}
 				],
@@ -336,7 +336,7 @@
 				],
 				"summary": "Finds a RunLumiInfoDto lists.",
 				"description": "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]",
-				"operationId": "listRunLumiInfo",
+				"operationId": "listRunInfo",
 				"produces": [
 					"application/json",
 					"application/xml"
@@ -387,14 +387,14 @@
 				}
 			}
 		},
-		"/runinfo/list": {
+		"/runinfo/select": {
 			"get": {
 				"tags": [
 					"runinfo"
 				],
 				"summary": "Finds a RunLumiInfoDto lists using parameters.",
 				"description": "This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]",
-				"operationId": "findRunLumiInfo",
+				"operationId": "selectRunInfo",
 				"produces": [
 					"application/json",
 					"application/xml"
@@ -419,36 +419,18 @@
 					{
 						"name": "format",
 						"in": "query",
-						"description": "format: the format to digest previous arguments [time] or [run-lumi]. Time = yyyymmddhhmiss, Run-lumi = run-lumi",
+						"description": "format: the format to digest previous arguments [iso], [number]. Time(iso) = yyyymmddhhmiss, Run(number) = runnumber, Time(number) = milliseconds",
 						"required": false,
 						"type": "string",
-						"default": "time"
+						"default": "number"
 					},
 					{
-						"name": "page",
+						"name": "mode",
 						"in": "query",
-						"description": "page: the page number {0}",
-						"required": false,
-						"type": "integer",
-						"default": 0,
-						"format": "int32"
-					},
-					{
-						"name": "size",
-						"in": "query",
-						"description": "size: the page size {1000}",
-						"required": false,
-						"type": "integer",
-						"default": 1000,
-						"format": "int32"
-					},
-					{
-						"name": "sort",
-						"in": "query",
-						"description": "sort: the sort pattern {since:ASC}",
+						"description": "mode: the mode for the request : [daterange] or [runrange]. Interprets",
 						"required": false,
 						"type": "string",
-						"default": "since:ASC"
+						"default": "runrange"
 					}
 				],
 				"responses": {

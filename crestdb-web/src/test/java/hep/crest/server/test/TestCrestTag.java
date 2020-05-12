@@ -1,13 +1,15 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.Tag;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.server.services.TagService;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
+import hep.crest.testutils.DataGenerator;
+import ma.glasnost.orika.MapperFacade;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,16 +28,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
-import hep.crest.server.services.TagService;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.swagger.model.TagMetaDto;
-import hep.crest.swagger.model.TagMetaSetDto;
-import hep.crest.swagger.model.TagSetDto;
-import hep.crest.testutils.DataGenerator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -48,38 +45,25 @@ public class TestCrestTag {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
-    @Autowired 
+    @Autowired
     private TagService tagservice;
-
+    
     @Autowired
     @Qualifier("jacksonMapper")
     private ObjectMapper mapper;
+    @Autowired
+    private MapperFacade mapperFacade;
 
     @Test
     public void test_TagService() {
         final TagDto dto = DataGenerator.generateTagDto("SVC-TAG-01", "test");
-        final Instant now = Instant.now();
-        final Date time = new Date(now.toEpochMilli());
-        final String data = "{ \"key\" : \"value\" }";
+      
         try {
-            final TagDto saved = tagservice.insertTag(dto);
+            Tag entity = mapperFacade.map(dto, Tag.class);
+            final Tag saved = tagservice.insertTag(entity);
             assertThat(saved).isNotNull();
-            final TagMetaDto tmdto1 = DataGenerator.generateTagMetaDto("SVC-TAG-01", data, time);
-
-            final TagMetaDto savedmeta = tagservice.insertTagMeta(tmdto1);
-            assertThat(savedmeta).isNotNull();
-            tagservice.insertTagMeta(tmdto1); // should throw exception
         }
-        catch (CdbServiceException | AlreadyExistsPojoException e) {
-            log.info("got exception of type {}",e.getClass());
-        }
-        final TagMetaDto tmdto2 = DataGenerator.generateTagMetaDto("SVC-TAG-01", data, time);
-        tmdto2.chansize(3);
-        tmdto2.setTagName(null);
-        try {
-            tagservice.updateTagMeta(tmdto2);
-        }
-        catch (final CdbServiceException e) {
+        catch (AlreadyExistsPojoException e) {
             log.info("got exception of type {}",e.getClass());
         }
         try {
@@ -89,19 +73,15 @@ public class TestCrestTag {
             log.info("got exception of type {}",e.getClass());
         }
         try {
-            tagservice.findOne(null);
+            final Tag dtonull = tagservice.findOne(null);
+            assertThat(dtonull).isNull();
         }
-        catch (final CdbServiceException e) {
+        catch (final NotExistsPojoException e) {
             log.info("got exception of type {}",e.getClass());
         }
         final List<String> ids = new ArrayList<>();
         ids.add("SVC-TAG-01");
-        try {
-            tagservice.findAllTags(ids);
-        }
-        catch (final CdbServiceException e) {
-            log.info("got exception of type {}",e.getClass());
-        }
+        tagservice.findAllTags(ids);
     }
 
     @Test
@@ -158,6 +138,8 @@ public class TestCrestTag {
 
     @Test
     public void testC_findTags() throws Exception {
+
+        // Successfull create new tag
         final TagDto dto = DataGenerator.generateTagDto("B-TAG-03", "test");
         log.info("Store tag : {} ", dto);
         final ResponseEntity<TagDto> response = this.testRestTemplate
@@ -165,13 +147,30 @@ public class TestCrestTag {
         log.info("Received response: {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // Successfull create new tag to remove it
+        final TagDto dtorm = DataGenerator.generateTagDto("B-TAG-RM", "test");
+        log.info("Store tag : {} ", dtorm);
+        final ResponseEntity<TagDto> responserm = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dtorm, TagDto.class);
+        log.info("Received response: {}", responserm);
+        assertThat(responserm.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        final ResponseEntity<String> resprm = this.testRestTemplate
+                .exchange("/crestapi/admin/tags/B-TAG-RM", HttpMethod.DELETE, null, String.class);
+        {
+            log.info("Remove tag B-TAG-RM ");
+            assertThat(resprm.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
+
+        // Successfull create new tag
         final TagDto dto1 = DataGenerator.generateTagDto("B-TAG-04", "test");
-        log.info("Store tag : {} ", dto);
+        log.info("Store tag : {} ", dto1);
         final ResponseEntity<TagDto> response1 = this.testRestTemplate
                 .postForEntity("/crestapi/tags", dto1, TagDto.class);
         log.info("Received response: {}", response1);
         assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // Successfull list tags
         final ResponseEntity<String> resp = this.testRestTemplate.exchange("/crestapi/tags",
                 HttpMethod.GET, null, String.class);
 
@@ -185,6 +184,7 @@ public class TestCrestTag {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
+        // Successfull find one tag resource
         final ResponseEntity<String> resp1 = this.testRestTemplate
                 .exchange("/crestapi/tags/" + dto1.getName(), HttpMethod.GET, null, String.class);
         {
@@ -197,6 +197,7 @@ public class TestCrestTag {
             assertThat(ok.getSize()).isEqualTo(1);
         }
 
+        // Update a tag
         final TagDto body = dto1;
         body.setDescription("another description updated");
         body.endOfValidity(new BigDecimal(1000L));
@@ -231,11 +232,18 @@ public class TestCrestTag {
             assertThat(resp1null.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
 
+        final ResponseEntity<String> resprmnotthere = this.testRestTemplate
+                .exchange("/crestapi/admin/tags/NOT-THERE", HttpMethod.DELETE, null, String.class);
+        {
+            log.info("Remove tag NOT-THERE ");
+            assertThat(resprmnotthere.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         final ResponseEntity<String> resp2 = this.testRestTemplate
                 .exchange("/crestapi/tags?by=name:TAG,insertiontime>0", HttpMethod.GET, null, String.class);
 
         {
-            log.info("Retrieved global tag list " + resp2.getBody());
+            log.info("Retrieved tag list " + resp2.getBody());
             final String responseBody = resp2.getBody();
             assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.OK);
             TagSetDto ok;
@@ -244,77 +252,25 @@ public class TestCrestTag {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
-        // Now use tag service
-        final long ntags = tagservice.count();
-        assertThat(ntags).isGreaterThan(0);
+        final ResponseEntity<String> resp2a = this.testRestTemplate
+                .exchange("/crestapi/tags?by=name:PIPPO,insertiontime<0", HttpMethod.GET, null, String.class);
 
-        final boolean istag = tagservice.exists(dto1.getName());
-        assertThat(istag).isTrue();
-
-    }
-    
-    @Test
-    public void testTagMeta() throws Exception {
-        final TagDto dto = DataGenerator.generateTagDto("TAG-FOR-META-01", "test");
-        log.info("Store tag : {} ", dto);
-        final ResponseEntity<TagDto> response = this.testRestTemplate
-                .postForEntity("/crestapi/tags", dto, TagDto.class);
-        log.info("Received response: {}", response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        
-        final Instant now = Instant.now();
-        final Date time = new Date(now.toEpochMilli());
-        final String data = "{ \"key\" : \"value\" }";
-        final TagMetaDto dto1 = DataGenerator.generateTagMetaDto("TAG-FOR-META-01", data, time);
-        log.info("Store tag meta : {} ", dto1);
-        final ResponseEntity<TagMetaDto> response1 = this.testRestTemplate
-                .postForEntity("/crestapi/tags/"+dto.getName()+"/meta", dto1, TagMetaDto.class);
-        log.info("Received response: {}", response1);
-        assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-
-        final TagMetaDto dto2 = DataGenerator.generateTagMetaDto("SOME-THING", data, time);
-        log.info("Store tag meta : {} ", dto1);
-        final ResponseEntity<String> response2 = this.testRestTemplate
-                .postForEntity("/crestapi/tags/SOME-THING/meta", dto2, String.class);
-        log.info("Received response: {}", response2);
-        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-
-        final ResponseEntity<String> resp1 = this.testRestTemplate
-                .exchange("/crestapi/tags/" + dto1.getTagName()+"/meta", HttpMethod.GET, null, String.class);
         {
-            log.info("Retrieved tag meta for {} ", dto1.getTagName());
-            final String responseBody = resp1.getBody();
-            assertThat(resp1.getStatusCode()).isEqualTo(HttpStatus.OK);
-            TagMetaSetDto ok;
-            log.info("Response from server is: " + responseBody);
-            ok = mapper.readValue(responseBody, TagMetaSetDto.class);
-            assertThat(ok.getSize()).isEqualTo(1);
+            log.info("Retrieved null tag list {} with status {}", resp2a.getBody(), resp2a.getStatusCode());
+            final String responseBody = resp2a.getBody();
+            assertThat(resp2a.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
         }
 
-        final TagMetaDto body = dto1;
-        body.setDescription("another description updated");
-        body.setChansize(10);
-        final HttpEntity<TagMetaDto> updrequest = new HttpEntity<TagMetaDto>(body);
+        // This should trigger a runtime exception on server side. The field used in the SORT expression does not exists.
+        final ResponseEntity<String> resp2b = this.testRestTemplate
+                .exchange("/crestapi/tags?by=name:PIPPO,insertiontime:0&sort=PIPPO:DESC", HttpMethod.GET, null, String.class);
 
-        final ResponseEntity<String> respupd = this.testRestTemplate
-                .exchange("/crestapi/tags/" + dto1.getTagName()+"/meta", HttpMethod.PUT, updrequest, String.class);
         {
-            log.info("Update tag meta for {} ", body.getTagName());
-            final String responseBody = respupd.getBody();
-            assertThat(respupd.getStatusCode()).isEqualTo(HttpStatus.OK);
-            TagMetaDto ok;
-            log.info("Response from server is: " + responseBody);
-            ok = mapper.readValue(responseBody, TagMetaDto.class);
-            assertThat(ok).isNotNull();
-            assertThat(ok.getChansize()).isEqualTo(10);
-        }    
-        
-        final ResponseEntity<String> respupdnull = this.testRestTemplate
-                .exchange("/crestapi/tags/NOT-THERE/meta", HttpMethod.PUT, updrequest, String.class);
-        {
-            final String responseBody = respupdnull.getBody();
-            assertThat(respupdnull.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        }    
+            log.info("Retrieved bad sql tag list {} with status {}", resp2b.getBody(), resp2b.getStatusCode());
+            final String responseBody = resp2b.getBody();
+            assertThat(resp2b.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.NOT_FOUND);
+        }
 
     }
+
 }
