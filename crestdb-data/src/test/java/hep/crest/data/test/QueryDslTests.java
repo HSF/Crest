@@ -19,7 +19,6 @@ import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.IovFiltering;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
 import hep.crest.data.repositories.querydsl.TagFiltering;
-import hep.crest.data.runinfo.pojo.RunInfo;
 import hep.crest.data.runinfo.pojo.RunLumiInfo;
 import hep.crest.data.runinfo.repositories.RunLumiInfoRepository;
 import hep.crest.data.runinfo.repositories.querydsl.RunLumiInfoFiltering;
@@ -326,7 +325,7 @@ public class QueryDslTests {
     public void testRunLumi() throws Exception {
         final Date start = new Date();
         final Date end = new Date(start.getTime()+3600000);
-        final RunLumiInfo entity = DataGenerator.generateRunLumiInfo(start, end, new BigDecimal(100L));
+        final RunLumiInfo entity = DataGenerator.generateRunLumiInfo(new BigDecimal(start.getTime()), new BigDecimal(end.getTime()), new BigDecimal(100L));
         
         runrepository.save(entity);
 
