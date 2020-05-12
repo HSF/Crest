@@ -3,7 +3,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE")
+//        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.2.RELEASE")
     }
 }
 plugins {
@@ -49,8 +50,8 @@ tasks.withType(Checkstyle) {
   }
 }
 
-//sourceCompatibility = 1.8
-//targetCompatibility = 1.8
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
 ////   	compile files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")   
@@ -63,6 +64,7 @@ dependencies {
     compile group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
     
 	testCompile("org.springframework.boot:spring-boot-starter-test") 
+	testImplementation 'org.testcontainers:postgresql:1.10.6'	
 }
 
 jar {
