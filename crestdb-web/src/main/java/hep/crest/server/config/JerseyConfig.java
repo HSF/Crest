@@ -13,10 +13,14 @@ import hep.crest.server.swagger.api.GlobaltagmapsApi;
 import hep.crest.server.swagger.api.GlobaltagsApi;
 import hep.crest.server.swagger.api.IovsApi;
 import hep.crest.server.swagger.api.PayloadsApi;
+import hep.crest.server.swagger.api.RuninfoApi;
 import hep.crest.server.swagger.api.TagsApi;
 import io.swagger.jaxrs.config.BeanConfig;
 
 /**
+ * Jersey configuration.
+ *
+ * @version %I%, %G%
  * @author formica
  *
  */
@@ -26,18 +30,21 @@ public class JerseyConfig extends ResourceConfig {
      * Default ctor.
      */
     public JerseyConfig() {
-        register(AdminApi.class);
-        register(GlobaltagsApi.class);
-        register(TagsApi.class);
-        register(GlobaltagmapsApi.class);
-        register(IovsApi.class);
-        register(PayloadsApi.class);
-        register(FsApi.class);
-        register(FoldersApi.class);
-        register(MultiPartFeature.class);
-        register(CacheControlFilter.class);
-        register(CORSFilter.class);
-        property(ServletProperties.FILTER_FORWARD_ON_404, true);
+        super();
+        // Register all API.
+        super.register(AdminApi.class);
+        super.register(GlobaltagsApi.class);
+        super.register(TagsApi.class);
+        super.register(GlobaltagmapsApi.class);
+        super.register(IovsApi.class);
+        super.register(PayloadsApi.class);
+        super.register(FsApi.class);
+        super.register(RuninfoApi.class);
+        super.register(FoldersApi.class);
+        super.register(MultiPartFeature.class);
+        super.register(CacheControlFilter.class);
+        super.register(CORSFilter.class);
+        super.property(ServletProperties.FILTER_FORWARD_ON_404, true);
     }
 
     // @PostConstruct
@@ -59,15 +66,18 @@ public class JerseyConfig extends ResourceConfig {
     }
 
     /**
+     * Swagger configuration.
      * @return
      */
     private void configureSwagger() {
-        this.register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        this.register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        // Register swagger listing classes for jaxrs.
+        super.register(io.swagger.jaxrs.listing.ApiListingResource.class);
+        super.register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 
         final BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion("1.0");
         beanConfig.setSchemes(new String[] {"http"});
+        // Define the baseapi path: it is used only in swagger ui.
         beanConfig.setBasePath("/crestapi");
         beanConfig.setResourcePackage("hep.crest.server.swagger.api");
         beanConfig.setScan(true);

@@ -1,30 +1,41 @@
 package hep.crest.server.swagger.api;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import hep.crest.swagger.model.*;
+import hep.crest.server.swagger.api.GlobaltagsApiService;
+
+import io.swagger.annotations.ApiParam;
+import io.swagger.jaxrs.*;
+
+import hep.crest.swagger.model.GlobalTagDto;
+import hep.crest.swagger.model.GlobalTagSetDto;
+import hep.crest.swagger.model.TagSetDto;
+
+import java.util.Map;
+import java.util.List;
+import hep.crest.server.swagger.api.NotFoundException;
+
+import java.io.InputStream;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import javax.ws.rs.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import hep.crest.swagger.model.GlobalTagDto;
-import hep.crest.swagger.model.GlobalTagSetDto;
-import hep.crest.swagger.model.TagSetDto;
-import io.swagger.annotations.ApiParam;
+import javax.validation.constraints.*;
 
 @Path("/globaltags")
 
 
 @io.swagger.annotations.Api(description = "the globaltags API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-04T10:30:37.214+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-12-26T18:15:33.531+01:00")
 public class GlobaltagsApi  {
 	@Autowired
 	private GlobaltagsApiService delegate;
@@ -63,7 +74,7 @@ public class GlobaltagsApi  {
         @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = TagSetDto.class) })
     public Response findGlobalTagFetchTags(@ApiParam(value = "",required=true) @PathParam("name") String name
 ,@ApiParam(value = "record:  the record string {}", defaultValue="none") @DefaultValue("none") @QueryParam("record") String record
-,@ApiParam(value = "label:  the label string {}", defaultValue="none") @DefaultValue("none")  @QueryParam("label") String label
+,@ApiParam(value = "label:  the label string {}", defaultValue="none") @DefaultValue("none") @QueryParam("label") String label
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.findGlobalTagFetchTags(name,record,label,securityContext,info);

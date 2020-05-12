@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
+ * @version %I%, %G%
  * @author formica
  *
  */
@@ -22,7 +23,7 @@ public class ProfileAndLogAspect {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(ProfileAndLogAspect.class);
 
     /**
      * @param joinPoint

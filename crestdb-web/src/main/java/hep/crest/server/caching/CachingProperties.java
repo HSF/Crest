@@ -18,7 +18,7 @@ public class CachingProperties {
     /**
      * Logger.
      */
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(CachingProperties.class);
 
     /**
      * The default cache in seconds.

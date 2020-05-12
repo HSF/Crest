@@ -1,28 +1,40 @@
 package hep.crest.server.swagger.api;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import hep.crest.swagger.model.*;
+import hep.crest.server.swagger.api.GlobaltagmapsApiService;
+
+import io.swagger.annotations.ApiParam;
+import io.swagger.jaxrs.*;
+
+import hep.crest.swagger.model.GlobalTagMapDto;
+import hep.crest.swagger.model.GlobalTagMapSetDto;
+
+import java.util.Map;
+import java.util.List;
+import hep.crest.server.swagger.api.NotFoundException;
+
+import java.io.InputStream;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import javax.ws.rs.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import hep.crest.swagger.model.GlobalTagMapDto;
-import hep.crest.swagger.model.GlobalTagMapSetDto;
-import io.swagger.annotations.ApiParam;
+import javax.validation.constraints.*;
 
 @Path("/globaltagmaps")
 
 
 @io.swagger.annotations.Api(description = "the globaltagmaps API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-10-04T10:30:37.214+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-12-26T18:15:33.531+01:00")
 public class GlobaltagmapsApi  {
 	@Autowired
 	private GlobaltagmapsApiService delegate;
@@ -33,7 +45,7 @@ public class GlobaltagmapsApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a GlobalTagMap in the database.", notes = "This method allows to insert a GlobalTag.Arguments: GlobalTagMapDto should be provided in the body as a JSON file.", response = GlobalTagMapDto.class, tags={ "globaltagmaps", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagMapDto.class) })
+        @io.swagger.annotations.ApiResponse(code = 201, message = "successful operation", response = GlobalTagMapDto.class) })
     public Response createGlobalTagMap(@ApiParam(value = "A json string that is used to construct a globaltagmapdto object: { globaltagname: xxx, ... }" ,required=true) GlobalTagMapDto body
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {

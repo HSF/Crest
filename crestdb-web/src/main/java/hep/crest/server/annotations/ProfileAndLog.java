@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Annotation for profiling methods.
+ * It also allow to print logging information.
  * @author formica
  *
  */
