@@ -1,15 +1,6 @@
 package hep.crest.server.swagger.api.impl;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.pojo.GlobalTag;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.GlobalTagService;
 import hep.crest.server.services.TagService;
@@ -17,75 +8,133 @@ import hep.crest.server.swagger.api.AdminApiService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.GlobalTagDto;
+import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+
+/**
+ * Rest endpoint for administration task. 
+ * Essentially allows to remove resources.
+ *
+ * @author formica
+ *
+ */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-09-05T16:23:23.401+02:00")
 @Component
 public class AdminApiServiceImpl extends AdminApiService {
 	
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+	/**
+	 * Logger.
+	 */
+	private static final Logger log = LoggerFactory.getLogger( AdminApiServiceImpl.class);
 
+	/**
+	 * Service.
+	 */
 	@Autowired
 	private GlobalTagService globalTagService;
 		
+	/**
+	 * Service.
+	 */
 	@Autowired
 	private TagService tagService;
+	
+    /**
+     * Mapper.
+     */
+    @Autowired
+    @Qualifier("mapper")
+    private MapperFacade mapper;
 
+
+    /* (non-Javadoc)
+     * @see hep.crest.server.swagger.api.AdminApiService#removeGlobalTag(java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     */
     @Override
     public Response removeGlobalTag(String name, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		log.info("AdminRestController processing request for removing a global tag");
 		try {
+		    // Remove the global tag identified by name.
 			globalTagService.removeGlobalTag(name);
 			return Response.ok().build();
-		} catch (CdbServiceException e) {
-			String msg = "Error removing globaltag resource using " + name;
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+		} catch (final RuntimeException e) {
+			final String msg = "Error removing globaltag resource using " + name;
+			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
     
+    /* (non-Javadoc)
+     * @see hep.crest.server.swagger.api.AdminApiService#removeTag(java.lang.String, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     */
     @Override
     public Response removeTag(String name, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		log.info("AdminRestController processing request for removing a tag");
 		try {
+		    // Remove the tag with name.
 			tagService.removeTag(name);
 			return Response.ok().build();
-		} catch (CdbServiceException e) {
-			String msg = "Error removing tag resource using " + name + " : "+e.getMessage();
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+		} catch (final RuntimeException e) {
+			final String msg = "Error removing tag resource using " + name + " : "+e.getMessage();
+			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }
     
+    /* (non-Javadoc)
+     * @see hep.crest.server.swagger.api.AdminApiService#updateGlobalTag(java.lang.String, hep.crest.swagger.model.GlobalTagDto, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     */
     @Override
     public Response updateGlobalTag(String name, GlobalTagDto body, SecurityContext securityContext, UriInfo info) throws NotFoundException {
 		log.info("AdminRestController processing request for updating a global tag using "+body);
 		try {
-			GlobalTagDto dtoentity = globalTagService.findOne(name);
-			if (dtoentity.getDescription() != body.getDescription()) {
-				dtoentity.setDescription(body.getDescription());
+		    final char type = body.getType() != null ? body.getType().charAt(0) : 'N';
+
+		    // Find the global tag corresponding to input name.
+			final GlobalTag entity = globalTagService.findOne(name);
+//	        final char type = entity.getType() != null ? entity.getType() : 'N';
+
+			// Compare fields to set them from the input body object provided by the client.
+			if (entity.getDescription() != body.getDescription()) {
+	            // change description.
+			    entity.setDescription(body.getDescription());
 			}
-			if (dtoentity.getRelease() != body.getRelease()) {
-				dtoentity.setRelease(body.getRelease());
+			if (entity.getRelease() != body.getRelease()) {
+                // change release.
+			    entity.setRelease(body.getRelease());
 			}
-			if (dtoentity.getWorkflow() != body.getWorkflow()) {
-				dtoentity.setWorkflow(body.getWorkflow());
+			if (entity.getWorkflow() != body.getWorkflow()) {
+                // change workflow.
+			    entity.setWorkflow(body.getWorkflow());
 			}
-			if (dtoentity.getScenario() != body.getScenario()) {
-				dtoentity.setScenario(body.getScenario());
+			if (entity.getScenario() != body.getScenario()) {
+                // change scenario.
+			    entity.setScenario(body.getScenario());
 			}
-			if (dtoentity.getType() != body.getType()) {
-				dtoentity.setType(body.getType());
+			if (entity.getType() != type) {
+                // change type.
+			    entity.setType(type);
 			}
-			GlobalTagDto saved = globalTagService.updateGlobalTag(dtoentity);
-			return Response.ok().entity(saved).build();
+			// Update the global tag.
+			final GlobalTag saved = globalTagService.updateGlobalTag(entity);
+			final GlobalTagDto dto = mapper.map(saved, GlobalTagDto.class);
+			return Response.ok().entity(dto).build();
 			
-		} catch (NotExistsPojoException e) {
-			String msg = "Error updating GlobalTag resource using "+body;
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+		} catch (final NotExistsPojoException e) {
+			final String msg = "Error updating GlobalTag resource using "+body;
+			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
-		} catch (Exception e) {
-			String msg = "Error updating GlobalTag resource using "+body;
-			ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
+		} catch (final RuntimeException e) {
+			final String msg = "Error updating GlobalTag resource using "+body;
+			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
 		}
     }

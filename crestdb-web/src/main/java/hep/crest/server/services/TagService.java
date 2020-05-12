@@ -6,12 +6,15 @@ package hep.crest.server.services;
 import com.querydsl.core.types.Predicate;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Tag;
+import hep.crest.data.repositories.TagMetaDataBaseCustom;
 import hep.crest.data.repositories.TagRepository;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
+import hep.crest.swagger.model.TagMetaDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,12 @@ public class TagService {
      */
     @Autowired
     private TagRepository tagRepository;
+    /**
+     * Repository.
+     */
+    @Autowired
+    @Qualifier("tagmetarepo")
+    private TagMetaDataBaseCustom tagmetaRepository;
 
     /**
      * @param tagname
@@ -180,4 +189,56 @@ public class TagService {
         log.debug("Removed entity: {}", name);
     }
 
+    /**
+     * Insert new tag meta data.
+     *
+     * @param dto
+     *            the TagMetaDto
+     * @return TagMetaDto
+     * @throws AlreadyExistsPojoException
+     *             If an Exception occurred
+     */
+    @Transactional
+    public TagMetaDto insertTagMeta(TagMetaDto dto)
+            throws CdbServiceException, AlreadyExistsPojoException {
+        log.debug("Create tag meta data from dto {}", dto);
+        final TagMetaDto tmpt = tagmetaRepository.find(dto.getTagName());
+        if (tmpt != null) {
+            log.debug("Cannot store tag meta {} : resource already exists.. ", dto);
+            throw new AlreadyExistsPojoException(
+                    "Tag meta already exists for name " + dto.getTagName());
+        }
+        final TagMetaDto saved = tagmetaRepository.save(dto);
+        log.info("Saved entity: {}", saved);
+        return saved;
+    }
+
+    /**
+     * Update an existing tag meta data.
+     *
+     * @param dto
+     *            the TagMetaDto
+     * @return TagMetaDto
+     * @throws CdbServiceException If an exception occurred.
+     */
+    @Transactional
+    public TagMetaDto updateTagMeta(TagMetaDto dto) throws CdbServiceException {
+        log.debug("Update tag meta from dto {}", dto);
+        final TagMetaDto saved = tagmetaRepository.update(dto);
+        log.debug("Updated entity: {}", saved);
+        return saved;
+    }
+
+    /**
+     * @param id
+     *            the String
+     * @return TagMetaDto
+     * @throws CdbServiceException
+     *             If an Exception occurred
+     */
+    public TagMetaDto findMeta(String id) throws CdbServiceException {
+        log.debug("Search for tag meta data by Id...{}", id);
+        final TagMetaDto tmpt = tagmetaRepository.find(id);
+        return tmpt; // This will trigger a response 404
+    }
 }
