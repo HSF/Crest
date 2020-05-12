@@ -66,7 +66,7 @@ public class TestCrestFolders {
                 .exchange("/crestapi/folders?by=nodeFullpath:RT,tagPattern:%", HttpMethod.GET, null, String.class);
 
         {
-            log.info("Retrieved global tag list " + resp.getBody());
+            log.info("Retrieved folder list " + resp.getBody());
             final String responseBody = resp.getBody();
             assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
             FolderSetDto ok;
@@ -74,7 +74,20 @@ public class TestCrestFolders {
             ok = mapper.readValue(responseBody, FolderSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
+        
+        // Retrieve all folder list
+        final ResponseEntity<String> resp1 = this.testRestTemplate
+                .exchange("/crestapi/folders", HttpMethod.GET, null, String.class);
 
+        {
+            log.info("Retrieved all folder list " + resp1.getBody());
+            final String responseBody = resp1.getBody();
+            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+            FolderSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, FolderSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
     }
 
 }

@@ -1,11 +1,15 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.server.swagger.api.ApiResponseMessage;
+import hep.crest.swagger.model.GlobalTagDto;
+import hep.crest.swagger.model.GlobalTagMapDto;
+import hep.crest.swagger.model.GlobalTagMapSetDto;
+import hep.crest.swagger.model.GlobalTagSetDto;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.swagger.model.TagSetDto;
+import hep.crest.testutils.DataGenerator;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,18 +29,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
 
-import hep.crest.server.swagger.api.ApiResponseMessage;
-import hep.crest.swagger.model.GlobalTagDto;
-import hep.crest.swagger.model.GlobalTagMapDto;
-import hep.crest.swagger.model.GlobalTagMapSetDto;
-import hep.crest.swagger.model.GlobalTagSetDto;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.swagger.model.TagSetDto;
-import hep.crest.testutils.DataGenerator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -81,9 +78,6 @@ public class TestCrestGlobalTag {
             catch (final JsonParseException e) {
                 e.printStackTrace();
             }
-            catch (final JsonMappingException e) {
-                e.printStackTrace();
-            }
             catch (final IOException e) {
                 e.printStackTrace();
             }
@@ -110,8 +104,8 @@ public class TestCrestGlobalTag {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         log.info("Try to store global tag again : {} ", dto);
-        final ResponseEntity<GlobalTagDto> response1 = this.testRestTemplate
-                .postForEntity("/crestapi/globaltags", dto, GlobalTagDto.class);
+        final ResponseEntity<String> response1 = this.testRestTemplate
+                .postForEntity("/crestapi/globaltags", dto, String.class);
         log.info("Received response: {}", response1);
         assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 
@@ -120,12 +114,13 @@ public class TestCrestGlobalTag {
         body.setDescription("Description has changed");
         body.validity(new BigDecimal(1990L));
         body.scenario("update");
+        body.type("new");
         final HttpEntity<GlobalTagDto> updrequest = new HttpEntity<GlobalTagDto>(body);
 
         final ResponseEntity<String> respupd = this.testRestTemplate
                 .exchange("/crestapi/admin/globaltags/" + dto.getName(), HttpMethod.PUT, updrequest, String.class);
         {
-            log.info("Update tag {} ", body.getName());
+            log.info("Update global tag {} ", body.getName());
             final String responseBody = respupd.getBody();
             assertThat(respupd.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagDto ok;
@@ -133,6 +128,19 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, GlobalTagDto.class);
             assertThat(ok).isNotNull();
             assertThat(ok.getScenario()).isEqualTo("update");
+        }
+        final ResponseEntity<String> respupdfail = this.testRestTemplate
+                .exchange("/crestapi/admin/globaltags/NOT-THERE", HttpMethod.PUT, updrequest, String.class);
+        {
+            log.info("Update global tag NOT-THERE ");
+            assertThat(respupdfail.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        final ResponseEntity<String> resprmnotthere = this.testRestTemplate
+                .exchange("/crestapi/admin/globaltags/NOT-THERE", HttpMethod.DELETE, null, String.class);
+        {
+            log.info("Remove global tag NOT-THERE ");
+            assertThat(resprmnotthere.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         dto.name(null);
@@ -188,7 +196,7 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
             assertThat(ok.getSize()).isEqualTo(1);
         }
-
+        // This should not find the GT
         final ResponseEntity<String> resp1null = this.testRestTemplate
                 .exchange("/crestapi/globaltags/SOME-GT", HttpMethod.GET, null, String.class);
         {
@@ -202,12 +210,39 @@ public class TestCrestGlobalTag {
         {
             log.info("Retrieved global tag list " + resp2.getBody());
             final String responseBody = resp2.getBody();
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.OK);
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
+        
+        final ResponseEntity<String> resp2a = this.testRestTemplate
+                .exchange("/crestapi/globaltags?by=scenario:test,validity>0,validity:0,validity<0", HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved global tag list " + resp2a.getBody());
+            final String responseBody = resp2a.getBody();
+            assertThat(resp2a.getStatusCode()).isEqualTo(HttpStatus.OK);
+            GlobalTagSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
+            assertThat(ok.getSize()).isEqualTo(0);
+        }
+
+        final ResponseEntity<String> resp2b = this.testRestTemplate
+                .exchange("/crestapi/globaltags?by=scenario:test,insertionTime>0,insertionTime:0,insertionTime<0", HttpMethod.GET, null, String.class);
+
+        {
+            log.info("Retrieved global tag list " + resp2b.getBody());
+            final String responseBody = resp2b.getBody();
+            assertThat(resp2b.getStatusCode()).isEqualTo(HttpStatus.OK);
+            GlobalTagSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
+            assertThat(ok.getSize()).isGreaterThanOrEqualTo(0);
+        }
+
 
         // Create a tag
         final TagDto tagdto = DataGenerator.generateTagDto("B-TAGGT-02", "test");
@@ -233,6 +268,19 @@ public class TestCrestGlobalTag {
             log.info("Retrieved associated tags for global tag {}", dto1.getName());
             final String responseBody = resptags.getBody();
             assertThat(resptags.getStatusCode()).isEqualTo(HttpStatus.OK);
+            TagSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, TagSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
+        final ResponseEntity<String> resptags2 = this.testRestTemplate.exchange(
+                "/crestapi/globaltags/" + dto1.getName() + "/tags?record=none&label=none",
+                HttpMethod.GET, null, String.class);
+        {
+            log.info("Retrieved associated tags for global tag {}", dto1.getName());
+            final String responseBody = resptags2.getBody();
+            assertThat(resptags2.getStatusCode()).isEqualTo(HttpStatus.OK);
             TagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, TagSetDto.class);
@@ -284,6 +332,20 @@ public class TestCrestGlobalTag {
         log.info("Received response: {}", respmaptag);
         assertThat(respmaptag.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // Associate the tag B-TAGGT-02 to the global tag B-GT-02 again; it should fail
+        final ResponseEntity<String> respmaptagalreadythere = this.testRestTemplate
+                .postForEntity("/crestapi/globaltagmaps", maptagdto, String.class);
+        log.info("Received response: {}", respmaptagalreadythere);
+        assertThat(respmaptagalreadythere.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
+
+        // Associate but use a null name for global tag: it should fail
+        maptagdto.setGlobalTagName(null);
+        final ResponseEntity<String> respmaptagfail = this.testRestTemplate
+                .postForEntity("/crestapi/globaltagmaps", maptagdto, String.class);
+        log.info("Received response: {}", respmaptagfail);
+        assertThat(respmaptagfail.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        // Search for mappings
         final ResponseEntity<String> resptags = this.testRestTemplate.exchange(
                 "/crestapi/globaltags/" + dto.getName() + "/tags?record=B-TAGGT&label=none",
                 HttpMethod.GET, null, String.class);
@@ -296,6 +358,22 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, TagSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
+        final ResponseEntity<String> resptagsall = this.testRestTemplate.exchange(
+                "/crestapi/globaltags/" + dto.getName() + "/tags?record=B-TAGGT&label=pippo",
+                HttpMethod.GET, null, String.class);
+        {
+            log.info("Retrieved associated tags for global tag {} using bot record and label");
+            assertThat(resptagsall.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
+
+        // Search for mapping on not existing global tag
+        final ResponseEntity<String> resptags2 = this.testRestTemplate.exchange(
+                "/crestapi/globaltags/NOT-THERE/tags",
+                HttpMethod.GET, null, String.class);
+        {
+            log.info("Retrieved associated tags for global tag NOT-THERE...should fail");
+            assertThat(resptags2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
 
         // Associate the tag B-TAGGT-02 to an not existing global tag
         final GlobalTagMapDto maptagdto1 = DataGenerator.generateMappingDto(tagdto.getName(),
@@ -304,7 +382,7 @@ public class TestCrestGlobalTag {
         final ResponseEntity<String> respmaptag1 = this.testRestTemplate
                 .postForEntity("/crestapi/globaltagmaps", maptagdto1, String.class);
         log.info("Received response: {}", respmaptag1);
-        assertThat(respmaptag1.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(respmaptag1.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
         // Retrieve global tag maps
         final ResponseEntity<String> respmaptags = this.testRestTemplate.exchange(
@@ -322,15 +400,7 @@ public class TestCrestGlobalTag {
         // Retrieve global tag maps for not existing gtag
         final ResponseEntity<String> respmaptagsnull = this.testRestTemplate
                 .exchange("/crestapi/globaltagmaps/NOT-THERE", HttpMethod.GET, null, String.class);
-        {
-            log.info("Retrieved associated tags for global tag NOT-THERE should give 0");
-            final String responseBody = respmaptagsnull.getBody();
-            assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.OK);
-            GlobalTagMapSetDto ok;
-            log.info("Response from server is: " + responseBody);
-            ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
-            assertThat(ok.getSize()).isEqualTo(0);
-        }
+        assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // Retrieve global tag maps from tagname using backtrace
         final HttpHeaders headers = new HttpHeaders();
@@ -348,5 +418,7 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
             assertThat(ok.getSize()).isGreaterThan(0);
         }
+
     }
+
 }

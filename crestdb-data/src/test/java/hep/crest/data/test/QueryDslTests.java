@@ -372,7 +372,7 @@ public class QueryDslTests {
         folderRepository.save(folder1);
         final IFilteringCriteria filter = new FolderFiltering();
         final PageRequest preq = createPageRequest(0, 10, "nodeFullpath:ASC");
-
+        log.info("Created folders in the db...{}", folder1);
         final List<SearchCriteria> params = createMatcherCriteria("nodeFullpath:M,tagpattern:TEST,grouprole:TEST");
         final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
@@ -385,6 +385,7 @@ public class QueryDslTests {
                 wherepred = wherepred.and(exp);
             }
         }
+        log.info("Loading folders using where pred {}", wherepred.toString());
         final Page<CrestFolders> dtolist = folderRepository.findAll(wherepred, preq);
         assertThat(dtolist.getSize()).isGreaterThan(0);
         

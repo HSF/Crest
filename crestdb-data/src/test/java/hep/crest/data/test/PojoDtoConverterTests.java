@@ -3,26 +3,7 @@
  */
 package hep.crest.data.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.GlobalTagMapId;
@@ -37,6 +18,7 @@ import hep.crest.data.security.pojo.CrestUser;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.FolderDto;
 import hep.crest.swagger.model.FolderSetDto;
+import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.GlobalTagDto;
 import hep.crest.swagger.model.GlobalTagMapDto;
 import hep.crest.swagger.model.GlobalTagMapSetDto;
@@ -59,6 +41,23 @@ import hep.crest.swagger.model.TagSetDto;
 import hep.crest.swagger.model.TagSummaryDto;
 import hep.crest.swagger.model.TagSummarySetDto;
 import ma.glasnost.orika.MapperFacade;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author formica
@@ -284,17 +283,17 @@ public class PojoDtoConverterTests {
     public void testRunInfoConverter() throws Exception {
         final Date start = new Date();
         final Date end = new Date(start.getTime()+3600000);
-        final RunInfoDto dto1 = DataGenerator.generateRunInfoDto(start, end, new BigDecimal(100L));
+        final RunLumiInfoDto dto1 = DataGenerator.generateRunLumiInfoDto(new BigDecimal(start.getTime()), new BigDecimal(end.getTime()), new BigDecimal(100L));
 
         assertThat(dto1.toString().length()).isGreaterThan(0);
         assertThat(dto1.hashCode()).isNotNull();
-        final RunInfo entity = mapper.map(dto1, RunInfo.class);
+        final RunLumiInfo entity = mapper.map(dto1, RunLumiInfo.class);
         assertThat(dto1.getRunNumber()).isEqualTo(entity.getRunNumber());
         assertThat(entity.toString().length()).isGreaterThan(0);
         assertThat(entity.hashCode()).isNotNull();
         
-        final RunInfoSetDto setdto = new RunInfoSetDto();
-        setdto.datatype("RunInfoSetDto");
+        final RunLumiSetDto setdto = new RunLumiSetDto();
+        setdto.datatype("RunLumiSetDto");
         final GenericMap filterm = new GenericMap();
         filterm.put("run", "1000");
         assertThat(filterm.containsKey("run")).isTrue();
@@ -303,8 +302,8 @@ public class PojoDtoConverterTests {
         setdto.addResourcesItem(dto1);
         setdto.format("RunInfo");
         
-        final RunInfoSetDto setdto2 = new RunInfoSetDto();
-        setdto2.datatype("RunInfoSetDto");
+        final RunLumiSetDto setdto2 = new RunLumiSetDto();
+        setdto2.datatype("RunLumiSetDto");
         setdto2.addResourcesItem(dto1);
         assertThat(setdto2.equals(setdto)).isFalse();
         assertThat(setdto.toString()).isNotNull();

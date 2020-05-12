@@ -3,13 +3,6 @@
  */
 package hep.crest.data.test.tools;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Date;
-
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.GlobalTagMap;
 import hep.crest.data.pojo.GlobalTagMapId;
@@ -28,6 +21,13 @@ import hep.crest.swagger.model.RunLumiInfoDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagMetaDto;
 import hep.crest.swagger.model.TagSummaryDto;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * @author formica
@@ -184,7 +184,7 @@ public class DataGenerator {
         entity.setSchemaName(schema);
         entity.setNodeFullpath(fullpath);
         entity.setNodeName(name);
-        entity.setTagPattern("MY-TEST");
+        entity.setTagPattern(name);
         entity.setNodeDescription("Some node");
         entity.setGroupRole("TEST");
         return entity;
