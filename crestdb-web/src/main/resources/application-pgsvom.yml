@@ -31,10 +31,9 @@ spring:
         hibernate.show_sql: false
         hibernate.jdbc.use_streams_for_binary: false
         hibernate.connection.autocommit: false
-# Without this there is an exception from Postgres driver related to createBlob method.
-        hibernate.jdbc.lob.non_contextual_creation: true        
+        hibernate.jdbc.lob.non_contextual_creation: true
 server:
-    port: ${crest.server.port}  
+    port: ${crest.server.port} 
 crest:
   schemaname: none
   dumpdir: ${crest.dump.dir}

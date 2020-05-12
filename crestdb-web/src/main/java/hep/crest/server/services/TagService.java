@@ -197,6 +197,8 @@ public class TagService {
      * @return TagMetaDto
      * @throws AlreadyExistsPojoException
      *             If an Exception occurred
+     * @throws CdbServiceException
+     *             If an Exception occurred
      */
     @Transactional
     public TagMetaDto insertTagMeta(TagMetaDto dto)
@@ -239,6 +241,6 @@ public class TagService {
     public TagMetaDto findMeta(String id) throws CdbServiceException {
         log.debug("Search for tag meta data by Id...{}", id);
         final TagMetaDto tmpt = tagmetaRepository.find(id);
-        return tmpt; // This will trigger a response 404
+        return tmpt; // This will trigger a response 404 if it is null
     }
 }
