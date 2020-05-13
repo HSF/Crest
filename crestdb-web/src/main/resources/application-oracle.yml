@@ -5,9 +5,6 @@
 # ===============================
 # Defaults
 spring:
- profiles:
-  include: default
-spring:
     profiles: oracle
     jersey:
       application-path: ${crest.api.name}

@@ -5,9 +5,6 @@
 # ===============================
 # Defaults
 spring:
- profiles:
-  include: default
-spring:
     profiles: cmsprep
     jersey:
       application-path: /crestapi

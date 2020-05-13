@@ -3,10 +3,6 @@
 #             server
 #             ...
 # ===============================
-# Defaults
-spring:
- profiles:
-  include: default
 spring:
     profiles: prod
     jersey:
