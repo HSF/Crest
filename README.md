@@ -1,3 +1,5 @@
+![Java CI with Gradle](https://github.com/HSF/Crest/workflows/Java%20CI%20with%20Gradle/badge.svg?event=push)
+
 #### Author: A.Formica, R.Sipos
 ##### Date of last development period: 2019/01/13
 ##### Recent additions: new api methods for uploads of iov+payload, a web-ui in vuejs.  
