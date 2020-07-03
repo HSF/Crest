@@ -39,6 +39,12 @@ The prototype uses [Spring framework](https://spring.io) and the REST services a
 The prototype runs as a microservice using `spring-boot`. By default it uses an embedded [undertow](http://undertow.io) servlet container, but others like [tomcat](https://tomcat.apache.org) or [jetty](https://www.eclipse.org/jetty/) can be easily used instead of [undertow](http://undertow.io).
 
 
+You can directly download an `html` file from gitlab to visualize the API documentation on your browser:
+```
+https://drf-gitlab.cea.fr/api/v4/projects/411/repository/files/doc%2Findex.html/raw?ref=master
+```
+
+
 ## Installation
 Download the project from gitlab (example below is using `https`):
 ```
