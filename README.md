@@ -41,7 +41,7 @@ The prototype runs as a microservice using `spring-boot`. By default it uses an 
 
 You can directly download an `html` file from gitlab to visualize the API documentation on your browser:
 ```
-https://drf-gitlab.cea.fr/api/v4/projects/411/repository/files/doc%2Findex.html/raw?ref=master
+https://drf-gitlab.cea.fr/api/v4/projects/523/repository/files/doc%2Findex.html/raw?ref=master
 ```
 
 
