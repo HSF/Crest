@@ -181,10 +181,10 @@ font-style: italic;
   <body>
   <h1>CrestDB REST API</h1>
     <div class="app-desc">Crest Rest Api to manage data for calibration files.</div>
-    
+    <div class="app-desc">More information: <a href="https://helloreverb.com">https://helloreverb.com</a></div>
     <div class="app-desc">Contact Info: <a href="andrea.formica@cern.ch">andrea.formica@cern.ch</a></div>
     <div class="app-desc">Version: 2.0</div>
-    <div class="app-desc">BasePath:/phycdb/v1/rest</div>
+    <div class="app-desc">BasePath:/crest</div>
     <div class="license-info">Apache 2.0</div>
     <div class="license-url">http://www.apache.org/licenses/LICENSE-2.0.html</div>
   <h2>Access</h2>
@@ -199,6 +199,15 @@ font-style: italic;
   <li><a href="#removeGlobalTag"><code><span class="http-method">delete</span> /admin/globaltags/{name}</code></a></li>
   <li><a href="#removeTag"><code><span class="http-method">delete</span> /admin/tags/{name}</code></a></li>
   <li><a href="#updateGlobalTag"><code><span class="http-method">put</span> /admin/globaltags/{name}</code></a></li>
+  </ul>
+  <h4><a href="#Folders">Folders</a></h4>
+  <ul>
+  <li><a href="#createFolder"><code><span class="http-method">post</span> /folders</code></a></li>
+  <li><a href="#listFolders"><code><span class="http-method">get</span> /folders</code></a></li>
+  </ul>
+  <h4><a href="#Fs">Fs</a></h4>
+  <ul>
+  <li><a href="#buildTar"><code><span class="http-method">post</span> /fs/tar</code></a></li>
   </ul>
   <h4><a href="#Globaltagmaps">Globaltagmaps</a></h4>
   <ul>
@@ -218,23 +227,39 @@ font-style: italic;
   <li><a href="#findAllIovs"><code><span class="http-method">get</span> /iovs</code></a></li>
   <li><a href="#getSize"><code><span class="http-method">get</span> /iovs/getSize</code></a></li>
   <li><a href="#getSizeByTag"><code><span class="http-method">get</span> /iovs/getSizeByTag</code></a></li>
+  <li><a href="#lastIov"><code><span class="http-method">get</span> /iovs/lastIov</code></a></li>
   <li><a href="#selectGroups"><code><span class="http-method">get</span> /iovs/selectGroups</code></a></li>
+  <li><a href="#selectIovPayloads"><code><span class="http-method">get</span> /iovs/selectIovPayloads</code></a></li>
   <li><a href="#selectIovs"><code><span class="http-method">get</span> /iovs/selectIovs</code></a></li>
   <li><a href="#selectSnapshot"><code><span class="http-method">get</span> /iovs/selectSnapshot</code></a></li>
+  <li><a href="#storeBatchIovMultiForm"><code><span class="http-method">post</span> /iovs/storebatch</code></a></li>
+  </ul>
+  <h4><a href="#Monitoring">Monitoring</a></h4>
+  <ul>
+  <li><a href="#listPayloadTagInfo"><code><span class="http-method">get</span> /monitoring/payloads</code></a></li>
   </ul>
   <h4><a href="#Payloads">Payloads</a></h4>
   <ul>
   <li><a href="#createPayload"><code><span class="http-method">post</span> /payloads</code></a></li>
   <li><a href="#createPayloadMultiForm"><code><span class="http-method">post</span> /payloads/upload</code></a></li>
-  <li><a href="#getBlob"><code><span class="http-method">get</span> /payloads/{hash}/data</code></a></li>
   <li><a href="#getPayload"><code><span class="http-method">get</span> /payloads/{hash}</code></a></li>
   <li><a href="#getPayloadMetaInfo"><code><span class="http-method">get</span> /payloads/{hash}/meta</code></a></li>
+  <li><a href="#storePayloadBatchWithIovMultiForm"><code><span class="http-method">post</span> /payloads/storebatch</code></a></li>
+  <li><a href="#storePayloadWithIovMultiForm"><code><span class="http-method">post</span> /payloads/store</code></a></li>
+  <li><a href="#uploadPayloadBatchWithIovMultiForm"><code><span class="http-method">post</span> /payloads/uploadbatch</code></a></li>
+  </ul>
+  <h4><a href="#Runinfo">Runinfo</a></h4>
+  <ul>
+  <li><a href="#createRunInfo"><code><span class="http-method">post</span> /runinfo</code></a></li>
+  <li><a href="#listRunInfo"><code><span class="http-method">get</span> /runinfo</code></a></li>
+  <li><a href="#selectRunInfo"><code><span class="http-method">get</span> /runinfo/select</code></a></li>
   </ul>
   <h4><a href="#Tags">Tags</a></h4>
   <ul>
   <li><a href="#createTag"><code><span class="http-method">post</span> /tags</code></a></li>
   <li><a href="#findTag"><code><span class="http-method">get</span> /tags/{name}</code></a></li>
   <li><a href="#listTags"><code><span class="http-method">get</span> /tags</code></a></li>
+  <li><a href="#updateTag"><code><span class="http-method">put</span> /tags/{name}</code></a></li>
   </ul>
 
   <h1><a name="Admin">Admin</a></h1>
@@ -269,7 +294,7 @@ font-style: italic;
     </ul>
 
     <h3 class="field-label">Responses</h3>
-    <h4 class="field-label">0</h4>
+    <h4 class="field-label">default</h4>
     successful operation
         <a href="#"></a>
   </div> <!-- method -->
@@ -305,7 +330,7 @@ font-style: italic;
     </ul>
 
     <h3 class="field-label">Responses</h3>
-    <h4 class="field-label">0</h4>
+    <h4 class="field-label">default</h4>
     successful operation
         <a href="#"></a>
   </div> <!-- method -->
@@ -352,17 +377,17 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
-  "insertionTimeMilli" : 123456789,
-  "snapshotTimeMilli" : 123456789,
+  "insertionTimeMilli" : 1,
+  "snapshotTimeMilli" : 6,
   "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "workflow" : "aeiou",
-  "scenario" : "aeiou",
-  "release" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "validity" : 1.3579000000000001069366817318950779736042022705078125,
+  "workflow" : "workflow",
+  "scenario" : "scenario",
+  "release" : "release",
+  "name" : "name",
+  "description" : "description",
+  "validity" : 0.80082819046101150206595775671303272247314453125,
   "snapshotTime" : "2000-01-23T04:56:07.000+00:00",
-  "type" : "aeiou"
+  "type" : "type"
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -376,6 +401,161 @@ font-style: italic;
     <h4 class="field-label">200</h4>
     successful operation
         <a href="#GlobalTagDto">GlobalTagDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Folders">Folders</a></h1>
+  <div class="method"><a name="createFolder"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /folders</code></pre></div>
+    <div class="method-summary">Create an entry for folder information. (<span class="nickname">createFolder</span>)</div>
+    <div class="method-notes">Folder informations go into a dedicated table.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#FolderDto">FolderDto</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash; A json string that is used to construct a folderdto object: { node: xxx, ... } </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+      <li><code>text/plain</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#String">String</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="listFolders"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /folders</code></pre></div>
+    <div class="method-summary">Finds a FolderDto list. (<span class="nickname">listFolders</span>)</div>
+    <div class="method-notes">This method allows to perform search and sorting.Arguments: by=<pattern>, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [&lt; : &gt;] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">by (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; by: the search pattern {none} default: none </div><div class="param">sort (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; sort: the sort pattern {nodeFullpath:ASC} default: nodeFullpath:ASC </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#FolderSetDto">FolderSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/xml</div>
+    <pre class="example"><code>null</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+      <li><code>application/xml</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#FolderSetDto">FolderSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Fs">Fs</a></h1>
+  <div class="method"><a name="buildTar"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /fs/tar</code></pre></div>
+    <div class="method-summary">Dump a tag into filesystem and retrieve the tar file asynchronously. (<span class="nickname">buildTar</span>)</div>
+    <div class="method-notes">This method allows to request a tar file from the server using a tag specified in input.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">tagname (required)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; tagname: the tag name {none} default: none </div><div class="param">snapshot (required)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; snapshot: the snapshot time {0} default: 0 format: int64</div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+      <li><code>text/plain</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#String">String</a>
   </div> <!-- method -->
   <hr/>
   <h1><a name="Globaltagmaps">Globaltagmaps</a></h1>
@@ -415,10 +595,10 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
-  "record" : "aeiou",
-  "label" : "aeiou",
-  "tagName" : "aeiou",
-  "globalTagName" : "aeiou"
+  "record" : "record",
+  "label" : "label",
+  "tagName" : "tagName",
+  "globalTagName" : "globalTagName"
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -429,7 +609,7 @@ font-style: italic;
     </ul>
 
     <h3 class="field-label">Responses</h3>
-    <h4 class="field-label">200</h4>
+    <h4 class="field-label">201</h4>
     successful operation
         <a href="#GlobalTagMapDto">GlobalTagMapDto</a>
   </div> <!-- method -->
@@ -450,12 +630,16 @@ font-style: italic;
 
 
 
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
 
 
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#GlobalTagMapDto">GlobalTagMapDto</a>]
+      <a href="#GlobalTagMapSetDto">GlobalTagMapSetDto</a>
       
     </div>
 
@@ -463,20 +647,10 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>[ {
-  "record" : "aeiou",
-  "label" : "aeiou",
-  "tagName" : "aeiou",
-  "globalTagName" : "aeiou"
-} ]</code></pre>
+    <pre class="example"><code>""</code></pre>
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/xml</div>
-    <pre class="example"><code><null>
-  <globalTagName>aeiou</globalTagName>
-  <record>aeiou</record>
-  <label>aeiou</label>
-  <tagName>aeiou</tagName>
-</null></code></pre>
+    <pre class="example"><code>null</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -489,7 +663,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        
+        <a href="#GlobalTagMapSetDto">GlobalTagMapSetDto</a>
   </div> <!-- method -->
   <hr/>
   <h1><a name="Globaltags">Globaltags</a></h1>
@@ -535,17 +709,17 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
-  "insertionTimeMilli" : 123456789,
-  "snapshotTimeMilli" : 123456789,
+  "insertionTimeMilli" : 1,
+  "snapshotTimeMilli" : 6,
   "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "workflow" : "aeiou",
-  "scenario" : "aeiou",
-  "release" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "validity" : 1.3579000000000001069366817318950779736042022705078125,
+  "workflow" : "workflow",
+  "scenario" : "scenario",
+  "release" : "release",
+  "name" : "name",
+  "description" : "description",
+  "validity" : 0.80082819046101150206595775671303272247314453125,
   "snapshotTime" : "2000-01-23T04:56:07.000+00:00",
-  "type" : "aeiou"
+  "type" : "type"
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -556,7 +730,7 @@ font-style: italic;
     </ul>
 
     <h3 class="field-label">Responses</h3>
-    <h4 class="field-label">200</h4>
+    <h4 class="field-label">201</h4>
     successful operation
         <a href="#GlobalTagDto">GlobalTagDto</a>
   </div> <!-- method -->
@@ -582,7 +756,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#GlobalTagDto">GlobalTagDto</a>
+      <a href="#GlobalTagSetDto">GlobalTagSetDto</a>
       
     </div>
 
@@ -590,34 +764,10 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
-  "insertionTimeMilli" : 123456789,
-  "snapshotTimeMilli" : 123456789,
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "workflow" : "aeiou",
-  "scenario" : "aeiou",
-  "release" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "validity" : 1.3579000000000001069366817318950779736042022705078125,
-  "snapshotTime" : "2000-01-23T04:56:07.000+00:00",
-  "type" : "aeiou"
-}</code></pre>
+    <pre class="example"><code>""</code></pre>
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/xml</div>
-    <pre class="example"><code><null>
-  <name>aeiou</name>
-  <validity>1.3579</validity>
-  <description>aeiou</description>
-  <release>aeiou</release>
-  <insertionTime>2000-01-23T04:56:07.000Z</insertionTime>
-  <snapshotTime>2000-01-23T04:56:07.000Z</snapshotTime>
-  <scenario>aeiou</scenario>
-  <workflow>aeiou</workflow>
-  <type>aeiou</type>
-  <snapshotTimeMilli>123456789</snapshotTimeMilli>
-  <insertionTimeMilli>123456789</insertionTimeMilli>
-</null></code></pre>
+    <pre class="example"><code>null</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -630,7 +780,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        <a href="#GlobalTagDto">GlobalTagDto</a>
+        <a href="#GlobalTagSetDto">GlobalTagSetDto</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="findGlobalTagFetchTags"/>
@@ -638,7 +788,7 @@ font-style: italic;
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /globaltags/{name}/tags</code></pre></div>
     <div class="method-summary">Finds a TagDtos lists associated to the global tag name in input. (<span class="nickname">findGlobalTagFetchTags</span>)</div>
-    <div class="method-notes">This method allows to trace a global tag.Arguments: record&#x3D;&lt;record&gt; filter output by record, label&#x3D;&lt;label&gt; filter output by label</div>
+    <div class="method-notes">This method allows to trace a global tag.Arguments: record=<record> filter output by record, label=<label> filter output by label</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -654,15 +804,15 @@ font-style: italic;
     <div class="field-items">
       <div class="param">record (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; record:  the record string {} </div><div class="param">label (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; record:  the record string {} default: none </div><div class="param">label (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; label:  the label string {} </div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; label:  the label string {} default: none </div>
     </div>  <!-- field-items -->
 
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#TagDto">TagDto</a>]
+      <a href="#TagSetDto">TagSetDto</a>
       
     </div>
 
@@ -670,30 +820,10 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>[ {
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "lastValidatedTime" : 1.3579000000000001069366817318950779736042022705078125,
-  "modificationTime" : "2000-01-23T04:56:07.000+00:00",
-  "name" : "aeiou",
-  "timeType" : "aeiou",
-  "synchronization" : "aeiou",
-  "description" : "aeiou",
-  "endOfValidity" : 1.3579000000000001069366817318950779736042022705078125,
-  "objectType" : "aeiou"
-} ]</code></pre>
+    <pre class="example"><code>""</code></pre>
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/xml</div>
-    <pre class="example"><code><null>
-  <name>aeiou</name>
-  <timeType>aeiou</timeType>
-  <objectType>aeiou</objectType>
-  <synchronization>aeiou</synchronization>
-  <description>aeiou</description>
-  <lastValidatedTime>1.3579</lastValidatedTime>
-  <endOfValidity>1.3579</endOfValidity>
-  <insertionTime>2000-01-23T04:56:07.000Z</insertionTime>
-  <modificationTime>2000-01-23T04:56:07.000Z</modificationTime>
-</null></code></pre>
+    <pre class="example"><code>null</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -706,7 +836,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        
+        <a href="#TagSetDto">TagSetDto</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="listGlobalTags"/>
@@ -714,7 +844,7 @@ font-style: italic;
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /globaltags</code></pre></div>
     <div class="method-summary">Finds a GlobalTagDtos lists. (<span class="nickname">listGlobalTags</span>)</div>
-    <div class="method-notes">This method allows to perform search and sorting.Arguments: by&#x3D;&lt;pattern&gt;, page&#x3D;{ipage}, size&#x3D;{isize}, sort&#x3D;&lt;sortpattern&gt;. The pattern &lt;pattern&gt; is in the form &lt;param-name&gt;&lt;operation&gt;&lt;param-value&gt;       &lt;param-name&gt; is the name of one of the fields in the dto       &lt;operation&gt; can be [&lt; : &gt;] ; for string use only [:]        &lt;param-value&gt; depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for &lt;pattern&gt;.      The pattern &lt;sortpattern&gt; is &lt;field&gt;:[DESC|ASC]</div>
+    <div class="method-notes">This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [&lt; : &gt;] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]</div>
 
 
 
@@ -736,7 +866,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#GlobalTagDto">GlobalTagDto</a>]
+      <a href="#GlobalTagSetDto">GlobalTagSetDto</a>
       
     </div>
 
@@ -744,34 +874,10 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>[ {
-  "insertionTimeMilli" : 123456789,
-  "snapshotTimeMilli" : 123456789,
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "workflow" : "aeiou",
-  "scenario" : "aeiou",
-  "release" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "validity" : 1.3579000000000001069366817318950779736042022705078125,
-  "snapshotTime" : "2000-01-23T04:56:07.000+00:00",
-  "type" : "aeiou"
-} ]</code></pre>
+    <pre class="example"><code>""</code></pre>
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/xml</div>
-    <pre class="example"><code><null>
-  <name>aeiou</name>
-  <validity>1.3579</validity>
-  <description>aeiou</description>
-  <release>aeiou</release>
-  <insertionTime>2000-01-23T04:56:07.000Z</insertionTime>
-  <snapshotTime>2000-01-23T04:56:07.000Z</snapshotTime>
-  <scenario>aeiou</scenario>
-  <workflow>aeiou</workflow>
-  <type>aeiou</type>
-  <snapshotTimeMilli>123456789</snapshotTimeMilli>
-  <insertionTimeMilli>123456789</insertionTimeMilli>
-</null></code></pre>
+    <pre class="example"><code>null</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -784,7 +890,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        
+        <a href="#GlobalTagSetDto">GlobalTagSetDto</a>
   </div> <!-- method -->
   <hr/>
   <h1><a name="Iovs">Iovs</a></h1>
@@ -825,9 +931,9 @@ font-style: italic;
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "payloadHash" : "aeiou",
-  "tagName" : "aeiou",
-  "since" : 1.3579000000000001069366817318950779736042022705078125
+  "payloadHash" : "payloadHash",
+  "tagName" : "tagName",
+  "since" : 0.80082819046101150206595775671303272247314453125
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -838,7 +944,7 @@ font-style: italic;
     </ul>
 
     <h3 class="field-label">Responses</h3>
-    <h4 class="field-label">200</h4>
+    <h4 class="field-label">201</h4>
     successful operation
         <a href="#IovDto">IovDto</a>
   </div> <!-- method -->
@@ -848,17 +954,21 @@ font-style: italic;
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs</code></pre></div>
     <div class="method-summary">Finds a IovDtos lists. (<span class="nickname">findAllIovs</span>)</div>
-    <div class="method-notes">This method allows to perform search by tagname and sorting.Arguments: tagname&#x3D;{a tag name}, page&#x3D;{ipage}, size&#x3D;{isize},      sort&#x3D;&lt;pattern&gt;, where pattern is &lt;field&gt;:[DESC|ASC]</div>
+    <div class="method-notes">This method allows to perform search by tagname and sorting.Arguments: tagname={a tag name}, page={ipage}, size={isize},      sort=<pattern>, where pattern is <field>:[DESC|ASC]</div>
 
 
 
 
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
 
     <h3 class="field-label">Query parameters</h3>
     <div class="field-items">
-      <div class="param">tagname (optional)</div>
+      <div class="param">by (required)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; tagname: the tag name {none} default: none </div><div class="param">page (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; you need a mandatory tagname:xxxx. Additional field can be since or insertionTime rules. default: none </div><div class="param">page (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; page: the page number {0} default: 0 format: int32</div><div class="param">size (optional)</div>
 
@@ -870,7 +980,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#IovDto">IovDto</a>]
+      <a href="#IovSetDto">IovSetDto</a>
       
     </div>
 
@@ -878,12 +988,7 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>[ {
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "payloadHash" : "aeiou",
-  "tagName" : "aeiou",
-  "since" : 1.3579000000000001069366817318950779736042022705078125
-} ]</code></pre>
+    <pre class="example"><code>""</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -895,7 +1000,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        
+        <a href="#IovSetDto">IovSetDto</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getSize"/>
@@ -903,7 +1008,7 @@ font-style: italic;
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs/getSize</code></pre></div>
     <div class="method-summary">Get the number o iovs for the given tag. (<span class="nickname">getSize</span>)</div>
-    <div class="method-notes">This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname&#x3D;{a tag name}, snapshotTime&#x3D;{snapshot time in milliseconds (Long) from epoch}</div>
+    <div class="method-notes">This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname={a tag name}, snapshotTime={snapshot time in milliseconds (Long) from epoch}</div>
 
 
 
@@ -921,15 +1026,22 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
+      <a href="#CrestBaseResponse">CrestBaseResponse</a>
       
-      Long
     </div>
 
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>123456789</code></pre>
+    <pre class="example"><code>{
+  "filter" : {
+    "name" : "name"
+  },
+  "size" : 0,
+  "datatype" : "datatype",
+  "format" : "format"
+}</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -941,7 +1053,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        <a href="#Long">Long</a>
+        <a href="#CrestBaseResponse">CrestBaseResponse</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="getSizeByTag"/>
@@ -949,7 +1061,7 @@ font-style: italic;
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs/getSizeByTag</code></pre></div>
     <div class="method-summary">Get the number o iovs for tags matching pattern. (<span class="nickname">getSizeByTag</span>)</div>
-    <div class="method-notes">This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time added.Arguments: tagname&#x3D;{a tag name}</div>
+    <div class="method-notes">This method allows to select the count of iovs in a tag. Also possible to get the size of snapshot, if the time is added. Arguments: tagname={a tag name}</div>
 
 
 
@@ -965,7 +1077,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#TagSummaryDto">TagSummaryDto</a>]
+      <a href="#TagSummarySetDto">TagSummarySetDto</a>
       
     </div>
 
@@ -973,10 +1085,7 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>[ {
-  "tagname" : "aeiou",
-  "niovs" : 123456789
-} ]</code></pre>
+    <pre class="example"><code>""</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -988,7 +1097,59 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        
+        <a href="#TagSummarySetDto">TagSummarySetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="lastIov"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs/lastIov</code></pre></div>
+    <div class="method-summary">Select last iov for a given tagname and before a given since. (<span class="nickname">lastIov</span>)</div>
+    <div class="method-notes">This method allows to select the last iov in a tag, before a given time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, snapshot={snapshot time as long}</div>
+
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">tagname (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; tagname: the tag name {none} default: none </div><div class="param">since (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; since: the since time default: now </div><div class="param">snapshot (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; snapshot: the snapshot time {0} default: 0 format: int64</div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#IovSetDto">IovSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#IovSetDto">IovSetDto</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="selectGroups"/>
@@ -996,7 +1157,7 @@ font-style: italic;
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs/selectGroups</code></pre></div>
     <div class="method-summary">Select groups for a given tagname. (<span class="nickname">selectGroups</span>)</div>
-    <div class="method-notes">This method allows to select a list of groups.Arguments: tagname&#x3D;{a tag name}, snapshot&#x3D;{snapshot time as long}</div>
+    <div class="method-notes">This method allows to select a list of groups.Arguments: tagname={a tag name}, snapshot={snapshot time as long}</div>
 
 
 
@@ -1014,7 +1175,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#GroupDto">GroupDto</a>
+      <a href="#IovSetDto">IovSetDto</a>
       
     </div>
 
@@ -1022,9 +1183,7 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
-  "groups" : [ 1.3579000000000001069366817318950779736042022705078125 ]
-}</code></pre>
+    <pre class="example"><code>""</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -1036,19 +1195,23 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        <a href="#GroupDto">GroupDto</a>
+        <a href="#IovSetDto">IovSetDto</a>
   </div> <!-- method -->
   <hr/>
-  <div class="method"><a name="selectIovs"/>
+  <div class="method"><a name="selectIovPayloads"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
-    <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs/selectIovs</code></pre></div>
-    <div class="method-summary">Select iovs for a given tagname and in a given range. (<span class="nickname">selectIovs</span>)</div>
-    <div class="method-notes">This method allows to select a list of iovs in a tag, using a given range in time and (optionally) for a given snapshot time.Arguments: tagname&#x3D;{a tag name}, since&#x3D;{since time as string}, until&#x3D;{until time as string}, snapshot&#x3D;{snapshot time as long}</div>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs/selectIovPayloads</code></pre></div>
+    <div class="method-summary">Select iovs and payload meta info for a given tagname and in a given range. (<span class="nickname">selectIovPayloads</span>)</div>
+    <div class="method-notes">This method allows to select a list of iovs+payload meta in a tag, using a given range in time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, until={until time as string}, snapshot={snapshot time as long}</div>
 
 
 
 
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
 
     <h3 class="field-label">Query parameters</h3>
     <div class="field-items">
@@ -1066,7 +1229,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#IovDto">IovDto</a>]
+      <a href="#IovPayloadSetDto">IovPayloadSetDto</a>
       
     </div>
 
@@ -1074,12 +1237,7 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>[ {
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "payloadHash" : "aeiou",
-  "tagName" : "aeiou",
-  "since" : 1.3579000000000001069366817318950779736042022705078125
-} ]</code></pre>
+    <pre class="example"><code>""</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -1091,7 +1249,61 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        
+        <a href="#IovPayloadSetDto">IovPayloadSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="selectIovs"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs/selectIovs</code></pre></div>
+    <div class="method-summary">Select iovs for a given tagname and in a given range. (<span class="nickname">selectIovs</span>)</div>
+    <div class="method-notes">This method allows to select a list of iovs in a tag, using a given range in time and (optionally) for a given snapshot time.Arguments: tagname={a tag name}, since={since time as string}, until={until time as string}, snapshot={snapshot time as long}</div>
+
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">tagname (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; tagname: the tag name {none} default: none </div><div class="param">since (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; since: the since time as a string {0} default: 0 </div><div class="param">until (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; until: the until time as a string {INF} default: INF </div><div class="param">snapshot (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; snapshot: the snapshot time {0} default: 0 format: int64</div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#IovSetDto">IovSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#IovSetDto">IovSetDto</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="selectSnapshot"/>
@@ -1099,7 +1311,7 @@ font-style: italic;
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /iovs/selectSnapshot</code></pre></div>
     <div class="method-summary">Select snapshot for a given tagname and insertion time. (<span class="nickname">selectSnapshot</span>)</div>
-    <div class="method-notes">This method allows to select a list of all iovs in a tag, using (optionally) a given snapshot time.Arguments: tagname&#x3D;{a tag name}, snapshot&#x3D;{snapshot time as long}</div>
+    <div class="method-notes">This method allows to select a list of all iovs in a tag, using (optionally) a given snapshot time.Arguments: tagname={a tag name}, snapshot={snapshot time as long}</div>
 
 
 
@@ -1117,7 +1329,102 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#IovDto">IovDto</a>]
+      <a href="#IovSetDto">IovSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#IovSetDto">IovSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="storeBatchIovMultiForm"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /iovs/storebatch</code></pre></div>
+    <div class="method-summary">Create many IOVs in the database, associated to a tag name. (<span class="nickname">storeBatchIovMultiForm</span>)</div>
+    <div class="method-notes">This method allows to insert multiple IOVs. Arguments: tagname,end time.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#IovSetDto">IovSetDto</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash; A json string that is used to construct a IovSetDto object. </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#IovSetDto">IovSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    successful operation
+        <a href="#IovSetDto">IovSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Monitoring">Monitoring</a></h1>
+  <div class="method"><a name="listPayloadTagInfo"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /monitoring/payloads</code></pre></div>
+    <div class="method-summary">Retrieves monitoring information on payload as a list of PayloadTagInfoDtos. (<span class="nickname">listPayloadTagInfo</span>)</div>
+    <div class="method-notes">This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [&lt; : &gt;] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">tagname (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; tagname: the search pattern {none} default: none </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#PayloadTagInfoDto">PayloadTagInfoDto</a>]
       
     </div>
 
@@ -1126,17 +1433,31 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>[ {
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "payloadHash" : "aeiou",
-  "tagName" : "aeiou",
-  "since" : 1.3579000000000001069366817318950779736042022705078125
+  "totvolume" : 6.0274563,
+  "tagname" : "tagname",
+  "avgvolume" : 1.4658129,
+  "niovs" : 0
+}, {
+  "totvolume" : 6.0274563,
+  "tagname" : "tagname",
+  "avgvolume" : 1.4658129,
+  "niovs" : 0
 } ]</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/xml</div>
+    <pre class="example"><code><null>
+  <tagname>aeiou</tagname>
+  <niovs>123</niovs>
+  <totvolume>1.3579</totvolume>
+  <avgvolume>1.3579</avgvolume>
+</null></code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
     <ul>
       <li><code>application/json</code></li>
+      <li><code>application/xml</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1182,12 +1503,13 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
-  "data" : [ "" ],
+  "size" : 0,
+  "data" : "data",
   "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "streamerInfo" : [ "" ],
-  "version" : "aeiou",
-  "hash" : "aeiou",
-  "objectType" : "aeiou"
+  "streamerInfo" : "streamerInfo",
+  "version" : "version",
+  "hash" : "hash",
+  "objectType" : "objectType"
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -1240,12 +1562,13 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
-  "data" : [ "" ],
+  "size" : 0,
+  "data" : "data",
   "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "streamerInfo" : [ "" ],
-  "version" : "aeiou",
-  "hash" : "aeiou",
-  "objectType" : "aeiou"
+  "streamerInfo" : "streamerInfo",
+  "version" : "version",
+  "hash" : "hash",
+  "objectType" : "objectType"
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -1261,21 +1584,309 @@ font-style: italic;
         <a href="#PayloadDto">PayloadDto</a>
   </div> <!-- method -->
   <hr/>
-  <div class="method"><a name="getBlob"/>
+  <div class="method"><a name="getPayload"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
-    <pre class="get"><code class="huge"><span class="http-method">get</span> /payloads/{hash}/data</code></pre></div>
-    <div class="method-summary">Finds payload data by hash; the payload object contains the real BLOB. (<span class="nickname">getBlob</span>)</div>
-    <div class="method-notes">Select one payload at the time, no regexp searches allowed here</div>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /payloads/{hash}</code></pre></div>
+    <div class="method-summary">Finds a payload resource associated to the hash. (<span class="nickname">getPayload</span>)</div>
+    <div class="method-notes">This method retrieves a payload resource.Arguments: hash=<hash> the hash of the payload</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
       <div class="param">hash (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; hash of the payload </div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; hash:  the hash of the payload </div>
     </div>  <!-- field-items -->
 
 
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/xml</div>
+    <pre class="example"><code>aeiou</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/octet-stream</code></li>
+      <li><code>application/json</code></li>
+      <li><code>application/xml</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#String">String</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getPayloadMetaInfo"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /payloads/{hash}/meta</code></pre></div>
+    <div class="method-summary">Finds a payload resource associated to the hash. (<span class="nickname">getPayloadMetaInfo</span>)</div>
+    <div class="method-notes">This method retrieves metadata of the payload resource.Arguments: hash=<hash> the hash of the payload</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">hash (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; hash:  the hash of the payload </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#PayloadSetDto">PayloadSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/xml</div>
+    <pre class="example"><code>null</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+      <li><code>application/xml</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#PayloadSetDto">PayloadSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="storePayloadBatchWithIovMultiForm"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /payloads/storebatch</code></pre></div>
+    <div class="method-summary">Create many Payloads in the database, associated to a given iov since list and tag name. (<span class="nickname">storePayloadBatchWithIovMultiForm</span>)</div>
+    <div class="method-notes">This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>multipart/form-data</code></li>
+    </ul>
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Form parameters</h3>
+    <div class="field-items">
+      <div class="param">tag (required)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The tag name </div><div class="param">iovsetupload (required)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash;  </div><div class="param">endtime (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The end time to be used for protection at tag level </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#IovSetDto">IovSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    successful operation
+        <a href="#IovSetDto">IovSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="storePayloadWithIovMultiForm"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /payloads/store</code></pre></div>
+    <div class="method-summary">Create a Payload in the database, associated to a given iov since and tag name. (<span class="nickname">storePayloadWithIovMultiForm</span>)</div>
+    <div class="method-notes">This method allows to insert a Payload and an IOV. Arguments: since,tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>multipart/form-data</code></li>
+    </ul>
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Form parameters</h3>
+    <div class="field-items">
+      <div class="param">file (required)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The payload file as a stream </div><div class="param">tag (required)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The tag name </div><div class="param">since (required)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The since time </div><div class="param">endtime (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The end time to be used for protection at tag level </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#HTTPResponse">HTTPResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "action" : "action",
+  "id" : "id",
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#HTTPResponse">HTTPResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="uploadPayloadBatchWithIovMultiForm"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /payloads/uploadbatch</code></pre></div>
+    <div class="method-summary">Create many Payloads in the database, associated to a given iov since list and tag name. (<span class="nickname">uploadPayloadBatchWithIovMultiForm</span>)</div>
+    <div class="method-notes">This method allows to insert a Payload and an IOV. Arguments: tagname,stream,end time. The header parameter X-Crest-PayloadFormat can be : JSON (default) or TXT or BLOB</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>multipart/form-data</code></li>
+    </ul>
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Form parameters</h3>
+    <div class="field-items">
+      <div class="param">files (required)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The files to upload </div><div class="param">tag (required)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The tag name </div><div class="param">iovsetupload (required)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash;  </div><div class="param">endtime (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash; The end time to be used for protection at tag level </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#IovSetDto">IovSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    successful operation
+        <a href="#IovSetDto">IovSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Runinfo">Runinfo</a></h1>
+  <div class="method"><a name="createRunInfo"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /runinfo</code></pre></div>
+    <div class="method-summary">Create an entry for run information. (<span class="nickname">createRunInfo</span>)</div>
+    <div class="method-notes">Run informations go into a separate table.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#RunInfoSetDto">RunInfoSetDto</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash; A json string that is used to construct one or more runinfodto object: { run: xxx, ... } </div>
+
+    </div>  <!-- field-items -->
 
 
 
@@ -1289,14 +1900,15 @@ font-style: italic;
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: </div>
-    <pre class="example"><code></code></pre>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
     <ul>
-      <li><code>application/octet-stream</code></li>
+      <li><code>application/json</code></li>
+      <li><code>text/plain</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1305,28 +1917,34 @@ font-style: italic;
         <a href="#String">String</a>
   </div> <!-- method -->
   <hr/>
-  <div class="method"><a name="getPayload"/>
+  <div class="method"><a name="listRunInfo"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
-    <pre class="get"><code class="huge"><span class="http-method">get</span> /payloads/{hash}</code></pre></div>
-    <div class="method-summary">Finds a payload resource associated to the hash. (<span class="nickname">getPayload</span>)</div>
-    <div class="method-notes">This method retrieves a payload resource.Arguments: hash&#x3D;&lt;hash&gt; the hash of the payload</div>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /runinfo</code></pre></div>
+    <div class="method-summary">Finds a RunLumiInfoDto lists. (<span class="nickname">listRunInfo</span>)</div>
+    <div class="method-notes">This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [&lt; : &gt;] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]</div>
 
-    <h3 class="field-label">Path parameters</h3>
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
     <div class="field-items">
-      <div class="param">hash (required)</div>
+      <div class="param">by (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; hash:  the hash of the payload </div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; by: the search pattern {none} default: none </div><div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; page: the page number {0} default: 0 format: int32</div><div class="param">size (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; size: the page size {1000} default: 1000 format: int32</div><div class="param">sort (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; sort: the sort pattern {runNumber:ASC} default: runNumber:ASC </div>
     </div>  <!-- field-items -->
-
-
-
-
 
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#PayloadDto">PayloadDto</a>
+      <a href="#RunInfoSetDto">RunInfoSetDto</a>
       
     </div>
 
@@ -1334,24 +1952,10 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
-  "data" : [ "" ],
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "streamerInfo" : [ "" ],
-  "version" : "aeiou",
-  "hash" : "aeiou",
-  "objectType" : "aeiou"
-}</code></pre>
+    <pre class="example"><code>""</code></pre>
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/xml</div>
-    <pre class="example"><code><null>
-  <hash>aeiou</hash>
-  <version>aeiou</version>
-  <objectType>aeiou</objectType>
-  <data></data>
-  <streamerInfo></streamerInfo>
-  <insertionTime>2000-01-23T04:56:07.000Z</insertionTime>
-</null></code></pre>
+    <pre class="example"><code>null</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -1364,31 +1968,37 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        <a href="#PayloadDto">PayloadDto</a>
+        <a href="#RunInfoSetDto">RunInfoSetDto</a>
   </div> <!-- method -->
   <hr/>
-  <div class="method"><a name="getPayloadMetaInfo"/>
+  <div class="method"><a name="selectRunInfo"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
-    <pre class="get"><code class="huge"><span class="http-method">get</span> /payloads/{hash}/meta</code></pre></div>
-    <div class="method-summary">Finds a payload resource associated to the hash. (<span class="nickname">getPayloadMetaInfo</span>)</div>
-    <div class="method-notes">This method retrieves metadata of the payload resource.Arguments: hash&#x3D;&lt;hash&gt; the hash of the payload</div>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /runinfo/select</code></pre></div>
+    <div class="method-summary">Finds a RunLumiInfoDto lists using parameters. (<span class="nickname">selectRunInfo</span>)</div>
+    <div class="method-notes">This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [&lt; : &gt;] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]</div>
 
-    <h3 class="field-label">Path parameters</h3>
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
     <div class="field-items">
-      <div class="param">hash (required)</div>
+      <div class="param">from (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; hash:  the hash of the payload </div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; from: the starting time or run default: none </div><div class="param">to (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; to: the ending time or run default: none </div><div class="param">format (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; format: the format to digest previous arguments [iso], [number]. Time(iso) = yyyymmddhhmiss, Run(number) = runnumber, Time(number) = milliseconds default: number </div><div class="param">mode (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; mode: the mode for the request : [daterange] or [runrange]. Interprets default: runrange </div>
     </div>  <!-- field-items -->
-
-
-
-
 
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#PayloadDto">PayloadDto</a>
+      <a href="#RunInfoSetDto">RunInfoSetDto</a>
       
     </div>
 
@@ -1396,24 +2006,10 @@ font-style: italic;
 
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
-  "data" : [ "" ],
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "streamerInfo" : [ "" ],
-  "version" : "aeiou",
-  "hash" : "aeiou",
-  "objectType" : "aeiou"
-}</code></pre>
+    <pre class="example"><code>""</code></pre>
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/xml</div>
-    <pre class="example"><code><null>
-  <hash>aeiou</hash>
-  <version>aeiou</version>
-  <objectType>aeiou</objectType>
-  <data></data>
-  <streamerInfo></streamerInfo>
-  <insertionTime>2000-01-23T04:56:07.000Z</insertionTime>
-</null></code></pre>
+    <pre class="example"><code>null</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
@@ -1426,7 +2022,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     successful operation
-        <a href="#PayloadDto">PayloadDto</a>
+        <a href="#RunInfoSetDto">RunInfoSetDto</a>
   </div> <!-- method -->
   <hr/>
   <h1><a name="Tags">Tags</a></h1>
@@ -1466,15 +2062,15 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
+  "payloadSpec" : "payloadSpec",
   "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "lastValidatedTime" : 1.3579000000000001069366817318950779736042022705078125,
+  "lastValidatedTime" : 0.80082819046101150206595775671303272247314453125,
   "modificationTime" : "2000-01-23T04:56:07.000+00:00",
-  "name" : "aeiou",
-  "timeType" : "aeiou",
-  "synchronization" : "aeiou",
-  "description" : "aeiou",
-  "endOfValidity" : 1.3579000000000001069366817318950779736042022705078125,
-  "objectType" : "aeiou"
+  "name" : "name",
+  "timeType" : "timeType",
+  "synchronization" : "synchronization",
+  "description" : "description",
+  "endOfValidity" : 6.02745618307040320615897144307382404804229736328125
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -1511,6 +2107,115 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
+      <a href="#TagSetDto">TagSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/xml</div>
+    <pre class="example"><code>null</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+      <li><code>application/xml</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#TagSetDto">TagSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="listTags"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /tags</code></pre></div>
+    <div class="method-summary">Finds a TagDtos lists. (<span class="nickname">listTags</span>)</div>
+    <div class="method-notes">This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [&lt; : &gt;] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">by (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; by: the search pattern {none} default: none </div><div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; page: the page number {0} default: 0 format: int32</div><div class="param">size (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; size: the page size {1000} default: 1000 format: int32</div><div class="param">sort (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; sort: the sort pattern {name:ASC} default: name:ASC </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#TagSetDto">TagSetDto</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>""</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/xml</div>
+    <pre class="example"><code>null</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+      <li><code>application/xml</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    successful operation
+        <a href="#TagSetDto">TagSetDto</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateTag"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /tags/{name}</code></pre></div>
+    <div class="method-summary">Update a TagDto by name (<span class="nickname">updateTag</span>)</div>
+    <div class="method-notes">This method will search for a tag with the given name, and update its content for the provided body fields. Only the following fields can be updated: description, timeType, objectTime, endOfValidity, lastValidatedTime.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">name (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; name: the tag name </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#GenericMap">GenericMap</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash; A json string that is used to construct a map of updatable fields: { description: xxx, ... } </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
       <a href="#TagDto">TagDto</a>
       
     </div>
@@ -1520,22 +2225,22 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
+  "payloadSpec" : "payloadSpec",
   "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "lastValidatedTime" : 1.3579000000000001069366817318950779736042022705078125,
+  "lastValidatedTime" : 0.80082819046101150206595775671303272247314453125,
   "modificationTime" : "2000-01-23T04:56:07.000+00:00",
-  "name" : "aeiou",
-  "timeType" : "aeiou",
-  "synchronization" : "aeiou",
-  "description" : "aeiou",
-  "endOfValidity" : 1.3579000000000001069366817318950779736042022705078125,
-  "objectType" : "aeiou"
+  "name" : "name",
+  "timeType" : "timeType",
+  "synchronization" : "synchronization",
+  "description" : "description",
+  "endOfValidity" : 6.02745618307040320615897144307382404804229736328125
 }</code></pre>
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/xml</div>
     <pre class="example"><code><null>
   <name>aeiou</name>
   <timeType>aeiou</timeType>
-  <objectType>aeiou</objectType>
+  <payloadSpec>aeiou</payloadSpec>
   <synchronization>aeiou</synchronization>
   <description>aeiou</description>
   <lastValidatedTime>1.3579</lastValidatedTime>
@@ -1558,98 +2263,70 @@ font-style: italic;
         <a href="#TagDto">TagDto</a>
   </div> <!-- method -->
   <hr/>
-  <div class="method"><a name="listTags"/>
-    <div class="method-path">
-    <a class="up" href="#__Methods">Up</a>
-    <pre class="get"><code class="huge"><span class="http-method">get</span> /tags</code></pre></div>
-    <div class="method-summary">Finds a TagDtos lists. (<span class="nickname">listTags</span>)</div>
-    <div class="method-notes">This method allows to perform search and sorting.Arguments: by&#x3D;&lt;pattern&gt;, page&#x3D;{ipage}, size&#x3D;{isize}, sort&#x3D;&lt;sortpattern&gt;. The pattern &lt;pattern&gt; is in the form &lt;param-name&gt;&lt;operation&gt;&lt;param-value&gt;       &lt;param-name&gt; is the name of one of the fields in the dto       &lt;operation&gt; can be [&lt; : &gt;] ; for string use only [:]        &lt;param-value&gt; depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for &lt;pattern&gt;.      The pattern &lt;sortpattern&gt; is &lt;field&gt;:[DESC|ASC]</div>
 
-
-
-
-
-    <h3 class="field-label">Query parameters</h3>
-    <div class="field-items">
-      <div class="param">by (optional)</div>
-
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; by: the search pattern {none} default: none </div><div class="param">page (optional)</div>
-
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; page: the page number {0} default: 0 format: int32</div><div class="param">size (optional)</div>
-
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; size: the page size {1000} default: 1000 format: int32</div><div class="param">sort (optional)</div>
-
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; sort: the sort pattern {name:ASC} default: name:ASC </div>
-    </div>  <!-- field-items -->
-
-
-    <h3 class="field-label">Return type</h3>
-    <div class="return-type">
-      array[<a href="#TagDto">TagDto</a>]
-      
-    </div>
-
-    <!--Todo: process Response Object and its headers, schema, examples -->
-
-    <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>[ {
-  "insertionTime" : "2000-01-23T04:56:07.000+00:00",
-  "lastValidatedTime" : 1.3579000000000001069366817318950779736042022705078125,
-  "modificationTime" : "2000-01-23T04:56:07.000+00:00",
-  "name" : "aeiou",
-  "timeType" : "aeiou",
-  "synchronization" : "aeiou",
-  "description" : "aeiou",
-  "endOfValidity" : 1.3579000000000001069366817318950779736042022705078125,
-  "objectType" : "aeiou"
-} ]</code></pre>
-    <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/xml</div>
-    <pre class="example"><code><null>
-  <name>aeiou</name>
-  <timeType>aeiou</timeType>
-  <objectType>aeiou</objectType>
-  <synchronization>aeiou</synchronization>
-  <description>aeiou</description>
-  <lastValidatedTime>1.3579</lastValidatedTime>
-  <endOfValidity>1.3579</endOfValidity>
-  <insertionTime>2000-01-23T04:56:07.000Z</insertionTime>
-  <modificationTime>2000-01-23T04:56:07.000Z</modificationTime>
-</null></code></pre>
-
-    <h3 class="field-label">Produces</h3>
-    This API call produces the following media types according to the <span class="header">Accept</span> request header;
-    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
-    <ul>
-      <li><code>application/json</code></li>
-      <li><code>application/xml</code></li>
-    </ul>
-
-    <h3 class="field-label">Responses</h3>
-    <h4 class="field-label">200</h4>
-    successful operation
-        
-  </div> <!-- method -->
-  <hr/>
-
-  <div class="up"><a href="#__Models">Up</a></div>
   <h2><a name="__Models">Models</a></h2>
   [ Jump to <a href="#__Methods">Methods</a> ]
 
   <h3>Table of Contents</h3>
   <ol>
-    <li><a href="#GlobalTagDto"><code>GlobalTagDto</code></a></li>
-    <li><a href="#GlobalTagMapDto"><code>GlobalTagMapDto</code></a></li>
-    <li><a href="#GroupDto"><code>GroupDto</code></a></li>
-    <li><a href="#IovDto"><code>IovDto</code></a></li>
-    <li><a href="#PayloadDto"><code>PayloadDto</code></a></li>
-    <li><a href="#TagDto"><code>TagDto</code></a></li>
-    <li><a href="#TagSummaryDto"><code>TagSummaryDto</code></a></li>
+    <li><a href="#CrestBaseResponse"><code>CrestBaseResponse</code> - </a></li>
+    <li><a href="#FolderDto"><code>FolderDto</code> - </a></li>
+    <li><a href="#GenericMap"><code>GenericMap</code> - </a></li>
+    <li><a href="#GlobalTagDto"><code>GlobalTagDto</code> - </a></li>
+    <li><a href="#GlobalTagMapDto"><code>GlobalTagMapDto</code> - </a></li>
+    <li><a href="#GroupDto"><code>GroupDto</code> - </a></li>
+    <li><a href="#HTTPResponse"><code>HTTPResponse</code> - </a></li>
+    <li><a href="#IovDto"><code>IovDto</code> - </a></li>
+    <li><a href="#IovPayloadDto"><code>IovPayloadDto</code> - </a></li>
+    <li><a href="#PayloadDto"><code>PayloadDto</code> - </a></li>
+    <li><a href="#PayloadTagInfoDto"><code>PayloadTagInfoDto</code> - </a></li>
+    <li><a href="#RunInfoDto"><code>RunInfoDto</code> - </a></li>
+    <li><a href="#RunLumiInfoDto"><code>RunLumiInfoDto</code> - </a></li>
+    <li><a href="#TagDto"><code>TagDto</code> - </a></li>
+    <li><a href="#TagSummaryDto"><code>TagSummaryDto</code> - </a></li>
+    <li><a href="#FolderSetDto"><code>FolderSetDto</code> - </a></li>
+    <li><a href="#GlobalTagMapSetDto"><code>GlobalTagMapSetDto</code> - </a></li>
+    <li><a href="#GlobalTagSetDto"><code>GlobalTagSetDto</code> - </a></li>
+    <li><a href="#IovPayloadSetDto"><code>IovPayloadSetDto</code> - </a></li>
+    <li><a href="#IovSetDto"><code>IovSetDto</code> - </a></li>
+    <li><a href="#PayloadSetDto"><code>PayloadSetDto</code> - </a></li>
+    <li><a href="#RunInfoSetDto"><code>RunInfoSetDto</code> - </a></li>
+    <li><a href="#RunLumiSetDto"><code>RunLumiSetDto</code> - </a></li>
+    <li><a href="#TagSetDto"><code>TagSetDto</code> - </a></li>
+    <li><a href="#TagSummarySetDto"><code>TagSummarySetDto</code> - </a></li>
   </ol>
 
   <div class="model">
-    <h3 class="field-label"><a name="GlobalTagDto">GlobalTagDto - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="CrestBaseResponse"><code>CrestBaseResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="FolderDto"><code>FolderDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">nodeFullpath (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">schemaName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">nodeName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">nodeDescription (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">tagPattern (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">groupRole (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="GenericMap"><code>GenericMap</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="GlobalTagDto"><code>GlobalTagDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
@@ -1666,7 +2343,7 @@ font-style: italic;
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="GlobalTagMapDto">GlobalTagMapDto - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="GlobalTagMapDto"><code>GlobalTagMapDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">globalTagName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
@@ -1676,41 +2353,93 @@ font-style: italic;
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="GroupDto">GroupDto - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="GroupDto"><code>GroupDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">groups (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">array[BigDecimal]</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="IovDto">IovDto - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="HTTPResponse"><code>HTTPResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>general response object that can be used for POST and PUT methods</div>
+    <div class="field-items">
+      <div class="param">message </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">action </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Action performed by the server </div>
+<div class="param">code </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Code of the response </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Can be used to store the ID of the generated object </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="IovDto"><code>IovDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">tagName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">since (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
+<div class="param">since </div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
 <div class="param">insertionTime (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">payloadHash </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="IovPayloadDto"><code>IovPayloadDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">since (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
+<div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">objectType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
 <div class="param">payloadHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="PayloadDto">PayloadDto - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="PayloadDto"><code>PayloadDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">hash (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">objectType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#ByteArray">array[byte[]]</a></span>  format: byte</div>
-<div class="param">streamerInfo (optional)</div><div class="param-desc"><span class="param-type"><a href="#ByteArray">array[byte[]]</a></span>  format: byte</div>
+<div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
+<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#ByteArray">byte[]</a></span>  format: byte</div>
+<div class="param">streamerInfo (optional)</div><div class="param-desc"><span class="param-type"><a href="#ByteArray">byte[]</a></span>  format: byte</div>
 <div class="param">insertionTime (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="TagDto">TagDto - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="PayloadTagInfoDto"><code>PayloadTagInfoDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">tagname (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">niovs (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">totvolume (optional)</div><div class="param-desc"><span class="param-type"><a href="#float">Float</a></span>  format: float</div>
+<div class="param">avgvolume (optional)</div><div class="param-desc"><span class="param-type"><a href="#float">Float</a></span>  format: float</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RunInfoDto"><code>RunInfoDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">runNumber (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
+<div class="param">startTime (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">endTime (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RunLumiInfoDto"><code>RunLumiInfoDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">since (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
+<div class="param">run (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
+<div class="param">lb (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
+<div class="param">starttime (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
+<div class="param">endtime (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="TagDto"><code>TagDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">timeType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">objectType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">payloadSpec (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">synchronization (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">lastValidatedTime (optional)</div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span>  </div>
@@ -1720,11 +2449,121 @@ font-style: italic;
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="TagSummaryDto">TagSummaryDto - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="TagSummaryDto"><code>TagSummaryDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">tagname (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">niovs (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="FolderSetDto"><code>FolderSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An FolderSet containing FolderDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#FolderDto">array[FolderDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="GlobalTagMapSetDto"><code>GlobalTagMapSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An GlobalTagMapSet containing GlobalTagMapDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#GlobalTagMapDto">array[GlobalTagMapDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="GlobalTagSetDto"><code>GlobalTagSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An GlobalTagSet containing GlobalTagDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#GlobalTagDto">array[GlobalTagDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="IovPayloadSetDto"><code>IovPayloadSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An Set containing IovPayloadDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#IovPayloadDto">array[IovPayloadDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="IovSetDto"><code>IovSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An Set containing IovDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#IovDto">array[IovDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="PayloadSetDto"><code>PayloadSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An Set containing PayloadDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#PayloadDto">array[PayloadDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RunInfoSetDto"><code>RunInfoSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An RunInfoSet containing RunInfoDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#RunInfoDto">array[RunInfoDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RunLumiSetDto"><code>RunLumiSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An RunLumiSet containing RunLumiInfoDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#RunLumiInfoDto">array[RunLumiInfoDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="TagSetDto"><code>TagSetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An Set containing TagDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#TagDto">array[TagDto]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="TagSummarySetDto"><code>TagSummarySetDto</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An Set containing TagSummaryDto objects.</div>
+    <div class="field-items">
+      <div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">format </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">datatype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#GenericMap">GenericMap</a></span>  </div>
+<div class="param">resources (optional)</div><div class="param-desc"><span class="param-type"><a href="#TagSummaryDto">array[TagSummaryDto]</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   </body>
