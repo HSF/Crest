@@ -5,9 +5,6 @@
 # ===============================
 # Defaults
 spring:
- profiles:
-  include: default
-spring:
     profiles: pgsvom
     security:
       strategy: MODE_INHERITABLETHREADLOCAL

@@ -1,7 +1,9 @@
 # CrestDB
 #
 # VERSION       CrestDB-1.0
-FROM anapsix/alpine-java
+###FROM anapsix/alpine-java
+FROM openjdk:8u212-jre-alpine3.9
+
 MAINTAINER Andrea Formica
 
 ENV USR svom

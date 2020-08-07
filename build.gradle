@@ -35,6 +35,12 @@ swaggerSources {
       configFile = file('swagger_schemas/swagger/json/crestdb-config.json')
     }
   }
+  crestapidoc {
+    inputFile = file('./swagger_schemas/swagger/json/crestdb_full.json')
+	code {
+      language = 'html'
+    } 
+  }
   crestdb_client {
     inputFile = file('swagger_schemas/swagger/json/crestdb.json')
     code {
