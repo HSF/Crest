@@ -22,7 +22,7 @@
     <div class="level-item">
     <div class="content has-text-left">
       <p>
-        <b>Server: </b>{{ selectedserver.host }} / {{ selectedserver.url }}
+        <b>Server: </b>{{ selectedserver }}
       </p>
     </div>
   </div>
@@ -41,7 +41,7 @@
 export default {
   name: 'Footer',
   props : {
-    selectedserver : Object,
+    selectedserver : String,
     notiftype : String,
     notifytext : String,
   },

@@ -16,13 +16,12 @@ export default {
             state.selectedTag = name;
         },
         selectIov(state, payloadHash) {
-          console.log('selecting iov ',payloadHash)
           state.selectedIov = payloadHash;
           state.selectedPayloadLink = Vue.prototype.apiName+'/payloads/'+payloadHash;
         },
     },
     actions: {
-    	selectGlobalTag({commit}, name) {
+        selectGlobalTag({commit}, name) {
             commit('selectGlobalTag', name);
         },
         selectTag({commit}, name) {

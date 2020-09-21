@@ -8,13 +8,13 @@
 </b-tab-item>
 -->
 <b-tab-item label="GlobalTags">
-    <GlobalTagsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <GlobalTagsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="selectedserver" v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Tags">
-    <TagsPane v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <TagsPane v-bind:selectedserver="selectedserver" v-on:select-tab="selActive"/>
 </b-tab-item>
 <b-tab-item label="Iovs">
-    <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="hostbaseurl" v-on:select-tab="selActive"/>
+    <IovsPane v-bind:selectedtag="selectedtag" v-bind:selectedserver="selectedserver" v-on:select-tab="selActive"/>
 </b-tab-item>
 </b-tabs>
 </section>
@@ -28,7 +28,7 @@ import GlobalTagsPane from './GlobalTagsPane.vue'
 
   export default {
       props : {
-        selectedserver : Object
+        selectedserver : String
       },
       data : function() {
         return {

@@ -29,12 +29,15 @@
         <div v-if="radioButton === 'Search'">
           <CrestGlobalTagsTable v-on:select-tag="selectTab" />
         </div>
-        <div v-if="radioButton === 'Create'">
+        <div v-else>
           <GlobalTagForm/>
         </div>
+
+<!--    Disable the global tag map form    
         <div v-else>
           <GlobalTagMapForm/>
         </div>
+-->
       </div>
     </div>
 </div>
@@ -92,7 +95,7 @@ export default {
   },
   watch: {
       selectedGlobalTag: function() {
-          this.fetchGlobalTagsByName('');
+          this.fetchGlobalTagsByName('%');
           this.updateGlobalTag();
       }
   },

@@ -1,10 +1,10 @@
 <template>
 <div id="app">
   <Title v-on:select-server="selectServer"/>
-  <CrestTabs v-bind:selectedserver="selectedserver" v-on:info-notification="activateInfoNotification"
+  <CrestTabs v-bind:selectedserver="hostname" v-on:info-notification="activateInfoNotification"
     v-on:error-notification="activateErrorNotification"/>
   <p>{{msg}}: default api {{apiName}} on {{apiUrl}} </p>
-  <Footer v-bind:notiftype="thetype" v-bind:selectedserver="selectedserver" v-bind:notifytext="thenotification"/>
+  <Footer v-bind:notiftype="thetype" v-bind:selectedserver="hostname" v-bind:notifytext="thenotification"/>
 
 </div>
 </template>
@@ -25,7 +25,8 @@ export default {
       thenotification : 'none',
       thetype : '',
       selectedserver: { host: this.apiHost, port: this.apiPort, protocol: this.apiProtocol, api: this.apiName, url: ''},
-      msg: 'Welcome to Crest Browser'
+      msg: 'Welcome to Crest Browser',
+      hostname: this.apiHost
     }
   },
   methods: {

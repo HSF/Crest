@@ -68,7 +68,7 @@ export default {
 			const params = `by=name:` + name;
 			return axios
 			.get(`${Vue.prototype.apiName}/tags?${params}`)
-			.then(response => response.data)
+			.then(response => response.data.resources)
 			.then(tags_list => {commit('mergeTags', tags_list)})
 			.catch(error => { return Promise.reject(error) });
 		},
@@ -79,7 +79,7 @@ export default {
 			const params = `record=` + record + `&label=` + label;
 			return axios
 			.get(`${Vue.prototype.apiName}/globaltags/${gtname}/tags?${params}`)
-			.then(response => response.data)
+			.then(response => response.data.resources)
 			.then(tags_list => {commit('mergeTagsForGlobaltag', {gtname, tags_list})})
 			.catch(error => { return Promise.reject(error) });
 		},
@@ -87,7 +87,7 @@ export default {
 			const tagname = name;
 			return axios
 			.get(`${Vue.prototype.apiName}/tags/${tagname}/meta`)
-			.then(response => response.data)
+			.then(response => response.data.resources)
 			.then(tagmeta_list => {commit('mergeTagMetaForTag', {tagname, tagmeta_list})})
 			.catch(error => { return Promise.reject(error) });
 		},
