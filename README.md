@@ -39,6 +39,12 @@ The prototype uses [Spring framework](https://spring.io) and the REST services a
 The prototype runs as a microservice using `spring-boot`. By default it uses an embedded [undertow](http://undertow.io) servlet container, but others like [tomcat](https://tomcat.apache.org) or [jetty](https://www.eclipse.org/jetty/) can be easily used instead of [undertow](http://undertow.io).
 
 
+You can directly download an `html` file from gitlab to visualize the API documentation on your browser:
+```
+https://drf-gitlab.cea.fr/api/v4/projects/523/repository/files/doc%2Findex.html/raw?ref=master
+```
+
+
 ## Installation
 Download the project from gitlab (example below is using `https`):
 ```
@@ -172,6 +178,8 @@ http://crest-undertow.web.cern.ch/ext/web/ui/index.html
 ```
 
 Note that in principle you can get the same links working (a part from the hostname) if you run the server locally.
+
+The same kind of visualisation is available directly in gitlab when accessing the [specification file](./swagger_schemas/swagger/json/crestdb_full.json).
 
 ### Swagger code generation
 In order to regenerate the API we use the JSON schemas and templates which are store in the directories:
