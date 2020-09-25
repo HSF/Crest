@@ -93,13 +93,14 @@ build_svom_docker_image:
 
 webui:
   stage: webui
+  environment: dc0
   tags:
     - dc0-shell
   script:
     - docker info
     - docker build --tag=$WEB_CONTAINER_IMAGE --file ./web-ui/crest-ui/Dockerfile.nginx.svom ./web-ui/crest-ui/
   only:
-  - svom-dc0
+  - svom-dc1
 
 registry-push:
   stage: release
