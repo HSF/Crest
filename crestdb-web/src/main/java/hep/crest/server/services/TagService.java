@@ -243,4 +243,16 @@ public class TagService {
         final TagMetaDto tmpt = tagmetaRepository.find(id);
         return tmpt; // This will trigger a response 404 if it is null
     }
+    
+    /**
+     * Remote tag meta.
+     *
+     * @param name the name
+     * @throws CdbServiceException the cdb service exception
+     */
+    public void removeTagMeta(String name) throws CdbServiceException {
+        log.debug("Remove tag meta info for {}", name);
+        tagmetaRepository.delete(name);
+        log.debug("Removed tag meta info for: {}", name);  
+    }
 }
