@@ -397,6 +397,20 @@ public class TestCrestGlobalTag {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
+        // Retrieve deleted global tag maps
+        final ResponseEntity<String> respdeletemaptags = this.testRestTemplate.exchange(
+                "/crestapi/globaltagmaps/" + dto.getName()+"?label=test&tagname="+tagdto.getName(), 
+                HttpMethod.DELETE, null, String.class);
+        {
+            log.info("Retrieved the deleted mapping tags for global tag {} and label {}", maptagdto.getGlobalTagName(), maptagdto.getLabel());
+            final String responseBody = respdeletemaptags.getBody();
+            assertThat(respdeletemaptags.getStatusCode()).isEqualTo(HttpStatus.OK);
+            GlobalTagMapSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
         // Retrieve global tag maps for not existing gtag
         final ResponseEntity<String> respmaptagsnull = this.testRestTemplate
                 .exchange("/crestapi/globaltagmaps/NOT-THERE", HttpMethod.GET, null, String.class);

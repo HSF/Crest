@@ -17,24 +17,33 @@ import hep.crest.data.pojo.GlobalTagMap;
  * Repository for mappings.
  * 
  * @author formica
- *
  */
 @Transactional(readOnly = true)
-public interface GlobalTagMapBaseRepository
-        extends PagingAndSortingRepository<GlobalTagMap, GlobalTagMapId> {
+public interface GlobalTagMapBaseRepository extends PagingAndSortingRepository<GlobalTagMap, GlobalTagMapId> {
 
     /**
-     * @param gtag
-     *            the String
+     * @param gtag the String
      * @return List<GlobalTagMap>
      */
     @Query("SELECT distinct p FROM GlobalTagMap p JOIN FETCH p.globalTag g "
-            + "JOIN FETCH p.tag t WHERE p.globalTag.name = (:globaltag)")
+            + "JOIN FETCH p.tag t WHERE g.name = (:globaltag)")
     List<GlobalTagMap> findByGlobalTagName(@Param("globaltag") String gtag);
 
     /**
-     * @param tag
-     *            the String
+     * Find by global tag name and label and tag name like.
+     *
+     * @param gtag the gtag
+     * @param label the label
+     * @param tag the tag
+     * @return the list
+     */
+    @Query("SELECT distinct p FROM GlobalTagMap p JOIN FETCH p.globalTag g "
+            + "JOIN FETCH p.tag t WHERE g.name = (:globaltag) AND p.id.label = (:label) AND t.name like (:tag)")
+    List<GlobalTagMap> findByGlobalTagNameAndLabelAndTagNameLike(@Param("globaltag") String gtag,
+            @Param("label") String label, @Param("tag") String tag);
+
+    /**
+     * @param tag the String
      * @return List<GlobalTagMap>
      */
     @Query("SELECT distinct p FROM GlobalTagMap p JOIN FETCH p.globalTag g "

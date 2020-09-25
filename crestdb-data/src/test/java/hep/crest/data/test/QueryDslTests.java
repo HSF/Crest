@@ -319,6 +319,8 @@ public class QueryDslTests {
         final List<GlobalTagMap> gmlistbytag = tagmaprepository.findByTagName(tag1.getName());
         assertThat(gmlistbytag.size()).isGreaterThan(0);
 
+        final List<GlobalTagMap> gmlistbygtaglabeltag = tagmaprepository.findByGlobalTagNameAndLabelAndTagNameLike(gtag.getName(), "MY-TEST", "%");
+        assertThat(gmlistbygtaglabeltag.size()).isGreaterThan(0);
     }
     
     @Test
