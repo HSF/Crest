@@ -64,4 +64,20 @@ public class GlobaltagmapsApi  {
     throws NotFoundException {
         return delegate.findGlobalTagMap(name,xCrestMapMode,securityContext,info);
     }
+    
+    @DELETE
+    @Path("/{name}")
+
+    @Produces({ "application/json", "application/xml" })
+    @io.swagger.annotations.ApiOperation(value = "Delete GlobalTagMapDto lists.", notes = "This method search for mappings using the global tag name and deletes all mappings.", response = GlobalTagMapSetDto.class, tags={ "globaltagmaps", })
+    @io.swagger.annotations.ApiResponses(value = {
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = GlobalTagMapSetDto.class) })
+    public Response deleteGlobalTagMap(@ApiParam(value = "the global tag name",required=true) @PathParam("name") String name
+,@ApiParam(value = "label: the generic name labelling all tags of a certain kind.",required=true, defaultValue="none") @DefaultValue("none") @QueryParam("label") String label
+,@ApiParam(value = "tagname: the name of the tag associated.",required=true, defaultValue="none") @DefaultValue("none") @QueryParam("tagname") String tagname
+,@ApiParam(value = "record: the record.") @QueryParam("record") String record
+,@Context SecurityContext securityContext,@Context UriInfo info)
+    throws NotFoundException {
+        return delegate.deleteGlobalTagMap(name,label,tagname,record,securityContext,info);
+    }
 }
