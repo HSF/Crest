@@ -15,12 +15,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.swagger.model.PayloadTagInfoDto;
 
 /**
  * @author formica
- *
  */
 @Component
 public class JdbcMonitoringRepository implements IMonitoringRepository {
@@ -36,9 +36,12 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
     @Autowired
     private DataSource ds;
 
+    /** The props. */
+    @Autowired
+    private CrestProperties props;
+
     /*
      * (non-Javadoc)
-     *
      * @see
      * hep.crest.data.monitoring.repositories.IMonitoringRepository#selectTagInfo(
      * java.lang.String)
@@ -50,7 +53,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
         try {
             // Create the sql string using a query defined in a package.
             // This will work only in Oracle.
-            sql = "select tag_name, niovs, tot_volume, avg_volume from table (CREST_TOOLS.F_GETTAGSUMMARY(?))";
+            sql = "select tag_name, niovs, tot_volume, avg_volume from table (" + procname() + ".F_GETTAGSUMMARY(?))";
             log.debug("Execute query {} using {}", sql, tagpattern);
             return jdbcTemplate.query(sql, new Object[] {tagpattern}, new PayloadInfoMapper());
         }
@@ -58,5 +61,17 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
             log.error("Cannot find tag information for pattern {}: {}", tagpattern, e);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Procname.
+     *
+     * @return the string
+     */
+    protected String procname() {
+        if (props.getSchemaname().isEmpty()) {
+            return "CREST_TOOLS";
+        }
+        return props.getSchemaname() + ".CREST_TOOLS";
     }
 }
