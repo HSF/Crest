@@ -18,7 +18,11 @@ import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.MonitoringApiService;
 import hep.crest.server.swagger.api.NotFoundException;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.GenericMap;
+import hep.crest.swagger.model.GlobalTagSetDto;
 import hep.crest.swagger.model.PayloadTagInfoDto;
+import hep.crest.swagger.model.PayloadTagInfoSetDto;
 
 /**
  * Rest endpoint for monitoring informations.
@@ -69,16 +73,17 @@ public class MonitoringApiServiceImpl extends MonitoringApiService {
                 // Add special pattern regexp.
                 tagpattern = "%" + tagpattern + "%";
             }
+            // Create filters
+            final GenericMap filters = new GenericMap();
+            filters.put("tagname", tagpattern);
             // Select tag informations.
             dtolist = monitoringrepo.selectTagInfo(tagpattern);
             // The dtolist should always be non null....
-            final GenericEntity<List<PayloadTagInfoDto>> entitylist = new GenericEntity<List<PayloadTagInfoDto>>(
-                    dtolist) {
-            };
+            // Create the PayloadTagInfoSet
+            final CrestBaseResponse setdto = new PayloadTagInfoSetDto().resources(dtolist)
+                    .format("PayloadTagInfoSetDto").filter(filters).size(1L).datatype("payloadtaginfos");
             // Return 200.
-            // We should prepare a set may be also for monitoring informations.
-            return Response.ok().entity(entitylist).build();
-
+            return Response.ok().entity(setdto).build();
         }
         catch (final CdbServiceException e) {
             // Exception, send a 500.
@@ -88,5 +93,4 @@ public class MonitoringApiServiceImpl extends MonitoringApiService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
     }
-
 }

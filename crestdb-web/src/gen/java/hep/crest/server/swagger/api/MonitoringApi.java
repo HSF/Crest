@@ -40,9 +40,9 @@ public class MonitoringApi  {
     @Path("/payloads")
     
     @Produces({ "application/json", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieves monitoring information on payload as a list of PayloadTagInfoDtos.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = PayloadTagInfoDto.class, responseContainer = "List", tags={ "monitoring", })
+    @io.swagger.annotations.ApiOperation(value = "Retrieves monitoring information on payload as a list of PayloadTagInfoDtos.", notes = "This method allows to perform search and sorting.Arguments: by=<pattern>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]", response = PayloadTagInfoSetDto.class, tags={ "monitoring", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = PayloadTagInfoDto.class, responseContainer = "List") })
+        @io.swagger.annotations.ApiResponse(code = 200, message = "successful operation", response = PayloadTagInfoSetDto.class) })
     public Response listPayloadTagInfo(@ApiParam(value = "tagname: the search pattern {none}", defaultValue="none") @DefaultValue("none") @QueryParam("tagname") String tagname
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
