@@ -2,7 +2,6 @@ package hep.crest.server.swagger.api.impl;
 
 import java.util.List;
 
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
@@ -20,7 +19,6 @@ import hep.crest.server.swagger.api.MonitoringApiService;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.GlobalTagSetDto;
 import hep.crest.swagger.model.PayloadTagInfoDto;
 import hep.crest.swagger.model.PayloadTagInfoSetDto;
 
@@ -81,7 +79,7 @@ public class MonitoringApiServiceImpl extends MonitoringApiService {
             // The dtolist should always be non null....
             // Create the PayloadTagInfoSet
             final CrestBaseResponse setdto = new PayloadTagInfoSetDto().resources(dtolist)
-                    .format("PayloadTagInfoSetDto").filter(filters).size(1L).datatype("payloadtaginfos");
+                    .format("PayloadTagInfoSetDto").filter(filters).size((long)(dtolist.size())).datatype("payloadtaginfos");
             // Return 200.
             return Response.ok().entity(setdto).build();
         }
