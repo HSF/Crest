@@ -27,7 +27,7 @@ spring:
         hibernate.show_sql: false
         hibernate.default_schema: ${crest.db.schema}
 server:
-    port: 8080
+    port: ${crest.port}
     connection-timeout: 300s
 crest:
   schemaname: ${crest.db.schema}  
