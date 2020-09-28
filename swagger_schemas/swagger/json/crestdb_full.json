@@ -212,10 +212,7 @@
 					"200": {
 						"description": "successful operation",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/definitions/PayloadTagInfoDto"
-							}
+							"$ref": "#/definitions/PayloadTagInfoSetDto"
 						}
 					}
 				}
@@ -2195,6 +2192,24 @@
 				}
 			]
 		},
+        "PayloadTagInfoSetDto": {
+            "description" : "An PayloadTagInfoSet containing PayloadTagInfoDto objects.",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/CrestBaseResponse"
+                },
+                {
+                    "properties": {
+                        "resources": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/PayloadTagInfoDto"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
 		"PayloadDto": {
 			"type": "object",
 			"properties": {
