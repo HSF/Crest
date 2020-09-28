@@ -1977,6 +1977,9 @@
 				},
 				"payloadHash": {
 					"type": "string"
+				},
+				"streamerInfo": {
+					"type": "string"
 				}
 			}
 		},

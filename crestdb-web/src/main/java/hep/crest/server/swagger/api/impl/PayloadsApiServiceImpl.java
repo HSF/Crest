@@ -41,7 +41,6 @@ import java.util.*;
  * Rest endpoint for payloads.
  *
  * @author formica
- *
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen",
         date = "2017-09-05T16:23:23.401+02:00")
@@ -130,8 +129,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Override
     public Response createPayloadMultiForm(InputStream fileInputStream,
-            FormDataContentDisposition fileDetail, FormDataBodyPart payload,
-            SecurityContext securityContext, UriInfo info) throws NotFoundException {
+                                           FormDataContentDisposition fileDetail, FormDataBodyPart payload,
+                                           SecurityContext securityContext, UriInfo info) throws NotFoundException {
         this.log.info("PayloadRestController processing request to upload payload from stream");
         // PayloadDto payload = new PayloadDto();
         try {
@@ -163,7 +162,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     @Override
     @CacheControlCdb("public, max-age=604800")
     public Response getPayload(String hash, String format, SecurityContext securityContext,
-            UriInfo info) throws NotFoundException {
+                               UriInfo info) throws NotFoundException {
         this.log.info(
                 "PayloadRestController processing request to download payload {} using format {}",
                 hash, format);
@@ -256,8 +255,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Override
     public Response storePayloadWithIovMultiForm(InputStream fileInputStream,
-            FormDataContentDisposition fileDetail, String tag, BigDecimal since, String format,
-            BigDecimal endtime, SecurityContext securityContext, UriInfo info)
+                                                 FormDataContentDisposition fileDetail, String tag, BigDecimal since, String format,
+                                                 BigDecimal endtime, SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         this.log.info(
                 "PayloadRestController processing request to store payload with iov in tag {} and at since {} using format {}",
@@ -267,9 +266,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             String fdetailsname = fileDetail.getFileName();
             if (fdetailsname == null || fdetailsname.isEmpty()) {
                 fdetailsname = ".blob";
-            } else {
+            }
+            else {
                 final Path p = Paths.get(fdetailsname);
-                fdetailsname = "_"+p.getFileName().toString(); 
+                fdetailsname = "_" + p.getFileName().toString();
             }
             // Create a temporary file name from tag name and time of validity.
             final String filename = cprops.getDumpdir() + SLASH + tag + "_" + since
@@ -277,8 +277,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             if (format == null) {
                 format = "JSON";
             }
-            final Map<String,String> sinfomap = new HashMap<>();
-            sinfomap.put("filename", filename);
+            // Create the streamer info object as a map with metadata like format and filename for the moment. In
+            // future this could have further informations on payload metadata (author, checksum, etc).
+            final Map<String, String> sinfomap = new HashMap<>();
+            sinfomap.put("filename", (fileDetail.getFileName() != null && !fileDetail.getFileName().isEmpty()) ?
+                    fileDetail.getFileName() : filename);
             sinfomap.put("format", format);
             // Create the DTO, the version here is ignored. It could be added from the Form data.
             final PayloadDto pdto = new PayloadDto().objectType(format)
@@ -311,9 +314,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Override
     public Response uploadPayloadBatchWithIovMultiForm(List<FormDataBodyPart> filesbodyparts,
-            FormDataContentDisposition filesDetail, String tag, FormDataBodyPart iovsetupload,
-            String xCrestPayloadFormat, BigDecimal endtime, SecurityContext securityContext,
-            UriInfo info) throws NotFoundException {
+                                                       FormDataContentDisposition filesDetail, String tag, FormDataBodyPart iovsetupload,
+                                                       String xCrestPayloadFormat, BigDecimal endtime, SecurityContext securityContext,
+                                                       UriInfo info) throws NotFoundException {
         this.log.info(
                 "PayloadRestController processing request to upload payload batch in tag {} with multi-iov {} and body {}",
                 tag, filesbodyparts.size(), iovsetupload.getValue());
@@ -361,8 +364,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Override
     public Response storePayloadBatchWithIovMultiForm(String tag, FormDataBodyPart iovsetupload,
-            String xCrestPayloadFormat, BigDecimal endtime, SecurityContext securityContext,
-            UriInfo info) throws NotFoundException {
+                                                      String xCrestPayloadFormat, BigDecimal endtime, SecurityContext securityContext,
+                                                      UriInfo info) throws NotFoundException {
         this.log.info(
                 "PayloadRestController processing request to store payload batch in tag {} with multi-iov",
                 tag);
@@ -392,17 +395,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     }
 
     /**
-     * @param dto
-     *            the IovSetDto
-     * @param tag
-     *            the String
-     * @param filesbodyparts
-     *            the List<FormDataBodyPart>
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     * @throws IOException
-     *             If an Exception occurred
+     * @param dto            the IovSetDto
+     * @param tag            the String
+     * @param filesbodyparts the List<FormDataBodyPart>
      * @return IovSetDto
+     * @throws CdbServiceException If an Exception occurred
+     * @throws IOException         If an Exception occurred
      */
     protected IovSetDto storeIovs(IovSetDto dto, String tag, List<FormDataBodyPart> filesbodyparts)
             throws CdbServiceException, IOException {
@@ -411,7 +409,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
         for (final IovDto piovDto : iovlist) {
             String filename = null;
-            final Map<String,String> sinfomap = new HashMap<>();
+            final Map<String, String> sinfomap = new HashMap<>();
             sinfomap.put("format", dto.getFormat());
 
             final PayloadDto pdto = new PayloadDto().objectType(dto.getFormat()).hash("none")
@@ -448,15 +446,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     }
 
     /**
-     * @param fileInputStream
-     *            the InputStream
-     * @param filename
-     *            the String
+     * @param fileInputStream the InputStream
+     * @param filename        the String
      * @return String. The computed hash from the byte stream.
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     * @throws IOException
-     *             If an Exception occurred
+     * @throws CdbServiceException If an Exception occurred
+     * @throws IOException         If an Exception occurred
      */
     protected String getHash(InputStream fileInputStream, String filename)
             throws CdbServiceException, IOException {
@@ -472,17 +466,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     }
 
     /**
-     * @param dto
-     *            the IovDto
-     * @param pdto
-     *            the PayloadDto
-     * @param filename
-     *            the String
+     * @param dto      the IovDto
+     * @param pdto     the PayloadDto
+     * @param filename the String
      * @return HTTPResponse
-     * @throws CdbServiceException
-     *             If an Exception occurred
-     * @throws IOException
-     *             If an Exception occurred
+     * @throws CdbServiceException If an Exception occurred
+     * @throws IOException         If an Exception occurred
      */
     @Transactional
     protected HTTPResponse saveIovAndPayload(IovDto dto, PayloadDto pdto, String filename)
@@ -553,7 +542,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         }
         return new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
                 .id(dto.getPayloadHash()).message("Internal error for "
-                + dto.getTagName());
+                        + dto.getTagName());
     }
 
     /*
@@ -588,13 +577,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     }
 
     /**
-     * @param mddto
-     *            the IovDto
-     * @param bodyParts
-     *            the List<FormDataBodyPart>
+     * @param mddto     the IovDto
+     * @param bodyParts the List<FormDataBodyPart>
      * @return Map<String, Object>
-     * @throws CdbServiceException
-     *             If an Exception occurred
+     * @throws CdbServiceException If an Exception occurred
      */
     protected Map<String, Object> getDocumentStream(IovDto mddto, List<FormDataBodyPart> bodyParts)
             throws CdbServiceException {
@@ -623,43 +609,42 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Utility class to better download payload data using the type.
      *
-     * @param ptype
-     *            the String
+     * @param ptype the String
      * @return MediaType
      */
     protected MediaType getMediaType(String ptype) {
         MediaType media_type = MediaType.APPLICATION_OCTET_STREAM_TYPE;
         final String comp = ptype.toLowerCase();
         switch (comp) {
-        case "png":
-            media_type = new MediaType("image", "png");
-            break;
-        case "svg":
-            media_type = MediaType.APPLICATION_SVG_XML_TYPE;
-            break;
-        case "json":
-            media_type = MediaType.APPLICATION_JSON_TYPE;
-            break;
-        case "xml":
-            media_type = MediaType.APPLICATION_XML_TYPE;
-            break;
-        case "csv":
-            media_type = new MediaType("text", "csv");
-            break;
-        case "txt":
-            media_type = MediaType.TEXT_PLAIN_TYPE;
-            break;
-        case "tgz":
-            media_type = new MediaType("application", "x-gtar-compressed");
-            break;
-        case "gz":
-            media_type = new MediaType("application", "gzip");
-            break;
-        case "pdf":
-            media_type = new MediaType("application", "pdf");
-            break;
-        default:
-            break;
+            case "png":
+                media_type = new MediaType("image", "png");
+                break;
+            case "svg":
+                media_type = MediaType.APPLICATION_SVG_XML_TYPE;
+                break;
+            case "json":
+                media_type = MediaType.APPLICATION_JSON_TYPE;
+                break;
+            case "xml":
+                media_type = MediaType.APPLICATION_XML_TYPE;
+                break;
+            case "csv":
+                media_type = new MediaType("text", "csv");
+                break;
+            case "txt":
+                media_type = MediaType.TEXT_PLAIN_TYPE;
+                break;
+            case "tgz":
+                media_type = new MediaType("application", "x-gtar-compressed");
+                break;
+            case "gz":
+                media_type = new MediaType("application", "gzip");
+                break;
+            case "pdf":
+                media_type = new MediaType("application", "pdf");
+                break;
+            default:
+                break;
         }
         return media_type;
     }
@@ -667,8 +652,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Set file extension in dowload.
      *
-     * @param ptype
-     *            the String
+     * @param ptype the String
      * @return String
      */
     protected String getExtension(String ptype) {
@@ -683,17 +667,17 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
     /**
      * @param entity the PayloadDto
-     * @param hash the String
+     * @param hash   the String
      * @return PayloadSetDto
      */
     protected PayloadSetDto buildSet(PayloadDto entity, String hash) {
         final GenericMap map = new GenericMap();
         map.put("hash", hash);
         final PayloadSetDto psetdto = new PayloadSetDto().addResourcesItem(entity);
-        psetdto.datatype(entity.getObjectType()).filter(map).size(1L);  
+        psetdto.datatype(entity.getObjectType()).filter(map).size(1L);
         return psetdto;
     }
-    
+
     protected Response notFoundPojo(String hash) {
         final String msg = "Cannot find payload corresponding to hash " + hash;
         final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
