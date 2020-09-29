@@ -6,8 +6,12 @@ package hep.crest.data.monitoring.repositories;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Table;
 import javax.sql.DataSource;
 
+import hep.crest.data.config.DatabasePropertyConfigurator;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +44,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
     @Autowired
     private CrestProperties props;
 
+    /**
     /*
      * (non-Javadoc)
      * @see
@@ -52,8 +57,10 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
         String sql;
         try {
             // Create the sql string using a query defined in a package.
-            // This will work only in Oracle.
-            sql = "select tag_name, niovs, tot_volume, avg_volume from table (" + procname() + ".F_GETTAGSUMMARY(?))";
+            // This should word on any DB.
+            sql = "select iv.tag_name, count(iv.tag_name) as niovs, sum(pl.data_size) as tot_volume, avg(pl" +
+                    ".data_size) as avg_volume FROM " + this.payloadTable() + " pl, " + iovTable() + " iv "
+                    + " WHERE iv.TAG_NAME like ? AND iv.PAYLOAD_HASH=pl.HASH group by iv.TAG_NAME order by iv.TAG_NAME";
             log.debug("Execute query {} using {}", sql, tagpattern);
             return jdbcTemplate.query(sql, new Object[] {tagpattern}, new PayloadInfoMapper());
         }
@@ -61,6 +68,42 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
             log.error("Cannot find tag information for pattern {}: {}", tagpattern, e);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Provide the correct table names taking into account the schema name.
+     *
+     * @return String
+     */
+    protected String payloadTable() {
+        String defaultTablename = ("none".equals(props.getSchemaname())) ? null : props.getSchemaname();
+        final Table ann = Payload.class.getAnnotation(Table.class);
+        String tablename = ann.name();
+        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
+            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
+        }
+        else if (defaultTablename != null) {
+            tablename = defaultTablename + "." + tablename;
+        }
+        return tablename;
+    }
+
+    /**
+     * Provide the correct table names taking into account the schema name.
+     *
+     * @return String
+     */
+    protected String iovTable() {
+        String defaultTablename = ("none".equals(props.getSchemaname())) ? null : props.getSchemaname();
+        final Table ann = Iov.class.getAnnotation(Table.class);
+        String tablename = ann.name();
+        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
+            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
+        }
+        else if (defaultTablename != null) {
+            tablename = defaultTablename + "." + tablename;
+        }
+        return tablename;
     }
 
     /**
