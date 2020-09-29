@@ -3,8 +3,7 @@
 	"info": {
 		"version": "2.0",
 		"title": "CrestDB REST API",
-		"termsOfService": "http://svom.swagger.fr/terms/",
-		"description": "Crest Rest Api to manage data for calibration files.",
+		"description": "Crest Rest Api to manage conditions data.",
 		"contact": {
 			"email": "andrea.formica@cern.ch"
 		},
@@ -14,7 +13,7 @@
 		}
 	},
 	"host": "localhost:8080",
-	"basePath": "/crest",
+	"basePath": "/crestapi",
 	"tags": [
 		{
 			"name": "iovs"
@@ -1320,6 +1319,20 @@
 						"description": "The since time",
 						"required": true,
 						"type": "number"
+					},
+					{
+						"name": "objectType",
+						"in": "formData",
+						"description": "The payload objectType",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "version",
+						"in": "formData",
+						"description": "The version",
+						"required": false,
+						"type": "string"
 					},
 					{
 						"name": "endtime",

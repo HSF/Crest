@@ -242,21 +242,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.crest.server.swagger.api.PayloadsApiService#storePayloadWithIovMultiForm(
-     * java.io.InputStream,
-     * org.glassfish.jersey.media.multipart.FormDataContentDisposition,
-     * java.lang.String, java.math.BigDecimal, java.lang.String,
-     * java.math.BigDecimal, javax.ws.rs.core.SecurityContext,
-     * javax.ws.rs.core.UriInfo)
-     */
     @Override
     public Response storePayloadWithIovMultiForm(InputStream fileInputStream,
                                                  FormDataContentDisposition fileDetail, String tag, BigDecimal since, String format,
-                                                 BigDecimal endtime, SecurityContext securityContext, UriInfo info)
+                                                 String objectType, String version, BigDecimal endtime,
+                                                 SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         this.log.info(
                 "PayloadRestController processing request to store payload with iov in tag {} and at since {} using format {}",
@@ -277,6 +267,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             if (format == null) {
                 format = "JSON";
             }
+            if (objectType == null) {
+                objectType = format;
+            }
+            if (version == null) {
+                version = "default";
+            }
             // Create the streamer info object as a map with metadata like format and filename for the moment. In
             // future this could have further informations on payload metadata (author, checksum, etc).
             final Map<String, String> sinfomap = new HashMap<>();
@@ -284,8 +280,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                     fileDetail.getFileName() : filename);
             sinfomap.put("format", format);
             // Create the DTO, the version here is ignored. It could be added from the Form data.
-            final PayloadDto pdto = new PayloadDto().objectType(format)
-                    .streamerInfo(jacksonMapper.writeValueAsBytes(sinfomap)).version("none");
+            final PayloadDto pdto = new PayloadDto().objectType(objectType)
+                    .streamerInfo(jacksonMapper.writeValueAsBytes(sinfomap)).version(version);
             final String hash = getHash(fileInputStream, filename);
             pdto.hash(hash);
             final IovDto iovDto = new IovDto().payloadHash(hash).since(since).tagName(tag);

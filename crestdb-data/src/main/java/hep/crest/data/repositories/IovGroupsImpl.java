@@ -18,6 +18,14 @@
 package hep.crest.data.repositories;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -266,8 +274,36 @@ public class IovGroupsImpl implements IovGroupsCustom {
                     entity.setVersion(rs.getString("VERSION"));
                     entity.setObjectType(rs.getString("OBJECT_TYPE"));
                     entity.setSize(rs.getInt("DATA_SIZE"));
-                    entity.setStreamerInfo(new String(rs.getBytes("STREAMER_INFO")));
+                    entity.setStreamerInfo(getBlob(rs, "STREAMER_INFO"));
                     return entity;
                 });
+    }
+
+    /**
+     * Transform streamerInfo bytes into String.
+     * This method should deal with different types of binary content. We want a normal string if possible, or base64
+     * encoded if the content is really binary.
+     *
+     * @param rs the ResulSet
+     * @param key the column String
+     * @return String
+     * @throws SQLException
+     */
+    protected String getBlob(ResultSet rs, String key) throws SQLException {
+        CharsetDecoder decoder = StandardCharsets.US_ASCII.newDecoder();
+
+        decoder.onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        byte[] streaminfoByteArr = rs.getBytes(key);
+        try {
+            String streaminfo = decoder.decode(ByteBuffer.wrap(streaminfoByteArr))
+                    .toString();
+            return streaminfo;
+        }
+        catch (CharacterCodingException e) {
+            log.warn("Cannot decode as String with charset US_ASCII, use base64");
+            return Base64.getEncoder().encodeToString(streaminfoByteArr);
+        }
     }
 }

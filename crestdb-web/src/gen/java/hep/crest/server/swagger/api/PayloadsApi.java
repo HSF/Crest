@@ -137,9 +137,12 @@ public class PayloadsApi  {
 ,@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
 ,@ApiParam(value = "The since time", required=true)@FormDataParam("since")  BigDecimal since
 ,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
-,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
+    ,@ApiParam(value = "The payload objectType")@FormDataParam("objectType")  String objectType
+    ,@ApiParam(value = "The version")@FormDataParam("version")  String version
+    ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
-        return delegate.storePayloadWithIovMultiForm(fileInputStream, fileDetail,tag,since,xCrestPayloadFormat,endtime,securityContext,info);
+        return delegate.storePayloadWithIovMultiForm(fileInputStream, fileDetail,tag,since,xCrestPayloadFormat,
+                objectType, version, endtime,securityContext,info);
     }
 }
