@@ -80,7 +80,9 @@ package_svom_application:
 
 release:
   stage: release
-  image: docker:dind
+  image: docker:19.03.1
+  services:
+    - docker:19.03.1-dind
   before_script:
       - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
   script:
