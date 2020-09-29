@@ -42,7 +42,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
     @Autowired
     private CrestProperties props;
 
-    /**
+    /*
      * (non-Javadoc)
      * @see
      * hep.crest.data.monitoring.repositories.IMonitoringRepository#selectTagInfo(
