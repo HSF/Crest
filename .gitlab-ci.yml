@@ -99,28 +99,14 @@ webui:
   only:
   - svom-dc1
 
-registry-push:
-  stage: release
-  environment: dc0
-  tags:
-    - dc0-shell
-  script:
-    - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
-    - docker push $CONTAINER_IMAGE
-##    - docker push $WEB_CONTAINER_IMAGE
-  only:
-  - svom-dc1
-
 sonar_application:
   stage: sonar_application
-  tags:
-    - dc0
   image: java:8
   script:
    - ./gradlew sonarqube -Dsonar.projectKey=crestdb -Dsonar.host.url=http://svom1.lal.in2p3.fr:20090 -Dsonar.login=f50918d8b780181f947ae83b42e78983ffde4bf3
   allow_failure: false
   only:
-  - cms-v0
+  - stable
 
 # build_svom_docker_image:
 #   stage: build
