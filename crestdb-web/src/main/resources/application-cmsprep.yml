@@ -5,12 +5,9 @@
 # ===============================
 # Defaults
 spring:
- profiles:
-  include: default
-spring:
     profiles: cmsprep
     jersey:
-      application-path: /crestapi
+      application-path: ${crest.api.name}
     datasource:
       url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=int2r-s.cern.ch)(PORT=10121))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=int2r_lb.cern.ch)))
       driverClassName: oracle.jdbc.OracleDriver
@@ -27,7 +24,7 @@ spring:
         hibernate.show_sql: false
         hibernate.default_schema: CMS_CONDITIONS
 server:
-    port: 8080
+    port: ${crest.server.port}
     connection-timeout: 300s
 crest:
   schemaname: CMS_CONDITIONS  
