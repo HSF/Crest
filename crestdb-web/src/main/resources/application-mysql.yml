@@ -5,9 +5,6 @@
 # ===============================
 # Defaults
 spring:
- profiles:
-  include: default
-spring:
     profiles: mysql
     jersey:
       application-path: /crestapi
