@@ -62,6 +62,7 @@ stages:
  - webui
  - build
  - release
+ - sonar_application
  - redeploy
 
 package_svom_application:
