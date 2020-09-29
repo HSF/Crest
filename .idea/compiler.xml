@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="crestdb.crestdb-data.main" target="1.8" />
+      <module name="crestdb.crestdb-data.test" target="1.8" />
+      <module name="crestdb.crestdb-web.generated" target="1.8" />
+      <module name="crestdb.crestdb-web.main" target="1.8" />
+      <module name="crestdb.crestdb-web.test" target="1.8" />
+      <module name="crestdb.main" target="1.8" />
+      <module name="crestdb.test" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

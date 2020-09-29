@@ -397,6 +397,23 @@ public class TestCrestGlobalTag {
             assertThat(ok.getSize()).isGreaterThan(0);
         }
 
+        // Retrieve global tag maps from tagname using backtrace
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Crest-MapMode", "BackTrace");
+        final HttpEntity<?> entity = new HttpEntity<>(headers);
+        final ResponseEntity<String> respmapbktags = this.testRestTemplate.exchange(
+                "/crestapi/globaltagmaps/" + tagdto.getName(), HttpMethod.GET, entity,
+                String.class);
+        {
+            log.info("Retrieved associated tags for global tag {}", tagdto.getName());
+            final String responseBody = respmapbktags.getBody();
+            assertThat(respmapbktags.getStatusCode()).isEqualTo(HttpStatus.OK);
+            GlobalTagMapSetDto ok;
+            log.info("Response from server is: " + responseBody);
+            ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
+            assertThat(ok.getSize()).isGreaterThan(0);
+        }
+
         // Retrieve deleted global tag maps
         final ResponseEntity<String> respdeletemaptags = this.testRestTemplate.exchange(
                 "/crestapi/globaltagmaps/" + dto.getName()+"?label=test&tagname="+tagdto.getName(), 
@@ -415,23 +432,6 @@ public class TestCrestGlobalTag {
         final ResponseEntity<String> respmaptagsnull = this.testRestTemplate
                 .exchange("/crestapi/globaltagmaps/NOT-THERE", HttpMethod.GET, null, String.class);
         assertThat(respmaptagsnull.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        // Retrieve global tag maps from tagname using backtrace
-        final HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Crest-MapMode", "BackTrace");
-        final HttpEntity<?> entity = new HttpEntity<>(headers);
-        final ResponseEntity<String> respmapbktags = this.testRestTemplate.exchange(
-                "/crestapi/globaltagmaps/" + tagdto.getName(), HttpMethod.GET, entity,
-                String.class);
-        {
-            log.info("Retrieved associated tags for global tag {}", tagdto.getName());
-            final String responseBody = respmapbktags.getBody();
-            assertThat(respmapbktags.getStatusCode()).isEqualTo(HttpStatus.OK);
-            GlobalTagMapSetDto ok;
-            log.info("Response from server is: " + responseBody);
-            ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
-        }
 
     }
 

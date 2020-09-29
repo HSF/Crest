@@ -24,7 +24,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -166,13 +165,9 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
             // associated with a global tag. The input name will be considered as a
             // GlobalTag name.
             entitylist = globaltagmapService.findMapsByGlobalTagLabelTag(name, label, tagname, record);
-            List<GlobalTagMap> deletedlist = new ArrayList<>();
-            for (GlobalTagMap globalTagMap : entitylist) {
-                GlobalTagMap delentity = globaltagmapService.deleteMap(globalTagMap);
-                if (delentity != null) {
-                    deletedlist.add(delentity);
-                }
-            }
+            // Delete the full list inside a transaction.
+            List<GlobalTagMap> deletedlist = globaltagmapService.deleteMapList(entitylist);
+            // Return the deleted list.
             List<GlobalTagMapDto> dtolist = edh.entityToDtoList(deletedlist, GlobalTagMapDto.class);
             final CrestBaseResponse setdto = new GlobalTagMapSetDto().resources(dtolist).filter(filters)
                     .format("GlobalTagMapSetDto").size((long) dtolist.size()).datatype("maps");

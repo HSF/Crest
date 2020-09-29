@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
 /**
  * IovPayloadDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2019-12-26T18:15:33.531+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2020-09-28T16:28:56.155+02:00")
 public class IovPayloadDto   {
   @JsonProperty("since")
   private BigDecimal since = null;
@@ -40,6 +40,9 @@ public class IovPayloadDto   {
 
   @JsonProperty("payloadHash")
   private String payloadHash = null;
+
+  @JsonProperty("streamerInfo")
+  private String streamerInfo = null;
 
   public IovPayloadDto since(BigDecimal since) {
     this.since = since;
@@ -136,6 +139,25 @@ public class IovPayloadDto   {
     this.payloadHash = payloadHash;
   }
 
+  public IovPayloadDto streamerInfo(String streamerInfo) {
+    this.streamerInfo = streamerInfo;
+    return this;
+  }
+
+  /**
+   * Get streamerInfo
+   * @return streamerInfo
+   **/
+  @JsonProperty("streamerInfo")
+  @ApiModelProperty(value = "")
+  public String getStreamerInfo() {
+    return streamerInfo;
+  }
+
+  public void setStreamerInfo(String streamerInfo) {
+    this.streamerInfo = streamerInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -150,12 +172,13 @@ public class IovPayloadDto   {
         Objects.equals(this.version, iovPayloadDto.version) &&
         Objects.equals(this.objectType, iovPayloadDto.objectType) &&
         Objects.equals(this.size, iovPayloadDto.size) &&
-        Objects.equals(this.payloadHash, iovPayloadDto.payloadHash);
+        Objects.equals(this.payloadHash, iovPayloadDto.payloadHash) &&
+        Objects.equals(this.streamerInfo, iovPayloadDto.streamerInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(since, version, objectType, size, payloadHash);
+    return Objects.hash(since, version, objectType, size, payloadHash, streamerInfo);
   }
 
 
@@ -169,6 +192,7 @@ public class IovPayloadDto   {
     sb.append("    objectType: ").append(toIndentedString(objectType)).append("\n");
     sb.append("    size: ").append(toIndentedString(size)).append("\n");
     sb.append("    payloadHash: ").append(toIndentedString(payloadHash)).append("\n");
+    sb.append("    streamerInfo: ").append(toIndentedString(streamerInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }
