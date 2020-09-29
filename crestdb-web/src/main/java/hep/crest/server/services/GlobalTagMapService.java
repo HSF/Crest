@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -134,10 +135,28 @@ public class GlobalTagMapService {
      *
      * @param entity the entity
      * @return the global tag map
-     * @throws RuntimeException the runtime exception
      */
-    public GlobalTagMap deleteMap(GlobalTagMap entity) throws RuntimeException {
+    @Transactional
+    public GlobalTagMap deleteMap(GlobalTagMap entity) {
         globalTagMapRepository.delete(entity);
         return entity;
+    }
+
+    /**
+     * Delete a list of mappings between tags and global tags.
+     *
+     * @param entitylist
+     * @return a list of deleted mappings
+     */
+    @Transactional
+    public List<GlobalTagMap> deleteMapList(Iterable<GlobalTagMap> entitylist) {
+        List<GlobalTagMap> deletedlist = new ArrayList<>();
+        for (GlobalTagMap globalTagMap : entitylist) {
+            GlobalTagMap delentity = this.deleteMap(globalTagMap);
+            if (delentity != null) {
+                deletedlist.add(delentity);
+            }
+        }
+        return deletedlist;
     }
 }

@@ -1,17 +1,5 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.util.List;
-
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.monitoring.repositories.IMonitoringRepository;
 import hep.crest.server.controllers.PageRequestHelper;
@@ -20,9 +8,17 @@ import hep.crest.server.swagger.api.MonitoringApiService;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
-import hep.crest.swagger.model.GlobalTagSetDto;
 import hep.crest.swagger.model.PayloadTagInfoDto;
 import hep.crest.swagger.model.PayloadTagInfoSetDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+import java.util.List;
 
 /**
  * Rest endpoint for monitoring informations.

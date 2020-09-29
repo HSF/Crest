@@ -100,10 +100,14 @@ public class PayloadsApi  {
     public Response storePayloadBatchWithIovMultiForm(@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
 ,@ApiParam(value = "", required=true)@FormDataParam("iovsetupload")  FormDataBodyPart iovsetupload
 ,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
+,@ApiParam(value = "The payload objectType")@FormDataParam("objectType")  String objectType
+,@ApiParam(value = "The version")@FormDataParam("version")  String version
 ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
-        return delegate.storePayloadBatchWithIovMultiForm(tag,iovsetupload,xCrestPayloadFormat,endtime,securityContext,info);
+        return delegate.storePayloadBatchWithIovMultiForm(tag,iovsetupload,xCrestPayloadFormat,objectType,version,
+                endtime,
+                securityContext,info);
     }
     
     @POST
@@ -119,10 +123,13 @@ public class PayloadsApi  {
             ,@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
 ,@ApiParam(value = "", required=true)@FormDataParam("iovsetupload")  FormDataBodyPart iovsetupload
 ,@ApiParam(value = "The format of the input data" , defaultValue="FILE")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
+,@ApiParam(value = "The payload objectType")@FormDataParam("objectType")  String objectType
+,@ApiParam(value = "The version")@FormDataParam("version")  String version
 ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
-        return delegate.uploadPayloadBatchWithIovMultiForm(filesbodyparts, filesDetail,tag,iovsetupload,xCrestPayloadFormat,endtime,securityContext,info);
+        return delegate.uploadPayloadBatchWithIovMultiForm(filesbodyparts, filesDetail,tag,iovsetupload,
+                xCrestPayloadFormat,objectType,version,endtime,securityContext,info);
     }
     @POST
     @Path("/store")

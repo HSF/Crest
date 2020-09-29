@@ -297,12 +297,11 @@ public class IovGroupsImpl implements IovGroupsCustom {
 
         byte[] streaminfoByteArr = rs.getBytes(key);
         try {
-            String streaminfo = decoder.decode(ByteBuffer.wrap(streaminfoByteArr))
+            return decoder.decode(ByteBuffer.wrap(streaminfoByteArr))
                     .toString();
-            return streaminfo;
         }
         catch (CharacterCodingException e) {
-            log.warn("Cannot decode as String with charset US_ASCII, use base64");
+            log.warn("Cannot decode as String with charset US_ASCII, use base64: {}", e);
             return Base64.getEncoder().encodeToString(streaminfoByteArr);
         }
     }

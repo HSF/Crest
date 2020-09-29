@@ -1395,6 +1395,20 @@
 						"type" : "string"
 					},
 					{
+						"name": "objectType",
+						"in": "formData",
+						"description": "The payload objectType",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "version",
+						"in": "formData",
+						"description": "The version",
+						"required": false,
+						"type": "string"
+					},
+					{
 						"name": "endtime",
 						"in": "formData",
 						"description": "The end time to be used for protection at tag level",
@@ -1446,6 +1460,20 @@
 						"in": "formData",
 						"required": true,
 						"type" : "string"
+					},
+					{
+						"name": "objectType",
+						"in": "formData",
+						"description": "The payload objectType",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "version",
+						"in": "formData",
+						"description": "The version",
+						"required": false,
+						"type": "string"
 					},
 					{
 						"name": "endtime",
