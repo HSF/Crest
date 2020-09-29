@@ -1,17 +1,14 @@
 /**
- * 
+ *
  */
 package hep.crest.data.monitoring.repositories;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.Table;
-import javax.sql.DataSource;
-
+import hep.crest.data.config.CrestProperties;
 import hep.crest.data.config.DatabasePropertyConfigurator;
+import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Payload;
+import hep.crest.swagger.model.PayloadTagInfoDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +16,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import hep.crest.data.config.CrestProperties;
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.swagger.model.PayloadTagInfoDto;
+import javax.persistence.Table;
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author formica
@@ -45,11 +43,10 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
     private CrestProperties props;
 
     /**
-    /*
      * (non-Javadoc)
      * @see
      * hep.crest.data.monitoring.repositories.IMonitoringRepository#selectTagInfo(
-     * java.lang.String)
+     *java.lang.String)
      */
     @Override
     public List<PayloadTagInfoDto> selectTagInfo(String tagpattern) throws CdbServiceException {
@@ -58,11 +55,11 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
         try {
             // Create the sql string using a query defined in a package.
             // This should word on any DB.
-            sql = "select iv.tag_name, count(iv.tag_name) as niovs, sum(pl.data_size) as tot_volume, avg(pl" +
-                    ".data_size) as avg_volume FROM " + this.payloadTable() + " pl, " + iovTable() + " iv "
+            sql = "select iv.tag_name, count(iv.tag_name) as niovs, sum(pl.data_size) as tot_volume, avg(pl"
+                    + ".data_size) as avg_volume FROM " + this.payloadTable() + " pl, " + iovTable() + " iv "
                     + " WHERE iv.TAG_NAME like ? AND iv.PAYLOAD_HASH=pl.HASH group by iv.TAG_NAME order by iv.TAG_NAME";
             log.debug("Execute query {} using {}", sql, tagpattern);
-            return jdbcTemplate.query(sql, new Object[] {tagpattern}, new PayloadInfoMapper());
+            return jdbcTemplate.query(sql, new Object[]{tagpattern}, new PayloadInfoMapper());
         }
         catch (final EmptyResultDataAccessException e) {
             log.error("Cannot find tag information for pattern {}: {}", tagpattern, e);

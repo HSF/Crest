@@ -94,5 +94,5 @@ public final class PayloadRequests {
     public static final String getDeleteQuery(String tablename) {
         return "DELETE FROM " + tablename + WHERE_HASH;
     }
-    
+
 }
