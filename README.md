@@ -48,7 +48,7 @@ https://drf-gitlab.cea.fr/api/v4/projects/523/repository/files/doc%2Findex.html/
 ## Installation
 Download the project from gitlab (example below is using `https`):
 ```
-git clone https://gitlab.cern.ch/formica/swagger_crestdb.git
+git clone https://gitlab.cern.ch/formica/crest.git
 ```
 or
 ```
