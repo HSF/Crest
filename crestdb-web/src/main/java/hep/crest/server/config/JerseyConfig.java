@@ -1,20 +1,21 @@
 package hep.crest.server.config;
 
+import hep.crest.server.swagger.api.AdminApi;
+import hep.crest.server.swagger.api.GlobaltagsApi;
+import hep.crest.server.swagger.api.GlobaltagmapsApi;
+import hep.crest.server.swagger.api.TagsApi;
+import hep.crest.server.swagger.api.IovsApi;
+import hep.crest.server.swagger.api.PayloadsApi;
+import hep.crest.server.swagger.api.MonitoringApi;
+import hep.crest.server.swagger.api.RuninfoApi;
+import hep.crest.server.swagger.api.FsApi;
+
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletProperties;
 
 import hep.crest.server.filters.CORSFilter;
 import hep.crest.server.filters.CacheControlFilter;
-import hep.crest.server.swagger.api.AdminApi;
-import hep.crest.server.swagger.api.FoldersApi;
-import hep.crest.server.swagger.api.FsApi;
-import hep.crest.server.swagger.api.GlobaltagmapsApi;
-import hep.crest.server.swagger.api.GlobaltagsApi;
-import hep.crest.server.swagger.api.IovsApi;
-import hep.crest.server.swagger.api.PayloadsApi;
-import hep.crest.server.swagger.api.RuninfoApi;
-import hep.crest.server.swagger.api.TagsApi;
 import io.swagger.jaxrs.config.BeanConfig;
 
 /**
@@ -40,7 +41,7 @@ public class JerseyConfig extends ResourceConfig {
         super.register(PayloadsApi.class);
         super.register(FsApi.class);
         super.register(RuninfoApi.class);
-        super.register(FoldersApi.class);
+        super.register(MonitoringApi.class);
         super.register(MultiPartFeature.class);
         super.register(CacheControlFilter.class);
         super.register(CORSFilter.class);
