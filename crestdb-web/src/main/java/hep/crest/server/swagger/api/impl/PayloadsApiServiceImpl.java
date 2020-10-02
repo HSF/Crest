@@ -420,7 +420,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             else {
                 throw new CdbServiceException("Wrong header parameter " + xCrestPayloadFormat);
             }
-
         }
         catch (final Exception e) {
             // Error in storing payload.

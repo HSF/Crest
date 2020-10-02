@@ -4,6 +4,21 @@
 #             ...
 # ===============================
 # Defaults
+crest:
+  schemaname: ${crest.db.schema}
+  webstaticdir: ${crest.web.static}
+  dumpdir: ${crest.dump.dir}
+  security: ${crest.security}
+  synchro: none
+  authenticationtype: none
+caching:
+  iovsgroups_maxage: 600
+  iovsgroups_snapshot_maxage: 3600
+  iovs_maxage: 600
+  iovs_snapshot_maxage: 3600
+  payloads_maxage: 604800
+  timetype_groupsize: 3600  # expressed in seconds
+  runtype_groupsize: 100    # expressed in run numbers  
 spring:
     profiles:
       include: crest
@@ -28,21 +43,6 @@ spring:
 server:
     port: ${crest.server.port}
     connection-timeout: 300s
-crest:
-  schemaname: ${crest.db.schema}  
-  webstaticdir: ${crest.web.static}
-  dumpdir: ${crest.dump.dir}
-  security: ${crest.security}
-  synchro: none
-  authenticationtype: none
-caching:
-  iovsgroups_maxage: 600
-  iovsgroups_snapshot_maxage: 3600
-  iovs_maxage: 600
-  iovs_snapshot_maxage: 3600
-  payloads_maxage: 604800
-  timetype_groupsize: 3600  # expressed in seconds
-  runtype_groupsize: 100    # expressed in run numbers  
 info:
   app:
     name: Crest Application

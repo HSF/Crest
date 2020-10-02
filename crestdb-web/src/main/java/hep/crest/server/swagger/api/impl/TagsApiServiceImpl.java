@@ -155,7 +155,6 @@ public class TagsApiServiceImpl extends TagsApiService {
             final Tag saved = tagService.updateTag(entity);
             TagDto dto = mapper.map(saved, TagDto.class);
             return Response.ok(info.getRequestUri()).entity(dto).build();
-
         }
         catch (final NotExistsPojoException e) {
             // Exception, tag not found, send 404.
