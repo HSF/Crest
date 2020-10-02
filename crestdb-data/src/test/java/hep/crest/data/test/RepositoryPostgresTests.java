@@ -1,21 +1,12 @@
 package hep.crest.data.test;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.Date;
-
-import javax.sql.DataSource;
-
+import hep.crest.data.handlers.PayloadHandler;
+import hep.crest.data.pojo.GlobalTag;
+import hep.crest.data.repositories.GlobalTagRepository;
+import hep.crest.data.repositories.PayloadDataBaseCustom;
+import hep.crest.data.test.tools.DataGenerator;
+import hep.crest.swagger.model.PayloadDto;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.FixMethodOrder;
@@ -36,12 +27,19 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-import hep.crest.data.handlers.PayloadHandler;
-import hep.crest.data.pojo.GlobalTag;
-import hep.crest.data.repositories.GlobalTagRepository;
-import hep.crest.data.repositories.PayloadDataBaseCustom;
-import hep.crest.data.test.tools.DataGenerator;
-import hep.crest.swagger.model.PayloadDto;
+import javax.sql.DataSource;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.Date;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -128,10 +126,11 @@ public class RepositoryPostgresTests {
         final Date time = new Date(now.toEpochMilli());
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhashpg1", "mydata", "mystreamer",
                 "test",time);
-        log.debug("Save payload {}", dto);
+        log.info("Save payload {}", dto);
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
         }
+        log.info("Add size of payload data {}", dto.getSize());
         final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
         final PayloadDto loaded = repobean.find("myhashpg1");
@@ -149,6 +148,8 @@ public class RepositoryPostgresTests {
         }
         final InputStream loadedblob = repobean.findData(savedfromblob.getHash());
         assertThat(loadedblob.available()).isGreaterThan(0);
+        final PayloadDto loadedmeta = repobean.findMetaInfo(savedfromblob.getHash());
+        assertThat(new String(loadedmeta.getStreamerInfo())).isEqualTo("mystreamer");
         repobean.delete(savedfromblob.getHash());
         
         ds = new BufferedInputStream(new FileInputStream(f));

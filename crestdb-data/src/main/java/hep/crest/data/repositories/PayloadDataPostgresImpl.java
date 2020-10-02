@@ -26,6 +26,7 @@ import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
@@ -72,7 +73,80 @@ public class PayloadDataPostgresImpl extends AbstractPayloadDataGeneral implemen
      */
     @Override
     protected byte[] getBlob(ResultSet rs, String key) throws SQLException {
+        log.debug("Get a blob as bytes for {}", key);
         return rs.getBytes(key);
+    }
+
+    /**
+     *
+     * @param rs
+     * @param key
+     * @return byte[]
+     * @throws SQLException
+     */
+    protected byte[] getBlobFromStream(ResultSet rs, String key) throws SQLException {
+        byte[] buf = null;
+        Long oid = rs.getLong(key);
+        log.info("Retrieve blob from oid {}", oid);
+        try (Connection conn = super.getDs().getConnection();) {
+            buf = getlargeObj(oid, conn);
+        }
+        return buf;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hep.crest.data.repositories.PayloadDataBaseCustom#findData(java.lang.String)
+     */
+    @Override
+    @Transactional
+    public PayloadDto findMetaInfo(String id) {
+        log.info("Find payload meta info {} using Postgres connection", id);
+        final String tablename = this.tablename();
+        final String sql = PayloadRequests.getFindMetaQuery(tablename);
+        Long oid = null;
+        ResultSet rs = null;
+        byte[] buf = null;
+        try (Connection conn = super.getDs().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);) {
+            conn.setAutoCommit(false);
+            ps.setString(1, id);
+            rs = ps.executeQuery();
+            final PayloadDto entity = new PayloadDto();
+            while (rs.next()) {
+                // Open the large object for reading
+                log.info("Read resultset...");
+                oid = rs.getLong("STREAMER_INFO");
+                entity.setHash(rs.getString("HASH"));
+                entity.setObjectType(rs.getString("OBJECT_TYPE"));
+                entity.setVersion(rs.getString("VERSION"));
+                entity.setInsertionTime(rs.getDate("INSERTION_TIME"));
+                entity.setSize(rs.getInt("DATA_SIZE"));
+                log.info("Create Dto {}", entity);
+            }
+            // Only one row is returned....
+            buf = getlargeObj(oid, conn);
+            entity.setStreamerInfo(buf);
+            rs.close();
+            conn.commit();
+            return entity;
+        }
+        catch (final SQLException e) {
+            log.error("SQL exception occurred in retrieving payload data for {}: {}", id, e.getMessage());
+        }
+        finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            }
+            catch (final SQLException e) {
+                log.error("Error in closing result set : {}", e);
+            }
+        }
+        return null;
     }
 
     /*
@@ -84,19 +158,19 @@ public class PayloadDataPostgresImpl extends AbstractPayloadDataGeneral implemen
     @Override
     public InputStream findData(String id) {
         log.info("Find payload data only for {} using JDBCTEMPLATE", id);
-        return readBlobAsStream(id);
+        final String tablename = this.tablename();
+        final String sql = PayloadRequests.getFindDataQuery(tablename);
+        return readBlobAsStream(id, sql);
     }
 
     /**
      * @param id
      *            the String
+     * @param sql
+     *            the String with the sql query
      * @return LargeObject
      */
-    protected InputStream readBlobAsStream(String id) {
-        final String tablename = this.tablename();
-
-        final String sql = PayloadRequests.getFindDataQuery(tablename);
-
+    protected InputStream readBlobAsStream(String id, String sql) {
         log.info("Read Payload data with hash {} using JDBCTEMPLATE", id);
         byte[] buf = null;
         Long oid = null;

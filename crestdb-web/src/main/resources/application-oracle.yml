@@ -5,7 +5,8 @@
 # ===============================
 # Defaults
 spring:
-    profiles: oracle
+    profiles:
+      include: crest
     jersey:
       application-path: ${crest.api.name}
     datasource:
@@ -22,6 +23,7 @@ spring:
         hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
         hibernate.jdbc.fetch_size: 100
         hibernate.show_sql: false
+        hibernate.hbm2ddl.auto: validate
         hibernate.default_schema: ${crest.db.schema}
 server:
     port: ${crest.server.port}
@@ -30,7 +32,7 @@ crest:
   schemaname: ${crest.db.schema}  
   webstaticdir: ${crest.web.static}
   dumpdir: ${crest.dump.dir}
-  security: none
+  security: ${crest.security}
   synchro: none
   authenticationtype: none
 caching:

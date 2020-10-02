@@ -1,16 +1,11 @@
 package hep.crest.data.repositories;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Calendar;
-
-import javax.persistence.Table;
-import javax.sql.DataSource;
-
+import hep.crest.data.config.DatabasePropertyConfigurator;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.handlers.PayloadHandler;
+import hep.crest.data.pojo.Payload;
+import hep.crest.data.repositories.externals.PayloadRequests;
+import hep.crest.swagger.model.PayloadDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,12 +13,15 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import hep.crest.data.config.DatabasePropertyConfigurator;
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.handlers.PayloadHandler;
-import hep.crest.data.pojo.Payload;
-import hep.crest.data.repositories.externals.PayloadRequests;
-import hep.crest.swagger.model.PayloadDto;
+import javax.persistence.Table;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Calendar;
 
 /**
  * General base class for repository implementations.
@@ -232,7 +230,6 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
             log.warn("Could not find meta info entry for hash {}: {}", id, e);
         }
         return null;
-
     }
     
     /**

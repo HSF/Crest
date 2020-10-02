@@ -1,7 +1,9 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import hep.crest.data.security.pojo.CrestRoles;
+import hep.crest.data.security.pojo.CrestUser;
+import hep.crest.data.security.pojo.RoleRepository;
+import hep.crest.data.security.pojo.UserRepository;
 import hep.crest.server.security.UserResource;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -13,16 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import hep.crest.data.security.pojo.CrestRoles;
-import hep.crest.data.security.pojo.CrestUser;
-import hep.crest.data.security.pojo.RoleRepository;
-import hep.crest.data.security.pojo.UserRepository;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@ActiveProfiles("test")
 public class TestCrestUsersRoles {
     
     private final Logger log = LoggerFactory.getLogger(this.getClass());

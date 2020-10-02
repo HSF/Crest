@@ -1,32 +1,6 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Tag;
 import hep.crest.server.controllers.EntityDtoHelper;
@@ -46,10 +20,36 @@ import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSummarySetDto;
 import hep.crest.testutils.DataGenerator;
 import ma.glasnost.orika.MapperFacade;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@ActiveProfiles("test")
 public class TestCrestIov {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());

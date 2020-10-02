@@ -3,16 +3,6 @@
 #             server
 #             ...
 # ===============================
-# Defaults
-caching:
-  iovsgroups_maxage: 600
-  iovsgroups_snapshot_maxage: 3600
-  iovs_maxage: 600
-  iovs_snapshot_maxage: 3600
-  payloads_maxage: 604800
-  timetype_groupsize: 3600  # expressed in seconds
-  runtype_groupsize: 100    # expressed in run numbers
-
 # schemaname : ATLAS_PHYS_COND or none
 # security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)
 crest:
@@ -29,7 +19,8 @@ server:
     servlet.path: /    
     connection-timeout: 60s
 spring:
-    profiles: sqlite
+    profiles:
+      include: default
     jersey:
       application-path: ${crest.apiname}
     datasource:
@@ -45,5 +36,5 @@ spring:
         hibernate.dialect: hep.crest.data.dialect.SQLiteDialect
         hibernate.jdbc.fetch_size: 100
         hibernate.hbm2ddl.auto: update
-        hibernate.show_sql: false        
-        
+        hibernate.show_sql: false
+        hibernate.ddl-auto: update

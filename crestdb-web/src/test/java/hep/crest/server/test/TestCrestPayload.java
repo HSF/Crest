@@ -1,13 +1,12 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovSetDto;
+import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.PayloadSetDto;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.testutils.DataGenerator;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -26,22 +25,23 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.IovSetDto;
-import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.PayloadSetDto;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.testutils.DataGenerator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@ActiveProfiles("test")
 public class TestCrestPayload {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -186,7 +186,7 @@ public class TestCrestPayload {
 
     @Test
     public void testA_payloadIovApi() throws Exception {
-        final TagDto dto = DataGenerator.generateTagDto("SB-TAG-PYLD-01", "run");
+        final TagDto dto = DataGenerator.generateTagDto("SB-TAG-PYLD-10", "run");
         log.info("Store tag for payload request: {}", dto);
         final ResponseEntity<TagDto> response = this.testRestTemplate
                 .postForEntity("/crestapi/tags", dto, TagDto.class);
@@ -197,7 +197,7 @@ public class TestCrestPayload {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        final String tagname = "SB-TAG-PYLD-01";
+        final String tagname = "SB-TAG-PYLD-10";
         final MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
         map.add("file", new String(bindata));
         map.add("since", "1000000");

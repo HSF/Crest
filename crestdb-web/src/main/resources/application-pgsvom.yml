@@ -5,7 +5,8 @@
 # ===============================
 # Defaults
 spring:
-    profiles: pgsvom
+    profiles:
+      includes: crest
     security:
       strategy: MODE_INHERITABLETHREADLOCAL
     jersey:
