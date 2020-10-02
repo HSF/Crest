@@ -90,7 +90,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         if (principal == null) {
             // requestContext.abortWith(ACCESS_DENIED);
             log.debug("Cannot check anything, user is null");
-        } else {
+        }
+        else {
             final Authentication authentication = SecurityContextHolder.getContext()
                     .getAuthentication();
             final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
