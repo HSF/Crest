@@ -5,7 +5,8 @@
 # ===============================
 # Defaults
 spring:
-    profiles: postgres
+    profiles:
+      include: crest
     jersey:
       application-path: ${crest.api.name}
     datasource:
@@ -32,7 +33,7 @@ crest:
   schemaname: none
   dumpdir: ${crest.dump.dir}
   webstaticdir: ${crest.web.static}
-  security: none
+  security: ${crest.security}
   synchro: none
   authenticationtype: none
   db:

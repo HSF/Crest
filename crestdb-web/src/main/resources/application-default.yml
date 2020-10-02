@@ -9,16 +9,10 @@ server:
     port: 8090
     servlet.path: /    
     connection-timeout: 60s
-auth0:
-    audience: https://crest/api
 spring:
     profiles:
       include: crest
     security:
-      oauth2:
-        resourceserver:
-          jwt:
-            issuer-uri: https://dev-andrea-1971.eu.auth0.com/
       strategy: MODE_INHERITABLETHREADLOCAL
     jersey:
       application-path: /crestapi
@@ -42,5 +36,14 @@ info:
     name: Crest Application
     description: Rest services for conditions data management 
     profile: default
-    
+crest:
+  dumpdir: /tmp
+  schemaname: none
+  security: none
+  synchro: none
+  webstaticdir: /tmp
+  dbfile: /tmp/crestdbh2
+  apiname: /crestapi
+  authenticationtype: none
+
     

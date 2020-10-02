@@ -1,12 +1,3 @@
-crest:
-    dumpdir: /tmp
-    schemaname: none
-    security: none
-    synchro: none
-    webstaticdir: /tmp
-    dbfile: /tmp/crestdbh2
-    apiname: /crestapi
-    authenticationtype: none
 caching:
     iovsgroups_maxage: 600
     iovsgroups_snapshot_maxage: 3600

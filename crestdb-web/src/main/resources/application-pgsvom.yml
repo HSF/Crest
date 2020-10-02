@@ -7,8 +7,6 @@
 spring:
     profiles:
       includes: crest
-    security:
-      strategy: MODE_INHERITABLETHREADLOCAL
     jersey:
       application-path: ${crest.api.name}
     datasource:
@@ -34,9 +32,9 @@ server:
     port: ${crest.server.port} 
 crest:
   schemaname: none
-  dumpdir: ${crest.dump.dir}
   webstaticdir: ${crest.web.static}
-  security: none
+  dumpdir: ${crest.dump.dir}
+  security: ${crest.security}
   synchro: none
   authenticationtype: none
   
