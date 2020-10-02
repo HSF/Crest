@@ -31,7 +31,7 @@ crest:
   schemaname: CMS_CONDITIONS
   webstaticdir: ${crest.web.static}
   dumpdir: ${crest.dump.dir}
-  security: none
+  security: ${crest.server.security}
   synchro: none
   authenticationtype: none
 info:
