@@ -1,9 +1,11 @@
 package hep.crest.server.filters;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.security.Principal;
-import java.util.Collection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -12,13 +14,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.security.Principal;
+import java.util.Collection;
 
 /**
  * This filter is here as an example.
@@ -89,14 +88,16 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         final Principal principal = securityContext.getUserPrincipal();
         log.debug("Found user {}", principal);
         if (principal == null) {
-            requestContext.abortWith(ACCESS_DENIED);
-        }
-        final Authentication authentication = SecurityContextHolder.getContext()
-                .getAuthentication();
-        final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        final Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-        for (final GrantedAuthority grantedAuthority : authorities) {
-            log.info("User has authority : {}", grantedAuthority);
+            // requestContext.abortWith(ACCESS_DENIED);
+            log.debug("Cannot check anything, user is null");
+        } else {
+            final Authentication authentication = SecurityContextHolder.getContext()
+                    .getAuthentication();
+            final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            final Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+            for (final GrantedAuthority grantedAuthority : authorities) {
+                log.info("User has authority : {}", grantedAuthority);
+            }
         }
         // In future we can imagine to activate the access authorization with code like:
         //        if <SOME CONDITION ON THE ROLE>
