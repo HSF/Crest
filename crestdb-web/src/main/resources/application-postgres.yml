@@ -33,7 +33,7 @@ crest:
   schemaname: none
   dumpdir: ${crest.dump.dir}
   webstaticdir: ${crest.web.static}
-  security: ${crest.security}
+  security: ${crest.server.security}
   synchro: none
   authenticationtype: none
   db:

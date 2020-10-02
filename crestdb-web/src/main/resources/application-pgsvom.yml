@@ -34,7 +34,7 @@ crest:
   schemaname: none
   webstaticdir: ${crest.web.static}
   dumpdir: ${crest.dump.dir}
-  security: ${crest.security}
+  security: ${crest.server.security}
   synchro: none
   authenticationtype: none
   
