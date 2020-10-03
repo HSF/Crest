@@ -1,5 +1,6 @@
 package hep.crest.server.security;
 
+import hep.crest.data.config.CrestProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
-
-import hep.crest.data.config.CrestProperties;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 /**
  * Web security configuration.
@@ -101,6 +107,36 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${ACCESS}")
     private String access;
 
+    /**
+     * the audience.
+     */
+    @Value("${auth0.audience}")
+    private String audience;
+
+    /**
+     * the issuer.
+     */
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    private String issuer;
+
+    /**
+     *
+     * @return the Decoder
+     */
+    @Bean
+    JwtDecoder jwtDecoder() {
+        NimbusJwtDecoder jwtDecoder = (NimbusJwtDecoder)
+                JwtDecoders.fromOidcIssuerLocation(issuer);
+
+        OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(audience);
+        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuer);
+        OAuth2TokenValidator<Jwt> withAudience = new DelegatingOAuth2TokenValidator<>(withIssuer, audienceValidator);
+
+        jwtDecoder.setJwtValidator(withAudience);
+
+        return jwtDecoder;
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -140,6 +176,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers(HttpMethod.DELETE, "/admin/**").hasRole("GURU")
                     .antMatchers(HttpMethod.PUT, "/admin/**").hasRole("GURU").and().httpBasic()
                     .and().csrf().disable();
+        }
+        else if ("auth0".equals(cprops.getSecurity())) {
+            http.authorizeRequests()
+                    .antMatchers(HttpMethod.DELETE, "/**").hasAuthority("SCOPE_manage:all")
+                    .antMatchers(HttpMethod.PUT, "/admin/**").hasAuthority("SCOPE_manage:all")
+                    .antMatchers(HttpMethod.PUT, "/**").hasAuthority("SCOPE_write:tags")
+                    .antMatchers(HttpMethod.POST, "/**").hasAuthority("SCOPE_write:tags")
+                    .antMatchers(HttpMethod.GET, "/**").permitAll()
+                    .anyRequest().authenticated()
+                    .and()
+                    .oauth2ResourceServer().jwt();
         }
     }
 

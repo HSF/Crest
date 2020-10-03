@@ -1,7 +1,12 @@
 package hep.crest.server.config;
 
-import java.util.Locale;
-
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import hep.crest.data.config.CrestProperties;
+import hep.crest.server.filters.AuthorizationFilter;
+import hep.crest.server.swagger.api.FoldersApi;
+import hep.crest.server.swagger.api.RuninfoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -12,14 +17,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import hep.crest.data.config.CrestProperties;
-import hep.crest.server.filters.AuthorizationFilter;
-import hep.crest.server.swagger.api.MonitoringApi;
-import hep.crest.server.swagger.api.RuninfoApi;
+import java.util.Locale;
 
 /**
  * Services configuration.
@@ -46,13 +44,13 @@ public class ServicesConfig {
      *
      * @return JerseyConfig
      */
-    @Profile({ "prod", "wildfly", "ssl", "cmsprep", "oracle", "test" })
+    @Profile({ "ssl", "cmsprep", "oracle", "test" })
     @Bean(name = "jerseyConfig")
     public JerseyConfig getJerseyResource() {
         final JerseyConfig jc = new JerseyConfig();
         // Register APIs for monitoring.
         jc.jerseyregister(RuninfoApi.class);
-        jc.jerseyregister(MonitoringApi.class);
+        jc.jerseyregister(FoldersApi.class);
         if (!"none".equals(cprops.getSecurity())) {
             // Register authorization filter.
             jc.jerseyregister(AuthorizationFilter.class);
@@ -66,7 +64,7 @@ public class ServicesConfig {
      *
      * @return JerseyConfig
      */
-    @Profile({ "default", "dev", "h2", "sqlite", "postgres", "mysql", "pgsvom" })
+    @Profile({ "default", "h2", "sqlite", "postgres", "mysql", "pgsvom" })
     @Bean(name = "jerseyConfig")
     public JerseyConfig getJerseyDefaultResource() {
         final JerseyConfig jc = new JerseyConfig();

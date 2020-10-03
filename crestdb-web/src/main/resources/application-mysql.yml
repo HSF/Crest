@@ -6,6 +6,7 @@
 # Defaults
 spring:
     profiles: mysql
+    includes: default
     jersey:
       application-path: /crestapi
     datasource:

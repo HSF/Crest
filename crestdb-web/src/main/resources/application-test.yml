@@ -3,18 +3,8 @@
 #             datasources
 #             ...
 # ===============================
-# Defaults
-crest:
-  dumpdir: /tmp
-  schemaname: none
-  security: none
-  synchro: none
-  webstaticdir: /tmp
-  dbfile: /tmp/crestdbh2
-  apiname: /crestapi
-  authenticationtype: none
 spring:
-    security.strategy: MODE_INHERITABLETHREADLOCAL
+    profiles.include: default
     jersey:
       application-path: /crestapi
     datasource:
@@ -31,11 +21,9 @@ spring:
         hibernate.jdbc.fetch_size: 100
         hibernate.hbm2ddl.auto: update
         hibernate.show_sql: false
-    
 info:
   app:
     name: Crest Application
     description: Rest services for conditions data management 
-    profile: default
-    
-      
+    profile: test
+

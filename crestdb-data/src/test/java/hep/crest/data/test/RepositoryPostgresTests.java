@@ -128,10 +128,11 @@ public class RepositoryPostgresTests {
         final Date time = new Date(now.toEpochMilli());
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhashpg1", "mydata", "mystreamer",
                 "test",time);
-        log.debug("Save payload {}", dto);
+        log.info("Save payload {}", dto);
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
         }
+        log.info("Add size of payload data {}", dto.getSize());
         final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
         final PayloadDto loaded = repobean.find("myhashpg1");
@@ -149,6 +150,8 @@ public class RepositoryPostgresTests {
         }
         final InputStream loadedblob = repobean.findData(savedfromblob.getHash());
         assertThat(loadedblob.available()).isGreaterThan(0);
+        final PayloadDto loadedmeta = repobean.findMetaInfo(savedfromblob.getHash());
+        assertThat(new String(loadedmeta.getStreamerInfo())).isEqualTo("mystreamer");
         repobean.delete(savedfromblob.getHash());
         
         ds = new BufferedInputStream(new FileInputStream(f));
