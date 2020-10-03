@@ -81,7 +81,7 @@ public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCus
     @Override
     public List<IovPayloadDto> getRangeIovPayloadInfo(String name, BigDecimal since,
             BigDecimal until, Date snapshot) {
-        log.debug("Select Iov and Payload meta info for tag  {} using JDBCTEMPLATE", name);
+        log.debug("Select Iov and Payload meta info for tag  {} using standard JDBC for Postgres", name);
         ResultSet rs = null;
         final String tablename = this.tablename();
 
@@ -126,6 +126,7 @@ public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCus
                 oid = rs.getLong("STREAMER_INFO");
                 buf = this.getlargeObj(oid, conn);
                 entity.setStreamerInfo(this.getStringFromBuf(buf));
+                entitylist.add(entity);
             }
             rs.close();
             conn.commit();
