@@ -106,10 +106,11 @@ public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCus
              PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
             ps.setString(1, name);
-            ps.setBigDecimal(2, since);
-            ps.setDate(3, new java.sql.Date(snapshot.getTime()));
-            ps.setBigDecimal(4, until);
-            ps.setDate(5, new java.sql.Date(snapshot.getTime()));
+            ps.setString(2, name);
+            ps.setBigDecimal(3, since);
+            ps.setDate(4, new java.sql.Date(snapshot.getTime()));
+            ps.setBigDecimal(5, until);
+            ps.setDate(6, new java.sql.Date(snapshot.getTime()));
 
             rs = ps.executeQuery();
             final IovPayloadDto entity = new IovPayloadDto();
