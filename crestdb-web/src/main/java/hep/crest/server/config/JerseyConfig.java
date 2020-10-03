@@ -7,7 +7,6 @@ import hep.crest.server.swagger.api.FsApi;
 import hep.crest.server.swagger.api.GlobaltagmapsApi;
 import hep.crest.server.swagger.api.GlobaltagsApi;
 import hep.crest.server.swagger.api.IovsApi;
-import hep.crest.server.swagger.api.MonitoringApi;
 import hep.crest.server.swagger.api.PayloadsApi;
 import hep.crest.server.swagger.api.RuninfoApi;
 import hep.crest.server.swagger.api.TagsApi;
@@ -39,7 +38,6 @@ public class JerseyConfig extends ResourceConfig {
         super.register(PayloadsApi.class);
         super.register(FsApi.class);
         super.register(RuninfoApi.class);
-        super.register(FoldersApi.class);
         super.register(MultiPartFeature.class);
         super.register(CacheControlFilter.class);
         super.register(CORSFilter.class);
