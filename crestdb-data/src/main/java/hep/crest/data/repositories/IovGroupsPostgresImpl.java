@@ -17,17 +17,12 @@
  **/
 package hep.crest.data.repositories;
 
-import hep.crest.data.config.DatabasePropertyConfigurator;
-import hep.crest.data.pojo.Iov;
-import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.IovPayloadDto;
-import hep.crest.swagger.model.TagSummaryDto;
+import org.postgresql.largeobject.LargeObject;
+import org.postgresql.largeobject.LargeObjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.persistence.Table;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -35,8 +30,11 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -47,7 +45,7 @@ import java.util.List;
  * @author formica
  *
  */
-public class IovGroupsPostgresImpl implements IovGroupsCustom {
+public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCustom {
 
     /**
      * Logger.
@@ -55,15 +53,10 @@ public class IovGroupsPostgresImpl implements IovGroupsCustom {
     private static final Logger log = LoggerFactory.getLogger(IovGroupsPostgresImpl.class);
 
     /**
-     * Datasource.
+     * The decoder.
      */
-    private final DataSource ds;
+    private CharsetDecoder decoder = StandardCharsets.US_ASCII.newDecoder();
 
-    /**
-     * The upload directory for files.
-     */
-    @Value("${crest.upload.dir:/tmp}")
-    private String serverUploadLocationFolder;
 
     /**
      * Default table name.
@@ -75,163 +68,7 @@ public class IovGroupsPostgresImpl implements IovGroupsCustom {
      *            the DataSource
      */
     public IovGroupsPostgresImpl(DataSource ds) {
-        super();
-        this.ds = ds;
-    }
-
-    /**
-     * @param defaultTablename
-     *            the String
-     * @return
-     */
-    public void setDefaultTablename(String defaultTablename) {
-        if (this.defaultTablename == null) {
-            this.defaultTablename = defaultTablename;
-        }
-    }
-
-    /**
-     * Use annotations to generate the table name in SQL requests. In general it
-     * adds the schema name.
-     *
-     * @return String
-     */
-    protected String tablename() {
-        final Table ann = Iov.class.getAnnotation(Table.class);
-        String tablename = ann.name();
-        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
-        }
-        else if (this.defaultTablename != null) {
-            tablename = this.defaultTablename + "." + tablename;
-        }
-        return tablename;
-    }
-
-    /**
-     * @return String
-     */
-    protected String payloadTablename() {
-        final Table ann = Payload.class.getAnnotation(Table.class);
-        String tablename = ann.name();
-        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
-        }
-        else if (this.defaultTablename != null) {
-            tablename = this.defaultTablename + "." + tablename;
-        }
-        return tablename;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.phycdb.svc.repositories.IovGroupsCustom#selectGroups(java.lang.String,
-     * java.lang.Long)
-     */
-    @Override
-    public List<BigDecimal> selectGroups(String tagname, Long groupsize) {
-        log.info("Select Iov Groups for tag {} with group size {} using JDBCTEMPLATE", tagname,
-                groupsize);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-        final String tablename = this.tablename();
-        // Set the default group frequency at 1000. This can be changed via groupsize argument.
-        Long groupfreq = 1000L;
-        if (groupsize != null && groupsize > 0) {
-            groupfreq = groupsize;
-        }
-        final String sql = "select MIN(SINCE) from " + tablename + " where TAG_NAME=? "
-                + " group by cast(SINCE/? as int)*?" + " order by min(SINCE)";
-        log.debug("Execute selectGroups query {}", sql);
-        return jdbcTemplate.queryForList(sql, BigDecimal.class, tagname, groupfreq, groupfreq);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * hep.phycdb.svc.repositories.IovGroupsCustom#selectSnapshotGroups(java.lang.
-     * String, java.util.Date, java.lang.Integer)
-     */
-    @Override
-    public List<BigDecimal> selectSnapshotGroups(String tagname, Date snap, Long groupsize) {
-        log.info(
-                "Select Iov Snapshot Groups for tag {} with group size {} and snapshot time {} using JDBCTEMPLATE",
-                tagname, groupsize, snap);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-        final String tablename = this.tablename();
-        // Set the default group frequency at 1000. This can be changed via groupsize argument.
-        Long groupfreq = 1000L;
-        if (groupsize != null && groupsize > 0) {
-            groupfreq = groupsize;
-        }
-        final String sql = "select MIN(SINCE) from " + tablename
-                + " where TAG_NAME=? and INSERTION_TIME<=?" + " group by cast(SINCE/? as int)*?"
-                + " order by min(SINCE)";
-        log.debug("Execute selectSnapshotGroups query {}", sql);
-
-        return jdbcTemplate.queryForList(sql, BigDecimal.class, tagname, snap, groupfreq,
-                groupfreq);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see hep.crest.data.repositories.IovGroupsCustom#getSize(java.lang.String)
-     */
-    @Override
-    public Long getSize(String tagname) {
-        log.info("Select count(TAG_NAME) Iov for tag {} using JDBCTEMPLATE", tagname);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-        final String tablename = this.tablename();
-
-        final String sql = "select COUNT(TAG_NAME) from " + tablename + " where TAG_NAME=?";
-        log.info("Execute query {}", sql);
-        return jdbcTemplate.queryForObject(sql, Long.class, tagname);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see hep.crest.data.repositories.IovGroupsCustom#getSizeBySnapshot(java.lang.
-     * String, java.util.Date)
-     */
-    @Override
-    public Long getSizeBySnapshot(String tagname, Date snap) {
-        log.info("Select count(TAG_NAME) Iov for tag {} and snapshot time {} using JDBCTEMPLATE",
-                tagname, snap);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-        final String tablename = this.tablename();
-
-        final String sql = "select COUNT(TAG_NAME) from " + tablename
-                + " where TAG_NAME=? and INSERTION_TIME<=?";
-        return jdbcTemplate.queryForObject(sql, Long.class, tagname, snap);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see hep.phycdb.svc.repositories.IovGroupsCustom#getTagSummaryInfo(java.lang.
-     * String)
-     */
-    @Override
-    public List<TagSummaryDto> getTagSummaryInfo(String tagname) {
-        log.info("Select count(TAG_NAME) Iov for tag matching pattern {} using JDBCTEMPLATE",
-                tagname);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-        final String tablename = this.tablename();
-        // sql : count iovs in a tag
-        // select TAG_NAME, COUNT(TAG_NAME) as NIOVS from IOV
-        // where TAG_NAME like ? GROUP BY TAG_NAME
-        final String sql = "select TAG_NAME, COUNT(TAG_NAME) as NIOVS from " + tablename
-                + " where TAG_NAME like ? GROUP BY TAG_NAME";
-        return jdbcTemplate.query(sql, new Object[] {tagname}, (rs, num) -> {
-            final TagSummaryDto entity = new TagSummaryDto();
-            entity.setTagname(rs.getString("TAG_NAME"));
-            entity.setNiovs(rs.getLong("NIOVS"));
-            return entity;
-        });
+        super(ds);
     }
 
     /*
@@ -245,7 +82,7 @@ public class IovGroupsPostgresImpl implements IovGroupsCustom {
     public List<IovPayloadDto> getRangeIovPayloadInfo(String name, BigDecimal since,
             BigDecimal until, Date snapshot) {
         log.debug("Select Iov and Payload meta info for tag  {} using JDBCTEMPLATE", name);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        ResultSet rs = null;
         final String tablename = this.tablename();
 
         // sql : select only metadata from payload table and link with the IOV table
@@ -264,36 +101,95 @@ public class IovGroupsPostgresImpl implements IovGroupsCustom {
                 + "  WHERE iov2.TAG_NAME=? AND iov2.SINCE<=? AND iov2.INSERTION_TIME<=? ),0)"
                 + " AND iv.SINCE<=? AND iv.INSERTION_TIME<=? "
                 + " ORDER BY iv.SINCE ASC, iv.INSERTION_TIME DESC";
-        return jdbcTemplate.query(sql,
-                new Object[] {name, name, since, snapshot, until, snapshot}, (rs, num) -> {
-                    final IovPayloadDto entity = new IovPayloadDto();
-                    entity.setSince(rs.getBigDecimal("SINCE"));
-                    entity.setPayloadHash(rs.getString("PAYLOAD_HASH"));
-                    entity.setVersion(rs.getString("VERSION"));
-                    entity.setObjectType(rs.getString("OBJECT_TYPE"));
-                    entity.setSize(rs.getInt("DATA_SIZE"));
-                    entity.setStreamerInfo(getBlob(rs, "STREAMER_INFO"));
-                    return entity;
-                });
+        List<IovPayloadDto> entitylist = new ArrayList<>();
+        try (Connection conn = super.getDs().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);) {
+            conn.setAutoCommit(false);
+            ps.setString(1, name);
+            ps.setBigDecimal(2, since);
+            ps.setDate(3, new java.sql.Date(snapshot.getTime()));
+            ps.setBigDecimal(4, until);
+            ps.setDate(5, new java.sql.Date(snapshot.getTime()));
+
+            rs = ps.executeQuery();
+            final IovPayloadDto entity = new IovPayloadDto();
+            byte[] buf = null;
+            Long oid = null;
+            while (rs.next()) {
+                // Open the large object for reading
+                log.info("Read resultset...");
+                entity.setSince(rs.getBigDecimal("SINCE"));
+                entity.setPayloadHash(rs.getString("PAYLOAD_HASH"));
+                entity.setVersion(rs.getString("VERSION"));
+                entity.setObjectType(rs.getString("OBJECT_TYPE"));
+                entity.setSize(rs.getInt("DATA_SIZE"));
+                oid = rs.getLong("STREAMER_INFO");
+                buf = this.getlargeObj(oid, conn);
+                entity.setStreamerInfo(this.getStringFromBuf(buf));
+            }
+            rs.close();
+            conn.commit();
+        }
+        catch (final SQLException e) {
+            log.error("SQL exception occurred in retrieving iovpayload data for {}: {}", name, e.getMessage());
+        }
+        finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            }
+            catch (final SQLException e) {
+                log.error("Error in closing result set : {}", e);
+            }
+        }
+        return entitylist;
     }
 
     /**
-     * Transform streamerInfo bytes into String.
-     * This method should deal with different types of binary content. We want a normal string if possible, or base64
-     * encoded if the content is really binary.
-     *
-     * @param rs the ResulSet
-     * @param key the column String
-     * @return String
+     * @param oid
+     *            the Long
+     * @param conn
+     *            the Connection
      * @throws SQLException
+     *             If an Exception occurred
+     * @return byte[]
      */
-    protected String getBlob(ResultSet rs, String key) throws SQLException {
-        CharsetDecoder decoder = StandardCharsets.US_ASCII.newDecoder();
+    protected byte[] getlargeObj(long oid, Connection conn) throws SQLException {
+        final LargeObjectManager lobj = conn.unwrap(org.postgresql.PGConnection.class)
+                .getLargeObjectAPI();
+        LargeObject obj = null;
+        byte[] buf = null;
+        try {
+            obj = lobj.open(oid, LargeObjectManager.READ);
+            buf = new byte[obj.size()];
+            obj.read(buf, 0, obj.size());
+            obj.close();
+        }
+        catch (final SQLException e) {
+            log.error("cannot read large object in postgres {} : {}", oid, e);
+        }
+        finally {
+            if (obj != null) {
+                obj.close();
+                // conn.commit(); no need to call commit here, it will be done in the calling func.
+            }
+            //This may not work ? lobj.unlink(oid);
+            // Be Careful : unlink could be used to DELETE the BLOB.
+        }
+        return buf;
+    }
 
+    /**
+     *
+     * @param buf
+     * @return the String.
+     */
+    private String getStringFromBuf(byte[] buf) {
         decoder.onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT);
 
-        byte[] streaminfoByteArr = rs.getBytes(key);
+        byte[] streaminfoByteArr = buf;
         try {
             return decoder.decode(ByteBuffer.wrap(streaminfoByteArr))
                     .toString();

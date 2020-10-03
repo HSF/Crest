@@ -17,6 +17,18 @@
  **/
 package hep.crest.data.repositories;
 
+import hep.crest.data.config.DatabasePropertyConfigurator;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Payload;
+import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.TagSummaryDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import javax.persistence.Table;
+import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -28,20 +40,6 @@ import java.sql.SQLException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-
-import javax.persistence.Table;
-import javax.sql.DataSource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import hep.crest.data.config.DatabasePropertyConfigurator;
-import hep.crest.data.pojo.Iov;
-import hep.crest.data.pojo.Payload;
-import hep.crest.swagger.model.IovPayloadDto;
-import hep.crest.swagger.model.TagSummaryDto;
 
 /**
  * An implementation for groups queries.
@@ -90,6 +88,13 @@ public class IovGroupsImpl implements IovGroupsCustom {
         if (this.defaultTablename == null) {
             this.defaultTablename = defaultTablename;
         }
+    }
+
+    /**
+     * @return DataSource
+     */
+    protected DataSource getDs() {
+        return ds;
     }
 
     /**
