@@ -1,14 +1,16 @@
 package hep.crest.data.config;
 
-import hep.crest.data.repositories.IovDirectoryImplementation;
-import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovGroupsImpl;
+import hep.crest.data.repositories.IovGroupsCustom;
+import hep.crest.data.repositories.IovGroupsPostgresImpl;
+import hep.crest.data.repositories.TagDirectoryImplementation;
+import hep.crest.data.repositories.IovDirectoryImplementation;
+import hep.crest.data.repositories.PayloadDirectoryImplementation;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
 import hep.crest.data.repositories.PayloadDataDBImpl;
 import hep.crest.data.repositories.PayloadDataPostgresImpl;
 import hep.crest.data.repositories.PayloadDataSQLITEImpl;
-import hep.crest.data.repositories.PayloadDirectoryImplementation;
-import hep.crest.data.repositories.TagDirectoryImplementation;
+
 import hep.crest.data.utils.DirectoryUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +88,22 @@ public class RepositoryConfig {
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
+        // Set default schema and table name taken from properties.
+        if (!"none".equals(cprops.getSchemaname())) {
+            bean.setDefaultTablename(cprops.getSchemaname());
+        }
+        return bean;
+    }
+
+    /**
+     * @param mainDataSource
+     *            the DataSource
+     * @return IovGroupsCustom
+     */
+    @Profile({ "postgres", "pgsvom" })
+    @Bean(name = "iovgroupsrepo")
+    public IovGroupsCustom iovgroupsPostgresRepository(@Qualifier("dataSource") DataSource mainDataSource) {
+        final IovGroupsPostgresImpl bean = new IovGroupsPostgresImpl(mainDataSource);
         // Set default schema and table name taken from properties.
         if (!"none".equals(cprops.getSchemaname())) {
             bean.setDefaultTablename(cprops.getSchemaname());

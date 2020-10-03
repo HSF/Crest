@@ -4,7 +4,6 @@
 package hep.crest.data.monitoring.repositories;
 
 import hep.crest.data.config.CrestProperties;
-import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Payload;
@@ -56,7 +55,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
             // Create the sql string using a query defined in a package.
             // This should word on any DB.
             sql = "select iv.tag_name, count(iv.tag_name) as niovs, sum(pl.data_size) as tot_volume, avg(pl"
-                    + ".data_size) as avg_volume FROM " + this.payloadTable() + " pl, " + iovTable() + " iv "
+                    + ".data_size) as avg_volume FROM " + this.payloadTable() + " pl, " + this.iovTable() + " iv "
                     + " WHERE iv.TAG_NAME like ? AND iv.PAYLOAD_HASH=pl.HASH group by iv.TAG_NAME order by iv.TAG_NAME";
             log.debug("Execute query {} using {}", sql, tagpattern);
             return jdbcTemplate.query(sql, new Object[]{tagpattern}, new PayloadInfoMapper());
@@ -76,12 +75,10 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
         String defaultTablename = ("none".equals(props.getSchemaname())) ? null : props.getSchemaname();
         final Table ann = Payload.class.getAnnotation(Table.class);
         String tablename = ann.name();
-        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
-        }
-        else if (defaultTablename != null) {
+        if (defaultTablename != null) {
             tablename = defaultTablename + "." + tablename;
         }
+        log.info("Generating payload table name as {}", tablename);
         return tablename;
     }
 
@@ -94,12 +91,10 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
         String defaultTablename = ("none".equals(props.getSchemaname())) ? null : props.getSchemaname();
         final Table ann = Iov.class.getAnnotation(Table.class);
         String tablename = ann.name();
-        if (!DatabasePropertyConfigurator.SCHEMA_NAME.isEmpty()) {
-            tablename = DatabasePropertyConfigurator.SCHEMA_NAME + "." + tablename;
-        }
-        else if (defaultTablename != null) {
+        if (defaultTablename != null) {
             tablename = defaultTablename + "." + tablename;
         }
+        log.info("Generating iov table name as {}", tablename);
         return tablename;
     }
 
