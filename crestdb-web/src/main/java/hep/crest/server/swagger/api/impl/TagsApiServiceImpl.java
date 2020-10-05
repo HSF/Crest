@@ -102,7 +102,9 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final AlreadyExistsPojoException e) {
             // Exception, resource exists, send 303.
             log.error("Cannot create tag {}, name already exists...", body);
-            return Response.status(Response.Status.SEE_OTHER).entity(body).build();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    "Cannot create tag because name already exists: " + body.getName());
+            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
         }
         catch (final RuntimeException e) {
             // Exception, send 500.
@@ -124,7 +126,7 @@ public class TagsApiServiceImpl extends TagsApiService {
     @Override
     public Response updateTag(String name, GenericMap body, SecurityContext securityContext,
                               UriInfo info) throws NotFoundException {
-        log.info("TagRestController processing request for creating a tag");
+        log.info("TagRestController processing request for updating a tag");
         try {
             // Search tag.
             final Tag entity = tagService.findOne(name);
@@ -134,22 +136,25 @@ public class TagsApiServiceImpl extends TagsApiService {
                     // Update description.
                     entity.setDescription(body.get(key));
                 }
-                if (key == "timeType") {
+                else if (key == "timeType") {
                     entity.setTimeType(body.get(key));
                 }
-                if (key == "lastValidatedTime") {
+                else if (key == "lastValidatedTime") {
                     final BigDecimal val = new BigDecimal(body.get(key));
                     entity.setLastValidatedTime(val);
                 }
-                if (key == "endOfValidity") {
+                else if (key == "endOfValidity") {
                     final BigDecimal val = new BigDecimal(body.get(key));
                     entity.setEndOfValidity(val);
                 }
-                if (key == "synchronization") {
+                else if (key == "synchronization") {
                     entity.setSynchronization(body.get(key));
                 }
-                if (key == "payloadSpec") {
+                else if (key == "payloadSpec") {
                     entity.setObjectType(body.get(key));
+                }
+                else {
+                    log.warn("Ignored key {} in updateTag: field does not exists", key);
                 }
             }
             final Tag saved = tagService.updateTag(entity);
@@ -162,6 +167,14 @@ public class TagsApiServiceImpl extends TagsApiService {
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
                     message);
             return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+        }
+        catch (final RuntimeException e) {
+            // Exception, send 500.
+            final String message = e.getMessage();
+            log.error("Api method updateTag got exception {}", message);
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
+                    message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         }
     }
 

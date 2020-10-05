@@ -85,6 +85,7 @@ public class RepositoryConfig {
      *            the DataSource
      * @return IovGroupsCustom
      */
+    @Profile({ "test", "default", "h2", "ssl", "mysql", "cmsprep", "oracle" })
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);

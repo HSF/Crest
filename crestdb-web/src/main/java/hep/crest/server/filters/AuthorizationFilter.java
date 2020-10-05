@@ -2,10 +2,6 @@ package hep.crest.server.filters;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -17,7 +13,6 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.util.Collection;
 
 /**
  * This filter is here as an example.
@@ -92,13 +87,14 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             log.debug("Cannot check anything, user is null");
         }
         else {
-            final Authentication authentication = SecurityContextHolder.getContext()
-                    .getAuthentication();
-            final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            final Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-            for (final GrantedAuthority grantedAuthority : authorities) {
-                log.info("User has authority : {}", grantedAuthority);
-            }
+            log.debug("Principal is {}", principal);
+//            final Authentication authentication = SecurityContextHolder.getContext()
+//                    .getAuthentication();
+//            final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//            final Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+//            for (final GrantedAuthority grantedAuthority : authorities) {
+//                log.info("User has authority : {}", grantedAuthority);
+//            }
         }
         // In future we can imagine to activate the access authorization with code like:
         //        if <SOME CONDITION ON THE ROLE>

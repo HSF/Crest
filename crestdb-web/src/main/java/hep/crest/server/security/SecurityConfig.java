@@ -10,11 +10,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.ldap.core.ContextSource;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
@@ -48,12 +46,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Autowired
     private CrestProperties cprops;
-
-    /**
-     * Service.
-     */
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     /**
      * The user search base for LDAP.
@@ -178,24 +170,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and().csrf().disable();
         }
         else if ("auth0".equals(cprops.getSecurity())) {
+            log.info("Auth0 security enabled for this server....");
             http.authorizeRequests()
                     .antMatchers(HttpMethod.DELETE, "/**").hasAuthority("SCOPE_manage:all")
                     .antMatchers(HttpMethod.PUT, "/admin/**").hasAuthority("SCOPE_manage:all")
-                    .antMatchers(HttpMethod.PUT, "/**").hasAuthority("SCOPE_write:tags")
-                    .antMatchers(HttpMethod.POST, "/**").hasAuthority("SCOPE_write:tags")
+                    .antMatchers(HttpMethod.PUT, "/tags", "/iovs", "/payloads")
+                        .hasAuthority("SCOPE_write:tags")
+                    .antMatchers(HttpMethod.POST, "/tags", "/iovs", "/payloads")
+                        .hasAuthority("SCOPE_write:tags")
                     .antMatchers(HttpMethod.GET, "/**").permitAll()
                     .anyRequest().authenticated()
+                    .and()
+                    .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())
                     .and()
                     .oauth2ResourceServer().jwt();
         }
     }
 
-    /**
-     * @param auth
-     *            the AuthenticationManagerBuilder
-     * @throws Exception
-     *             If an Exception occurred
-     */
+//    /**
+//     * @param auth
+//     *            the AuthenticationManagerBuilder
+//     * @throws Exception
+//     *             If an Exception occurred
+//     */
+/*
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         log.debug("Configure authentication manager");
@@ -223,6 +221,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // auth.userDetailsService(accountRepository)
 
     }
+*/
 
     /**
      * @return LdapContextSource

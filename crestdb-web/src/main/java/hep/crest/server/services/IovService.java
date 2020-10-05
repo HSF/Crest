@@ -3,27 +3,8 @@
  */
 package hep.crest.server.services;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
-
-import org.joda.time.Instant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
-
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.IovGroupsCustom;
@@ -39,6 +20,22 @@ import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.IovPayloadDto;
 import hep.crest.swagger.model.IovSetDto;
 import hep.crest.swagger.model.TagSummaryDto;
+import org.joda.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author formica
@@ -73,6 +70,7 @@ public class IovService {
      * Repository.
      */
     @Autowired
+    @Qualifier("iovgroupsrepo")
     private IovGroupsCustom iovgroupsrepo;
     /**
      * Helper.
