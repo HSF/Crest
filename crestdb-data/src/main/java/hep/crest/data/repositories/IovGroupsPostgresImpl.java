@@ -109,9 +109,9 @@ public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCus
             ps.setString(1, name);
             ps.setString(2, name);
             ps.setBigDecimal(3, since);
-            ps.setDate(4, new java.sql.Date(snapshot.getTime()));
+            ps.setTimestamp(4, new java.sql.Timestamp(snapshot.getTime()));
             ps.setBigDecimal(5, until);
-            ps.setDate(6, new java.sql.Date(snapshot.getTime()));
+            ps.setTimestamp(6, new java.sql.Timestamp(snapshot.getTime()));
 
             rs = ps.executeQuery();
             byte[] buf = null;
