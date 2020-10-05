@@ -15,7 +15,7 @@ spring:
     security:
       strategy: MODE_INHERITABLETHREADLOCAL
     jersey:
-      application-path: /crestapi
+      application-path: ${crest.api.name}
     datasource:
       url: jdbc:h2:${crest.dbfile};DB_CLOSE_ON_EXIT=FALSE
       driverClassName: org.h2.Driver
@@ -39,11 +39,11 @@ info:
 crest:
   dumpdir: /tmp
   schemaname: none
-  security: none
+  security: ${crest.server.security}
   synchro: none
   webstaticdir: /tmp
   dbfile: /tmp/crestdbh2
-  apiname: /crestapi
+  apiname: ${crest.api.name}
   authenticationtype: none
 
     
