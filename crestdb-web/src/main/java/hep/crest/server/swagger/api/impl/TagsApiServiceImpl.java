@@ -1,7 +1,6 @@
 package hep.crest.server.swagger.api.impl;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.server.controllers.EntityDtoHelper;
@@ -279,7 +278,7 @@ public class TagsApiServiceImpl extends TagsApiService {
                     message);
             return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
         }
-        catch (final RuntimeException | CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
             // Error from server. Send a 500.
             final String message = e.getMessage();
@@ -309,7 +308,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             return Response.ok().entity(respdto).build();
 
         }
-        catch (final RuntimeException | CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
             // Error from server. Send a 500.
             final String message = e.getMessage();
@@ -355,7 +354,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             final TagMetaDto saved = tagService.updateTagMeta(dto);
             return Response.ok(info.getRequestUri()).entity(saved).build();
         }
-        catch (final RuntimeException | CdbServiceException e) {
+        catch (final RuntimeException e) {
             final String message = e.getMessage();
             final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();

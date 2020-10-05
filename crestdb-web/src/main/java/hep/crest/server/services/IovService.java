@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -310,9 +311,10 @@ public class IovService {
      * @return Iov
      * @throws NotExistsPojoException
      *             If an Exception occurred
+     * @throws DataIntegrityViolationException If an sql exception occurred.
      */
     @Transactional
-    public Iov insertIov(Iov entity) throws NotExistsPojoException {
+    public Iov insertIov(Iov entity) throws NotExistsPojoException, DataIntegrityViolationException {
         log.debug("Create iov from {}", entity);
         final String tagname = entity.getTag().getName();
         // The IOV is not yet stored. Verify that the tag exists before inserting it.
@@ -329,8 +331,6 @@ public class IovService {
             log.debug("Saved entity: {}", saved);
             return saved;
         }
-        else {
-            throw new NotExistsPojoException("Unkown tag : " + tagname);
-        }
+        throw new NotExistsPojoException("Unkown tag : " + tagname);
     }
 }
