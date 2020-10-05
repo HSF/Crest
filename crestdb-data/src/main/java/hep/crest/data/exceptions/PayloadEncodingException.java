@@ -21,7 +21,7 @@ package hep.crest.data.exceptions;
  * @author formica
  *
  */
-public class PayloadEncodingException extends Exception {
+public class PayloadEncodingException extends RuntimeException {
 
     /**
      * Serializer.

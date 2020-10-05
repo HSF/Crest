@@ -3,6 +3,14 @@
  */
 package hep.crest.data.repositories;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.swagger.model.IovDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,16 +19,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.utils.DirectoryUtilities;
-import hep.crest.swagger.model.IovDto;
 
 /**
  * An implementation for IOVs stored in file system.
@@ -111,7 +109,7 @@ public class IovDirectoryImplementation {
 
             return iovdto;
         }
-        catch (final RuntimeException | CdbServiceException | JsonProcessingException x) {
+        catch (final RuntimeException | JsonProcessingException x) {
             log.error("Cannot save iov dto {} : {}", iovdto, x);
         }
         return null;
