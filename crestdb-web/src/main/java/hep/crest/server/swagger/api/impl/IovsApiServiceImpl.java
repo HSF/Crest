@@ -649,6 +649,7 @@ public class IovsApiServiceImpl extends IovsApiService {
                 // Set the snapshot.
                 snap = new Date(snapshot);
             }
+            log.debug("Use snapshot {}", snap);
             // Get the IOV list.
             dtolist = iovService.selectIovPayloadsByTagRangeSnapshot(tagname, rsince, runtil, snap);
             final IovPayloadSetDto respdto = new IovPayloadSetDto();
