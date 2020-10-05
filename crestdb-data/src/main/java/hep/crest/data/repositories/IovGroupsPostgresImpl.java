@@ -93,7 +93,7 @@ public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCus
         // AND iv.SINCE<=? AND iv.INSERTION_TIME<=?
         // order by iv.SINCE ASC, iv.INSERTION_TIME DESC
 
-        final String sql = "select iv.TAG_NAME, iv.SINCE, iv.PAYLOAD_HASH, pyld.STREAMER_INFO, "
+        final String sql = "select iv.TAG_NAME, iv.SINCE, iv.INSERTION_TIME, iv.PAYLOAD_HASH, pyld.STREAMER_INFO, "
                 + " pyld.VERSION, pyld.OBJECT_TYPE, " + " pyld.DATA_SIZE from " + tablename + " iv "
                 + " LEFT JOIN " + payloadTablename() + " pyld " + " ON iv.PAYLOAD_HASH=pyld.HASH "
                 + " where iv.TAG_NAME=? AND iv.SINCE>=COALESCE(" + "  (SELECT max(iov2.SINCE) FROM "
@@ -105,6 +105,7 @@ public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCus
         try (Connection conn = super.getDs().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);) {
             conn.setAutoCommit(false);
+            log.debug("Executing query {}", sql);
             ps.setString(1, name);
             ps.setString(2, name);
             ps.setBigDecimal(3, since);
@@ -113,13 +114,14 @@ public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCus
             ps.setDate(6, new java.sql.Date(snapshot.getTime()));
 
             rs = ps.executeQuery();
-            final IovPayloadDto entity = new IovPayloadDto();
             byte[] buf = null;
             Long oid = null;
             while (rs.next()) {
+                final IovPayloadDto entity = new IovPayloadDto();
                 // Open the large object for reading
                 log.info("Read resultset...");
                 entity.setSince(rs.getBigDecimal("SINCE"));
+                entity.setInsertionTime(rs.getTimestamp("INSERTION_TIME"));
                 entity.setPayloadHash(rs.getString("PAYLOAD_HASH"));
                 entity.setVersion(rs.getString("VERSION"));
                 entity.setObjectType(rs.getString("OBJECT_TYPE"));
@@ -127,6 +129,7 @@ public class IovGroupsPostgresImpl extends IovGroupsImpl implements IovGroupsCus
                 oid = rs.getLong("STREAMER_INFO");
                 buf = this.getlargeObj(oid, conn);
                 entity.setStreamerInfo(this.getStringFromBuf(buf));
+                log.debug("create entity {}", entity);
                 entitylist.add(entity);
             }
             rs.close();

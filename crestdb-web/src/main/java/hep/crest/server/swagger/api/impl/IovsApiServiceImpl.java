@@ -15,7 +15,14 @@ import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.IovsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
-import hep.crest.swagger.model.*;
+import hep.crest.swagger.model.CrestBaseResponse;
+import hep.crest.swagger.model.GenericMap;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovPayloadDto;
+import hep.crest.swagger.model.IovPayloadSetDto;
+import hep.crest.swagger.model.IovSetDto;
+import hep.crest.swagger.model.TagSummaryDto;
+import hep.crest.swagger.model.TagSummarySetDto;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +32,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -637,6 +649,7 @@ public class IovsApiServiceImpl extends IovsApiService {
                 // Set the snapshot.
                 snap = new Date(snapshot);
             }
+            log.debug("Use snapshot {}", snap);
             // Get the IOV list.
             dtolist = iovService.selectIovPayloadsByTagRangeSnapshot(tagname, rsince, runtil, snap);
             final IovPayloadSetDto respdto = new IovPayloadSetDto();

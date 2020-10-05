@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -153,6 +152,15 @@ public class PayloadService {
     }
 
 
+    /**
+     * Save IOV and Payload in one request.
+     *
+     * @param dto
+     * @param pdto
+     * @param filename
+     * @return
+     * @throws CdbServiceException
+     */
     @Transactional
     public HTTPResponse saveIovAndPayload(IovDto dto, PayloadDto pdto, String filename)
             throws CdbServiceException {
@@ -197,21 +205,9 @@ public class PayloadService {
                     .id(dto.getPayloadHash()).message("Tag not found "
                             + dto.getTagName());
         }
-        catch (DataIntegrityViolationException e) {
-            String msg = "Api method saveIovAndPayload got SQL exception " + e.getMessage();
-            msg += "\nCannot store data in : " + dto.getTagName() + " @ " + dto.getSince();
-            new HTTPResponse().code(Response.Status.CONFLICT.getStatusCode())
-                    .id(dto.getPayloadHash()).message(msg);
-        }
         catch (RuntimeException e) {
             log.error("A Runtime exception occurred in saveIovAndPayload method: {}", e);
         }
-//        catch (RuntimeException e) {
-//            String msg = "Api method saveIovAndPayload got exception " + e.getMessage();
-//            msg += "\nCannot store data in : " + dto.getTagName() + " @ " + dto.getSince();
-//            new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-//                    .id(dto.getPayloadHash()).message(msg);
-//        }
         finally {
             try {
                 Files.deleteIfExists(temppath);

@@ -2125,6 +2125,10 @@
 				"since": {
 					"type": "number"
 				},
+				"insertionTime": {
+					"type": "string",
+					"format": "date-time"
+				},
 				"version": {
 					"type": "string"
 				},
