@@ -263,7 +263,7 @@ public class IovGroupsImpl implements IovGroupsCustom {
         // AND iv.SINCE<=? AND iv.INSERTION_TIME<=?
         // order by iv.SINCE ASC, iv.INSERTION_TIME DESC
 
-        final String sql = "select iv.TAG_NAME, iv.SINCE, iv.PAYLOAD_HASH, pyld.STREAMER_INFO, "
+        final String sql = "select iv.TAG_NAME, iv.SINCE, iv.INSERTION_TIME, iv.PAYLOAD_HASH, pyld.STREAMER_INFO, "
                 + " pyld.VERSION, pyld.OBJECT_TYPE, " + " pyld.DATA_SIZE from " + tablename + " iv "
                 + " LEFT JOIN " + payloadTablename() + " pyld " + " ON iv.PAYLOAD_HASH=pyld.HASH "
                 + " where iv.TAG_NAME=? AND iv.SINCE>=COALESCE(" + "  (SELECT max(iov2.SINCE) FROM "
@@ -275,11 +275,13 @@ public class IovGroupsImpl implements IovGroupsCustom {
                 new Object[] {name, name, since, snapshot, until, snapshot}, (rs, num) -> {
                     final IovPayloadDto entity = new IovPayloadDto();
                     entity.setSince(rs.getBigDecimal("SINCE"));
+                    entity.setInsertionTime(rs.getTimestamp("INSERTION_TIME"));
                     entity.setPayloadHash(rs.getString("PAYLOAD_HASH"));
                     entity.setVersion(rs.getString("VERSION"));
                     entity.setObjectType(rs.getString("OBJECT_TYPE"));
                     entity.setSize(rs.getInt("DATA_SIZE"));
                     entity.setStreamerInfo(getBlob(rs, "STREAMER_INFO"));
+                    log.debug("create entity {}", entity);
                     return entity;
                 });
     }

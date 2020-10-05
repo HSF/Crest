@@ -1,6 +1,6 @@
 package hep.crest.server.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import hep.crest.data.config.CrestProperties;
@@ -86,7 +86,25 @@ public class ServicesConfig {
         final ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
         // Disable the serialization features for DATEs.
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.setSerializationInclusion(Include.NON_NULL);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+//                // date/time
+//                .appendPattern("yyyy-MM-dd HH:mm:ss")
+//                // optional fraction of seconds (from 0 to 9 digits)
+//                .optionalStart().appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true).optionalEnd()
+//                // offset
+//                .appendPattern("xxx")
+//                // create formatter
+//                .toFormatter();
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false);
+//        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+//        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//        mapper.setDateFormat(new StdDateFormat());
+//        JavaTimeModule module = new JavaTimeModule();
+//        module.addSerializer(Date.class, new DateSerializer());
+//        mapper.registerModule(module);
+
         return mapper;
     }
     

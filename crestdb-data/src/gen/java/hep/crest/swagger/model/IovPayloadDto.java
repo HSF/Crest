@@ -1,6 +1,6 @@
 /*
  * CrestDB REST API
- * Crest Rest Api to manage data for calibration files.
+ * Crest Rest Api to manage conditions data.
  *
  * OpenAPI spec version: 2.0
  * Contact: andrea.formica@cern.ch
@@ -13,21 +13,23 @@
 
 package hep.crest.swagger.model;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.math.BigDecimal;
-import javax.validation.constraints.*;
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * IovPayloadDto
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2020-09-28T16:28:56.155+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2020-10-05T12:57:22.396+02:00")
 public class IovPayloadDto   {
   @JsonProperty("since")
   private BigDecimal since = null;
+
+  @JsonProperty("insertionTime")
+  private Date insertionTime = null;
 
   @JsonProperty("version")
   private String version = null;
@@ -61,6 +63,25 @@ public class IovPayloadDto   {
 
   public void setSince(BigDecimal since) {
     this.since = since;
+  }
+
+  public IovPayloadDto insertionTime(Date insertionTime) {
+    this.insertionTime = insertionTime;
+    return this;
+  }
+
+  /**
+   * Get insertionTime
+   * @return insertionTime
+   **/
+  @JsonProperty("insertionTime")
+  @ApiModelProperty(value = "")
+  public Date getInsertionTime() {
+    return insertionTime;
+  }
+
+  public void setInsertionTime(Date insertionTime) {
+    this.insertionTime = insertionTime;
   }
 
   public IovPayloadDto version(String version) {
@@ -169,6 +190,7 @@ public class IovPayloadDto   {
     }
     IovPayloadDto iovPayloadDto = (IovPayloadDto) o;
     return Objects.equals(this.since, iovPayloadDto.since) &&
+        Objects.equals(this.insertionTime, iovPayloadDto.insertionTime) &&
         Objects.equals(this.version, iovPayloadDto.version) &&
         Objects.equals(this.objectType, iovPayloadDto.objectType) &&
         Objects.equals(this.size, iovPayloadDto.size) &&
@@ -178,7 +200,7 @@ public class IovPayloadDto   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(since, version, objectType, size, payloadHash, streamerInfo);
+    return Objects.hash(since, insertionTime, version, objectType, size, payloadHash, streamerInfo);
   }
 
 
@@ -188,6 +210,7 @@ public class IovPayloadDto   {
     sb.append("class IovPayloadDto {\n");
     
     sb.append("    since: ").append(toIndentedString(since)).append("\n");
+    sb.append("    insertionTime: ").append(toIndentedString(insertionTime)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    objectType: ").append(toIndentedString(objectType)).append("\n");
     sb.append("    size: ").append(toIndentedString(size)).append("\n");
