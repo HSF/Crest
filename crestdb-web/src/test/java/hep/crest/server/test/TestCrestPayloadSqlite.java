@@ -198,10 +198,10 @@ public class TestCrestPayloadSqlite {
     public void testA_payloadIovApi() throws Exception {
         final TagDto dto = DataGenerator.generateTagDto("SB-TAG-PYLD-01", "run");
         log.info("Store tag for payload request: {}", dto);
-        final ResponseEntity<TagDto> response = this.testRestTemplate
-                .postForEntity("/crestapi/tags", dto, TagDto.class);
+        final ResponseEntity<String> response = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto, String.class);
         log.info("Received response: " + response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 
         final byte[] bindata = new String("This is yet another fake payload").getBytes();
 

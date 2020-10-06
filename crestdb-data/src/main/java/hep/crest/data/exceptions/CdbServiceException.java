@@ -7,7 +7,7 @@ package hep.crest.data.exceptions;
  * @author formica
  *
  */
-public class CdbServiceException extends Exception {
+public class CdbServiceException extends RuntimeException {
 
     /**
      * Serializer.

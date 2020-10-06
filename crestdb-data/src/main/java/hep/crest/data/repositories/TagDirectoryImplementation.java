@@ -3,6 +3,12 @@
  */
 package hep.crest.data.repositories;
 
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.swagger.model.TagDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,13 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.utils.DirectoryUtilities;
-import hep.crest.swagger.model.TagDto;
 
 /**
  * @author formica
@@ -166,7 +165,7 @@ public class TagDirectoryImplementation {
                 return entity;
             }
         }
-        catch (final RuntimeException | CdbServiceException | IOException x) {
+        catch (final RuntimeException | IOException x) {
             log.error("Cannot save tag dto {} : {}", entity, x);
         }
         return null;
