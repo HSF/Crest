@@ -46,6 +46,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -265,8 +266,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Override
     public Response storePayloadWithIovMultiForm(InputStream fileInputStream,
-                                                 FormDataContentDisposition fileDetail, String tag, BigDecimal since, String format,
+                                                 FormDataContentDisposition fileDetail, String tag, BigDecimal since,
+                                                 String format,
                                                  String objectType, String version, BigDecimal endtime,
+                                                 String streamerInfo,
                                                  SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         this.log.info(
@@ -274,6 +277,15 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 tag, since, format);
         try {
             // Store payload with multi form
+            if (fileDetail == null) {
+                throw new IOException("Cannot upload payload: form is missing the file field");
+            }
+            if (tag == null) {
+                throw new IOException("Cannot upload payload: form is missing the tag field");
+            }
+            if (since == null) {
+                throw new IOException("Cannot upload payload: form is missing the since field");
+            }
             String fdetailsname = fileDetail.getFileName();
             if (fdetailsname == null || fdetailsname.isEmpty()) {
                 // Generate a fake filename.
@@ -298,6 +310,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             if (version == null) {
                 version = "default";
             }
+            log.debug("Fill meta types: {} {} {} use file name {}", objectType, version, format, filename);
             // Create the streamer info object as a map with metadata like format and filename for the moment. In
             // future this could have further informations on payload metadata (author, checksum, etc).
             final Map<String, String> sinfomap = new HashMap<>();
@@ -305,6 +318,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             sinfomap.put("filename", (fileDetail.getFileName() != null && !fileDetail.getFileName().isEmpty()) ?
                     fileDetail.getFileName() : filename);
             sinfomap.put("format", format);
+            sinfomap.put("insertionDate", new Date().toString());
+            if (streamerInfo != null) {
+                sinfomap.put("streamerInfo", streamerInfo);
+            }
             // Create the DTO, the version here is ignored. It could be added from the Form data.
             final PayloadDto pdto = new PayloadDto().objectType(objectType)
                     .streamerInfo(jacksonMapper.writeValueAsBytes(sinfomap)).version(version);
@@ -336,9 +353,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Override
     public Response uploadPayloadBatchWithIovMultiForm(List<FormDataBodyPart> filesbodyparts,
-                                                       FormDataContentDisposition filesDetail, String tag, FormDataBodyPart iovsetupload,
+                                                       FormDataContentDisposition filesDetail, String tag,
+                                                       FormDataBodyPart iovsetupload,
                                                        String xCrestPayloadFormat, String objectType, String version,
-                                                       BigDecimal endtime, SecurityContext securityContext,
+                                                       BigDecimal endtime, String streamerInfo,
+                                                       SecurityContext securityContext,
                                                        UriInfo info) throws NotFoundException {
         this.log.info(
                 "PayloadRestController processing request to upload payload batch in tag {} with multi-iov {} and body {}",
@@ -372,7 +391,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             // Only the payload format FILE is allowed here.
             // This was created to eventually merge with other methods later on.
             if (xCrestPayloadFormat.equals("FILE")) {
-                final IovSetDto outdto = storeIovs(dto, tag, objectType, version, filesbodyparts);
+                final IovSetDto outdto = storeIovs(dto, tag, objectType, version, streamerInfo, filesbodyparts);
                 return Response.created(info.getRequestUri()).entity(outdto).build();
             }
             else {
@@ -400,7 +419,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     @Override
     public Response storePayloadBatchWithIovMultiForm(String tag, FormDataBodyPart iovsetupload,
                                                       String xCrestPayloadFormat, String objectType, String version,
-                                                      BigDecimal endtime, SecurityContext securityContext,
+                                                      BigDecimal endtime, String streamerInfo,
+                                                      SecurityContext securityContext,
                                                       UriInfo info) throws NotFoundException {
         this.log.info(
                 "PayloadRestController processing request to store payload batch in tag {} with multi-iov",
@@ -426,7 +446,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             // This method only accept JSON in header format.
             // It can probably be merged with the previous method.
             if (xCrestPayloadFormat.equalsIgnoreCase("JSON")) {
-                final IovSetDto outdto = storeIovs(dto, tag, objectType, version,null);
+                final IovSetDto outdto = storeIovs(dto, tag, objectType, version, streamerInfo, null);
                 return Response.created(info.getRequestUri()).entity(outdto).build();
             }
             else {
@@ -452,19 +472,26 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      * @throws PayloadEncodingException If an Exception occurred
      * @throws IOException         If an Exception occurred
      */
-    protected IovSetDto storeIovs(IovSetDto dto, String tag, String objectType, String version, List<FormDataBodyPart> filesbodyparts)
+    protected IovSetDto storeIovs(IovSetDto dto, String tag, String objectType, String version,
+                                  String streamerInfo, List<FormDataBodyPart> filesbodyparts)
             throws PayloadEncodingException, IOException {
         final List<IovDto> iovlist = dto.getResources();
         final List<IovDto> savediovlist = new ArrayList<>();
         // Loop over iovs found in the Set.
         for (final IovDto piovDto : iovlist) {
             String filename = null;
+            log.debug("Store from iovset the entry {}", piovDto);
             final Map<String, String> sinfomap = new HashMap<>();
             sinfomap.put("format", dto.getFormat());
+            sinfomap.put("insertionDate", new Date().toString());
+            if (streamerInfo != null) {
+                sinfomap.put("streamerInfo", streamerInfo);
+            }
             // Here we generate objectType and version. We should probably allow for input arguments.
             final PayloadDto pdto = new PayloadDto().objectType(objectType).hash("none")
                     .version(version);
             if (filesbodyparts == null) {
+                log.debug("Use the hash, it represents the payload : {}", piovDto.getPayloadHash());
                 // If there are no attached files, then the payloadHash contains the payload itself.
                 pdto.data(piovDto.getPayloadHash().getBytes());
                 final String hash = getHash(new ByteArrayInputStream(pdto.getData()), "none");
@@ -473,6 +500,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             }
             else {
                 // If there are attached files, then the payload will be loaded from filename.
+                log.debug("Use attached files : {}", piovDto.getPayloadHash());
                 final Map<String, Object> retmap = getDocumentStream(piovDto, filesbodyparts);
                 filename = (String) retmap.get("file");
                 final String hash = getHash((InputStream) retmap.get("stream"), filename);
@@ -483,7 +511,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             final IovDto iovDto = new IovDto().payloadHash(pdto.getHash()).since(piovDto.getSince())
                     .tagName(tag);
             try {
-                payloadService.saveIovAndPayload(iovDto, pdto, filename);
+                log.debug("Save IOV and Payload : {} - {} using filename {}", iovDto, pdto, filename);
+                HTTPResponse resp = payloadService.saveIovAndPayload(iovDto, pdto, filename);
+                log.info("PayloadService response : {}", resp);
                 savediovlist.add(iovDto);
             }
             catch (final CdbServiceException e1) {

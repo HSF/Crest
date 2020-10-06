@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import hep.crest.data.config.CrestProperties;
 import hep.crest.server.filters.AuthorizationFilter;
 import hep.crest.server.swagger.api.FoldersApi;
-import hep.crest.server.swagger.api.RuninfoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -49,7 +48,6 @@ public class ServicesConfig {
     public JerseyConfig getJerseyResource() {
         final JerseyConfig jc = new JerseyConfig();
         // Register APIs for monitoring.
-        jc.jerseyregister(RuninfoApi.class);
         jc.jerseyregister(FoldersApi.class);
         if (!"none".equals(cprops.getSecurity())) {
             // Register authorization filter.
@@ -64,7 +62,7 @@ public class ServicesConfig {
      *
      * @return JerseyConfig
      */
-    @Profile({ "default", "h2", "sqlite", "postgres", "mysql", "pgsvom" })
+    @Profile({ "default", "sqlite", "postgres", "mysql", "pgsvom" })
     @Bean(name = "jerseyConfig")
     public JerseyConfig getJerseyDefaultResource() {
         final JerseyConfig jc = new JerseyConfig();
@@ -87,24 +85,6 @@ public class ServicesConfig {
         // Disable the serialization features for DATEs.
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-//        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-//                // date/time
-//                .appendPattern("yyyy-MM-dd HH:mm:ss")
-//                // optional fraction of seconds (from 0 to 9 digits)
-//                .optionalStart().appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true).optionalEnd()
-//                // offset
-//                .appendPattern("xxx")
-//                // create formatter
-//                .toFormatter();
-//        ObjectMapper mapper = new ObjectMapper();
-//        mapper.configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false);
-//        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-//        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-//        mapper.setDateFormat(new StdDateFormat());
-//        JavaTimeModule module = new JavaTimeModule();
-//        module.addSerializer(Date.class, new DateSerializer());
-//        mapper.registerModule(module);
-
         return mapper;
     }
     

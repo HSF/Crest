@@ -1,13 +1,12 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.IovSetDto;
+import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.PayloadSetDto;
+import hep.crest.swagger.model.TagDto;
+import hep.crest.testutils.DataGenerator;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -27,22 +26,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.IovSetDto;
-import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.PayloadSetDto;
-import hep.crest.swagger.model.TagDto;
-import hep.crest.testutils.DataGenerator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@ContextConfiguration
 @ActiveProfiles("sqlite")
 public class TestCrestPayloadSqlite {
 

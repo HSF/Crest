@@ -158,7 +158,7 @@ public class PayloadService {
      * @param dto
      * @param pdto
      * @param filename
-     * @return
+     * @return HTTPResponse
      * @throws CdbServiceException
      */
     @Transactional
@@ -193,12 +193,14 @@ public class PayloadService {
             entity.setTag(new Tag(tagname));
             final Iov savediov = iovService.insertIov(entity);
             IovDto saveddto = mapper.map(savediov, IovDto.class);
+            saveddto.tagName(tagname);
             dto.tagName(tagname);
+            log.debug("Saved Iov Dto {} ", saveddto);
 
             log.debug("Created payload {} and iov {} ", saved, savediov);
             return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
-                    .id(savediov.getPayloadHash()).message("Iov created in tag "
-                            + dto.getTagName() + " @ " + saveddto.getSince());
+                    .id(saveddto.getPayloadHash()).message("Iov created in tag "
+                            + saveddto.getTagName() + " @ " + saveddto.getSince());
         }
         catch (final NotExistsPojoException e) {
             return new HTTPResponse().code(Response.Status.NOT_FOUND.getStatusCode())
@@ -209,8 +211,11 @@ public class PayloadService {
             log.error("A Runtime exception occurred in saveIovAndPayload method: {}", e);
         }
         finally {
+            log.debug("Clean up files when non null...");
             try {
-                Files.deleteIfExists(temppath);
+                if (temppath != null) {
+                    Files.deleteIfExists(temppath);
+                }
             }
             catch (IOException e) {
                 log.error("Cannot delete temporary file");

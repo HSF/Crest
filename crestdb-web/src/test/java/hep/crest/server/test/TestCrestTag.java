@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ActiveProfiles("default")
+@ActiveProfiles("test")
 public class TestCrestTag {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -109,8 +109,8 @@ public class TestCrestTag {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         log.info("Try to store tag again : {} ", dto);
-        final ResponseEntity<TagDto> response1 = this.testRestTemplate
-                .postForEntity("/crestapi/tags", dto, TagDto.class);
+        final ResponseEntity<String> response1 = this.testRestTemplate
+                .postForEntity("/crestapi/tags", dto, String.class);
         log.info("Received response: {}", response1);
         assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 

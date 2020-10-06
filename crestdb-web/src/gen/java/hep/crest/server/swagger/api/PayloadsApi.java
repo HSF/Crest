@@ -1,8 +1,14 @@
 package hep.crest.server.swagger.api;
 
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.List;
+import hep.crest.swagger.model.HTTPResponse;
+import hep.crest.swagger.model.IovSetDto;
+import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.PayloadSetDto;
+import io.swagger.annotations.ApiParam;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -15,17 +21,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import hep.crest.swagger.model.HTTPResponse;
-import hep.crest.swagger.model.IovSetDto;
-import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.PayloadSetDto;
-import io.swagger.annotations.ApiParam;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.List;
 
 @Path("/payloads")
 
@@ -103,10 +101,11 @@ public class PayloadsApi  {
 ,@ApiParam(value = "The payload objectType")@FormDataParam("objectType")  String objectType
 ,@ApiParam(value = "The version")@FormDataParam("version")  String version
 ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
+,@ApiParam(value = "The streamerInfo CLOB as a string")@FormDataParam("streamerInfo")  String streamerInfo
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.storePayloadBatchWithIovMultiForm(tag,iovsetupload,xCrestPayloadFormat,objectType,version,
-                endtime,
+                endtime, streamerInfo,
                 securityContext,info);
     }
     
@@ -126,10 +125,11 @@ public class PayloadsApi  {
 ,@ApiParam(value = "The payload objectType")@FormDataParam("objectType")  String objectType
 ,@ApiParam(value = "The version")@FormDataParam("version")  String version
 ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
+,@ApiParam(value = "The streamerInfo CLOB as a string")@FormDataParam("streamerInfo")  String streamerInfo
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.uploadPayloadBatchWithIovMultiForm(filesbodyparts, filesDetail,tag,iovsetupload,
-                xCrestPayloadFormat,objectType,version,endtime,securityContext,info);
+                xCrestPayloadFormat,objectType,version,endtime,streamerInfo,securityContext,info);
     }
     @POST
     @Path("/store")
@@ -144,12 +144,13 @@ public class PayloadsApi  {
 ,@ApiParam(value = "The tag name", required=true)@FormDataParam("tag")  String tag
 ,@ApiParam(value = "The since time", required=true)@FormDataParam("since")  BigDecimal since
 ,@ApiParam(value = "The format of the input data" , defaultValue="JSON")@HeaderParam("X-Crest-PayloadFormat") String xCrestPayloadFormat
-    ,@ApiParam(value = "The payload objectType")@FormDataParam("objectType")  String objectType
-    ,@ApiParam(value = "The version")@FormDataParam("version")  String version
-    ,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
+,@ApiParam(value = "The payload objectType")@FormDataParam("objectType")  String objectType
+,@ApiParam(value = "The version")@FormDataParam("version")  String version
+,@ApiParam(value = "The end time to be used for protection at tag level")@FormDataParam("endtime")  BigDecimal endtime
+,@ApiParam(value = "The streamerInfo CLOB as a string")@FormDataParam("streamerInfo")  String streamerInfo
 ,@Context SecurityContext securityContext,@Context UriInfo info)
     throws NotFoundException {
         return delegate.storePayloadWithIovMultiForm(fileInputStream, fileDetail,tag,since,xCrestPayloadFormat,
-                objectType, version, endtime,securityContext,info);
+                objectType, version, endtime, streamerInfo, securityContext,info);
     }
 }

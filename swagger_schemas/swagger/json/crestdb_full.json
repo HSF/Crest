@@ -1340,6 +1340,13 @@
 						"description": "The end time to be used for protection at tag level",
 						"required": false,
 						"type": "number"
+					},
+					{
+						"name": "streamerInfo",
+						"in": "formData",
+						"description": "The streamerInfo CLOB as a string",
+						"required": false,
+						"type": "string"
 					}
 				],
 				"responses": {
@@ -1414,6 +1421,13 @@
 						"description": "The end time to be used for protection at tag level",
 						"required": false,
 						"type": "number"
+					},
+					{
+						"name": "streamerInfo",
+						"in": "formData",
+						"description": "The streamerInfo CLOB as a string",
+						"required": false,
+						"type": "string"
 					}
 				],
 				"responses": {
@@ -1481,6 +1495,13 @@
 						"description": "The end time to be used for protection at tag level",
 						"required": false,
 						"type": "number"
+					},
+					{
+						"name": "streamerInfo",
+						"in": "formData",
+						"description": "The streamerInfo CLOB as a string",
+						"required": false,
+						"type": "string"
 					}
 				],
 				"responses": {
