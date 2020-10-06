@@ -4,28 +4,27 @@
 
 package hep.crest.data;
 
-import java.net.InetAddress;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+
+import java.net.InetAddress;
 
 /**
  * @author formica
  *
  */
 @SpringBootApplication
-public class Application {
+public class ApplicationData {
 
     /**
      * Logger.
      */
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
+    private static final Logger log = LoggerFactory.getLogger(ApplicationData.class);
 
     /**
      * A runner to dump information from the server.
@@ -34,8 +33,9 @@ public class Application {
      *            the ApplicationContext
      * @return CommandLineRunner
      */
-    @Bean
-    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
+////
+////@///Bean
+    public CommandLineRunner cliRunner(ApplicationContext ctx) {
         return args -> {
 
             log.debug("Let's inspect the beans provided by Spring Boot:");
@@ -52,7 +52,8 @@ public class Application {
      * @return
      */
     public static void main(String[] args) {
-        SpringApplication.run(Application.class);
+        log.info("Start Application Data.....");
+        SpringApplication.run(ApplicationData.class);
     }
 
 }

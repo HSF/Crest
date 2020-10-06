@@ -8,20 +8,20 @@ server:
   connection-timeout: 60s
 spring:
   profiles:
-    include: crest
+      include: crest
   security:
-    strategy: MODE_INHERITABLETHREADLOCAL
-    jersey:
+      strategy: MODE_INHERITABLETHREADLOCAL
+  jersey:
       application-path: /crestapi
-    datasource:
-      url: jdbc:h2:${crest.dbfile};DB_CLOSE_ON_EXIT=FALSE
+  datasource:
+      jdbc-url: jdbc:h2:${crest.dbfile};DB_CLOSE_ON_EXIT=FALSE
       driverClassName: org.h2.Driver
       username: root
       password: root
       hikari:
         connection-test-query: SELECT 1 
         maximum-pool-size: 3
-    jpa:
+  jpa:
       properties:
         hibernate.dialect: org.hibernate.dialect.H2Dialect
         hibernate.jdbc.fetch_size: 100

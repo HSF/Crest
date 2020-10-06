@@ -1,0 +1,2 @@
+# Environment Post Processor
+org.springframework.boot.env.EnvironmentPostProcessor=hep.crest.server.autoconfig.DockerEnvironmentPostProcessor

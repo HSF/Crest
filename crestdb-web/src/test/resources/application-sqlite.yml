@@ -5,18 +5,18 @@
 # ===============================
 # schemaname : ATLAS_PHYS_COND or none
 # security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)
+## WARNING : the SQLITE way to get the URL is using datasource.url and not datasource.jdbc-url
 crest:
   dumpdir: /tmp
   schemaname: none
   security: none
   synchro: none
   webstaticdir: /tmp/data/web
-  dbfile: /tmp/crestdb.sqlite
+  dbfile: /tmp/crestdbweb.sqlite
   apiname: /crestapi
   authenticationtype: none
 server:
-    port: 8090
-    servlet.path: /    
+    servlet.path: /
     connection-timeout: 60s
 spring:
     profiles:

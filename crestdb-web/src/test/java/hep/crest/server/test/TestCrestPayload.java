@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -41,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@ContextConfiguration
 @ActiveProfiles("test")
 public class TestCrestPayload {
 
@@ -227,6 +229,7 @@ public class TestCrestPayload {
         log.info("Upload request gave response: {}", resp2a);
         assertThat(resp2a.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // The following should fail since there is no "file" field in the form.
         final HttpHeaders headers3 = new HttpHeaders();
         headers3.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers3.add("X-Crest-PayloadFormat", "PDF");
