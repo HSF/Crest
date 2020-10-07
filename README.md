@@ -72,7 +72,37 @@ The server need by definition to have a database connection in order to store th
 If you do not have any remote database available you should use the default spring profile.
 
 The set of default properties to run the server is defined in `config/application.properties` which will be read by spring when starting the server. The file there will use the `default` spring profile and a local database instance `h2database` where to store the data (it is a sort of `sqlite` file).
+It is essential to set appropriate parameters in this file. An example
+is provided to start up a default profile with local h2 database.
 
+#### Oracle
+```
+spring.profiles.active=oracle
+user.timezone=GMT
+crest.api.name=/crestapi
+crest.web.static=/tmp/data/web
+crest.dump.dir=/tmp/data/dump
+crest.log.dir=/tmp/data/dump
+crest.db.password=somepassword
+crest.db.user=ATLAS_PHYS_COND_01_W
+crest.port=8090
+crest.db.url=jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=cman1-atlas.cern.ch)(PORT=10500))(LOAD_BALANCE=on)(ENABLE=BROKEN)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=int8r.cern.ch)))
+crest.db.schema=ATLAS_PHYS_COND_01
+```
+#### Postgres
+```
+spring.profiles.active=postgres
+user.timezone=GMT
+crest.web.static=/tmp/data/web
+crest.dump.dir=/tmp/data/dump
+crest.log.dir=/tmp/data/logs
+management.endpoint.health.show-details=ALWAYS
+crest.db.url=jdbc:postgresql://postgres-host:5432/crestdb
+crest.db.user=someuser
+crest.db.password=somepassword
+```
+
+### Start
 To start the server you can simply run:
 
 ```
@@ -83,32 +113,16 @@ This script is the same that is used by the docker container (when packaging the
 We provide the following commands as examples for alternative way (not maintained anymore):
 ```
 cd crestdb-web
-$ gradle bootRun "-Dspring.profiles.active=prod" "-Dcrest.db.password=xxx"
+$ gradle bootRun "-Dspring.profiles.active=oracle" "-Dcrest.db.password=xxx"
 ```
 or
 ```
-$java -Dspring.profiles.active=prod -Dcrest.db.password=xxx -jar crestdb-web/build/libs/crest.war
+$java -Dspring.profiles.active=oracle -Dcrest.db.password=xxx -jar crestdb-web/build/libs/crest.war
 ```
-<details>
-<summary>Obsolete: click me to collapse/fold.</summary>
-
->The next section is obsolete. We leave for the moment the instructions but they should probably be ignored. >Later on we may provide something similar for a quick database definition.
-
-For faster start and stop of the service we provide also a script that can be used.
-```
-./crestrun.sh start dbfilename
-```
-and
-```
-./crestrun.sh stop
-```
-For the moment the script is not very well documented, but it should be easy to configure it at your needs.
-
-</details>
-
-
 
 ### Activate  security
+This part is obsolete. We are working on OAuth2 implementation.
+
 To activate security you need to build the war file including the key-store. The file should go into <crestdb-web>/src/main/resources together with a complete ldap.properties file in which you need to set the manager password.
 These are not detailed instructions, it is more a reminder.
 
