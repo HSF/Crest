@@ -4,7 +4,7 @@ caching:
     iovs_maxage: 600
     iovs_snapshot_maxage: 3600
     payloads_maxage: 604800
-    timetype_groupsize: 3600  # expressed in seconds
+    timetype_groupsize: 86400  # expressed in seconds: 3600*24
     runtype_groupsize: 100    # expressed in run numbers
 auth0:
     audience: https://crest/api
