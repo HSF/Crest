@@ -6,6 +6,7 @@ import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.server.annotations.CacheControlCdb;
+import hep.crest.server.caching.CachingPolicyService;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.PayloadService;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -90,6 +92,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Autowired
     private IovService iovService;
+    /**
+     * Service.
+     */
+    @Autowired
+    private CachingPolicyService cachesvc;
     /**
      * Properties.
      */
@@ -186,6 +193,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             // Get the media type. It utilize the objectType field.
             final MediaType media_type = getMediaType(ptype);
 
+            // Set caching policy depending on snapshot argument
+            // this is filling a mag-age parameter in the header
+            final CacheControl cc = cachesvc.getPayloadCacheControl();
+
             if (format == null || format.equalsIgnoreCase("BLOB")
                     || format.equalsIgnoreCase("BIN")) {
                 // The client requested to get binary data.
@@ -233,6 +244,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                         .header("Content-Disposition", "Inline; filename=\"" + fname + "\"")
                         // .header("Content-Length", new
                         // Long(f.length()).toString())
+                        .cacheControl(cc)
                         .build();
             }
             else {
@@ -243,7 +255,9 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 final PayloadSetDto psetdto = buildSet(entity, hash);
                 return Response.ok()
                         .header("Content-type", MediaType.APPLICATION_JSON_TYPE.toString())
-                        .entity(psetdto).build();
+                        .entity(psetdto)
+                        .cacheControl(cc)
+                        .build();
             }
         }
         catch (final NotExistsPojoException e) {
