@@ -22,10 +22,12 @@ import ma.glasnost.orika.MapperFacade;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.hibernate.JDBCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -471,10 +473,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      * @return IovSetDto
      * @throws PayloadEncodingException If an Exception occurred
      * @throws IOException         If an Exception occurred
+     * @throws CdbServiceException if an exception occurred in insertion.
      */
     protected IovSetDto storeIovs(IovSetDto dto, String tag, String objectType, String version,
                                   String streamerInfo, List<FormDataBodyPart> filesbodyparts)
-            throws PayloadEncodingException, IOException {
+            throws PayloadEncodingException, IOException, CdbServiceException {
         final List<IovDto> iovlist = dto.getResources();
         final List<IovDto> savediovlist = new ArrayList<>();
         // Loop over iovs found in the Set.
@@ -516,8 +519,16 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 log.info("PayloadService response : {}", resp);
                 savediovlist.add(iovDto);
             }
-            catch (final CdbServiceException e1) {
+            catch (final CdbServiceException e) {
                 log.error("Cannot insert iov {}", piovDto);
+                throw new CdbServiceException("cannot insert iov and payload for " + iovDto + ": " +e.getMessage());
+            }
+            catch (final JDBCException | DataIntegrityViolationException e) {
+                log.error("SQL exception when inserting {}", iovDto);
+                throw new CdbServiceException("SQL error, cannot insert iov and payload for " + iovDto.getTagName()
+                       + ", " + iovDto.getSince()
+                       + " " + iovDto.getPayloadHash()
+                       + ": " +e.getMessage());
             }
         }
         dto.size((long) savediovlist.size());
