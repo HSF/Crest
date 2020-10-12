@@ -201,7 +201,7 @@ public class TestCrestPayloadSqlite {
         final ResponseEntity<TagDto> response = this.testRestTemplate
                 .postForEntity("/crestapi/tags", dto, TagDto.class);
         log.info("Received response: " + response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getStatusCode()).isLessThanOrEqualTo(HttpStatus.SEE_OTHER);
 
         final byte[] bindata = new String("This is yet another fake payload").getBytes();
 
