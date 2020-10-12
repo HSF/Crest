@@ -49,6 +49,16 @@ public class CachingPolicyService {
     }
 
     /**
+     * @return CacheControl
+     */
+    public CacheControl getPayloadCacheControl() {
+        final CacheControl cc = new CacheControl();
+        cc.setMaxAge(cprops.getPayloadsMaxage());
+        return cc;
+    }
+
+
+    /**
      * @param snapshot
      *            the Long
      * @param until
