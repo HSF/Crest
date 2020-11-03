@@ -24,14 +24,8 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'war'
 
-bootJar {
-    baseName = 'crestdb-web'
-  	version = '2.0-SNAPSHOT'
-}
-
 bootWar {
-    baseName = 'crest'
-    archiveName = 'crest.war'
+    archiveFileName = 'crest.war'
     metaInf { from 'src/main/resources/spring.factories' }    
 }
 
@@ -86,6 +80,7 @@ dependencies {
     		exclude module: 'spring-boot-starter-tomcat'
     }
     implementation ("org.springframework.boot:spring-boot-starter-security")
+    implementation ("org.springframework.boot:spring-boot-starter-oauth2-client")
     // Added from auth0 documentation
     compile 'org.springframework.security:spring-security-oauth2-resource-server'
     compile 'org.springframework.security:spring-security-oauth2-jose'

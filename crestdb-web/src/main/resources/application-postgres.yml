@@ -28,7 +28,7 @@ spring:
         hibernate.jdbc.use_streams_for_binary: false
         hibernate.connection.autocommit: false
 server:
-    port: 8080 
+    port: ${crest.server.port}
 crest:
   schemaname: none
   dumpdir: ${crest.dump.dir}

@@ -34,7 +34,7 @@ public class AtlasRepositoryConfig {
      *            the DataSource
      * @return TagMetaDataBaseCustom
      */
-    @Profile({ "test", "default", "prod", "h2", "oracle", "wildfly", "ssl", "dev", "mysql" })
+    @Profile({ "test", "default", "prod", "h2", "oracle", "ssl", "dev", "mysql" })
     @Bean(name = "tagmetarepo")
     public TagMetaDataBaseCustom tagmetaDefaultRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
