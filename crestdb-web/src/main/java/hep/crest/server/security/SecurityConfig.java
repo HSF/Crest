@@ -149,7 +149,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         }
         else if ("none".equals(cprops.getSecurity())) {
             log.info("No security enabled for this server....");
-            http.authorizeRequests().antMatchers("/**").permitAll().and().httpBasic().and().csrf()
+            http.authorizeRequests().antMatchers("/**").permitAll().and().httpBasic().disable().csrf()
                     .disable();
         }
         else if ("reco".equals(cprops.getSecurity())) {

@@ -4,5 +4,5 @@ crest.api.name=/api
 crest.web.static=/tmp/data/web
 crest.dump.dir=/tmp/data/dump
 crest.log.dir=/tmp/data/dump
-crest.server.security=auth0
+crest.server.security=none
 management.endpoint.health.show-details=ALWAYS
