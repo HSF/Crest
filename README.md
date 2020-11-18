@@ -244,7 +244,12 @@ In order to push an image created into the CERN gitlab registry you need to logi
 ```
 docker login -u formica gitlab-registry.cern.ch
 ```
-Then the push command can work.
+You can choose another registry. 
+The push command work only if the login is successful.
+### Swarm
+As an example for a deployment in a swarm look at `./swarm/docker-compose.yml`.
+In the same repository there is a script to help in generating the config maps needed and the secret.
+An `application.properties` file should be created in order to run the server. Examples are shown above.
 
 ## Openshift
 We gather here some notes on openshift deployment via gitlab-ci. These notes are for usage inside CERN.
@@ -259,7 +264,8 @@ We have been merging our clients in this repository with the contribution of som
 > This is work in progress...documentation needs to be improved....
 
 ### Python
-Client is generated via swagger. (complete here)
+A small client is available in `crestdb-client/python/cli` that can be installed via `pip`.
+One can also generate a python client via swagger.
 ### C++
 Ask Juno colleagues.
 ### gatling
