@@ -17,6 +17,15 @@
  **/
 package hep.crest.data.repositories;
 
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.repositories.externals.TagMetaRequests;
+import hep.crest.swagger.model.TagMetaDto;
+import org.postgresql.largeobject.LargeObject;
+import org.postgresql.largeobject.LargeObjectManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,18 +35,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
-
-import javax.sql.DataSource;
-
-import org.postgresql.largeobject.LargeObject;
-import org.postgresql.largeobject.LargeObjectManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.repositories.externals.PayloadRequests;
-import hep.crest.data.repositories.externals.TagMetaRequests;
-import hep.crest.swagger.model.TagMetaDto;
 
 /**
  * @author formica
@@ -253,7 +250,7 @@ public class TagMetaPostgresImpl extends TagMetaGeneral implements TagMetaDataBa
 
         final String tablename = this.tablename();
 
-        final String sql = PayloadRequests.getInsertAllQuery(tablename);
+        final String sql = TagMetaRequests.getInsertAllQuery(tablename);
 
         log.debug("Insert Tag meta {} using JDBCTEMPLATE ", entity.getTagName());
 

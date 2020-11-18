@@ -138,7 +138,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        log.debug("Configure http security rules");
+        log.debug("Configure http security rules using {}", cprops.getSecurity());
 
         if ("active".equals(cprops.getSecurity())) {
             http.authorizeRequests().antMatchers(HttpMethod.GET, "/**").permitAll()
