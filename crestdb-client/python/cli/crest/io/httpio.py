@@ -75,8 +75,10 @@ class HttpIo:
                 response = requests.get(url, **kwargs)
             elif req == 'POST':
                 response = requests.post(url, **kwargs)
+            elif req == 'PUT':
+                response = requests.put(url, **kwargs)
             else:
-                exc = f"_sync_request() only handles 'GET' and 'POST' requests, not '{req}'"
+                exc = f"_sync_request() only handles 'GET', 'POST' and 'PUT' requests, not '{req}'"
                 raise ValueError(exc)
             tried += 1
             # retrieve response.json()
@@ -98,6 +100,7 @@ class HttpIo:
                 log.debug('%s request (%sth try) to %s: %s', req, tried+1, url, kwargs)
             else:
                 log.warning('%s request to %s failed (%s)', req, url, response.status_code)
+                log.error('Last server %s response (%s): %s', req, response.status_code, json_resp)
                 log.error('%s request to %s failed %s times. Aborting', req, url, self.max_tries)
                 break
         # override response.json()
@@ -120,8 +123,10 @@ class HttpIo:
                 response = await self.async_session.get(url, **kwargs)
             elif req == 'POST':
                 response = await self.async_session.post(url, **kwargs)
+            elif req == 'PUT':
+                response = await self.async_session.put(url, **kwargs)
             else:
-                exc = f"_async_request() only handles 'GET' and 'POST' requests, not '{req}'"
+                exc = f"_async_request() only handles 'GET', 'POST' and 'PUT' requests, not '{req}'"
                 raise ValueError(exc)
             # retrieve response.json()
             json_resp = {}
@@ -143,8 +148,10 @@ class HttpIo:
                 response = await self._async_request(req, url, tried, **kwargs)
             else:
                 log.warning('%s request (async) to %s failed (%s)', req, url, response.status)
+                log.error('Last server %s response (%s): %s', req, response.status, json_resp)
                 log.error('%s request (async) to %s failed %s times. Aborting',
-                          req, url, self.max_tries)
+                          req, url, self.max_tries, response.status)
+
                 # override response.json()
                 response.json = lambda: json_resp
                 response.status_code = response.status
@@ -165,6 +172,11 @@ class HttpIo:
         url = f"{self.server_url}/{endpoint.strip('/')}"
         return self._sync_request('POST', url, **kwargs)
 
+    def put(self, endpoint='/', **kwargs):
+        """ PUT request to endpoint {endpoint} with json data {data}"""
+        url = f"{self.server_url}/{endpoint.strip('/')}"
+        return self._sync_request('PUT', url, **kwargs)
+
     async def async_get(self, endpoint='/', **kwargs):
         """ GET request to endpoint {endpoint} with json data {data}"""
         url = f"{self.server_url}/{endpoint.strip('/')}"
@@ -174,6 +186,11 @@ class HttpIo:
         """ POST request to endpoint {endpoint} with json data {data}"""
         url = f"{self.server_url}/{endpoint.strip('/')}"
         return await self._async_request('POST', url, tried=0, **kwargs)
+
+    async def async_put(self, endpoint='/', **kwargs):
+        """ PUT request to endpoint {endpoint} with json data {data}"""
+        url = f"{self.server_url}/{endpoint.strip('/')}"
+        return await self._async_request('PUT', url, tried=0, **kwargs)
 
     def stop(self):
         """ close http session if asynchronous """
