@@ -67,6 +67,10 @@ In case gradle is not installed on your machine, you can run the wrapper deliver
 ```
 ./gradlew clean build
 ```
+If you want to select a specific JVM when you run gradle you can use a command like this:
+```
+gradle clean build -Dorg.gradle.java.home=/path to jvm/11.0/
+```
 
 ## Run the server
 This section is under maintenance.
