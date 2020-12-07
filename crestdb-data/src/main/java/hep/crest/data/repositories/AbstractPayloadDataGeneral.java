@@ -106,6 +106,30 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
         this.serverUploadLocationFolder = serverUploadLocationFolder;
     }
 
+    /**
+     * @param id the String
+     * @return String
+     */
+    @Override
+    public String exists(String id) {
+        log.info("Find payload {} using JDBCTEMPLATE", id);
+        try {
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+            final String tablename = this.tablename();
+
+            final String sql = PayloadRequests.getExistsHashQuery(tablename);
+
+            return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
+                final String dbhash = rs.getString("HASH");
+                return dbhash;
+            });
+        }
+        catch (final DataAccessException e) {
+            log.warn("Hash {} does not exists: {}", id, e);
+        }
+        return null;
+    }
+
     /*
      * (non-Javadoc)
      *
