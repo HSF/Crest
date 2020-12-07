@@ -3,6 +3,7 @@ package hep.crest.server.swagger.api.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.exceptions.HashExistsException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.server.annotations.CacheControlCdb;
@@ -127,6 +128,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             log.debug("Saved PayloadDto {}", saved);
             return Response.created(info.getRequestUri()).entity(saved).build();
         }
+        catch (final HashExistsException e) {
+            log.error("Duplicated hash found for {}", body);
+            final String msg = "Hash duplication error for payload resource " + body.toString();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.WARNING, msg);
+            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
+        }
         catch (final CdbServiceException e) {
             // Exception, send a 500.
             log.error("Error saving PayloadDto {}", body);
@@ -152,16 +159,23 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                                            SecurityContext securityContext, UriInfo info) throws NotFoundException {
         this.log.info("PayloadRestController processing request to upload payload from stream");
         // PayloadDto payload = new PayloadDto();
+        PayloadDto payloaddto = null;
         try {
             // Assume the FormDataBodyPart is a JSON string.
             payload.setMediaType(MediaType.APPLICATION_JSON_TYPE);
             // Get the DTO.
-            final PayloadDto payloaddto = payload.getValueAs(PayloadDto.class);
+            payloaddto = payload.getValueAs(PayloadDto.class);
             log.debug("Received body json " + payloaddto);
             // Create the payload taking binary content from the input stream.
             final PayloadDto saved = payloadService.insertPayloadAndInputStream(payloaddto,
                     fileInputStream);
             return Response.created(info.getRequestUri()).entity(saved).build();
+        }
+        catch (final HashExistsException e) {
+            log.error("Duplicated hash found for {}", payloaddto.getHash());
+            final String msg = "Hash duplication error for payload resource " + payloaddto.toString();
+            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.WARNING, msg);
+            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
         }
         catch (final CdbServiceException | NullPointerException e) {
             // Exception, send 500.

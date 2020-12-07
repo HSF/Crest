@@ -102,8 +102,8 @@ sonarqube {
 }
 
 subprojects {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
     ext {
         swagger_annotations_version = "1.5.13"
         jackson_version = "2.9.4"
@@ -167,14 +167,14 @@ subprojects {
     }
 
     task wrapper(type: Wrapper) {
-        gradleVersion = '5.2.1' //version required
+        gradleVersion = '6.4' //version required
     }
 
     // Clean files and directories used for unit testing
     task purgedb(type: Delete) {
         delete fileTree('/tmp') {
             include 'crest*.db'
-            include 'crest*sqlite'
+            include 'crest*sqlite*'
             include 'tagtar*'
         }
         delete '/tmp/cdms'

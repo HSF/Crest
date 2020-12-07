@@ -123,7 +123,7 @@ public class PayloadService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    @Transactional
+    //@Transactional
     public PayloadDto insertPayload(PayloadDto dto) throws CdbServiceException {
         log.debug("Save payload dto {}", dto);
         if (dto.getSize() == null) {
@@ -149,7 +149,6 @@ public class PayloadService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    @Transactional
     public PayloadDto insertPayloadAndInputStream(PayloadDto dto, InputStream is)
             throws CdbServiceException {
         log.debug("Save payload {} creating blob from inputstream...", dto);
@@ -209,7 +208,7 @@ public class PayloadService {
             saveddto.tagName(tagname);
             dto.tagName(tagname);
             log.debug("Saved Iov Dto {} ", saveddto);
-
+            // Everything ok, so send back a "created" status code.
             log.debug("Created payload {} and iov {} ", saved, savediov);
             return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
                     .id(saveddto.getPayloadHash()).message("Iov created in tag "
