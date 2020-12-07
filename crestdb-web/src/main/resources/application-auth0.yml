@@ -24,12 +24,11 @@ crest:
     dbfile: /tmp/crestdbh2
     apiname: ${crest.api.name}
     authenticationtype: none
+    audience: https://crest/api
 server:
     port: 8090
     servlet.path: /    
     connection-timeout: 60s
-auth0:
-    audience: https://crest/api
 spring:
     security:
       oauth2:

@@ -102,7 +102,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * the audience.
      */
-    @Value("${auth0.audience}")
+    @Value("${crest.audience}")
     private String audience;
 
     /**
