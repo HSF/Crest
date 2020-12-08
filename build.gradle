@@ -1,7 +1,6 @@
 buildscript {
 	repositories {
 		jcenter()
-		maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
 	}
 
 	dependencies {
@@ -9,9 +8,9 @@ buildscript {
 	}
 }
 plugins {
-  id "org.sonarqube" version "2.6"
-  id 'org.hidetake.swagger.generator' version '2.9.0'
-  id 'jacoco'
+    id "org.sonarqube" version "2.6"
+    id 'org.hidetake.swagger.generator' version '2.9.0'
+    id 'jacoco'
 }
 
 apply plugin: 'java'
@@ -23,7 +22,7 @@ ext {
     swagger_annotations_version = "1.5.13"
     jackson_version = "2.7.5"
     spring_version = "4.1.4.RELEASE"
-    springboot_version = "2.0.1.RELEASE"
+    springboot_version = "2.1.0.RELEASE"
     junit_version = "4.12"
     oltu_version = "1.0.1"
     orika_version = "1.5.1"
@@ -35,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.0'
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.1'
 }
 
 // Task to generate sources in build output directory
@@ -48,151 +47,139 @@ convertSwagger2markup {
 }
 
 swaggerSources {
-  crestdb {
-    inputFile = file('swagger_schemas/swagger/json/crestdb_full.json')
-    code {
-      language = 'jaxrs'
-      templateDir = file('./templates/java/JavaJaxRs')
-      configFile = file('swagger_schemas/swagger/json/crestdb-config.json')
+    crestdb {
+        inputFile = file('swagger_schemas/swagger/json/crestdb_full.json')
+        code {
+            language = 'jaxrs'
+            templateDir = file('./templates/java/JavaJaxRs')
+            configFile = file('swagger_schemas/swagger/json/crestdb-config.json')
+        }
     }
-  }
-  crestapidoc {
-    inputFile = file('./swagger_schemas/swagger/json/crestdb_full.json')
-	code {
-      language = 'html'
-    } 
-  }
-  crestdb_client {
-    inputFile = file('swagger_schemas/swagger/json/crestdb.json')
-    code {
-      language = 'python'
-      templateDir = file('./templates/2.3.0/python-client/model')
-      configFile = file('swagger_schemas/swagger/json/crestdb-pyclient-config.json')
+    crestdb_client {
+        inputFile = file('swagger_schemas/swagger/json/crestdb.json')
+        code {
+            language = 'python'
+            //templateDir = file('./templates/2.3.0/python-client/model')
+            configFile = file('swagger_schemas/swagger/json/crestdb-pyclient-config.json')
+        }
     }
-  }
-  crestdb_oldclient {
-    inputFile = file('swagger_schemas/swagger/json/crestdb.json')
-    code {
-      language = 'python'
-      //templateDir = file('./templates/2.3.0/python-client/model')
-      configFile = file('swagger_schemas/swagger/json/crestdb-pyclient-config.json')
-    }
-  }
-
 }
 
 configurations.compile.each {
-	println "compile: $it"
+    println "compile: $it"
 }
 
-allprojects  {
-	apply plugin: 'maven'
-	apply plugin: 'jacoco'
-	group = 'hep.crest'
-	version = '2.0-SNAPSHOT'
-	repositories {
-	    mavenCentral()
-	}
+allprojects {
+    apply plugin: 'maven'
+    apply plugin: 'jacoco'
+    apply plugin: 'java'
 
-	jacoco {
-	    toolVersion = '0.8.4'
-	    reportsDir = file("$buildDir/reports/jacoco")
-	}
-	jacocoTestReport {
-	    reports {
-	        xml.enabled false
-	        csv.enabled false
-	        html.destination file("${buildDir}/jacocoHtml")
-	    }
-	}
+    group = 'hep.crest'
+    version = '2.0-SNAPSHOT'
+    repositories {
+        mavenCentral()
+    }
+
+    jacoco {
+        toolVersion = '0.8.4'
+        reportsDir = file("$buildDir/reports/jacoco")
+    }
+    jacocoTestReport {
+        reports {
+            xml.enabled false
+            csv.enabled false
+            html.destination file("${buildDir}/jacocoHtml")
+        }
+    }
 }
 
 // An example for sonarqube configuration: to run the code on a local sonarqube instance you should
 // use commands like : ./gradlew sonarqube   -Dsonar.host.url=http://localhost:9000   -Dsonar.login=180fe2ea3c768359eb5fa680f7bbe6667ceeb238
 sonarqube {
-	properties{
-		property "sonar.coverage.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/data/dialect/*,**/hep/crest/server/filters/*,**/hep/crest/server/aspects/*,**/hep/crest/server/security/*,**/hep/crest/server/autoconfig/*"
-    	//property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/data/dialect/*,**/hep/crest/server/filters/*,**/hep/crest/server/swagger/api/*,**/hep/crest/server/security/*"
-        property "sonar.exclusions", "**/generated/**/Q*.java,**/hep/crest/swagger/model/*,**/hep/crest/data/dialect/*,**/hep/crest/server/filters/*,**/hep/crest/server/swagger/api/*,**/hep/crest/server/security/*"
-	}
+    properties {
+        property 'sonar.coverage.exclusions', "**/hep/crest/swagger/model/*"
+        property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*,**/hep/crest/data/dialect/*"
+    }
 }
 
 subprojects {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-	ext {
-	    swagger_annotations_version = "1.5.13"
-	    jackson_version = "2.9.4"
-	    springboot_version = "2.0.1.RELEASE"
-	    junit_version = "4.12"
-	    oltu_version = "1.0.1"
-	    orika_version = "1.5.1"
-		jersey2_version = "2.22.2"
-		swagger_core_version = "1.5.13"
-    	querydsl_version = "4.2.1"
-		server= "undertow"
-	}
-
-    tasks.withType(JavaCompile) {
-  	    options.encoding = 'UTF-8'
+    sourceCompatibility = 11
+    targetCompatibility = 11
+    ext {
+        swagger_annotations_version = "1.5.13"
+        jackson_version = "2.10.5"
+        springboot_version = "2.3.1.RELEASE"
+        junit_version = "4.12"
+        oltu_version = "1.0.1"
+        orika_version = "1.5.1"
+        jersey2_version = "2.22.2"
+        swagger_core_version = "1.5.13"
+        querydsl_version = "4.4.0"
+        server = "undertow"
     }
 
-	repositories {
-	    mavenLocal()
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
 
-	    maven { url "http://repo.spring.io/milestone" }
-	    maven { url "https://jcenter.bintray.com/" }
-	    maven { url "https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo" }
-	    maven { url "http://repo.maven.apache.org/maven2" }
-	}
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://repo.spring.io/milestone" }
+        maven { url "https://jcenter.bintray.com/" }
+        maven { url "https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo" }
+        maven { url "https://repo.maven.apache.org/maven2" }
+    }
 
-	configurations {
-	     compile.exclude module: "tomcat-jdbc"
-	}
+    configurations {
+        compile.exclude module: "tomcat-jdbc"
+    }
 
-	dependencies {
-		// JAX-B dependencies for JDK 9+
-		compile "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
-		compile "org.glassfish.jaxb:jaxb-runtime:2.3.2"
-		// javassist for JDK 9+
-		compile "org.javassist:javassist:3.23.1-GA"
-		compile "io.swagger:swagger-annotations:$swagger_annotations_version"
-		compile "io.swagger:swagger-core:$swagger_core_version"
-		compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
-	    compile group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
+    dependencies {
+        // JAX-B dependencies for JDK 9+
+        implementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
+        implementation "org.glassfish.jaxb:jaxb-runtime:2.3.2"
+        // javassist for JDK 9+
+        implementation "org.javassist:javassist:3.23.1-GA"
+        // swagger
+        implementation "io.swagger:swagger-annotations:$swagger_annotations_version"
+        implementation "io.swagger:swagger-core:$swagger_core_version"
+        implementation "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
+        implementation group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
 
 
-	   	compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
-	   	compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
-    	compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
-    	compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
-    	compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
+        implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
+        implementation "com.fasterxml.jackson.core:jackson-core:$jackson_version"
+        implementation "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
+        implementation "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+        implementation "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
 
-		// DATABASES
-	    //compile group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
-	    compile files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")
+        // DATABASES
+        //implementation group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
+        implementation files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")
 // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
-		compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
-		compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
-		compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
-		compile("com.h2database:h2")
-		compile("commons-io:commons-io:2.6")
-		compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
+        implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
+        implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
+        implementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
+        implementation("com.h2database:h2")
+        implementation("commons-io:commons-io:2.6")
+        implementation group: 'commons-codec', name: 'commons-codec', version: '1.11'
 
-	}
+    }
 
-	task wrapper(type: Wrapper) {
-	   gradleVersion = '6.4' //version required
-	}
 
-	// Clean files and directories used for unit testing
-	task purgedb(type: Delete) {
-    	delete fileTree('/tmp') {
-	        include 'crest*.db'
-	        include 'crest*sqlite'
-	        include 'tagtar*'
-    	}
-    	delete '/tmp/cdms'
+    task wrapper(type: Wrapper) {
+        gradleVersion = '6.4' //version required
+    }
+
+    // Clean files and directories used for unit testing
+    task purgedb(type: Delete) {
+        delete fileTree('/tmp') {
+            include 'crest*.db'
+            include 'crest*sqlite*'
+            include 'tagtar*'
+        }
+        delete '/tmp/cdms'
     }
     test.dependsOn purgedb
 }

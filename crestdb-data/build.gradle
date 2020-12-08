@@ -1,30 +1,12 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-//        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE")
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.2.RELEASE")
-    }
-}
 plugins {
-    id 'net.ltgt.apt' version '0.18'
-    id 'net.ltgt.apt-eclipse' version '0.18'    
-  	id 'checkstyle' 
+  	id 'checkstyle'
+    id 'org.springframework.boot' version '2.3.1.RELEASE'
 }
 description = 'JPA package for persistency'
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'eclipse-wtp'
-apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-
-bootJar {
-    baseName = 'crestdb-data'
-  	version = '2.0-SNAPSHOT'
-}
 
 repositories {
     mavenCentral()
@@ -50,21 +32,21 @@ tasks.withType(Checkstyle) {
   }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+//sourceCompatibility = 1.8
+//targetCompatibility = 1.8
 
 dependencies {
 ////   	compile files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")   
     annotationProcessor     'com.querydsl:querydsl-apt:4.2.1:jpa'
     annotationProcessor     'org.springframework.boot:spring-boot-starter-data-jpa' // needed because the query dsl annotation processor doesn't recognize javax.persistence.Entity
-    compile                 group: 'com.querydsl', name: 'querydsl-jpa', version: querydsl_version
+    implementation  group: 'com.querydsl', name: 'querydsl-jpa', version: querydsl_version
 
-    compile ("org.springframework.boot:spring-boot-starter-data-jpa") 	
-    compile group: 'org.apache.commons', name: 'commons-compress', version: '1.15'
-    compile group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
+    implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.15'
+    implementation group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
     
 	testCompile("org.springframework.boot:spring-boot-starter-test") 
-	testImplementation 'org.testcontainers:postgresql:1.10.6'	
+	testImplementation 'org.testcontainers:postgresql:1.15.0-rc2'
 }
 
 jar {

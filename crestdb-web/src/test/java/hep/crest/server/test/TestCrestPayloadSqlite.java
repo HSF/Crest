@@ -41,9 +41,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration
 @ActiveProfiles("sqlite")
+@ContextConfiguration
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestCrestPayloadSqlite {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());

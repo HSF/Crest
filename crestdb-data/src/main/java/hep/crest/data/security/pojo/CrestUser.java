@@ -1,15 +1,14 @@
 package hep.crest.data.security.pojo;
 
+import hep.crest.data.config.DatabasePropertyConfigurator;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import hep.crest.data.config.DatabasePropertyConfigurator;
-
 /**
  * @author formica
- *
  */
 @Entity
 @Table(name = "CREST_USERS", schema = DatabasePropertyConfigurator.SCHEMA_NAME)
@@ -35,10 +34,8 @@ public class CrestUser {
     }
 
     /**
-     * @param username
-     *            the String
-     * @param password
-     *            the String
+     * @param username the String
+     * @param password the String
      */
     public CrestUser(String username, String password) {
         this.username = username;
@@ -55,8 +52,7 @@ public class CrestUser {
     }
 
     /**
-     * @param id
-     *            the String
+     * @param id the String
      * @return
      */
     public void setId(String id) {
@@ -72,8 +68,7 @@ public class CrestUser {
     }
 
     /**
-     * @param username
-     *            the String
+     * @param username the String
      * @return
      */
     public void setUsername(String username) {
@@ -89,8 +84,7 @@ public class CrestUser {
     }
 
     /**
-     * @param password
-     *            the String
+     * @param password the String
      * @return
      */
     public void setPassword(String password) {

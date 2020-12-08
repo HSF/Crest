@@ -30,7 +30,7 @@ import javax.sql.DataSource;
  *
  */
 @Configuration
-@ComponentScan("hep.crest.data.repositories")
+@ComponentScan("hep.crest.data")
 public class RepositoryConfig {
 
     /**
