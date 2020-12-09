@@ -257,24 +257,18 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final AlreadyExistsPojoException e) {
             // Exception, resource exists, send 303.
             log.error("Cannot create tag meta {}, name already exists...", body);
-            return Response.status(Response.Status.SEE_OTHER).entity(body).build();
+            return ResponseFormatHelper.alreadyExistsPojo(e.getMessage());
         }
         catch (final NotExistsPojoException e) {
             // Exception, tag not found, send 404.
             final String message = "No tag resource has been found for " + name;
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
-                    message);
-            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+            return ResponseFormatHelper.notFoundPojo(message);
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
-            // Error from server. Send a 500.
             final String message = e.getMessage();
             log.error("createTagMeta service exception : {}", message);
-            final String error = bundle.getString("log.tag.notfound");
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("createTagMeta error: " + e.getMessage());
         }
     }
 
@@ -288,23 +282,18 @@ public class TagsApiServiceImpl extends TagsApiService {
             final TagMetaDto dto = tagService.findMeta(name);
             if (dto == null) {
                 log.debug("Entity not found for name " + name);
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, "Entity not found for name " + name);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+                return ResponseFormatHelper.notFoundPojo("findTagMeta error: cannot find meta for tag " + name);
             }
             final TagMetaSetDto respdto = (TagMetaSetDto) new TagMetaSetDto().addResourcesItem(dto).size(1L)
                     .datatype("tagmetas");
             return Response.ok().entity(respdto).build();
-
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
             // Error from server. Send a 500.
             final String message = e.getMessage();
             log.error("findTagMeta service exception : {}", message);
-            final String error = bundle.getString("log.tag.notfound");
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("findTagMeta error: " + e.getMessage());
         }
     }
 
@@ -321,8 +310,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             if (dto == null) {
                 log.debug("Cannot update meta data on null tag meta entity for {}", name);
                 final String message = "TagMeta " + name + " not found...";
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
-                return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+                return ResponseFormatHelper.notFoundPojo("updateTagMeta error: cannot find meta for tag " + name);
             }
             for (final String key : body.keySet()) {
                 if (key == "description") {
@@ -343,9 +331,8 @@ public class TagsApiServiceImpl extends TagsApiService {
             return Response.ok(info.getRequestUri()).entity(saved).build();
         }
         catch (final RuntimeException e) {
-            final String message = e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            log.error("Api method updateTagMeta error: {}", e.getMessage());
+            return ResponseFormatHelper.internalError("updateTagMeta error: " + e.getMessage());
         }
     }
 }
