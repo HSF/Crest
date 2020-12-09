@@ -7,6 +7,7 @@ variables:
     WEB_CONTAINER_IMAGE: $REGISTRY/crest-ui:$VERSION
     GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     GIT_SSL_NO_VERIFY: "true"
+
   # When using dind service we need to instruct docker, to talk with the
   # daemon started inside of the service. The daemon is available with
   # a network connection instead of the default /var/run/docker.sock socket.
@@ -60,8 +61,8 @@ stages:
  - package_application
  - webui
  - build
- - sonar_application
  - release
+ - sonar_application
  - redeploy
 
 package_svom_application:
@@ -75,19 +76,20 @@ package_svom_application:
     - ./crestdb-web/build/libs/crest.war
     expire_in: 1 week
   only:
-  - svom-dc1
+  - cms-v0
 
-build_svom_docker_image:
-  stage: build
-  environment: dc0
-  tags:
-    - dc0-shell
-  image: java:11
+release:
+  stage: release
+  image: docker:19.03.1
+  services:
+    - docker:19.03.1-dind
+  before_script:
+      - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
   script:
-    - docker info
-    - docker build --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
+      - docker build --rm --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
+      - docker push $CONTAINER_IMAGE
   only:
-  - svom-dc1
+  - cms-v0
 
 webui:
   stage: webui
@@ -100,29 +102,47 @@ webui:
   only:
   - svom-dc1
 
-registry-push:
-  stage: release
-  environment: dc0
-  tags:
-    - dc0-shell
-  script:
-    - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
-    - docker push $CONTAINER_IMAGE
-##    - docker push $WEB_CONTAINER_IMAGE
-  only:
-  - svom-dc1
-
 sonar_application:
   stage: sonar_application
-  tags:
-    - dc0
   image: java:11
   script:
    - ./gradlew sonarqube -Dsonar.projectKey=crestdb -Dsonar.host.url=http://svom1.lal.in2p3.fr:20090 -Dsonar.login=f50918d8b780181f947ae83b42e78983ffde4bf3
   allow_failure: false
   only:
-     refs:
-       - stable
+  - stable
+
+# build_svom_docker_image:
+#   stage: build
+#   environment: dc0
+#   tags:
+#     - dc0-shell
+#   image: java:8
+#   script:
+#     - docker info
+#     - docker build --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
+#   only:
+#   - svom-dc1
+
+# webui:
+#   stage: webui
+#   tags:
+#     - dc0-shell
+#   script:
+#     - docker info
+#     - docker build --tag=$WEB_CONTAINER_IMAGE ./web-ui/crest-ui/
+#   only:
+#   - svom-dc0
+
+# registry-push:
+#   stage: release
+#   environment: dc0
+#   tags:
+#     - dc0-shell
+#   script:
+#     - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
+#     - docker push $CONTAINER_IMAGE
+#   only:
+#   - svom-dc1
 
 package_cern_application:
   stage: package_application
@@ -134,7 +154,7 @@ package_cern_application:
       - $REMOTE_NAME == "cern"
   image: java:11
   script:
-   - ./gradlew clean assemble -PwarName=crest.war
+   - ./gradlew -g /cache/.gradle clean assemble -PwarName=crest.war
   allow_failure: false
   artifacts:
    paths:
@@ -148,7 +168,7 @@ package_cern_web_application:
       - master
     variables:
       - $REMOTE_NAME == "cern"
-  image: node:10
+  image: node:lts-alpine
   script:
    - ./vuecompile.sh
   allow_failure: false
