@@ -104,7 +104,7 @@ webui:
 
 sonar_application:
   stage: sonar_application
-  image: java:8
+  image: java:11
   script:
    - ./gradlew sonarqube -Dsonar.projectKey=crestdb -Dsonar.host.url=http://svom1.lal.in2p3.fr:20090 -Dsonar.login=f50918d8b780181f947ae83b42e78983ffde4bf3
   allow_failure: false
