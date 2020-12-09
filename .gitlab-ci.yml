@@ -67,7 +67,7 @@ stages:
 
 package_svom_application:
   stage: package_application
-  image: openjdk:11-alpine
+  image: openjdk:11-jdk-alpine
   script:
    - ./gradlew -g /cache/.gradle clean assemble -PwarName=crest.war
   allow_failure: false
@@ -104,7 +104,7 @@ webui:
 
 sonar_application:
   stage: sonar_application
-  image: java:11
+  image: openjdk:11-jdk-alpine
   script:
    - ./gradlew sonarqube -Dsonar.projectKey=crestdb -Dsonar.host.url=http://svom1.lal.in2p3.fr:20090 -Dsonar.login=f50918d8b780181f947ae83b42e78983ffde4bf3
   allow_failure: false
