@@ -7,6 +7,8 @@ import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.server.annotations.CacheControlCdb;
 import hep.crest.server.caching.CachingPolicyService;
+import hep.crest.server.exceptions.AlreadyExistsPojoException;
+import hep.crest.server.exceptions.HashExistsException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.PayloadService;
@@ -116,7 +118,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
 
     /* (non-Javadoc)
-     * @see hep.crest.server.swagger.api.PayloadsApiService#createPayload(hep.crest.swagger.model.PayloadDto, javax.ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
+     * @see hep.crest.server.swagger.api.PayloadsApiService#createPayload(hep.crest.swagger.model.PayloadDto, javax
+     * .ws.rs.core.SecurityContext, javax.ws.rs.core.UriInfo)
      */
     @Override
     public Response createPayload(PayloadDto body, SecurityContext securityContext, UriInfo info)
@@ -127,12 +130,16 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             log.debug("Saved PayloadDto {}", saved);
             return Response.created(info.getRequestUri()).entity(saved).build();
         }
-        catch (final CdbServiceException e) {
+        catch (final HashExistsException e) {
+            log.error("Duplicated hash found for {}", body);
+            final String msg = "Hash duplication error for payload resource " + body.toString();
+            return ResponseFormatHelper.alreadyExistsPojo("Payload hash exists: " + msg);
+        }
+        catch (final RuntimeException e) {
             // Exception, send a 500.
             log.error("Error saving PayloadDto {}", body);
             final String msg = "Error creating payload resource using " + body.toString();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("createPayload error: " + msg);
         }
     }
 
@@ -152,22 +159,27 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                                            SecurityContext securityContext, UriInfo info) throws NotFoundException {
         this.log.info("PayloadRestController processing request to upload payload from stream");
         // PayloadDto payload = new PayloadDto();
+        PayloadDto payloaddto = null;
         try {
             // Assume the FormDataBodyPart is a JSON string.
             payload.setMediaType(MediaType.APPLICATION_JSON_TYPE);
             // Get the DTO.
-            final PayloadDto payloaddto = payload.getValueAs(PayloadDto.class);
+            payloaddto = payload.getValueAs(PayloadDto.class);
             log.debug("Received body json " + payloaddto);
             // Create the payload taking binary content from the input stream.
             final PayloadDto saved = payloadService.insertPayloadAndInputStream(payloaddto,
                     fileInputStream);
             return Response.created(info.getRequestUri()).entity(saved).build();
         }
+        catch (final HashExistsException e) {
+            log.error("Duplicated hash found for {}", payloaddto.getHash());
+            final String msg = "Hash duplication error for payload resource " + payloaddto.toString();
+            return ResponseFormatHelper.alreadyExistsPojo("Payload hash exists: " + msg);
+        }
         catch (final CdbServiceException | NullPointerException e) {
             // Exception, send 500.
             final String msg = "Error creating payload resource : " + e.getCause();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("createPayloadMultiForm error: " + msg);
         }
     }
 
@@ -198,7 +210,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             final CacheControl cc = cachesvc.getPayloadCacheControl();
 
             if (format == null || format.equalsIgnoreCase("BLOB")
-                    || format.equalsIgnoreCase("BIN")) {
+                || format.equalsIgnoreCase("BIN")) {
                 // The client requested to get binary data.
                 // Get the payload data.
                 final InputStream in = payloadService.getPayloadData(hash);
@@ -261,14 +273,15 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             }
         }
         catch (final NotExistsPojoException e) {
-            // The Payload hash was not found.
-            return notFoundPojo(hash);
+            // Exception, tag not found, send 404.
+            log.warn("getPayload resource not found for hash: {}", hash);
+            return ResponseFormatHelper.notFoundPojo("getPayload error: " + e.getMessage());
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             // Exception, send a 500.
+            log.error("Payload not found for hash {}", hash);
             final String msg = "Error retrieving payload from hash " + hash;
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("getPayload error: " + e.getMessage());
         }
     }
 
@@ -289,7 +302,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                                                  SecurityContext securityContext, UriInfo info)
             throws NotFoundException {
         this.log.info(
-                "PayloadRestController processing request to store payload with iov in tag {} and at since {} using format {}",
+                "PayloadRestController processing request to store payload with iov in tag {} and at since {} using "
+                + "format {}",
                 tag, since, format);
         try {
             // Store payload with multi form
@@ -314,7 +328,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             }
             // Create a temporary file name from tag name and time of validity.
             final String filename = cprops.getDumpdir() + SLASH + tag + "_" + since
-                    + fdetailsname;
+                                    + fdetailsname;
             if (format == null) {
                 format = "JSON";
             }
@@ -347,13 +361,29 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             // Save iov and payload and get the response object in return.
             final HTTPResponse resp = payloadService.saveIovAndPayload(iovDto, pdto, filename);
             resp.action("storePayloadWithIovMultiForm");
-            return Response.created(info.getRequestUri()).entity(resp).build();
+            Response serverResp = ResponseFormatHelper.createApiResponse(resp);
+            return serverResp;
         }
-        catch (final RuntimeException | IOException e) {
+        catch (final AlreadyExistsPojoException e) {
+            // Exception, send 303.
+            final String msg = "Error creating payload resource : " + e.getMessage();
+            return ResponseFormatHelper.alreadyExistsPojo("storePayloadWithIovMultiForm error: " + e.getMessage());
+        }
+        catch (final NotExistsPojoException e) {
+            // Exception, send 404.
+            final String msg = "Error creating payload resource : " + e.getMessage();
+            return ResponseFormatHelper.notFoundPojo("storePayloadWithIovMultiForm error: " + e.getMessage());
+        }
+        catch (IOException e) {
+            log.warn("Bad request: {}", e.getMessage());
+            return ResponseFormatHelper.badRequest("storePayloadWithIovMultiForm bad request: " + e.getMessage());
+        }
+        catch (final RuntimeException e) {
             final String msg = "Internal exception creating payload resource using storePayloadWithIovMultiForm for " +
-                    "tag " + tag.toString() + " : " + e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+                               "tag " + tag.toString() + " : " + e.getMessage();
+            log.error("storePayloadWithIovMultiForm error: {}", msg);
+            e.printStackTrace();
+            return ResponseFormatHelper.internalError("storePayloadWithIovMultiForm error: " + msg);
         }
     }
 
@@ -376,7 +406,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                                                        SecurityContext securityContext,
                                                        UriInfo info) throws NotFoundException {
         this.log.info(
-                "PayloadRestController processing request to upload payload batch in tag {} with multi-iov {} and body {}",
+                "PayloadRestController processing request to upload payload batch in tag {} with multi-iov {} and "
+                + "body {}",
                 tag, filesbodyparts.size(), iovsetupload.getValue());
         iovsetupload.setMediaType(MediaType.APPLICATION_JSON_TYPE);
         try {
@@ -399,10 +430,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             // Check that number of files is not too much.
             if (filesbodyparts.size() > MAX_FILE_UPLOAD) {
                 final String msg = "Too many files attached to the request...> MAX_FILE_UPLOAD = "
-                        + MAX_FILE_UPLOAD;
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                        msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+                                   + MAX_FILE_UPLOAD;
+                throw new IOException(msg);
             }
             // Only the payload format FILE is allowed here.
             // This was created to eventually merge with other methods later on.
@@ -414,12 +443,22 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 throw new CdbServiceException("Wrong header parameter " + xCrestPayloadFormat);
             }
         }
-        catch (final RuntimeException | IOException e) {
+        catch (final NotExistsPojoException e) {
+            // Exception, tag not found, send 404.
+            final String message = "Missing tag " + tag;
+            log.warn("uploadPayloadBatchWithIovMultiForm error: {}", message);
+            return ResponseFormatHelper.notFoundPojo("uploadPayloadBatchWithIovMultiForm cannot find tag: " + e.getMessage());
+        }
+        catch (IOException e) {
+            log.warn("uploadPayloadBatchWithIovMultiForm bad request: {}", e.getMessage());
+            return ResponseFormatHelper.badRequest("uploadPayloadBatchWithIovMultiForm error: " + e.getMessage());
+        }
+        catch (final RuntimeException e) {
             final String msg =
                     "Internal exception creating payload resource using uploadPayloadBatchWithIovMultiForm for " +
                     "tag " + tag.toString() + " : " + e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            log.error("uploadPayloadBatchWithIovMultiForm error: {}", msg);
+            return ResponseFormatHelper.internalError("uploadPayloadBatchWithIovMultiForm error: " + msg);
         }
     }
 
@@ -466,15 +505,19 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
                 return Response.created(info.getRequestUri()).entity(outdto).build();
             }
             else {
-                throw new CdbServiceException("Wrong header parameter " + xCrestPayloadFormat);
+                throw new IOException("Wrong header parameter " + xCrestPayloadFormat);
             }
         }
-        catch (final RuntimeException | IOException e) {
+        catch (IOException e) {
+            log.warn("storePayloadBatchWithIovMultiForm bad request: {}", e.getMessage());
+            return ResponseFormatHelper.badRequest("storePayloadBatchWithIovMultiForm error: " + e.getMessage());
+        }
+        catch (final RuntimeException e) {
             final String msg =
                     "Internal exception creating payload resource using storePayloadBatchWithIovMultiForm for " +
-                            "tag " + tag.toString() + " : " + e.getMessage();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+                    "tag " + tag.toString() + " : " + e.getMessage();
+            log.error("storePayloadBatchWithIovMultiForm error: {}", msg);
+            return ResponseFormatHelper.internalError("storePayloadBatchWithIovMultiForm error: " + msg);
         }
     }
 
@@ -486,8 +529,8 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      * @param filesbodyparts the List<FormDataBodyPart>
      * @return IovSetDto
      * @throws PayloadEncodingException If an Exception occurred
-     * @throws IOException         If an Exception occurred
-     * @throws CdbServiceException if an exception occurred in insertion.
+     * @throws IOException              If an Exception occurred
+     * @throws CdbServiceException      if an exception occurred in insertion.
      */
     protected IovSetDto storeIovs(IovSetDto dto, String tag, String objectType, String version,
                                   String streamerInfo, List<FormDataBodyPart> filesbodyparts)
@@ -535,14 +578,14 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             }
             catch (final CdbServiceException e) {
                 log.error("Cannot insert iov {}", piovDto);
-                throw new CdbServiceException("cannot insert iov and payload for " + iovDto + ": " +e.getMessage());
+                throw new CdbServiceException("cannot insert iov and payload for " + iovDto + ": " + e.getMessage());
             }
             catch (final JDBCException | DataIntegrityViolationException e) {
                 log.error("SQL exception when inserting {}", iovDto);
                 throw new CdbServiceException("SQL error, cannot insert iov and payload for " + iovDto.getTagName()
-                       + ", " + iovDto.getSince()
-                       + " " + iovDto.getPayloadHash()
-                       + ": " +e.getMessage());
+                                              + ", " + iovDto.getSince()
+                                              + " " + iovDto.getPayloadHash()
+                                              + ": " + e.getMessage());
             }
         }
         dto.size((long) savediovlist.size());
@@ -555,7 +598,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      * @param filename        the String
      * @return String. The computed hash from the byte stream.
      * @throws PayloadEncodingException If an Exception occurred
-     * @throws IOException         If an Exception occurred
+     * @throws IOException              If an Exception occurred
      */
     protected String getHash(InputStream fileInputStream, String filename)
             throws PayloadEncodingException, IOException {
@@ -570,96 +613,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             throw e;
         }
     }
-
-//    /**
-//     * @param dto      the IovDto
-//     * @param pdto     the PayloadDto
-//     * @param filename the String
-//     * @return HTTPResponse
-//     * @throws CdbServiceException         If an Exception occurred
-//     */
-//    @Transactional
-//    protected HTTPResponse saveIovAndPayload(IovDto dto, PayloadDto pdto, String filename)
-//            throws CdbServiceException {
-//        log.debug("Create dto with hash {},  format {}, ...", dto.getPayloadHash(),
-//                pdto.getObjectType());
-//        if (filename == null) {
-//            try {
-//                // pdto.hash(hash).streamerInfo(pdto.getObjectType().getBytes());
-//                pdto.size(pdto.getData().length);
-//                final PayloadDto saved = payloadService.insertPayload(pdto);
-//                String tagname = dto.getTagName();
-//                Iov entity = mapper.map(dto, Iov.class);
-//                entity.setTag(new Tag(tagname));
-//                final Iov savediov = iovService.insertIov(entity);
-//                IovDto saveddto = mapper.map(savediov, IovDto.class);
-//                dto.tagName(tagname);
-//
-//                log.debug("Created payload {} and iov {} ", saved, savediov);
-//                return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
-//                        .id(savediov.getPayloadHash()).message("Iov created in tag "
-//                                + dto.getTagName() + " with time " + saveddto.getSince());
-//            }
-//            catch (final NotExistsPojoException e) {
-//                return new HTTPResponse().code(Response.Status.NOT_FOUND.getStatusCode())
-//                        .id(dto.getPayloadHash()).message("Tag not found "
-//                                + dto.getTagName());
-//            }
-//            catch (RuntimeException e) {
-//                final String msg = "Api method saveIovAndPayload got exception " + e.getMessage();
-//                new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-//                        .id(dto.getPayloadHash()).message("Runtime error for "
-//                        + dto.getTagName());
-//            }
-//        }
-//        final Path temppath = Paths.get(filename);
-//        try (InputStream is = new FileInputStream(filename);) {
-//            // pdto.streamerInfo(pdto.getObjectType().getBytes());
-//            final FileChannel tempchan = FileChannel.open(temppath);
-//            pdto.size((int) tempchan.size());
-//            tempchan.close();
-//            final PayloadDto saved = payloadService.insertPayloadAndInputStream(pdto, is);
-//            String tagname = dto.getTagName();
-//            Iov entity = mapper.map(dto, Iov.class);
-//            entity.setTag(new Tag(tagname));
-//            final Iov savediov = iovService.insertIov(entity);
-//            IovDto saveddto = mapper.map(savediov, IovDto.class);
-//            dto.tagName(tagname);
-//            log.debug("Create payload {} and iov {} ", saved, saveddto);
-//            return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
-//                    .id(savediov.getPayloadHash()).message("Iov created in tag " + dto.getTagName()
-//                            + " with time " + saveddto.getSince());
-//        }
-//        catch (final NotExistsPojoException e) {
-//            return new HTTPResponse().code(Response.Status.NOT_FOUND.getStatusCode())
-//                    .id(dto.getPayloadHash()).message("Tag not found "
-//                            + dto.getTagName());
-//        }
-//        catch (RuntimeException e) {
-//            final String msg = "Api method saveIovAndPayload got exception " + e.getMessage();
-//            new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-//                    .id(dto.getPayloadHash()).message("Runtime error for "
-//                    + dto.getTagName());
-//        }
-//        catch (IOException e) {
-//            final String msg = "Api method saveIovAndPayload got exception " + e.getMessage();
-//            new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-//                    .id(dto.getPayloadHash()).message("IO error for "
-//                    + dto.getTagName());
-//        }
-//        finally {
-//            try {
-//                Files.deleteIfExists(temppath);
-//            }
-//            catch (IOException e) {
-//                log.error("Cannot delete temporary file");
-//            }
-//            log.debug("Removed temporary file");
-//        }
-//        return new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-//                .id(dto.getPayloadHash()).message("Internal error for "
-//                        + dto.getTagName());
-//    }
 
     /*
      * (non-Javadoc)
@@ -683,7 +636,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
 
         }
         catch (final NotExistsPojoException e) {
-            return notFoundPojo(hash);
+            // Exception, tag not found, send 404.
+            final String message = "No payload resource has been found for " + hash;
+            log.warn("getPayloadMetaInfo error: {}", message);
+            return ResponseFormatHelper.notFoundPojo("getPayloadMetaInfo cannot find payload: " + hash);
         }
         catch (final CdbServiceException e) {
             final String msg = "Error retrieving payload from hash " + hash;
@@ -792,12 +748,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         final PayloadSetDto psetdto = new PayloadSetDto().addResourcesItem(entity);
         psetdto.datatype(entity.getObjectType()).filter(map).size(1L);
         return psetdto;
-    }
-
-    protected Response notFoundPojo(String hash) {
-        final String msg = "Cannot find payload corresponding to hash " + hash;
-        final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-        return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
     }
 
 }

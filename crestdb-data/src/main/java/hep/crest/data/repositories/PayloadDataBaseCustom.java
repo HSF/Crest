@@ -17,13 +17,13 @@
  **/
 package hep.crest.data.repositories;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.exceptions.PayloadEncodingException;
 import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.PayloadDto;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author formica
@@ -31,6 +31,13 @@ import hep.crest.swagger.model.PayloadDto;
  */
 public interface PayloadDataBaseCustom {
 
+
+    /**
+     * @param id
+     *            the String
+     * @return String
+     */
+    String exists(String id);
 
     /**
      * @param id

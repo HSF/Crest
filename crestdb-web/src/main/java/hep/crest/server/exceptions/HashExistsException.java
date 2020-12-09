@@ -9,7 +9,7 @@ import hep.crest.data.exceptions.CdbServiceException;
  * @author formica
  *
  */
-public class NotExistsPojoException extends CdbServiceException {
+public class HashExistsException extends CdbServiceException {
 
     /**
      * Serializer.
@@ -17,31 +17,30 @@ public class NotExistsPojoException extends CdbServiceException {
     private static final long serialVersionUID = -8552538724531679765L;
 
     /**
-     * @param string
+     * @param message
      *            the String
      */
-    public NotExistsPojoException(String string) {
-        super(string);
+    public HashExistsException(String message) {
+        super(message);
     }
 
     /**
-     * @param string
+     * @param message
      *            the String
      * @param err
      *            the Throwable
      */
-    public NotExistsPojoException(String string, Throwable err) {
-        super(string, err);
+    public HashExistsException(String message, Throwable err) {
+        super(message, err);
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see hep.crest.data.exceptions.CdbServiceException#getMessage()
+     * @see java.lang.Throwable#getMessage()
      */
     @Override
     public String getMessage() {
-        return "NotExistsPojoException: " + super.getMessage();
+        return "HashExistsException: " + super.getMessage();
     }
-
 }

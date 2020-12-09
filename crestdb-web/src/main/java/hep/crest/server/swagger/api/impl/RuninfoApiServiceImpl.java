@@ -1,28 +1,6 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Component;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
-
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.data.repositories.querydsl.SearchCriteria;
@@ -35,6 +13,25 @@ import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.GenericMap;
 import hep.crest.swagger.model.RunInfoDto;
 import hep.crest.swagger.model.RunInfoSetDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Rest endpoint for run information.
@@ -137,8 +134,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method listRunLumiInfo got exception : {}", message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, message)).build();
+            return ResponseFormatHelper.internalError("listRunInfo error: " + message);
         }
     }
 
@@ -204,9 +200,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("findRunLumiInfo got Exception : {}", message);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("findRunLumiInfo error: " + message);
         }
     }
 

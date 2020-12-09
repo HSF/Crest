@@ -8,7 +8,6 @@ import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.TagService;
-import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.server.swagger.api.TagsApiService;
 import hep.crest.swagger.model.CrestBaseResponse;
@@ -102,17 +101,13 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final AlreadyExistsPojoException e) {
             // Exception, resource exists, send 303.
             log.error("Cannot create tag {}, name already exists...", body);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    "Cannot create tag because name already exists: " + body.getName());
-            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
+            return ResponseFormatHelper.alreadyExistsPojo("Cannot create tag: " + e.getMessage());
         }
         catch (final RuntimeException e) {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method createTag got exception {}", message);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("createTag error: " + message);
         }
     }
 
@@ -164,17 +159,13 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final NotExistsPojoException e) {
             // Exception, tag not found, send 404.
             final String message = "No tag resource has been found for " + name;
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
-                    message);
-            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+            return ResponseFormatHelper.notFoundPojo("Cannot find tag: " + name);
         }
         catch (final RuntimeException e) {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method updateTag got exception {}", message);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("updateTag error: " + message);
         }
     }
 
@@ -203,7 +194,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             log.warn("Api method findGlobalTag cannot find resource : {}", name);
             final CrestBaseResponse resp = new TagSetDto()
                     .format("TagSetDto").filter(filters).size(0L).datatype("tags");
-            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+            return ResponseFormatHelper.emptyResultSet(resp);
         }
     }
 
@@ -247,10 +238,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             // Error from server. Send a 500.
             final String message = e.getMessage();
             log.error("listTags service exception : {}", message);
-            final String error = bundle.getString("log.tag.notfound");
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("listTags error: " + message);
         }
     }
 }

@@ -3,24 +3,17 @@
  */
 package hep.crest.server.exceptions;
 
-import hep.crest.data.exceptions.CdbServiceException;
-
 /**
  * @author formica
  *
  */
-public class NotExistsPojoException extends CdbServiceException {
-
-    /**
-     * Serializer.
-     */
-    private static final long serialVersionUID = -8552538724531679765L;
+public class AlreadyExistsIovException extends AlreadyExistsPojoException {
 
     /**
      * @param string
      *            the String
      */
-    public NotExistsPojoException(String string) {
+    public AlreadyExistsIovException(String string) {
         super(string);
     }
 
@@ -30,7 +23,7 @@ public class NotExistsPojoException extends CdbServiceException {
      * @param err
      *            the Throwable
      */
-    public NotExistsPojoException(String string, Throwable err) {
+    public AlreadyExistsIovException(String string, Throwable err) {
         super(string, err);
     }
 
@@ -41,7 +34,7 @@ public class NotExistsPojoException extends CdbServiceException {
      */
     @Override
     public String getMessage() {
-        return "NotExistsPojoException: " + super.getMessage();
+        return "AlreadyExistsIovException: " + super.getMessage();
     }
 
 }

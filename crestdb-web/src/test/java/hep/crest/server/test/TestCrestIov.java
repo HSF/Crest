@@ -5,7 +5,6 @@ import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Tag;
 import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.controllers.PageRequestHelper;
-import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.TagService;
@@ -121,13 +120,13 @@ public class TestCrestIov {
             final List<IovDto> ilist2 = edh.entityToDtoList(iovlist2, IovDto.class);
             assertThat(ilist2.size()).isGreaterThan(0);
         }
-        catch (RuntimeException | AlreadyExistsPojoException e) {
-            log.info("got exception of type {}",e.getClass());
-        }
         catch (final NotExistsPojoException e) {
             log.info("got exception of type {}",e.getClass());
         }
-       
+        catch (RuntimeException e) {
+            log.info("got exception of type {}",e.getClass());
+        }
+
     }
 
     @Test
@@ -180,7 +179,7 @@ public class TestCrestIov {
         final ResponseEntity<String> iovrespalreadythere = this.testRestTemplate
                 .postForEntity("/crestapi/iovs", iovdto, String.class);
         log.info("Received response: " + iovrespalreadythere);
-        assertThat(iovrespalreadythere.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(iovrespalreadythere.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 
         // Upload batch iovs
         iovdto.setSince(new BigDecimal(2000000L)); // change the since to have a new iov...

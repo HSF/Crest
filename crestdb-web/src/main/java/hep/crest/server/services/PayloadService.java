@@ -7,6 +7,8 @@ import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
+import hep.crest.server.exceptions.AlreadyExistsIovException;
+import hep.crest.server.exceptions.HashExistsException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.HTTPResponse;
 import hep.crest.swagger.model.IovDto;
@@ -17,8 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.transaction.Transactional;
 import javax.ws.rs.core.Response;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -122,12 +124,18 @@ public class PayloadService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    @Transactional
+    //@Transactional
     public PayloadDto insertPayload(PayloadDto dto) throws CdbServiceException {
         log.debug("Save payload dto {}", dto);
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
         }
+        // Verify if hash exists
+        String dbhash = payloaddataRepository.exists(dto.getHash());
+        if (dbhash != null && dbhash.length() > 0) {
+            throw new HashExistsException("Hash already exists " + dto.getHash());
+        }
+        // Store the payload dto
         final PayloadDto saved = payloaddataRepository.save(dto);
         log.debug("Saved entity: {}", saved);
         return saved;
@@ -142,10 +150,15 @@ public class PayloadService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    @Transactional
     public PayloadDto insertPayloadAndInputStream(PayloadDto dto, InputStream is)
             throws CdbServiceException {
         log.debug("Save payload {} creating blob from inputstream...", dto);
+        // Verify if hash exists
+        String dbhash = payloaddataRepository.exists(dto.getHash());
+        if (dbhash != null && dbhash.length() > 0) {
+            throw new HashExistsException("Hash already exists " + dto.getHash());
+        }
+
         final PayloadDto saved = payloaddataRepository.save(dto, is);
         log.debug("Saved entity: {}", saved);
         return saved;
@@ -161,7 +174,7 @@ public class PayloadService {
      * @return HTTPResponse
      * @throws CdbServiceException
      */
-    @Transactional
+    @Transactional(rollbackOn = {CdbServiceException.class})
     public HTTPResponse saveIovAndPayload(IovDto dto, PayloadDto pdto, String filename)
             throws CdbServiceException {
         log.debug("Create dto with hash {},  format {}, ...", dto.getPayloadHash(),
@@ -177,16 +190,26 @@ public class PayloadService {
                     tempchan.close();
                     saved = insertPayloadAndInputStream(pdto, is);
                 }
+                catch (final HashExistsException e) {
+                    log.warn("Payload hash duplication, will not store : {}", dto.getPayloadHash());
+                    saved = getPayloadMetaInfo(dto.getPayloadHash());
+                }
                 catch (IOException ex) {
                     log.error("IO Exception in reading payload data: {}", ex);
                     return new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
                             .id(dto.getPayloadHash()).message("IO Exception in reading payload data for "
-                                    + dto.getTagName());
+                                                              + dto.getTagName());
                 }
             }
             else {
                 pdto.size(pdto.getData().length);
-                saved = insertPayload(pdto);
+                try {
+                    saved = insertPayload(pdto);
+                }
+                catch (final HashExistsException e) {
+                    log.warn("Payload hash duplication, will not store : {}", dto.getPayloadHash());
+                    saved = getPayloadMetaInfo(dto.getPayloadHash());
+                }
             }
             String tagname = dto.getTagName();
             Iov entity = mapper.map(dto, Iov.class);
@@ -196,19 +219,23 @@ public class PayloadService {
             saveddto.tagName(tagname);
             dto.tagName(tagname);
             log.debug("Saved Iov Dto {} ", saveddto);
-
+            // Everything ok, so send back a "created" status code.
             log.debug("Created payload {} and iov {} ", saved, savediov);
             return new HTTPResponse().code(Response.Status.CREATED.getStatusCode())
                     .id(saveddto.getPayloadHash()).message("Iov created in tag "
-                            + saveddto.getTagName() + " @ " + saveddto.getSince());
+                                                           + saveddto.getTagName() + " @ " + saveddto.getSince());
         }
         catch (final NotExistsPojoException e) {
-            return new HTTPResponse().code(Response.Status.NOT_FOUND.getStatusCode())
-                    .id(dto.getPayloadHash()).message("Tag not found "
-                            + dto.getTagName());
+            log.warn("Tag not found: {} - {}", dto.getTagName(), e.getMessage());
+            throw e;
+        }
+        catch (final AlreadyExistsIovException e) {
+            log.warn("Iov already exists: {} - {}", dto, e.getMessage());
+            throw e;
         }
         catch (RuntimeException e) {
             log.error("A Runtime exception occurred in saveIovAndPayload method: {}", e);
+            throw e;
         }
         finally {
             log.debug("Clean up files when non null...");
@@ -222,9 +249,5 @@ public class PayloadService {
             }
             log.debug("Removed temporary file");
         }
-        String msg = "Api method saveIovAndPayload error. ";
-        msg += "\nCannot store data in : " + dto.getTagName() + " @ " + dto.getSince();
-        return new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-                .id(dto.getPayloadHash()).message(msg);
     }
 }

@@ -27,7 +27,7 @@ spring:
       hibernate.show_sql: false
 crest:
   security: none
-  dbfile: /tmp/crestdbsqlite
+  dbfile: /tmp/crestdata.sqlite
   authenticationtype: database
   dumpdir: /tmp/crest-dump/
   schemaname: none

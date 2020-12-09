@@ -46,6 +46,14 @@ public final class PayloadRequests {
      * @param tablename the String
      * @return String
      */
+    public static final String getExistsHashQuery(String tablename) {
+        return "select HASH from "+ tablename + WHERE_HASH;
+    }
+
+    /**
+     * @param tablename the String
+     * @return String
+     */
     public static final String getFindMetaQuery(String tablename) {
         return "select HASH,OBJECT_TYPE,VERSION,INSERTION_TIME,STREAMER_INFO, "
                 + " DATA_SIZE from " + tablename + WHERE_HASH;

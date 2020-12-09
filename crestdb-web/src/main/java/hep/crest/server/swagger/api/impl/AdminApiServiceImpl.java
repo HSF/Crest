@@ -5,7 +5,6 @@ import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.GlobalTagService;
 import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.api.AdminApiService;
-import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.GlobalTagDto;
 import ma.glasnost.orika.MapperFacade;
@@ -67,8 +66,8 @@ public class AdminApiServiceImpl extends AdminApiService {
 			return Response.ok().build();
 		} catch (final RuntimeException e) {
 			final String msg = "Error removing globaltag resource using " + name;
-			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+			log.error("removeGlobalTag service exception : {}", msg);
+			return ResponseFormatHelper.internalError("removeGlobalTag error: " + msg);
 		}
     }
     
@@ -84,8 +83,8 @@ public class AdminApiServiceImpl extends AdminApiService {
 			return Response.ok().build();
 		} catch (final RuntimeException e) {
 			final String msg = "Error removing tag resource using " + name + " : "+e.getMessage();
-			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+			log.error("removeTag service exception : {}", msg);
+			return ResponseFormatHelper.internalError("removeTag error: " + msg);
 		}
     }
     
@@ -127,15 +126,14 @@ public class AdminApiServiceImpl extends AdminApiService {
 			final GlobalTag saved = globalTagService.updateGlobalTag(entity);
 			final GlobalTagDto dto = mapper.map(saved, GlobalTagDto.class);
 			return Response.ok().entity(dto).build();
-			
 		} catch (final NotExistsPojoException e) {
 			final String msg = "Error updating GlobalTag resource using "+body;
-			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+			log.warn("updateGlobalTag cannot update resource {}", msg);
+			return ResponseFormatHelper.notFoundPojo("updateGlobalTag error: " + msg);
 		} catch (final RuntimeException e) {
 			final String msg = "Error updating GlobalTag resource using "+body;
-			final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+			log.error("updateGlobalTag service exception : {}", msg);
+			return ResponseFormatHelper.internalError("updateGlobalTag error: " + msg);
 		}
     }
 }

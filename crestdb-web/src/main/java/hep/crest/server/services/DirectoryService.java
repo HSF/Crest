@@ -3,20 +3,6 @@
  */
 package hep.crest.server.services;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.Future;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.stereotype.Service;
-
 import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
@@ -31,6 +17,19 @@ import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
 import hep.crest.swagger.model.TagDto;
 import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * An implementation for filesystem based storage.
@@ -185,11 +184,11 @@ public class DirectoryService {
             return new AsyncResult<>(
                     "Dump a list of " + dtolist.size() + " iovs into file system...");
         }
-        catch (final CdbServiceException e) {
-            log.error("Cannot dump tag {} in path {} : {}", tagname, path, e);
-        }
         catch (final NotExistsPojoException e) {
-            log.error("Cannot find payload  : {}", e);
+            log.error("Cannot find tag or payload  : {}", e);
+        }
+        catch (final CdbServiceException e) {
+            log.error("Server exception, cannot dump tag {} in path {} : {}", tagname, path, e);
         }
         return null;
     }

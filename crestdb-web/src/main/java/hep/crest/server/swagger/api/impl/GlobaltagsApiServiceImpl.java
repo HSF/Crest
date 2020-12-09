@@ -1,22 +1,6 @@
 package hep.crest.server.swagger.api.impl;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Component;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
-
 import hep.crest.data.pojo.GlobalTag;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
@@ -25,7 +9,6 @@ import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.GlobalTagService;
-import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.GlobaltagsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.CrestBaseResponse;
@@ -35,6 +18,19 @@ import hep.crest.swagger.model.GlobalTagSetDto;
 import hep.crest.swagger.model.TagDto;
 import hep.crest.swagger.model.TagSetDto;
 import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Rest endpoint to manage global tags. It is used for creation or search of
@@ -118,16 +114,13 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             // Global tag resource exists already. Send a 303.
             log.warn("createGlobalTag resource exists : {}", e);
             final String msg = "GlobalTag already exists for name : " + body.getName();
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, msg);
-            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
+            return ResponseFormatHelper.alreadyExistsPojo(msg);
         }
         catch (final RuntimeException e) {
             // Error in creation. Send a 500.
             final String message = e.getMessage();
             log.error("Api method createGlobalTag got exception : {}", message);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("createGlobalTag error: " + message);
         }
     }
 
@@ -160,7 +153,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             log.warn("Api method findGlobalTag cannot find resource : {}", name);
             final CrestBaseResponse resp = new GlobalTagSetDto()
                     .format("GlobalTagSetDto").filter(filters).size(0L).datatype("globaltags");
-            return Response.status(Response.Status.NOT_FOUND).entity(resp).build();
+            return ResponseFormatHelper.emptyResultSet(resp);
         }
     }
 
@@ -240,10 +233,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             // Error from server. Send a 500.
             final String message = e.getMessage();
             log.error("listGlobalTags service exception : {}", message);
-            final String error = bundle.getString("log.globaltag.notfound");
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    error + message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("listGlobalTags error: " + message);
         }
     }
 }

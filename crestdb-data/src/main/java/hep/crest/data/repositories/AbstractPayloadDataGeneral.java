@@ -106,6 +106,30 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
         this.serverUploadLocationFolder = serverUploadLocationFolder;
     }
 
+    /**
+     * @param id the String
+     * @return String
+     */
+    @Override
+    public String exists(String id) {
+        log.info("Find payload {} using JDBCTEMPLATE", id);
+        try {
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+            final String tablename = this.tablename();
+
+            final String sql = PayloadRequests.getExistsHashQuery(tablename);
+
+            return jdbcTemplate.queryForObject(sql, new Object[] {id}, (rs, num) -> {
+                final String dbhash = rs.getString("HASH");
+                return dbhash;
+            });
+        }
+        catch (final DataAccessException e) {
+            log.warn("Hash {} does not exists", id);
+        }
+        return null;
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -114,12 +138,14 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
      * Payload)
      */
     @Override
+    @Transactional
     public PayloadDto save(PayloadDto entity) throws CdbServiceException {
         PayloadDto savedentity = null;
         try {
             savedentity = this.saveBlobAsBytes(entity);
+            //savedentity = findMetaInfo(entity.getHash());
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             log.error("Error in save paylod dto : {}", e);
         }
         return savedentity;
@@ -133,12 +159,13 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
      * model.PayloadDto, java.io.InputStream)
      */
     @Override
+    @Transactional
     public PayloadDto save(PayloadDto entity, InputStream is) throws CdbServiceException {
         PayloadDto savedentity = null;
         try {
             savedentity = this.saveBlobAsStream(entity, is);
         }
-        catch (final CdbServiceException e) {
+        catch (final RuntimeException e) {
             log.error("Exception during payload dto insertion: {}", e);
         }
         return savedentity;
@@ -272,8 +299,6 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
                     entity.getHash(), entity.getObjectType(), entity.getVersion(),
                     entity.getInsertionTime());
             ps.execute();
-            log.debug("Search for stored payload as a verification, use hash {} ",
-                    entity.getHash());
         }
         catch (final SQLException e) {
             log.error("Sql exception when storing payload with sql {} : {}", sql, e);
@@ -308,6 +333,7 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
      *             If an Exception occurred
      * @return PayloadDto
      */
+    @Transactional
     protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
         final String tablename = this.tablename();
 
@@ -315,7 +341,8 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
 
         log.info("Insert Payload with hash {} using saveBlobAsStream", entity.getHash());
         execute(is, sql, entity);
-        return findMetaInfo(entity.getHash());
+        //return findMetaInfo(entity.getHash());
+        return entity;
     }
 
     /**
@@ -325,6 +352,7 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
      *             If an Exception occurred
      * @return PayloadDto
      */
+    @Transactional
     protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
 
         final String tablename = this.tablename();
@@ -332,7 +360,7 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
 
         log.info("Insert Payload with hash {} using saveBlobAsBytes", entity.getHash());
         execute(null, sql, entity);
-        return findMetaInfo(entity.getHash());
+        return entity;
     }
 
 }
