@@ -72,14 +72,6 @@ configurations.compile.each {
 allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
-<<<<<<< HEAD
-    group = 'hep.crest'
-    version = '2.0-SNAPSHOT'
-    repositories {
-        mavenCentral()
-    }
-
-=======
     apply plugin: 'java'
 
     group = 'hep.crest'
@@ -88,7 +80,6 @@ allprojects {
         mavenCentral()
     }
 
->>>>>>> e5f7d1a... Clean up gradle to migrate to 6.7
     jacoco {
         toolVersion = '0.8.4'
         reportsDir = file("$buildDir/reports/jacoco")
@@ -116,23 +107,14 @@ subprojects {
     targetCompatibility = 11
     ext {
         swagger_annotations_version = "1.5.13"
-<<<<<<< HEAD
-        jackson_version = "2.9.4"
-        springboot_version = "2.0.1.RELEASE"
-=======
         jackson_version = "2.10.5"
         springboot_version = "2.3.1.RELEASE"
->>>>>>> e5f7d1a... Clean up gradle to migrate to 6.7
         junit_version = "4.12"
         oltu_version = "1.0.1"
         orika_version = "1.5.1"
         jersey2_version = "2.22.2"
         swagger_core_version = "1.5.13"
-<<<<<<< HEAD
-        querydsl_version = "4.2.1"
-=======
         querydsl_version = "4.4.0"
->>>>>>> e5f7d1a... Clean up gradle to migrate to 6.7
         server = "undertow"
     }
 
@@ -142,19 +124,11 @@ subprojects {
 
     repositories {
         mavenLocal()
-<<<<<<< HEAD
-
-        maven { url "http://repo.spring.io/milestone" }
-        maven { url "https://jcenter.bintray.com/" }
-        maven { url "https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo" }
-        maven { url "http://repo.maven.apache.org/maven2" }
-=======
         mavenCentral()
         maven { url "https://repo.spring.io/milestone" }
         maven { url "https://jcenter.bintray.com/" }
         maven { url "https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo" }
         maven { url "https://repo.maven.apache.org/maven2" }
->>>>>>> e5f7d1a... Clean up gradle to migrate to 6.7
     }
 
     configurations {
@@ -163,42 +137,6 @@ subprojects {
 
     dependencies {
         // JAX-B dependencies for JDK 9+
-<<<<<<< HEAD
-        compile "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
-        compile "org.glassfish.jaxb:jaxb-runtime:2.3.2"
-        // javassist for JDK 9+
-        compile "org.javassist:javassist:3.23.1-GA"
-        // swagger
-        compile "io.swagger:swagger-annotations:$swagger_annotations_version"
-        compile "io.swagger:swagger-core:$swagger_core_version"
-        compile "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
-        compile group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
-
-
-        compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
-        compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
-        compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
-        compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
-        compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
-
-        // DATABASES
-        //compile group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
-        compile files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")
-// https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
-        compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
-        compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
-        compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
-        compile("com.h2database:h2")
-        compile("commons-io:commons-io:2.6")
-        compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
-
-    }
-
-    task wrapper(type: Wrapper) {
-        gradleVersion = '6.4' //version required
-    }
-
-=======
         implementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
         implementation "org.glassfish.jaxb:jaxb-runtime:2.3.2"
         // javassist for JDK 9+
@@ -229,12 +167,10 @@ subprojects {
 
     }
 
-
     task wrapper(type: Wrapper) {
         gradleVersion = '6.4' //version required
     }
 
->>>>>>> e5f7d1a... Clean up gradle to migrate to 6.7
     // Clean files and directories used for unit testing
     task purgedb(type: Delete) {
         delete fileTree('/tmp') {
