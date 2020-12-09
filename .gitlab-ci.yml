@@ -67,7 +67,7 @@ stages:
 
 package_svom_application:
   stage: package_application
-  image: java:8
+  image: java:11
   script:
    - ./gradlew -g /cache/.gradle clean assemble -PwarName=crest.war
   allow_failure: false
@@ -152,7 +152,7 @@ package_cern_application:
       - master
     variables:
       - $REMOTE_NAME == "cern"
-  image: java:8
+  image: java:11
   script:
    - ./gradlew -g /cache/.gradle clean assemble -PwarName=crest.war
   allow_failure: false

@@ -6,3 +6,4 @@ temp
 web-ui/tmp-ui
 tmp
 crestdb-client/python/cli/crest.io.egg-info
+.idea
