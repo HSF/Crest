@@ -66,9 +66,7 @@ stages:
 
 package_svom_application:
   stage: package_application
-  tags:
-    - dc0
-  image: java:8
+  image: java:11
   script:
    - ./gradlew -g /cache/.gradle clean assemble -PwarName=crest.war
   allow_failure: false
@@ -84,7 +82,7 @@ build_svom_docker_image:
   environment: dc0
   tags:
     - dc0-shell
-  image: java:8
+  image: java:11
   script:
     - docker info
     - docker build --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
@@ -118,7 +116,7 @@ sonar_application:
   stage: sonar_application
   tags:
     - dc0
-  image: java:8
+  image: java:11
   script:
    - ./gradlew sonarqube -Dsonar.projectKey=crestdb -Dsonar.host.url=http://svom1.lal.in2p3.fr:20090 -Dsonar.login=f50918d8b780181f947ae83b42e78983ffde4bf3
   allow_failure: false
@@ -134,7 +132,7 @@ package_cern_application:
       - master
     variables:
       - $REMOTE_NAME == "cern"
-  image: java:8
+  image: java:11
   script:
    - ./gradlew clean assemble -PwarName=crest.war
   allow_failure: false
