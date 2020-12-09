@@ -148,7 +148,7 @@ class CrestCli(object):
             if 'type' in args:
                 cmd = args['type']
             log.info(f'Creating object for type {cmd}')
-            if 'tag' in args and cmd in ['tags', 'maps']:
+            if 'tag' in args and cmd in ['tags', 'maps', 'iovs']:
                 tname = args['tag']
             if 'globaltag' in args and cmd in ['globaltags', 'maps']:
                 gtname = args['globaltag']
@@ -171,6 +171,16 @@ class CrestCli(object):
                     ''')
                     return
                 out = self.cm.create_tags(name=tname, mode=mode, **pdic)
+            elif cmd == 'iovs':
+                log.info(f'Creating iov for tag {tname} and args {pdic}')
+                if len(pdic.items()) == 0:
+                    print(f'Missing information; provide the hash and the since !')
+                    print(f'''Example params:
+                    since=0,
+                    hash=somehash
+                    ''')
+                    return
+                out = self.cm.create_iovs(name=tname, since=pdic['since'], phash=pdic['hash'])
             elif cmd == 'globaltags':
                 log.info(f'Creating globaltag {tname} and args {pdic}')
                 if 'update' == mode:

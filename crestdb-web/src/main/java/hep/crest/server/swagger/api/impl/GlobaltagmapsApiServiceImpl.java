@@ -5,7 +5,6 @@ import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.server.services.GlobalTagMapService;
-import hep.crest.server.swagger.api.ApiResponseMessage;
 import hep.crest.server.swagger.api.GlobaltagmapsApiService;
 import hep.crest.server.swagger.api.NotFoundException;
 import hep.crest.swagger.model.CrestBaseResponse;
@@ -23,7 +22,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-
 import java.util.List;
 
 /**
@@ -74,29 +72,24 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
             GlobalTagMap entity = mapper.map(body, GlobalTagMap.class);
             final GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
             GlobalTagMapDto dto = mapper.map(saved, GlobalTagMapDto.class);
-
             return Response.created(info.getRequestUri()).entity(dto).build();
+        }
+        catch (NotExistsPojoException e) {
+            // Not found. Send a 404.
+            log.warn("Api method createGlobalTagMap cannot find resource : {}", body);
+            return ResponseFormatHelper.badRequest("createGlobalTagMap error: " + e.getMessage());
+        }
+        catch (AlreadyExistsPojoException e) {
+            // See other. Send a 303.
+            log.warn("createGlobalTagMap resource exists : {}", e.getMessage());
+            final String msg = "GlobalTagMap already exists : " + body;
+            return ResponseFormatHelper.alreadyExistsPojo("createGlobalTagMap error: " + msg);
         }
         catch (final RuntimeException e) {
             // Error in creation. Send a 500.
             final String message = e.getMessage();
             log.error("Api method createGlobalTagMap got exception : {}", message);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
-        }
-        catch (NotExistsPojoException e) {
-            // Not found. Send a 404.
-            log.warn("Api method createGlobalTagMap cannot find resource : {}", body);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO,
-                    "Cannot find GlobalTag or Tag to create the mapping");
-            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
-        }
-        catch (AlreadyExistsPojoException e) {
-            // See other. Send a 303.
-            log.warn("createGlobalTagMap resource exists : {}", e);
-            final String msg = "GlobalTagMap already exists : " + body;
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.INFO, msg);
-            return Response.status(Response.Status.SEE_OTHER).entity(resp).build();
+            return ResponseFormatHelper.internalError("createGlobalTagMap error: " + message);
         }
     }
 
@@ -141,9 +134,8 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
         catch (final RuntimeException e) {
             // Error in finding mappings. Send a 500.
             final String message = e.getMessage();
-            log.error("Internal error searching maps : {}", message);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            log.error("Api method findGlobalTagMap got exception : {}", message);
+            return ResponseFormatHelper.internalError("findGlobalTagMap error: " + message);
         }
     }
 
@@ -177,9 +169,8 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
         catch (final RuntimeException e) {
             // Error in finding mappings. Send a 500.
             final String message = e.getMessage();
-            log.error("Internal error searching maps : {}", message);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            log.error("Api method deleteGlobalTagMap got exception : {}", message);
+            return ResponseFormatHelper.internalError("deleteGlobalTagMap error: " + message);
         }
     }
 

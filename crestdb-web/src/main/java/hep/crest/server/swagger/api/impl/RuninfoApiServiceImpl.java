@@ -134,8 +134,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method listRunLumiInfo got exception : {}", message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, message)).build();
+            return ResponseFormatHelper.internalError("listRunInfo error: " + message);
         }
     }
 
@@ -201,9 +200,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("findRunLumiInfo got Exception : {}", message);
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                    message);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            return ResponseFormatHelper.internalError("findRunLumiInfo error: " + message);
         }
     }
 

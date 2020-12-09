@@ -200,7 +200,7 @@ public class TestCrestServices {
             final GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
             assertThat(saved).isNotNull();
         }
-        catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
+        catch (RuntimeException e) {
             log.info("Exception : {}", e);
         }
 
@@ -217,7 +217,7 @@ public class TestCrestServices {
             final GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
             final GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
         }
-        catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
+        catch (RuntimeException e) {
             log.info("Exception : {}", e);
         }
         // Create a mapping wih an existing MAPID
@@ -232,7 +232,7 @@ public class TestCrestServices {
             final GlobalTagMap entity = DataGenerator.generateMapping(gt, tag, mapid);
             final GlobalTagMap saved = globaltagmapService.insertGlobalTagMap(entity);
         }
-        catch (RuntimeException | AlreadyExistsPojoException | NotExistsPojoException e) {
+        catch (RuntimeException e) {
             log.info("Exception : {}", e);
         }
 

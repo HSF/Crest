@@ -15,6 +15,7 @@ import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -47,6 +48,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TestCrestPayloadSqlite {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Value("${spring.jersey.application-path}")
+    private String apiname;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -84,12 +88,12 @@ public class TestCrestPayloadSqlite {
                 "some info", "test");
         log.info("Store payload : {}", dto);
         final ResponseEntity<PayloadDto> response = this.testRestTemplate
-                .postForEntity("/crestapi/payloads", dto, PayloadDto.class);
+                .postForEntity(apiname + "/payloads", dto, PayloadDto.class);
         log.info("Received response: " + response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         final ResponseEntity<String> responsedup = this.testRestTemplate
-                .postForEntity("/crestapi/payloads", dto, String.class);
+                .postForEntity(apiname + "/payloads", dto, String.class);
         log.info("Received response on dup: " + responsedup);
         assertThat(responsedup.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 
@@ -98,7 +102,7 @@ public class TestCrestPayloadSqlite {
         final HttpEntity<?> entity = new HttpEntity<>(headers);
 
         final ResponseEntity<String> resp1 = this.testRestTemplate.exchange(
-                "/crestapi/payloads/" + dto.getHash(), HttpMethod.GET, entity, String.class);
+                apiname + "/payloads/" + dto.getHash(), HttpMethod.GET, entity, String.class);
         {
             log.info("Retrieved payload {} ", dto.getHash());
             final String responseBody = resp1.getBody();
@@ -111,7 +115,7 @@ public class TestCrestPayloadSqlite {
 
         // Now do not set the header and retrieve the binary data only
         final ResponseEntity<String> resp2 = this.testRestTemplate.exchange(
-                "/crestapi/payloads/" + dto.getHash(), HttpMethod.GET, null, String.class);
+                apiname + "/payloads/" + dto.getHash(), HttpMethod.GET, null, String.class);
         {
             log.info("Retrieved binary payload {} ", dto.getHash());
             assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -121,7 +125,7 @@ public class TestCrestPayloadSqlite {
                 "some info", "test");
         log.info("Store payload : {}", dto10);
         final ResponseEntity<PayloadDto> response10 = this.testRestTemplate
-                .postForEntity("/crestapi/payloads", dto10, PayloadDto.class);
+                .postForEntity(apiname + "/payloads", dto10, PayloadDto.class);
         log.info("Received response: " + response10);
         assertThat(response10.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         
@@ -140,14 +144,14 @@ public class TestCrestPayloadSqlite {
         final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
                 map, headers1);
         final ResponseEntity<String> resp3 = this.testRestTemplate
-                .postForEntity("/crestapi/payloads/upload", request, String.class);
+                .postForEntity(apiname + "/payloads/upload", request, String.class);
 
         log.info("Upload request gave response: {}", resp3);
         assertThat(resp3.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // Now retrieve metadata only
         final ResponseEntity<String> resp4 = this.testRestTemplate.exchange(
-                "/crestapi/payloads/" + dto1.getHash() + "/meta", HttpMethod.GET, null,
+                apiname + "/payloads/" + dto1.getHash() + "/meta", HttpMethod.GET, null,
                 String.class);
         {
             log.info("Retrieved meta payload {} ", dto1.getHash());
@@ -163,7 +167,7 @@ public class TestCrestPayloadSqlite {
         dto.hash(null);
         log.info("Store bad payload : {}", dto);
         final ResponseEntity<String> response = this.testRestTemplate
-                .postForEntity("/crestapi/payloads", dto, String.class);
+                .postForEntity(apiname + "/payloads", dto, String.class);
         log.info("Received response: " + response);
         assertThat(response.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
         
@@ -176,7 +180,7 @@ public class TestCrestPayloadSqlite {
         final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
                 map, headers1);
         final ResponseEntity<String> resp2 = this.testRestTemplate
-                .postForEntity("/crestapi/payloads/upload", request, String.class);
+                .postForEntity(apiname + "/payloads/upload", request, String.class);
         assertThat(resp2.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
 
         final String hash = "somenotexistinghash";
@@ -185,14 +189,14 @@ public class TestCrestPayloadSqlite {
         headers.add("X-Crest-PayloadFormat", "JSON");
         final HttpEntity<?> entity = new HttpEntity<>(headers);
         final ResponseEntity<String> resp3 = this.testRestTemplate.exchange(
-                "/crestapi/payloads/" + hash, HttpMethod.GET, entity, String.class);
+                apiname + "/payloads/" + hash, HttpMethod.GET, entity, String.class);
         log.info("Received response: " + resp3);
         assertThat(resp3.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
 
         log.info("Get payload meta with not existing hash: {}", hash);
         
         final ResponseEntity<String> resp4 = this.testRestTemplate.exchange(
-                "/crestapi/payloads/" + hash+"/meta", HttpMethod.GET, entity, String.class);
+                apiname + "/payloads/" + hash+"/meta", HttpMethod.GET, entity, String.class);
         log.info("Received response: " + resp4);
         assertThat(resp4.getStatusCode()).isGreaterThanOrEqualTo(HttpStatus.OK);
 
@@ -203,8 +207,8 @@ public class TestCrestPayloadSqlite {
     public void testA_payloadIovApi() throws Exception {
         final TagDto dto = DataGenerator.generateTagDto("SB-TAG-PYLD-01", "run");
         log.info("Store tag for payload request: {}", dto);
-        final ResponseEntity<String> response = this.testRestTemplate
-                .postForEntity("/crestapi/tags", dto, String.class);
+        final ResponseEntity<TagDto> response = this.testRestTemplate
+                .postForEntity(apiname + "/tags", dto, TagDto.class);
         log.info("Received response: " + response);
         assertThat(response.getStatusCode()).isLessThanOrEqualTo(HttpStatus.SEE_OTHER);
 
@@ -221,7 +225,7 @@ public class TestCrestPayloadSqlite {
         final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
                 map, headers);
         final ResponseEntity<String> resp1 = this.testRestTemplate
-                .postForEntity("/crestapi/payloads/store", request, String.class);
+                .postForEntity(apiname + "/payloads/store", request, String.class);
 
         log.info("Upload request gave response: {}", resp1);
         assertThat(resp1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -247,7 +251,7 @@ public class TestCrestPayloadSqlite {
         final HttpEntity<MultiValueMap<String, Object>> request1 = new HttpEntity<MultiValueMap<String, Object>>(
                 map1, headers);
         final ResponseEntity<String> resp2 = this.testRestTemplate
-                .postForEntity("/crestapi/payloads/uploadbatch", request1, String.class);
+                .postForEntity(apiname + "/payloads/uploadbatch", request1, String.class);
         assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // Upload batch using payload inserted in iovdto instead of payload hash.
@@ -265,7 +269,7 @@ public class TestCrestPayloadSqlite {
         final HttpEntity<MultiValueMap<String, Object>> request2 = new HttpEntity<MultiValueMap<String, Object>>(
                 map2, headers);
         final ResponseEntity<String> resp3 = this.testRestTemplate
-                .postForEntity("/crestapi/payloads/storebatch", request2, String.class);
+                .postForEntity(apiname + "/payloads/storebatch", request2, String.class);
         assertThat(resp3.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         
     }

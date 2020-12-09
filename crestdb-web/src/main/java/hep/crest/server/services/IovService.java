@@ -5,6 +5,7 @@ package hep.crest.server.services;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.IovGroupsCustom;
@@ -14,6 +15,7 @@ import hep.crest.data.repositories.TagRepository;
 import hep.crest.data.repositories.querydsl.IFilteringCriteria;
 import hep.crest.server.annotations.ProfileAndLog;
 import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.exceptions.AlreadyExistsIovException;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.CrestBaseResponse;
 import hep.crest.swagger.model.IovDto;
@@ -142,7 +144,7 @@ public class IovService {
      * @return List<BigDecimal>
      */
     public List<BigDecimal> selectGroupsByTagNameAndSnapshotTime(String tagname, Date snapshot,
-            Long groupsize) {
+                                                                 Long groupsize) {
         log.debug("Search for iovs groups by tag name {} and snapshot time {}", tagname, snapshot);
         List<BigDecimal> minsincelist = null;
         if (snapshot == null) {
@@ -168,7 +170,7 @@ public class IovService {
      */
     @ProfileAndLog
     public CrestBaseResponse selectGroupDtoByTagNameAndSnapshotTime(String tagname, Date snapshot,
-            Long groupsize) {
+                                                                    Long groupsize) {
         final List<BigDecimal> minsincelist = selectGroupsByTagNameAndSnapshotTime(tagname,
                 snapshot, groupsize);
         final List<IovDto> iovlist = minsincelist.stream().map(s -> new IovDto().since(s))
@@ -190,7 +192,7 @@ public class IovService {
      * @return Iterable<Iov>
      */
     public Iterable<Iov> selectIovsByTagRangeSnapshot(String tagname, BigDecimal since,
-            BigDecimal until, Date snapshot, String flag) {
+                                                      BigDecimal until, Date snapshot, String flag) {
         log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
                 tagname, since, until, snapshot);
         Iterable<Iov> entities = null;
@@ -225,7 +227,7 @@ public class IovService {
      * @return List<IovPayloadDto>
      */
     public List<IovPayloadDto> selectIovPayloadsByTagRangeSnapshot(String tagname, BigDecimal since,
-            BigDecimal until, Date snapshot) {
+                                                                   BigDecimal until, Date snapshot) {
         log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
                 tagname, since, until, snapshot);
         List<IovPayloadDto> entities = null;
@@ -313,20 +315,25 @@ public class IovService {
      *             If an Exception occurred
      * @throws DataIntegrityViolationException If an sql exception occurred.
      */
-    @Transactional
-    public Iov insertIov(Iov entity) throws NotExistsPojoException, DataIntegrityViolationException {
+    @Transactional(rollbackOn = {CdbServiceException.class})
+    public Iov insertIov(Iov entity) throws CdbServiceException, DataIntegrityViolationException {
         log.debug("Create iov from {}", entity);
         final String tagname = entity.getTag().getName();
         // The IOV is not yet stored. Verify that the tag exists before inserting it.
         final Optional<Tag> tg = tagRepository.findById(tagname);
         if (tg.isPresent()) {
             final Tag t = tg.get();
-            t.setModificationTime(null);
+            t.setModificationTime(new Date());
+            // Check if iov exists
+            if (existsIov(t.getName(), entity.getId().getSince(), entity.getPayloadHash())) {
+                log.warn("Iov already exists : {}", entity);
+                throw new AlreadyExistsIovException(entity.toString());
+            }
             // Update the tag modification time
             final Tag updtag = tagRepository.save(t);
             entity.setTag(updtag);
             entity.getId().setTagName(updtag.getName());
-            log.debug("Storing iov entity {}", entity);
+            log.debug("Storing iov entity {} in tag {}", entity, updtag);
             final Iov saved = iovRepository.save(entity);
             log.debug("Saved entity: {}", saved);
             return saved;
