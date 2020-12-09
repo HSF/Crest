@@ -1,0 +1,14 @@
+[Unit]
+Description=COOLR REST application (SpringBoot v2.3.0)
+After=syslog.target
+
+[Service]
+User=coolr
+ExecStart=/usr/local/share/coolr/entrypoint.sh
+SuccessExitStatus=143
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target
+

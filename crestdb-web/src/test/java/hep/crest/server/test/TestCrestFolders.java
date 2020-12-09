@@ -1,7 +1,9 @@
 package hep.crest.server.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.swagger.model.FolderDto;
+import hep.crest.swagger.model.FolderSetDto;
+import hep.crest.testutils.DataGenerator;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,18 +19,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import hep.crest.swagger.model.FolderDto;
-import hep.crest.swagger.model.FolderSetDto;
-import hep.crest.testutils.DataGenerator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ActiveProfiles("test")
+@ContextConfiguration
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestCrestFolders {
     
     private final Logger log = LoggerFactory.getLogger(this.getClass());
