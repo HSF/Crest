@@ -55,6 +55,12 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
     private PageRequestHelper prh;
 
     /**
+     * Response helper.
+     */
+    @Autowired
+    private ResponseFormatHelper rfh;
+
+    /**
      * Helper.
      */
     @Autowired
@@ -114,13 +120,13 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             // Global tag resource exists already. Send a 303.
             log.warn("createGlobalTag resource exists : {}", e);
             final String msg = "GlobalTag already exists for name : " + body.getName();
-            return ResponseFormatHelper.alreadyExistsPojo(msg);
+            return rfh.alreadyExistsPojo(msg);
         }
         catch (final RuntimeException e) {
             // Error in creation. Send a 500.
             final String message = e.getMessage();
             log.error("Api method createGlobalTag got exception : {}", message);
-            return ResponseFormatHelper.internalError("createGlobalTag error: " + message);
+            return rfh.internalError("createGlobalTag error: " + message);
         }
     }
 
@@ -153,7 +159,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             log.warn("Api method findGlobalTag cannot find resource : {}", name);
             final CrestBaseResponse resp = new GlobalTagSetDto()
                     .format("GlobalTagSetDto").filter(filters).size(0L).datatype("globaltags");
-            return ResponseFormatHelper.emptyResultSet(resp);
+            return rfh.emptyResultSet(resp);
         }
     }
 
@@ -233,7 +239,7 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
             // Error from server. Send a 500.
             final String message = e.getMessage();
             log.error("listGlobalTags service exception : {}", message);
-            return ResponseFormatHelper.internalError("listGlobalTags error: " + message);
+            return rfh.internalError("listGlobalTags error: " + message);
         }
     }
 }

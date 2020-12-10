@@ -193,8 +193,8 @@ public class IovService {
      */
     public Iterable<Iov> selectIovsByTagRangeSnapshot(String tagname, BigDecimal since,
                                                       BigDecimal until, Date snapshot, String flag) {
-        log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {}",
-                tagname, since, until, snapshot);
+        log.debug("Search for iovs by tag name {}  and range time {} -> {} using snapshot {} and flag {}",
+                tagname, since, until, snapshot, flag);
         Iterable<Iov> entities = null;
         if (snapshot == null && "groups".equals(flag)) {
             entities = iovRepository.selectLatestByGroup(tagname, since, until);

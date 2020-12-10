@@ -74,6 +74,13 @@ public class TagsApiServiceImpl extends TagsApiService {
     @Autowired
     @Qualifier("mapper")
     private MapperFacade mapper;
+
+    /**
+     * Response helper.
+     */
+    @Autowired
+    private ResponseFormatHelper rfh;
+
     /**
      * Resource bundle.
      */
@@ -101,13 +108,13 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final AlreadyExistsPojoException e) {
             // Exception, resource exists, send 303.
             log.error("Cannot create tag {}, name already exists...", body);
-            return ResponseFormatHelper.alreadyExistsPojo("Cannot create tag: " + e.getMessage());
+            return rfh.alreadyExistsPojo("Cannot create tag: " + e.getMessage());
         }
         catch (final RuntimeException e) {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method createTag got exception {}", message);
-            return ResponseFormatHelper.internalError("createTag error: " + message);
+            return rfh.internalError("createTag error: " + message);
         }
     }
 
@@ -159,13 +166,13 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final NotExistsPojoException e) {
             // Exception, tag not found, send 404.
             final String message = "No tag resource has been found for " + name;
-            return ResponseFormatHelper.notFoundPojo("Cannot find tag: " + name);
+            return rfh.notFoundPojo("Cannot find tag: " + name);
         }
         catch (final RuntimeException e) {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method updateTag got exception {}", message);
-            return ResponseFormatHelper.internalError("updateTag error: " + message);
+            return rfh.internalError("updateTag error: " + message);
         }
     }
 
@@ -194,7 +201,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             log.warn("Api method findGlobalTag cannot find resource : {}", name);
             final CrestBaseResponse resp = new TagSetDto()
                     .format("TagSetDto").filter(filters).size(0L).datatype("tags");
-            return ResponseFormatHelper.emptyResultSet(resp);
+            return rfh.emptyResultSet(resp);
         }
     }
 
@@ -238,7 +245,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             // Error from server. Send a 500.
             final String message = e.getMessage();
             log.error("listTags service exception : {}", message);
-            return ResponseFormatHelper.internalError("listTags error: " + message);
+            return rfh.internalError("listTags error: " + message);
         }
     }
 }
