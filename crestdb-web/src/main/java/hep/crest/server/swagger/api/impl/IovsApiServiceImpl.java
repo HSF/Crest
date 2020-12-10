@@ -108,6 +108,12 @@ public class IovsApiServiceImpl extends IovsApiService {
     @Qualifier("mapper")
     private MapperFacade mapper;
 
+    /**
+     * Response helper.
+     */
+    @Autowired
+    private ResponseFormatHelper rfh;
+
     /*
      * (non-Javadoc)
      *
@@ -133,18 +139,18 @@ public class IovsApiServiceImpl extends IovsApiService {
         catch (final NotExistsPojoException e) {
             // Exception. Send a 404.
             log.error("Exception in creating iov, tag resource does not exists : {}", e.getMessage());
-            return ResponseFormatHelper.notFoundPojo("Tag not found: " + body.getTagName());
+            return rfh.notFoundPojo("Tag not found: " + body.getTagName());
         }
         catch (final AlreadyExistsIovException e) {
             // Exception. Send a 303.
             log.error("Exception in creating iov, resource already exists : {}", e.getMessage());
-            return ResponseFormatHelper.alreadyExistsPojo("Iov exists: " + e.getMessage());
+            return rfh.alreadyExistsPojo("Iov exists: " + e.getMessage());
         }
         catch (final RuntimeException e) {
             // Exception. Send a 500.
             final String message = e.getMessage();
             log.error("Api method createIov got exception creating resource {}: {}", body, message);
-            return ResponseFormatHelper.internalError("Iov creation error: " + message);
+            return rfh.internalError("Iov creation error: " + message);
         }
     }
 
@@ -211,13 +217,13 @@ public class IovsApiServiceImpl extends IovsApiService {
         catch (final NotExistsPojoException e) {
             // Exception. Send a 404.
             log.error("Api method storeBatchIovMultiForm tag not found {}", tagName);
-            return ResponseFormatHelper.notFoundPojo("Tag not found: " + tagName);
+            return rfh.notFoundPojo("Tag not found: " + tagName);
         }
         catch (final RuntimeException e) {
             // Exception. Send a 500.
             final String message = e.getMessage();
             log.error("Api method storeBatchIovMultiForm got exception creating resources: {}", message);
-            return ResponseFormatHelper.internalError("Store Iovs batch error: " + message);
+            return rfh.internalError("Store Iovs batch error: " + message);
         }
     }
 
@@ -244,9 +250,8 @@ public class IovsApiServiceImpl extends IovsApiService {
             if (!by.matches("(.*)tag.ame(.*)")) {
                 // If the tagname is not among the parameter then return a 406.
                 final String message = "Cannot search iovs without a tagname selection.";
-                final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
-                        message);
-                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(resp).build();
+                log.warn("findAllIovs bad request: no tag name selection in {}", by);
+                return rfh.badRequest("findAllIovs bad request: " + message);
             }
             // Create filters
             GenericMap filters = prh.getFilters(prh.createMatcherCriteria(by));
@@ -270,7 +275,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             // Exception. Send a 500.
             final String message = e.getMessage();
             log.error("Api method findAllIovs got exception : {}", message);
-            return ResponseFormatHelper.internalError("findAllIovs error: " + message);
+            return rfh.internalError("findAllIovs error: " + message);
         }
     }
 
@@ -313,7 +318,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             // Exception, send a response with 500.
             final String message = e.getMessage();
             log.error("Api method getSize got exception counting iov for tag {}: {}", tagname, message);
-            return ResponseFormatHelper.internalError("getSize error: " + message);
+            return rfh.internalError("getSize error: " + message);
         }
     }
 
@@ -344,7 +349,7 @@ public class IovsApiServiceImpl extends IovsApiService {
             // Exception, send a 500.
             final String message = e.getMessage();
             log.error("Api method getSizeByTag got exception in summary for tag {}: {}", tagname, message);
-            return ResponseFormatHelper.internalError("getSizeByTag error: " + message);
+            return rfh.internalError("getSizeByTag error: " + message);
         }
     }
 
@@ -394,7 +399,7 @@ public class IovsApiServiceImpl extends IovsApiService {
                 groupsize = groupsize * 1000000000L;
             }
             // Set caching policy depending on snapshot argument
-            // this is filling a mag-age parameter in the header
+            // this is filling a max-age parameter in the header
             final CacheControl cc = cachesvc.getGroupsCacheControl(snapshot);
             // Retrieve all iovs groups
             Date snap = null;
@@ -412,20 +417,20 @@ public class IovsApiServiceImpl extends IovsApiService {
             respdto.datatype("groups").filter(filters);
             respdto.format("IovSetDto");
             // In the response set the cachecontrol flag as well.
-            return Response.ok().entity(respdto).cacheControl(cc).build();
+            return Response.ok().entity(respdto).cacheControl(cc).lastModified(tagentity.getModificationTime()).build();
 
         }
         catch (final NotExistsPojoException e) {
             // The tag was not found.
             log.error("Api method selectGroups tag not found: {}", tagname);
-            return ResponseFormatHelper.notFoundPojo("Tag not found: " + tagname);
+            return rfh.notFoundPojo("Tag not found: " + tagname);
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
             final String msg = "groups for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
             log.error("Api method selectGroups got exception: {}", message);
-            return ResponseFormatHelper.internalError("selectGroups error: " + message);
+            return rfh.internalError("selectGroups error: " + message);
         }
 
     }
@@ -501,19 +506,19 @@ public class IovsApiServiceImpl extends IovsApiService {
             filters.put("until", runtil.toString());
             final CrestBaseResponse respdto = buildEntityResponse(dtolist, filters);
             // Send the cache control in the response.
-            return Response.ok().entity(respdto).cacheControl(cc).build();
+            return Response.ok().entity(respdto).cacheControl(cc).lastModified(tagentity.getModificationTime()).build();
         }
         catch (final NotExistsPojoException e) {
             // The tag was not found.
             log.error("Api method selectIovs tag not found: {}", tagname);
-            return ResponseFormatHelper.notFoundPojo("Tag not found: " + tagname);
+            return rfh.notFoundPojo("Tag not found: " + tagname);
         }
         catch (final RuntimeException e) {
             // Exception. Send a 500.
             final String msg = "iovs for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
             log.error("Api method selectIovs got exception: {}", message);
-            return ResponseFormatHelper.internalError("selectIovs error: " + message);
+            return rfh.internalError("selectIovs error: " + message);
         }
     }
 
@@ -552,14 +557,14 @@ public class IovsApiServiceImpl extends IovsApiService {
         catch (final NotExistsPojoException e) {
             // The tag was not found.
             log.error("Api method selectSnapshot tag not found: {}", tagname);
-            return ResponseFormatHelper.notFoundPojo(tagname);
+            return rfh.notFoundPojo(tagname);
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
             final String msg = "iovs for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
             log.error("Api method selectSnapshot got exception: {}", message);
-            return ResponseFormatHelper.internalError("selectSnapshot error: " + message);
+            return rfh.internalError("selectSnapshot error: " + message);
         }
     }
 
@@ -606,14 +611,14 @@ public class IovsApiServiceImpl extends IovsApiService {
         catch (final NotExistsPojoException e) {
             // Tag does not exists, send a 404.
             log.error("Api method lastIov tag not found: {}", tagname);
-            return ResponseFormatHelper.notFoundPojo("Tag not found: " + tagname);
+            return rfh.notFoundPojo("Tag not found: " + tagname);
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
             final String msg = "iovs for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
             log.error("Api method lastIov got exception: {}", message);
-            return ResponseFormatHelper.internalError("lastIov error: " + message);
+            return rfh.internalError("lastIov error: " + message);
         }
     }
 
@@ -673,14 +678,14 @@ public class IovsApiServiceImpl extends IovsApiService {
         }
         catch (final NotExistsPojoException e) {
             log.error("Api method selectIovPayloads tag not found: {}", tagname);
-            return ResponseFormatHelper.notFoundPojo("Tag not found: " + tagname);
+            return rfh.notFoundPojo("Tag not found: " + tagname);
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
             final String msg = "iovs for " + tagname + ", " + snapshot;
             final String message = msg + " -- " + e.getMessage();
             log.error("Api method selectIovPayloads got exception: {}", message);
-            return ResponseFormatHelper.internalError("selectIovPayloads error: " + message);
+            return rfh.internalError("selectIovPayloads error: " + message);
         }
     }
 

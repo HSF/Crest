@@ -116,6 +116,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     @Qualifier("mapper")
     private MapperFacade mapper;
 
+    /**
+     * Response helper.
+     */
+    @Autowired
+    private ResponseFormatHelper rfh;
 
     /* (non-Javadoc)
      * @see hep.crest.server.swagger.api.PayloadsApiService#createPayload(hep.crest.swagger.model.PayloadDto, javax
@@ -133,13 +138,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         catch (final HashExistsException e) {
             log.error("Duplicated hash found for {}", body);
             final String msg = "Hash duplication error for payload resource " + body.toString();
-            return ResponseFormatHelper.alreadyExistsPojo("Payload hash exists: " + msg);
+            return rfh.alreadyExistsPojo("Payload hash exists: " + msg);
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
             log.error("Error saving PayloadDto {}", body);
             final String msg = "Error creating payload resource using " + body.toString();
-            return ResponseFormatHelper.internalError("createPayload error: " + msg);
+            return rfh.internalError("createPayload error: " + msg);
         }
     }
 
@@ -174,12 +179,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         catch (final HashExistsException e) {
             log.error("Duplicated hash found for {}", payloaddto.getHash());
             final String msg = "Hash duplication error for payload resource " + payloaddto.toString();
-            return ResponseFormatHelper.alreadyExistsPojo("Payload hash exists: " + msg);
+            return rfh.alreadyExistsPojo("Payload hash exists: " + msg);
         }
         catch (final CdbServiceException | NullPointerException e) {
             // Exception, send 500.
             final String msg = "Error creating payload resource : " + e.getCause();
-            return ResponseFormatHelper.internalError("createPayloadMultiForm error: " + msg);
+            return rfh.internalError("createPayloadMultiForm error: " + msg);
         }
     }
 
@@ -275,13 +280,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         catch (final NotExistsPojoException e) {
             // Exception, tag not found, send 404.
             log.warn("getPayload resource not found for hash: {}", hash);
-            return ResponseFormatHelper.notFoundPojo("getPayload error: " + e.getMessage());
+            return rfh.notFoundPojo("getPayload error: " + e.getMessage());
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
             log.error("Payload not found for hash {}", hash);
             final String msg = "Error retrieving payload from hash " + hash;
-            return ResponseFormatHelper.internalError("getPayload error: " + e.getMessage());
+            return rfh.internalError("getPayload error: " + e.getMessage());
         }
     }
 
@@ -361,29 +366,29 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             // Save iov and payload and get the response object in return.
             final HTTPResponse resp = payloadService.saveIovAndPayload(iovDto, pdto, filename);
             resp.action("storePayloadWithIovMultiForm");
-            Response serverResp = ResponseFormatHelper.createApiResponse(resp);
+            Response serverResp = rfh.createApiResponse(resp);
             return serverResp;
         }
         catch (final AlreadyExistsPojoException e) {
             // Exception, send 303.
             final String msg = "Error creating payload resource : " + e.getMessage();
-            return ResponseFormatHelper.alreadyExistsPojo("storePayloadWithIovMultiForm error: " + e.getMessage());
+            return rfh.alreadyExistsPojo("storePayloadWithIovMultiForm error: " + e.getMessage());
         }
         catch (final NotExistsPojoException e) {
             // Exception, send 404.
             final String msg = "Error creating payload resource : " + e.getMessage();
-            return ResponseFormatHelper.notFoundPojo("storePayloadWithIovMultiForm error: " + e.getMessage());
+            return rfh.notFoundPojo("storePayloadWithIovMultiForm error: " + e.getMessage());
         }
         catch (IOException e) {
             log.warn("Bad request: {}", e.getMessage());
-            return ResponseFormatHelper.badRequest("storePayloadWithIovMultiForm bad request: " + e.getMessage());
+            return rfh.badRequest("storePayloadWithIovMultiForm bad request: " + e.getMessage());
         }
         catch (final RuntimeException e) {
             final String msg = "Internal exception creating payload resource using storePayloadWithIovMultiForm for " +
                                "tag " + tag.toString() + " : " + e.getMessage();
             log.error("storePayloadWithIovMultiForm error: {}", msg);
             e.printStackTrace();
-            return ResponseFormatHelper.internalError("storePayloadWithIovMultiForm error: " + msg);
+            return rfh.internalError("storePayloadWithIovMultiForm error: " + msg);
         }
     }
 
@@ -447,18 +452,18 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             // Exception, tag not found, send 404.
             final String message = "Missing tag " + tag;
             log.warn("uploadPayloadBatchWithIovMultiForm error: {}", message);
-            return ResponseFormatHelper.notFoundPojo("uploadPayloadBatchWithIovMultiForm cannot find tag: " + e.getMessage());
+            return rfh.notFoundPojo("uploadPayloadBatchWithIovMultiForm cannot find tag: " + e.getMessage());
         }
         catch (IOException e) {
             log.warn("uploadPayloadBatchWithIovMultiForm bad request: {}", e.getMessage());
-            return ResponseFormatHelper.badRequest("uploadPayloadBatchWithIovMultiForm error: " + e.getMessage());
+            return rfh.badRequest("uploadPayloadBatchWithIovMultiForm error: " + e.getMessage());
         }
         catch (final RuntimeException e) {
             final String msg =
                     "Internal exception creating payload resource using uploadPayloadBatchWithIovMultiForm for " +
                     "tag " + tag.toString() + " : " + e.getMessage();
             log.error("uploadPayloadBatchWithIovMultiForm error: {}", msg);
-            return ResponseFormatHelper.internalError("uploadPayloadBatchWithIovMultiForm error: " + msg);
+            return rfh.internalError("uploadPayloadBatchWithIovMultiForm error: " + msg);
         }
     }
 
@@ -510,14 +515,14 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         }
         catch (IOException e) {
             log.warn("storePayloadBatchWithIovMultiForm bad request: {}", e.getMessage());
-            return ResponseFormatHelper.badRequest("storePayloadBatchWithIovMultiForm error: " + e.getMessage());
+            return rfh.badRequest("storePayloadBatchWithIovMultiForm error: " + e.getMessage());
         }
         catch (final RuntimeException e) {
             final String msg =
                     "Internal exception creating payload resource using storePayloadBatchWithIovMultiForm for " +
                     "tag " + tag.toString() + " : " + e.getMessage();
             log.error("storePayloadBatchWithIovMultiForm error: {}", msg);
-            return ResponseFormatHelper.internalError("storePayloadBatchWithIovMultiForm error: " + msg);
+            return rfh.internalError("storePayloadBatchWithIovMultiForm error: " + msg);
         }
     }
 
@@ -639,12 +644,12 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
             // Exception, tag not found, send 404.
             final String message = "No payload resource has been found for " + hash;
             log.warn("getPayloadMetaInfo error: {}", message);
-            return ResponseFormatHelper.notFoundPojo("getPayloadMetaInfo cannot find payload: " + hash);
+            return rfh.notFoundPojo("getPayloadMetaInfo cannot find payload: " + hash);
         }
         catch (final CdbServiceException e) {
             final String msg = "Error retrieving payload from hash " + hash;
-            final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR, msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
+            log.error("getPayloadMetaInfo error: {}", msg);
+            return rfh.internalError(msg);
         }
     }
 

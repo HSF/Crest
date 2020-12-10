@@ -44,11 +44,19 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
      */
     @Autowired
     private GlobalTagMapService globaltagmapService;
+
     /**
      * Helper.
      */
     @Autowired
     EntityDtoHelper edh;
+
+    /**
+     * Response helper.
+     */
+    @Autowired
+    private ResponseFormatHelper rfh;
+
     /**
      * Mapper.
      */
@@ -77,19 +85,19 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
         catch (NotExistsPojoException e) {
             // Not found. Send a 404.
             log.warn("Api method createGlobalTagMap cannot find resource : {}", body);
-            return ResponseFormatHelper.badRequest("createGlobalTagMap error: " + e.getMessage());
+            return rfh.badRequest("createGlobalTagMap error: " + e.getMessage());
         }
         catch (AlreadyExistsPojoException e) {
             // See other. Send a 303.
             log.warn("createGlobalTagMap resource exists : {}", e.getMessage());
             final String msg = "GlobalTagMap already exists : " + body;
-            return ResponseFormatHelper.alreadyExistsPojo("createGlobalTagMap error: " + msg);
+            return rfh.alreadyExistsPojo("createGlobalTagMap error: " + msg);
         }
         catch (final RuntimeException e) {
             // Error in creation. Send a 500.
             final String message = e.getMessage();
             log.error("Api method createGlobalTagMap got exception : {}", message);
-            return ResponseFormatHelper.internalError("createGlobalTagMap error: " + message);
+            return rfh.internalError("createGlobalTagMap error: " + message);
         }
     }
 
@@ -135,7 +143,7 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
             // Error in finding mappings. Send a 500.
             final String message = e.getMessage();
             log.error("Api method findGlobalTagMap got exception : {}", message);
-            return ResponseFormatHelper.internalError("findGlobalTagMap error: " + message);
+            return rfh.internalError("findGlobalTagMap error: " + message);
         }
     }
 
@@ -170,7 +178,7 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
             // Error in finding mappings. Send a 500.
             final String message = e.getMessage();
             log.error("Api method deleteGlobalTagMap got exception : {}", message);
-            return ResponseFormatHelper.internalError("deleteGlobalTagMap error: " + message);
+            return rfh.internalError("deleteGlobalTagMap error: " + message);
         }
     }
 

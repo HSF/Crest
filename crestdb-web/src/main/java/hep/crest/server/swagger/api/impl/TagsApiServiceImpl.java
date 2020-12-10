@@ -78,6 +78,12 @@ public class TagsApiServiceImpl extends TagsApiService {
     @Qualifier("mapper")
     private MapperFacade mapper;
 
+    /**
+     * Response helper.
+     */
+    @Autowired
+    private ResponseFormatHelper rfh;
+
     /*
      * (non-Javadoc)
      *
@@ -100,13 +106,13 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final AlreadyExistsPojoException e) {
             // Exception, resource exists, send 303.
             log.error("Cannot create tag {}, name already exists...", body);
-            return ResponseFormatHelper.alreadyExistsPojo("Cannot create tag: " + e.getMessage());
+            return rfh.alreadyExistsPojo("Cannot create tag: " + e.getMessage());
         }
         catch (final RuntimeException e) {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method createTag got exception {}", message);
-            return ResponseFormatHelper.internalError("createTag error: " + message);
+            return rfh.internalError("createTag error: " + message);
         }
     }
 
@@ -158,13 +164,13 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final NotExistsPojoException e) {
             // Exception, tag not found, send 404.
             final String message = "No tag resource has been found for " + name;
-            return ResponseFormatHelper.notFoundPojo("Cannot find tag: " + name);
+            return rfh.notFoundPojo("Cannot find tag: " + name);
         }
         catch (final RuntimeException e) {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method updateTag got exception {}", message);
-            return ResponseFormatHelper.internalError("updateTag error: " + message);
+            return rfh.internalError("updateTag error: " + message);
         }
     }
 
@@ -193,7 +199,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             log.warn("Api method findGlobalTag cannot find resource : {}", name);
             final CrestBaseResponse resp = new TagSetDto()
                     .format("TagSetDto").filter(filters).size(0L).datatype("tags");
-            return ResponseFormatHelper.emptyResultSet(resp);
+            return rfh.emptyResultSet(resp);
         }
     }
 
@@ -237,7 +243,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             // Error from server. Send a 500.
             final String message = e.getMessage();
             log.error("listTags service exception : {}", message);
-            return ResponseFormatHelper.internalError("listTags error: " + message);
+            return rfh.internalError("listTags error: " + message);
         }
     }
 
@@ -257,18 +263,18 @@ public class TagsApiServiceImpl extends TagsApiService {
         catch (final AlreadyExistsPojoException e) {
             // Exception, resource exists, send 303.
             log.error("Cannot create tag meta {}, name already exists...", body);
-            return ResponseFormatHelper.alreadyExistsPojo(e.getMessage());
+            return rfh.alreadyExistsPojo(e.getMessage());
         }
         catch (final NotExistsPojoException e) {
             // Exception, tag not found, send 404.
             final String message = "No tag resource has been found for " + name;
-            return ResponseFormatHelper.notFoundPojo(message);
+            return rfh.notFoundPojo(message);
         }
         catch (final RuntimeException e) {
             // Exception, send a 500.
             final String message = e.getMessage();
             log.error("createTagMeta service exception : {}", message);
-            return ResponseFormatHelper.internalError("createTagMeta error: " + e.getMessage());
+            return rfh.internalError("createTagMeta error: " + e.getMessage());
         }
     }
 
@@ -282,7 +288,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             final TagMetaDto dto = tagService.findMeta(name);
             if (dto == null) {
                 log.debug("Entity not found for name " + name);
-                return ResponseFormatHelper.notFoundPojo("findTagMeta error: cannot find meta for tag " + name);
+                return rfh.notFoundPojo("findTagMeta error: cannot find meta for tag " + name);
             }
             final TagMetaSetDto respdto = (TagMetaSetDto) new TagMetaSetDto().addResourcesItem(dto).size(1L)
                     .datatype("tagmetas");
@@ -293,7 +299,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             // Error from server. Send a 500.
             final String message = e.getMessage();
             log.error("findTagMeta service exception : {}", message);
-            return ResponseFormatHelper.internalError("findTagMeta error: " + e.getMessage());
+            return rfh.internalError("findTagMeta error: " + e.getMessage());
         }
     }
 
@@ -310,7 +316,7 @@ public class TagsApiServiceImpl extends TagsApiService {
             if (dto == null) {
                 log.debug("Cannot update meta data on null tag meta entity for {}", name);
                 final String message = "TagMeta " + name + " not found...";
-                return ResponseFormatHelper.notFoundPojo("updateTagMeta error: cannot find meta for tag " + name);
+                return rfh.notFoundPojo("updateTagMeta error: cannot find meta for tag " + name);
             }
             for (final String key : body.keySet()) {
                 if (key == "description") {
@@ -332,7 +338,7 @@ public class TagsApiServiceImpl extends TagsApiService {
         }
         catch (final RuntimeException e) {
             log.error("Api method updateTagMeta error: {}", e.getMessage());
-            return ResponseFormatHelper.internalError("updateTagMeta error: " + e.getMessage());
+            return rfh.internalError("updateTagMeta error: " + e.getMessage());
         }
     }
 }

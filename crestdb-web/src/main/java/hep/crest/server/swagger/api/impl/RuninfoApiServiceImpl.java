@@ -68,6 +68,12 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
     @Autowired
     private RunInfoService runinfoService;
 
+    /**
+     * Response helper.
+     */
+    @Autowired
+    private ResponseFormatHelper rfh;
+
     /*
      * (non-Javadoc)
      *
@@ -134,7 +140,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("Api method listRunLumiInfo got exception : {}", message);
-            return ResponseFormatHelper.internalError("listRunInfo error: " + message);
+            return rfh.internalError("listRunInfo error: " + message);
         }
     }
 
@@ -200,7 +206,7 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
             // Exception, send 500.
             final String message = e.getMessage();
             log.error("findRunLumiInfo got Exception : {}", message);
-            return ResponseFormatHelper.internalError("findRunLumiInfo error: " + message);
+            return rfh.internalError("findRunLumiInfo error: " + message);
         }
     }
 

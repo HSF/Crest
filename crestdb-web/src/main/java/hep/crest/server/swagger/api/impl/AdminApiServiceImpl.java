@@ -55,6 +55,12 @@ public class AdminApiServiceImpl extends AdminApiService {
     @Qualifier("mapper")
     private MapperFacade mapper;
 
+    /**
+     * Response helper.
+     */
+    @Autowired
+    private ResponseFormatHelper rfh;
+
     /*
      * (non-Javadoc)
      * @see hep.crest.server.swagger.api.AdminApiService#removeGlobalTag(java.lang.
@@ -72,7 +78,7 @@ public class AdminApiServiceImpl extends AdminApiService {
         catch (final RuntimeException e) {
             final String msg = "Error removing globaltag resource using " + name;
             log.error("removeGlobalTag service exception : {}", msg);
-            return ResponseFormatHelper.internalError("removeGlobalTag error: " + msg);
+            return rfh.internalError("removeGlobalTag error: " + msg);
         }
     }
 
@@ -103,7 +109,7 @@ public class AdminApiServiceImpl extends AdminApiService {
         catch (final RuntimeException e) {
             final String msg = "Error removing tag resource using " + name + " : " + e.getMessage();
             log.error("removeTag service exception : {}", msg);
-            return ResponseFormatHelper.internalError("removeTag error: " + msg);
+            return rfh.internalError("removeTag error: " + msg);
         }
     }
 
@@ -153,12 +159,12 @@ public class AdminApiServiceImpl extends AdminApiService {
         catch (final NotExistsPojoException e) {
             final String msg = "Error updating GlobalTag resource using " + body;
             log.warn("updateGlobalTag cannot update resource {}", msg);
-            return ResponseFormatHelper.notFoundPojo("updateGlobalTag error: " + msg);
+            return rfh.notFoundPojo("updateGlobalTag error: " + msg);
         }
         catch (final RuntimeException e) {
             final String msg = "Error updating GlobalTag resource using " + body;
             log.error("updateGlobalTag service exception : {}", msg);
-            return ResponseFormatHelper.internalError("updateGlobalTag error: " + msg);
+            return rfh.internalError("updateGlobalTag error: " + msg);
         }
     }
 }
