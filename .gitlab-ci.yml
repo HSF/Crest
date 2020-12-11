@@ -86,7 +86,7 @@ release:
   before_script:
       - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
   script:
-      - docker build --rm --tag=$CONTAINER_IMAGE --file Dockerfile.svom .
+      - docker build --rm --tag=$CONTAINER_IMAGE --file Dockerfile .
       - docker push $CONTAINER_IMAGE
   only:
   - cms-v0
