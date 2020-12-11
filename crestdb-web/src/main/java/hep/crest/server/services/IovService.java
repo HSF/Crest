@@ -208,6 +208,9 @@ public class IovService {
             }
             entities = iovRepository.getRange(tagname, since, until, snapshot);
         }
+        else {
+            log.warn("Unkown header flag {}, sending empty Iov list.", flag);
+        }
         if (entities == null) {
             log.warn("Cannot find iovs for tag {}", tagname);
             return new ArrayList<>();

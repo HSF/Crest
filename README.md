@@ -48,11 +48,16 @@ or
 ```
 git clone https://github.com/HSF/Crest.git
 ```
+or
+```
+git clone https://drf-gitlab.cea.fr/svom/common/crest.git
+git checkout cms-v0
+```
 if you are taking the github version.
-This will create a directory `swagger_crestdb` in the location where you run the git command.
+This will create a directory `crest` in the location where you run the git command.
 
 ## Build instructions
-You need to have java >= 8 installed on your machine. If you have also [gradle](https://gradle.org) (version 5) you can build the project using the following command from the root project directory (`swagger_crestdb`):
+You need to have java >= 8 installed on your machine. If you have also [gradle](https://gradle.org) (version 5) you can build the project using the following command from the root project directory (`crest`):
 ```
 gradle clean build
 ```
@@ -65,7 +70,13 @@ If you want to select a specific JVM when you run gradle you can use a command l
 ```
 gradle clean build -Dorg.gradle.java.home=/path to jvm/11.0/
 ```
+Be careful to checkout the correct branch. 
 
+| ATLAS | CMS | SVOM |
+| ------ | ------ | ------ |
+| master | cms-v0 | cms-v0 |
+| contains tag meta information | standard API | standard API |
+ 
 ## Run the server
 This section is under maintenance.
 
