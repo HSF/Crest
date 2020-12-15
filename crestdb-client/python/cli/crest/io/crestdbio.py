@@ -102,6 +102,18 @@ class CrestDbIo(HttpIo):
         resp = self.get(self.endpoints['tags'], params=criteria, headers=loc_headers)
         return resp.json()
 
+    def search_tag_info(self, tagname=None):
+        """
+        request and export data from the database in json format
+        usage example: search_tag_info(tagname='SVOM')
+        /tags/SVOM/meta”
+        """
+        # prepare request arguments
+        loc_headers = self.build_header()
+        # send request
+        resp = self.get('%s/%s/meta' % (self.endpoints['tags'], tagname), headers=loc_headers)
+        return resp.json()
+
     def search_maps(self, name=None, mode='Trace'):
         """
         request and export data from the database in json format

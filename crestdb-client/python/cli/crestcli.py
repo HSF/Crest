@@ -129,6 +129,15 @@ class CrestCli(object):
                 log.info(f'Search tag backtrace using {tagname}')
                 out = self.cm.search_maps(name=tagname, mode='BackTrace')
                 out['format'] = 'GlobalTagMapSetDto'
+            elif cmd == 'meta':
+                if tagname is None:
+                    print('Cannot list tag meta infos: select a tag name')
+                    return
+                log.info(f'Search tag meta infos using {tagname}')
+                out = self.cm.search_tag_info(tagname=tagname)
+                out['format'] = 'TagMetaSetDto'
+                if fields is None or fields == []:
+                    fields = ['short']
             else:
                 print(f'Command {cmd} is not recognized in this context')
         crest_print(out, format=fields)
@@ -313,7 +322,7 @@ class CrestCli(object):
         crest_print(out, format=fields)
 
     def do_select(self, args):
-        """select [iovs|groups|ranges|size|iovpayloads] -t sometag -s snapshot -c since=1000,until=2000
+        """select [iovs|groups|ranges|size|iovpayloads|meta] -t sometag -s snapshot -c since=1000,until=2000
         Select for iovs in the given tag, since and until can be defined using --cut"""
         out = None
         cdic = {}
@@ -415,7 +424,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Crest browser.', add_help=False)
     parser.add_argument('cmd', nargs='?', choices=['ls', 'select', 'create', 'get', 'monitor', 'update'], default='ls')
     parser.add_argument('--type', choices=['tags', 'iovs', 'payloads', 'groups', 'ranges', 'size',
-                                           'globaltags', 'trace', 'backtrace', 'iovpayloads', 'maps'], default='tags')
+                                           'globaltags', 'trace', 'backtrace', 'iovpayloads', 'maps', 'meta'], default='tags')
     parser.add_argument('--host', default='localhost',
                         help='Host of the Crest service (default: svomtest.svom.fr)')
     parser.add_argument('--api', default='crestapi',

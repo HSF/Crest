@@ -4,19 +4,21 @@ Created on Nov 24, 2017
 @author: formica
 '''
 
-import sys, os
-import logging
-import atexit
-from prettytable import PrettyTable
-from beautifultable import BeautifulTable
+import json
 from collections import defaultdict
+
+from beautifultable import BeautifulTable
 from termcolor import colored
 
 print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__, __name__, str(__package__)))
 
 shortheaddic = {
     'globaltags': ['name', 'release', 'workflow', 'snapshotTime'],
-    'tags': ['name', 'timeType', 'synchronization', 'insertionTime']
+    'tags': ['name', 'timeType', 'synchronization', 'insertionTime'],
+    'metas': ['tagName', 'chansize', 'colsize', 'description']
+}
+metadic = {
+    'metas': ['channel_list', 'node_description', 'payload_spec']
 }
 gtagfieldsdic = {
     'name': '{name:25s}',
@@ -156,6 +158,21 @@ def crest_print(crestdata, format=[]):
             format = shortheaddic['tags']
         # dprint(format, tagfieldsdicheader, tagfieldsdic, dataarr)
         prettyprint(format, tagfieldsdicheader, dataarr)
+    elif (crestdata['format'] == 'TagMetaSetDto'):
+        if 'short' in format:
+            format = shortheaddic['metas']
+            prettyprint(format, metadic, dataarr)
+        elif 'channels' in format:
+            tagInfo = json.loads(dataarr[0]['tagInfo'])
+            chanarr = []
+            for achan in tagInfo['channel_list']:
+                for key, value in achan.items():
+                    dc = {'channelId': key, 'channelName': value}
+                    chanarr.append(dc)
+            nd = 'node_description'
+            ps = 'payload_spec'
+            print(f'Node Desc: {tagInfo[nd]}\nPayload Spec: {tagInfo[ps]}')
+            prettyprint(['channelId', 'channelName'], None, chanarr)
     elif (crestdata['format'] == 'GlobalTagSetDto'):
         # dprint(format, gtagfieldsdicheader, gtagfieldsdic, dataarr)
         if 'short' in format:
