@@ -333,7 +333,6 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
      *             If an Exception occurred
      * @return PayloadDto
      */
-    @Transactional
     protected PayloadDto saveBlobAsStream(PayloadDto entity, InputStream is) throws CdbServiceException {
         final String tablename = this.tablename();
 
@@ -352,7 +351,6 @@ public abstract class AbstractPayloadDataGeneral implements PayloadDataBaseCusto
      *             If an Exception occurred
      * @return PayloadDto
      */
-    @Transactional
     protected PayloadDto saveBlobAsBytes(PayloadDto entity) throws CdbServiceException {
 
         final String tablename = this.tablename();
