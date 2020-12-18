@@ -50,7 +50,7 @@ public class ByteArrayDeserializer extends JsonDeserializer<byte[]> {
     @Override
     public byte[] deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         log.info("Trying to deserialize json parser {}: {}", jp, jp.getText());
-        final String blobstr = new String(jp.getText());
+        final String blobstr = jp.getText();
         log.info("try to decode string {} to byte[]", blobstr);
         return Base64.getDecoder().decode(blobstr);
     }

@@ -75,7 +75,7 @@ public class TestCrestGlobalTag {
                     this.testRestTemplate.delete(url);
                 }
                 assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(ok.getSize()).isGreaterThanOrEqualTo(0);
+                assertThat(ok.getSize()).isNotNegative();
             }
             catch (final JsonParseException e) {
                 e.printStackTrace();
@@ -184,7 +184,7 @@ public class TestCrestGlobalTag {
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
         final ResponseEntity<String> resp1 = this.testRestTemplate.exchange(
@@ -216,7 +216,7 @@ public class TestCrestGlobalTag {
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
         
         final ResponseEntity<String> resp2a = this.testRestTemplate
@@ -229,7 +229,7 @@ public class TestCrestGlobalTag {
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
-            assertThat(ok.getSize()).isEqualTo(0);
+            assertThat(ok.getSize()).isZero();
         }
 
         final ResponseEntity<String> resp2b = this.testRestTemplate
@@ -242,7 +242,7 @@ public class TestCrestGlobalTag {
             GlobalTagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
-            assertThat(ok.getSize()).isGreaterThanOrEqualTo(0);
+            assertThat(ok.getSize()).isNotNegative();
         }
 
 
@@ -273,7 +273,7 @@ public class TestCrestGlobalTag {
             TagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, TagSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
         final ResponseEntity<String> resptags2 = this.testRestTemplate.exchange(
@@ -286,7 +286,7 @@ public class TestCrestGlobalTag {
             TagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, TagSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
     }
@@ -358,7 +358,7 @@ public class TestCrestGlobalTag {
             TagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, TagSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
         final ResponseEntity<String> resptagsall = this.testRestTemplate.exchange(
                 "/crestapi/globaltags/" + dto.getName() + "/tags?record=B-TAGGT&label=pippo",
@@ -396,7 +396,7 @@ public class TestCrestGlobalTag {
             GlobalTagMapSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
         // Retrieve global tag maps from tagname using backtrace
@@ -413,7 +413,7 @@ public class TestCrestGlobalTag {
             GlobalTagMapSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
         // Retrieve deleted global tag maps
@@ -427,7 +427,7 @@ public class TestCrestGlobalTag {
             GlobalTagMapSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, GlobalTagMapSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
         // Retrieve global tag maps for not existing gtag

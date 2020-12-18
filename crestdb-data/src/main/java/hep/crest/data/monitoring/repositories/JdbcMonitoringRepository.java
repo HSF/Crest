@@ -4,7 +4,6 @@
 package hep.crest.data.monitoring.repositories;
 
 import hep.crest.data.config.CrestProperties;
-import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Payload;
 import hep.crest.swagger.model.PayloadTagInfoDto;
@@ -48,7 +47,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
      *java.lang.String)
      */
     @Override
-    public List<PayloadTagInfoDto> selectTagInfo(String tagpattern) throws CdbServiceException {
+    public List<PayloadTagInfoDto> selectTagInfo(String tagpattern) {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         String sql;
         try {
@@ -78,7 +77,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
         if (defaultTablename != null) {
             tablename = defaultTablename + "." + tablename;
         }
-        log.info("Generating payload table name as {}", tablename);
+        log.debug("Generating payload table name as {}", tablename);
         return tablename;
     }
 
@@ -94,7 +93,7 @@ public class JdbcMonitoringRepository implements IMonitoringRepository {
         if (defaultTablename != null) {
             tablename = defaultTablename + "." + tablename;
         }
-        log.info("Generating iov table name as {}", tablename);
+        log.debug("Generating iov table name as {}", tablename);
         return tablename;
     }
 

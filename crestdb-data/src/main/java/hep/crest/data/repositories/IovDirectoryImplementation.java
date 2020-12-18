@@ -68,7 +68,7 @@ public class IovDirectoryImplementation {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public List<IovDto> findByTagName(String tagname) throws CdbServiceException {
+    public List<IovDto> findByTagName(String tagname) {
         //final Path iovfilepath = dirtools.getIovFilePath(tagname);
         final StringBuilder buf = new StringBuilder();
         try (BufferedReader reader = Files.newBufferedReader(dirtools.getIovFilePath(tagname), dirtools.getCharset())) {
@@ -123,7 +123,7 @@ public class IovDirectoryImplementation {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    protected void writeIovFile(String jsonstr, Path iovfilepath) throws CdbServiceException {
+    protected void writeIovFile(String jsonstr, Path iovfilepath) {
         try (BufferedWriter writer = Files.newBufferedWriter(iovfilepath, dirtools.getCharset())) {
             writer.write(jsonstr);
         }

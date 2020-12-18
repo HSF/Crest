@@ -24,10 +24,7 @@ import hep.crest.data.config.DatabasePropertyConfigurator;
 @Entity
 @Table(name = "PAYLOAD", schema = DatabasePropertyConfigurator.SCHEMA_NAME)
 public class Payload {
-    /**
-     * Serializer.
-     */
-//    private static final long serialVersionUID = 5486724556389838782L;
+
     /**
      * The hash.
      */

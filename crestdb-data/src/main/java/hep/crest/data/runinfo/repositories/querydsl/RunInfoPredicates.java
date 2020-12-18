@@ -68,13 +68,13 @@ public final class RunInfoPredicates {
         BooleanExpression pred = null;
 
         if ("<".equals(oper)) {
-            pred = QRunInfo.runInfo.startTime.lt(new Date(new Long(num)));
+            pred = QRunInfo.runInfo.startTime.lt(new Date(Long.valueOf(num)));
         }
         else if (">".equals(oper)) {
-            pred = QRunInfo.runInfo.startTime.gt(new Date(new Long(num)));
+            pred = QRunInfo.runInfo.startTime.gt(new Date(Long.valueOf(num)));
         }
         else if (":".equals(oper)) {
-            pred = QRunInfo.runInfo.startTime.eq(new Date(new Long(num)));
+            pred = QRunInfo.runInfo.startTime.eq(new Date(Long.valueOf(num)));
         }
         return pred;
     }
@@ -91,15 +91,14 @@ public final class RunInfoPredicates {
         BooleanExpression pred = null;
 
         if ("<".equals(oper)) {
-            pred = QRunInfo.runInfo.endTime.lt(new Date(new Long(num)));
+            pred = QRunInfo.runInfo.endTime.lt(new Date(Long.valueOf(num)));
         }
         else if (">".equals(oper)) {
-            pred = QRunInfo.runInfo.endTime.gt(new Date(new Long(num)));
+            pred = QRunInfo.runInfo.endTime.gt(new Date(Long.valueOf(num)));
         }
         else if (":".equals(oper)) {
-            pred = QRunInfo.runInfo.endTime.eq(new Date(new Long(num)));
+            pred = QRunInfo.runInfo.endTime.eq(new Date(Long.valueOf(num)));
         }
         return pred;
     }
-
 }

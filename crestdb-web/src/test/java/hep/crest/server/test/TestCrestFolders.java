@@ -72,7 +72,7 @@ public class TestCrestFolders {
             FolderSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, FolderSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
         
         // Retrieve all folder list
@@ -86,7 +86,7 @@ public class TestCrestFolders {
             FolderSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, FolderSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
     }
 

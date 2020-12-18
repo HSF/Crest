@@ -44,7 +44,7 @@ public class TagService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public boolean exists(String tagname) throws CdbServiceException {
+    public boolean exists(String tagname) {
         try {
             log.debug("Verify existence of Tag->{}", tagname);
             return tagRepository.existsById(tagname);
@@ -70,7 +70,7 @@ public class TagService {
      * @throws NotExistsPojoException
      *             If object was not found
      */
-    public Tag findOne(String id) throws NotExistsPojoException {
+    public Tag findOne(String id) {
         try {
             log.debug("Search for tag by Id...{}", id);
             final Optional<Tag> entity = tagRepository.findById(id);
@@ -126,7 +126,7 @@ public class TagService {
      *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public Tag insertTag(Tag entity) throws AlreadyExistsPojoException {
+    public Tag insertTag(Tag entity) {
         log.debug("Create Tag from {}", entity);
         final Optional<Tag> tmpt = tagRepository.findById(entity.getName());
         if (tmpt.isPresent()) {
@@ -149,7 +149,7 @@ public class TagService {
      *             If an Exception occurred
      */
     @Transactional
-    public Tag updateTag(Tag entity) throws NotExistsPojoException {
+    public Tag updateTag(Tag entity) {
         log.debug("Update tag from dto {}", entity
         );
         final Optional<Tag> tmpt = tagRepository.findById(entity.getName());

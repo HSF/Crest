@@ -120,7 +120,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 usernameAndPassword = new String(Base64.getDecoder().decode(encodedUserPassword));
             }
             catch (final IllegalArgumentException e) {
-                log.error("Cannot get username and password : {}", e);
+                log.error("Cannot get username and password : {}", e.getMessage());
                 requestContext.abortWith(SERVER_ERROR);
                 return;
             }

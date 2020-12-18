@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -71,7 +70,7 @@ public class PayloadService {
      *             If object was not found
      */
     @Transactional
-    public PayloadDto getPayload(String hash) throws CdbServiceException, NotExistsPojoException {
+    public PayloadDto getPayload(String hash) {
         final PayloadDto pyld = payloaddataRepository.find(hash);
         if (pyld == null) {
             throw new NotExistsPojoException("Cannot find payload dto for hash " + hash);
@@ -89,8 +88,7 @@ public class PayloadService {
      *             If object was not found
      */
     @Transactional
-    public PayloadDto getPayloadMetaInfo(String hash)
-            throws CdbServiceException, NotExistsPojoException {
+    public PayloadDto getPayloadMetaInfo(String hash) {
         final PayloadDto pyld = payloaddataRepository.findMetaInfo(hash);
         if (pyld == null) {
             throw new NotExistsPojoException("Cannot find payload meta data for hash " + hash);
@@ -108,8 +106,7 @@ public class PayloadService {
      *             If object was not found
      */
     @Transactional
-    public InputStream getPayloadData(String hash)
-            throws CdbServiceException, NotExistsPojoException {
+    public InputStream getPayloadData(String hash) {
         final InputStream is = payloaddataRepository.findData(hash);
         if (is == null) {
             throw new NotExistsPojoException("Cannot find payload data for hash " + hash);
@@ -125,7 +122,7 @@ public class PayloadService {
      *             If an Exception occurred
      */
     //@Transactional
-    public PayloadDto insertPayload(PayloadDto dto) throws CdbServiceException {
+    public PayloadDto insertPayload(PayloadDto dto) {
         log.debug("Save payload dto {}", dto);
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
@@ -150,8 +147,7 @@ public class PayloadService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public PayloadDto insertPayloadAndInputStream(PayloadDto dto, InputStream is)
-            throws CdbServiceException {
+    public PayloadDto insertPayloadAndInputStream(PayloadDto dto, InputStream is) {
         log.debug("Save payload {} creating blob from inputstream...", dto);
         // Verify if hash exists
         String dbhash = payloaddataRepository.exists(dto.getHash());
@@ -175,41 +171,16 @@ public class PayloadService {
      * @throws CdbServiceException
      */
     @Transactional(rollbackOn = {CdbServiceException.class})
-    public HTTPResponse saveIovAndPayload(IovDto dto, PayloadDto pdto, String filename)
-            throws CdbServiceException {
+    public HTTPResponse saveIovAndPayload(IovDto dto, PayloadDto pdto, String filename) {
         log.debug("Create dto with hash {},  format {}, ...", dto.getPayloadHash(),
                 pdto.getObjectType());
-        Path temppath = null;
         try {
             PayloadDto saved = null;
             if (filename != null) {
-                temppath = Paths.get(filename);
-                try (InputStream is = new FileInputStream(filename);) {
-                    final FileChannel tempchan = FileChannel.open(temppath);
-                    pdto.size((int) tempchan.size());
-                    tempchan.close();
-                    saved = insertPayloadAndInputStream(pdto, is);
-                }
-                catch (final HashExistsException e) {
-                    log.warn("Payload hash duplication, will not store : {}", dto.getPayloadHash());
-                    saved = getPayloadMetaInfo(dto.getPayloadHash());
-                }
-                catch (IOException ex) {
-                    log.error("IO Exception in reading payload data: {}", ex);
-                    return new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-                            .id(dto.getPayloadHash()).message("IO Exception in reading payload data for "
-                                                              + dto.getTagName());
-                }
+                saved = insertPayloadFromFile(filename, pdto, dto);
             }
             else {
-                pdto.size(pdto.getData().length);
-                try {
-                    saved = insertPayload(pdto);
-                }
-                catch (final HashExistsException e) {
-                    log.warn("Payload hash duplication, will not store : {}", dto.getPayloadHash());
-                    saved = getPayloadMetaInfo(dto.getPayloadHash());
-                }
+                saved = insertPayloadFromDto(pdto, dto);
             }
             String tagname = dto.getTagName();
             Iov entity = mapper.map(dto, Iov.class);
@@ -225,29 +196,69 @@ public class PayloadService {
                     .id(saveddto.getPayloadHash()).message("Iov created in tag "
                                                            + saveddto.getTagName() + " @ " + saveddto.getSince());
         }
+        catch (IOException ex) {
+            log.error("IO Exception in reading payload data: {}", ex.getMessage());
+            return new HTTPResponse().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                    .id(dto.getPayloadHash()).message("IO Exception in reading payload data for "
+                                                      + dto.getTagName());
+        }
         catch (final NotExistsPojoException e) {
-            log.warn("Tag not found: {} - {}", dto.getTagName(), e.getMessage());
-            throw e;
+            throw new NotExistsPojoException("Tag not found: " + dto.getTagName(), e);
         }
         catch (final AlreadyExistsIovException e) {
-            log.warn("Iov already exists: {} - {}", dto, e.getMessage());
-            throw e;
+            throw new AlreadyExistsIovException("Iov already exists: " + dto.toString(), e);
         }
         catch (RuntimeException e) {
-            log.error("A Runtime exception occurred in saveIovAndPayload method: {}", e);
-            throw e;
+            throw new CdbServiceException("Service runtime exception in saveIovAndPayload: ", e);
         }
         finally {
             log.debug("Clean up files when non null...");
             try {
-                if (temppath != null) {
-                    Files.deleteIfExists(temppath);
+                if (filename != null) {
+                    Files.deleteIfExists(Paths.get(filename));
                 }
             }
             catch (IOException e) {
-                log.error("Cannot delete temporary file");
+                log.error("Cannot delete temporary file: {}", e.getMessage());
             }
             log.debug("Removed temporary file");
+        }
+    }
+
+    /**
+     *
+     * @param filename
+     * @param pdto
+     * @param dto
+     * @return PayloadDto
+     * @throws IOException
+     */
+    protected PayloadDto insertPayloadFromFile(String filename, PayloadDto pdto, IovDto dto) throws IOException {
+        try (InputStream is = new FileInputStream(filename);
+             FileChannel tempchan = FileChannel.open(Paths.get(filename));) {
+            pdto.size((int) tempchan.size());
+            return insertPayloadAndInputStream(pdto, is);
+        }
+        catch (final HashExistsException e) {
+            log.warn("Payload hash duplication, will not store : {}", dto.getPayloadHash());
+            return getPayloadMetaInfo(dto.getPayloadHash());
+        }
+    }
+
+    /**
+     *
+     * @param pdto
+     * @param dto
+     * @return
+     */
+    protected PayloadDto insertPayloadFromDto(PayloadDto pdto, IovDto dto) {
+        try {
+            pdto.size(pdto.getData().length);
+            return insertPayload(pdto);
+        }
+        catch (final HashExistsException e) {
+            log.warn("Payload hash duplication, will not store : {}", dto.getPayloadHash());
+            return getPayloadMetaInfo(dto.getPayloadHash());
         }
     }
 }

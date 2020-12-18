@@ -75,8 +75,7 @@ public final class PayloadHandler {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public static void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation)
-            throws CdbServiceException {
+    public static void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
 
         try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
             int read = 0;
@@ -88,8 +87,7 @@ public final class PayloadHandler {
             out.flush();
         }
         catch (final IOException e) {
-            log.error("Exception saving stream to file: {}", e.getMessage());
-            throw new CdbServiceException("Cannot save stream to file " + uploadedFileLocation);
+            throw new CdbServiceException("Cannot save stream to file " + uploadedFileLocation, e);
         }
     }
 
@@ -139,14 +137,13 @@ public final class PayloadHandler {
      *             If an Exception occurred
      */
     public static String saveToFileGetHash(InputStream uploadedInputStream,
-            String uploadedFileLocation) throws PayloadEncodingException {
+            String uploadedFileLocation) {
 
         try (OutputStream out = new FileOutputStream(new File(uploadedFileLocation))) {
             return HashGenerator.hashoutstream(uploadedInputStream, out);
         }
         catch (NoSuchAlgorithmException | IOException e) {
-            log.error("Cannot generate hash : {}", e.getMessage());
-            throw new PayloadEncodingException(e.getMessage());
+            throw new PayloadEncodingException("Cannot get hash from file " + uploadedFileLocation, e);
         }
         finally {
             // Close the stream outside the try-with-resource block.
@@ -169,14 +166,12 @@ public final class PayloadHandler {
      * @throws PayloadEncodingException
      *             If an Exception occurred
      */
-    public static String getHashFromStream(BufferedInputStream uploadedInputStream)
-            throws PayloadEncodingException {
+    public static String getHashFromStream(BufferedInputStream uploadedInputStream) {
         try {
             return HashGenerator.hash(uploadedInputStream);
         }
         catch (NoSuchAlgorithmException | IOException e) {
-            log.error("Error in hashing stream : {}", e.getMessage());
-            throw new PayloadEncodingException("Error in hashing stream : " + e.getMessage());
+            throw new PayloadEncodingException("Error in hashing stream : ", e);
         }
     }
 
@@ -233,4 +228,43 @@ public final class PayloadHandler {
         }
         return flength;
     }
+
+    /**
+     * Return a byte array from the input stream blob.
+     *
+     * @param is
+     * @return byte[]
+     */
+    public static byte[] getByteArr(InputStream is) {
+        if (is == null) {
+            return new byte[0];
+        }
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream();) {
+            int read = 0;
+            final byte[] bytes = new byte[2048];
+            // Read input bytes and write in output stream
+            while ((read = is.read(bytes, 0, bytes.length)) != -1) {
+                buffer.write(bytes, 0, read);
+                log.trace("Copying {} bytes into the output...", read);
+            }
+            // Flush data
+            buffer.flush();
+            return buffer.toByteArray();
+        }
+        catch (IOException e) {
+            log.error("Exception in reading byte array from input stream: {}", e.getMessage());
+        }
+        finally {
+            // Close all streames to avoid memory leaks.
+            log.debug("closing streams...");
+            try {
+                is.close();
+            }
+            catch (IOException e) {
+                log.error("Cannot close input stream from SQLITE blob: {}", e.getMessage());
+            }
+        }
+        return new byte[0];
+    }
+
 }

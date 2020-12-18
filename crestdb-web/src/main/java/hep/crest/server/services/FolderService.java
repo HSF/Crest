@@ -69,8 +69,7 @@ public class FolderService {
      *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public CrestFolders insertFolder(CrestFolders entity)
-            throws AlreadyExistsPojoException {
+    public CrestFolders insertFolder(CrestFolders entity) {
         log.debug("Create CrestFolder from  {}", entity);
         final Optional<CrestFolders> tmpgt = folderRepository
                 .findById(entity.getNodeFullpath());

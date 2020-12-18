@@ -74,7 +74,7 @@ public class CacheControlFilter implements ContainerResponseFilter {
             log.debug("Examine control cache parameter {}", val);
             if (val.startsWith("max-age")) {
                 final String maval = val.split("=")[1];
-                final Integer maxAge = new Integer(maval);
+                final Integer maxAge = Integer.valueOf(maval);
                 if (maxAge <= 600) {
                     frontiercache = "short";
                 }
