@@ -38,7 +38,7 @@ public abstract class AbstractPayloadDataGeneral extends DataGeneral implements 
      */
     protected AbstractPayloadDataGeneral(DataSource ds) {
         super(ds);
-        ann = Payload.class.getAnnotation(Table.class);
+        super.setAnn(Payload.class.getAnnotation(Table.class));
     }
 
     /**
@@ -49,7 +49,7 @@ public abstract class AbstractPayloadDataGeneral extends DataGeneral implements 
     public String exists(String id) {
         log.info("Find payload {} using JDBCTEMPLATE", id);
         try {
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(getDs());
             final String tablename = this.tablename();
             // Check if payload with a given hash exists.
             final String sql = SqlRequests.getExistsHashQuery(tablename);
@@ -116,7 +116,7 @@ public abstract class AbstractPayloadDataGeneral extends DataGeneral implements 
 
         final String sql = SqlRequests.getDeleteQuery(tablename);
         log.info("Remove payload with hash {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(getDs());
         jdbcTemplate.update(sql, id);
         log.debug("Entity removal done...");
     }
@@ -129,7 +129,7 @@ public abstract class AbstractPayloadDataGeneral extends DataGeneral implements 
     public PayloadDto find(String id) {
         log.info("Find payload {} using JDBCTEMPLATE", id);
         try {
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(getDs());
             final String tablename = this.tablename();
 
             final String sql = SqlRequests.getFindQuery(tablename);
@@ -169,7 +169,7 @@ public abstract class AbstractPayloadDataGeneral extends DataGeneral implements 
     public PayloadDto findMetaInfo(String id) {
         log.info("Find payload meta info {} using JDBCTEMPLATE", id);
         try {
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(getDs());
             final String tablename = this.tablename();
             final String sql = SqlRequests.getFindMetaQuery(tablename);
 
@@ -202,7 +202,7 @@ public abstract class AbstractPayloadDataGeneral extends DataGeneral implements 
     public InputStream findData(String id) {
         log.info("Find payload data {} using JDBCTEMPLATE", id);
         try {
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(getDs());
             final String tablename = this.tablename();
 
             final String sql = SqlRequests.getFindDataQuery(tablename);
@@ -256,7 +256,7 @@ public abstract class AbstractPayloadDataGeneral extends DataGeneral implements 
                         entity.getStreamerInfo().length);
             }
         }
-        try (Connection conn = ds.getConnection();
+        try (Connection conn = getDs().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);) {
             ps.setString(1, entity.getHash());
             ps.setString(2, entity.getObjectType());

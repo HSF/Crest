@@ -37,7 +37,7 @@ public abstract class TagMetaGeneral extends DataGeneral implements TagMetaDataB
      */
     protected TagMetaGeneral(DataSource ds) {
         super(ds);
-        ann = TagMeta.class.getAnnotation(Table.class);
+        super.setAnn(TagMeta.class.getAnnotation(Table.class));
     }
 
     @Override
@@ -70,7 +70,7 @@ public abstract class TagMetaGeneral extends DataGeneral implements TagMetaDataB
         final String tablename = this.tablename();
         final String sql = TagMetaRequests.getDeleteQuery(tablename);
         log.debug("Remove tag meta with tag name {} using JDBCTEMPLATE", id);
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(getDs());
         jdbcTemplate.update(sql, id);
         log.debug("Entity removal done...");
     }
@@ -80,7 +80,7 @@ public abstract class TagMetaGeneral extends DataGeneral implements TagMetaDataB
     public TagMetaDto find(String id) {
         log.debug("Find tag meta {} using JDBCTEMPLATE", id);
         try {
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(getDs());
             final String tablename = this.tablename();
 
             final String sql = TagMetaRequests.getFindQuery(tablename);
@@ -111,7 +111,7 @@ public abstract class TagMetaGeneral extends DataGeneral implements TagMetaDataB
     public TagMetaDto findMetaInfo(String id) {
         log.debug("Find tag meta info {} using JDBCTEMPLATE", id);
         try {
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(getDs());
             final String tablename = this.tablename();
             final String sql = TagMetaRequests.getFindMetaQuery(tablename);
 

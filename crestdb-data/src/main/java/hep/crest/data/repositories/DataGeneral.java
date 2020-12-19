@@ -10,7 +10,7 @@ public class DataGeneral {
     /**
      * The Data Source.
      */
-    protected final DataSource ds;
+    private final DataSource ds;
     /**
      * The upload directory for files.
      */
@@ -24,7 +24,7 @@ public class DataGeneral {
     /**
      * Table annotation to be filled by sub classes.
      */
-    protected Table ann = null;
+    private Table ann = null;
 
     /**
      * @param ds
@@ -56,6 +56,22 @@ public class DataGeneral {
             tablename = this.defaultTablename + "." + tablename;
         }
         return tablename;
+    }
+
+    /**
+     *
+     * @return Table
+     */
+    public Table getAnn() {
+        return ann;
+    }
+
+    /**
+     *
+     * @param ann
+     */
+    public void setAnn(Table ann) {
+        this.ann = ann;
     }
 
     /**

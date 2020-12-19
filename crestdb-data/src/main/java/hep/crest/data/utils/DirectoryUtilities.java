@@ -55,7 +55,7 @@ public class DirectoryUtilities {
     /**
      * Charset.
      */
-    private static final Charset charset = StandardCharsets.UTF_8;
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     /**
      * Mapper.
@@ -116,7 +116,7 @@ public class DirectoryUtilities {
      * @return Charset
      */
     public Charset getCharset() {
-        return charset;
+        return CHARSET;
     }
 
     /**

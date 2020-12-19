@@ -464,7 +464,7 @@ public class PojoDtoConverterTests {
         setdto.format("tagmetas");
         setdto.addResourcesItem(dto1);
         assertThat(setdto.toString().length()).isPositive();
-        assertThat(setdto.hashCode()).isPositive();
+        assertThat(setdto.hashCode()).isNotZero();
         final List<TagMetaDto> resources = setdto.getResources();
         for (final TagMetaDto gtDto : resources) {
             if (gtDto.getTagName().equals("A_TAG")) {
