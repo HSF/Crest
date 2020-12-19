@@ -58,7 +58,7 @@ public class RunInfoService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public List<RunLumiInfoDto> findAllRunInfo(Predicate qry, Pageable req) throws CdbServiceException {
+    public List<RunLumiInfoDto> findAllRunInfo(Predicate qry, Pageable req) {
         Iterable<RunLumiInfo> entitylist = null;
         if (qry == null) {
             entitylist = runinfoRepository.findAll(req);
@@ -96,8 +96,7 @@ public class RunInfoService {
      *             If an Exception occurred.
      * @return List<RunLumiInfoDto>
      */
-    public List<RunLumiInfoDto> selectInclusiveByRun(BigDecimal from, BigDecimal to)
-            throws CdbServiceException {
+    public List<RunLumiInfoDto> selectInclusiveByRun(BigDecimal from, BigDecimal to) {
         List<RunLumiInfo> entitylist = null;
         entitylist = runinfoRepository.findByRunNumberInclusive(from, to);
         if (entitylist == null) {
@@ -105,9 +104,8 @@ public class RunInfoService {
                     from, to);
             return new ArrayList<>();
         }
-        return StreamSupport.stream(entitylist.spliterator(), false)
+        return entitylist.stream()
                 .map(s -> mapper.map(s, RunLumiInfoDto.class)).collect(Collectors.toList());
-
     }
 
     /**
@@ -119,7 +117,7 @@ public class RunInfoService {
      *             If an Exception occurred.
      * @return List<RunLumiInfoDto>
      */
-    public List<RunLumiInfoDto> selectInclusiveByDate(Date from, Date to) throws CdbServiceException {
+    public List<RunLumiInfoDto> selectInclusiveByDate(Date from, Date to) {
         List<RunLumiInfo> entitylist = null;
         entitylist = runinfoRepository.findByDateInclusive(new BigDecimal(from.getTime()),
                 new BigDecimal(to.getTime()));
@@ -128,9 +126,7 @@ public class RunInfoService {
                     from, to);
             return new ArrayList<>();
         }
-        return StreamSupport.stream(entitylist.spliterator(), false)
+        return entitylist.stream()
                 .map(s -> mapper.map(s, RunLumiInfoDto.class)).collect(Collectors.toList());
-
     }
-
 }

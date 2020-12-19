@@ -70,7 +70,7 @@ public class GlobalTagService {
      *             If object was not found
      * @return GlobalTag
      */
-    public GlobalTag findOne(String globaltagname) throws NotExistsPojoException {
+    public GlobalTag findOne(String globaltagname) {
         log.debug("Search for global tag by name {}", globaltagname);
         final GlobalTag entity = globalTagRepository.findByName(globaltagname);
         if (entity == null) {
@@ -90,8 +90,7 @@ public class GlobalTagService {
      * @throws NotExistsPojoException
      *             If an Exception occurred
      */
-    public List<Tag> getGlobalTagByNameFetchTags(String globaltagname, String record, String label)
-            throws NotExistsPojoException {
+    public List<Tag> getGlobalTagByNameFetchTags(String globaltagname, String record, String label) {
         GlobalTag entity = null;
         log.debug("Search for (record, label) specified tag list for GlobalTag={}", globaltagname);
         if ("none".equals(record)) {
@@ -128,8 +127,7 @@ public class GlobalTagService {
      *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public GlobalTag insertGlobalTag(GlobalTag entity)
-            throws AlreadyExistsPojoException {
+    public GlobalTag insertGlobalTag(GlobalTag entity) {
         log.debug("Create GlobalTag from {}", entity);
         final Optional<GlobalTag> tmpgt = globalTagRepository.findById(entity.getName());
         if (tmpgt.isPresent()) {
@@ -150,7 +148,7 @@ public class GlobalTagService {
      *             If object was not found
      */
     @Transactional
-    public GlobalTag updateGlobalTag(GlobalTag entity) throws NotExistsPojoException {
+    public GlobalTag updateGlobalTag(GlobalTag entity) {
         log.debug("Update GlobalTag from {}", entity);
         final Optional<GlobalTag> tmpoptgt = globalTagRepository.findById(entity.getName());
         if (!tmpoptgt.isPresent()) {

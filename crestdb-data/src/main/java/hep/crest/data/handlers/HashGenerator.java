@@ -58,7 +58,7 @@ public final class HashGenerator {
      * @return The MD5 representation of the message string.
      * @throws PayloadEncodingException If an Exception occurred
      **/
-    public static String md5Java(String message) throws PayloadEncodingException {
+    public static String md5Java(String message) {
         return md5Java(message.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -68,7 +68,7 @@ public final class HashGenerator {
      * @return The MD5 representation of the message string.
      * @throws PayloadEncodingException If an Exception occurred
      */
-    public static String md5Java(byte[] message) throws PayloadEncodingException {
+    public static String md5Java(byte[] message) {
         String digest = null;
         try {
             final MessageDigest md = MessageDigest.getInstance(MD5);
@@ -79,10 +79,10 @@ public final class HashGenerator {
                 sb.append(String.format("%02x", b & 0xff));
             }
             digest = sb.toString();
+            log.trace("md5Java generated hash: {}", digest);
         }
         catch (final NoSuchAlgorithmException ex) {
-            log.error(ex.getMessage());
-            throw new PayloadEncodingException(ex);
+            throw new PayloadEncodingException("md5java encoding error:", ex);
         }
         return digest;
     }
@@ -93,7 +93,7 @@ public final class HashGenerator {
      * @return The MD5 representation of the message string.
      * @throws PayloadEncodingException If an Exception occurred
      */
-    public static String shaJava(byte[] message) throws PayloadEncodingException {
+    public static String shaJava(byte[] message) {
         String digest = null;
         try {
             final MessageDigest md = MessageDigest.getInstance(SHA);
@@ -104,10 +104,10 @@ public final class HashGenerator {
                 sb.append(String.format("%02x", b & 0xff));
             }
             digest = sb.toString();
+            log.trace("shaJava generated hash: {}", digest);
         }
         catch (final NoSuchAlgorithmException ex) {
-            log.error(ex.getMessage());
-            throw new PayloadEncodingException(ex);
+            throw new PayloadEncodingException("shaJava exception: ", ex);
         }
         return digest;
     }

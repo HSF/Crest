@@ -69,7 +69,7 @@ public class ToolsTests {
     @Test
     public void testDirectoryTools() throws Exception {
         final DirectoryUtilities dirutils = new DirectoryUtilities();
-        assertThat(dirutils.getBasePath().startsWith("/tmp")).isTrue();
+        assertThat(dirutils.getBasePath()).startsWithRaw(Paths.get("/tmp"));
 
         final Path mtagpath = Paths.get(dirutils.getBasePath().toString(), "MANUAL-TAG");
         Files.createDirectories(mtagpath);
@@ -132,14 +132,14 @@ public class ToolsTests {
     @Test
     public void testDirectoryImpl() throws Exception {
         final DirectoryUtilities dirutils = new DirectoryUtilities();
-        assertThat(dirutils.getBasePath().startsWith("/tmp")).isTrue();
+        assertThat(dirutils.getBasePath()).startsWithRaw(Paths.get("/tmp"));
         assertThat(dirutils.getTagfile()).isEqualTo("tag.json"); // Should be true
         assertThat(dirutils.getIovfile()).isEqualTo("iovs.json"); // Should be true
         dirutils.createIfNotexistsTag("MY-NEW-TAG");
         log.info("Created tag : MY-NEW-TAG");
         final Path tp = dirutils.getTagFilePath("MY-NEW-TAG");
         log.info("Retrieved file path for tag : {}", tp);
-        assertThat(tp.endsWith("tag.json")).isTrue();
+        assertThat(tp).endsWithRaw(Paths.get("tag.json"));
 
         final TagDirectoryImplementation fstagrepository = new TagDirectoryImplementation(dirutils);
         final TagDto tag = DataGenerator.generateTagDto("MY-TAG-01", "time");
@@ -157,10 +157,10 @@ public class ToolsTests {
                 new BigDecimal(1000L));
         fsiovrepository.save(iov);
         final List<IovDto> iovlist = fsiovrepository.findByTagName("MY-TAG-01");
-        assertThat(iovlist.size()).isGreaterThan(0);
+        assertThat(iovlist.size()).isPositive();
         try {
             final List<IovDto> iovemptylist = fsiovrepository.findByTagName("MY-TAG-02");
-            assertThat(iovemptylist.size()).isEqualTo(0);
+            assertThat(iovemptylist.size()).isZero();
         }
         catch (final CdbServiceException e) {
             log.error("Cannot find tag MY-TAG-02");
@@ -187,14 +187,14 @@ public class ToolsTests {
         assertThat(RunIovConverter.getTime(nullbi)).isNull();
         // Test getRun(BigInteger)
         assertThat(RunIovConverter.getRun(nullbi)).isNull();
-        assertThat(RunIovConverter.getRun(cmdmaxdata.toBigInteger())).isGreaterThan(0);
-        assertThat(RunIovConverter.getRun(cmdmaxrun.toBigInteger())).isGreaterThan(0);
+        assertThat(RunIovConverter.getRun(cmdmaxdata.toBigInteger())).isPositive();
+        assertThat(RunIovConverter.getRun(cmdmaxrun.toBigInteger())).isPositive();
         assertThat(RunIovConverter.getRun(runlumi.toBigInteger())).isEqualTo(222222L);
 
         // Test getRun(Long)
         assertThat(RunIovConverter.getRun((Long) null)).isNull();
-        assertThat(RunIovConverter.getRun(coolmaxrun)).isGreaterThan(0);
-        assertThat(RunIovConverter.getRun(coolmaxdate)).isGreaterThan(0);
+        assertThat(RunIovConverter.getRun(coolmaxrun)).isPositive();
+        assertThat(RunIovConverter.getRun(coolmaxdate)).isPositive();
         // getCoolRun
         assertThat(RunIovConverter.getCoolRun("222222")).isGreaterThan(new BigDecimal(222222L));
         assertThat(RunIovConverter.getCoolRun("INF")).isGreaterThan(new BigDecimal(222222L));
@@ -209,7 +209,7 @@ public class ToolsTests {
         assertThat(RunIovConverter.getLumi((Long) null)).isNull();
 
         // getTime(BigInteger)
-        assertThat(RunIovConverter.getTime(cmdmaxdata.toBigInteger())).isGreaterThan(0);
+        assertThat(RunIovConverter.getTime(cmdmaxdata.toBigInteger())).isPositive();
 
         // getCoolRunLumi(String, String)
         assertThat(RunIovConverter.getCoolRunLumi(null, "100")).isNull();
@@ -232,12 +232,12 @@ public class ToolsTests {
         final BigDecimal since = RunIovConverter.getCoolTime(1500000000L, "time");
         final String cooltstr = RunIovConverter.getCoolTimeRunLumiString(since.longValue(), "time");
         log.info("Created cool time string : {}", cooltstr);
-        assertThat(cooltstr.length()).isGreaterThan(0);
+        assertThat(cooltstr.length()).isPositive();
 
         final String coolotherstr = RunIovConverter.getCoolTimeRunLumiString(since.longValue(),
                 "event");
         log.info("Created cool time string : {}", coolotherstr);
-        assertThat(coolotherstr.length()).isGreaterThan(0);
+        assertThat(coolotherstr.length()).isPositive();
 
     }
 
@@ -279,7 +279,7 @@ public class ToolsTests {
         final String adate = dh.format(ts);
         log.info("Received date as string {}", adate);
         assertThat(adate.equals("2011-12-03T09:15:30Z")).isTrue(); // The date is in GMT this time.
-        assertThat(tsmsec).isGreaterThan(0);
+        assertThat(tsmsec).isPositive();
         assertThat(dtformat).isNotNull();
 
         final DateFormatterHandler dfh = new DateFormatterHandler();
@@ -302,7 +302,7 @@ public class ToolsTests {
         props.setSecurity("none");
         props.setSynchro("all");
         props.setWebstaticdir("/tmp");
-        assertThat(props.toString().length()).isGreaterThan(0);
+        assertThat(props.toString().length()).isPositive();
         assertThat(props.getApiname()).isEqualTo("api");
         assertThat(props.getAuthenticationtype()).isEqualTo("BASIC");
         assertThat(props.getDumpdir()).isEqualTo("/tmp");

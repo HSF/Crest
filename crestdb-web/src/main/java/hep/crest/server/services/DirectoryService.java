@@ -126,7 +126,7 @@ public class DirectoryService {
             return fsiovrepository.findByTagName(tagname);
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot find iov list for tag {}: {}", tagname, e);
+            log.error("Cannot find iov list for tag {}: {}", tagname, e.getMessage());
         }
         return new ArrayList<>();
     }
@@ -141,7 +141,7 @@ public class DirectoryService {
             return fspayloadrepository.find(hash);
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot find payload for hash {} : {}", hash, e);
+            log.error("Cannot find payload for hash {} : {}", hash, e.getMessage());
         }
         return null;
     }
@@ -185,10 +185,10 @@ public class DirectoryService {
                     "Dump a list of " + dtolist.size() + " iovs into file system...");
         }
         catch (final NotExistsPojoException e) {
-            log.error("Cannot find tag or payload  : {}", e);
+            log.error("Cannot find tag or payload  : {}", e.getMessage());
         }
         catch (final CdbServiceException e) {
-            log.error("Server exception, cannot dump tag {} in path {} : {}", tagname, path, e);
+            log.error("Server exception, cannot dump tag {} in path {} : {}", tagname, path, e.getMessage());
         }
         return null;
     }

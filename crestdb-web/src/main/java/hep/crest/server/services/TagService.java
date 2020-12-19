@@ -53,7 +53,7 @@ public class TagService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public boolean exists(String tagname) throws CdbServiceException {
+    public boolean exists(String tagname) {
         try {
             log.debug("Verify existence of Tag->{}", tagname);
             return tagRepository.existsById(tagname);
@@ -79,7 +79,7 @@ public class TagService {
      * @throws NotExistsPojoException
      *             If object was not found
      */
-    public Tag findOne(String id) throws NotExistsPojoException {
+    public Tag findOne(String id) {
         try {
             log.debug("Search for tag by Id...{}", id);
             final Optional<Tag> entity = tagRepository.findById(id);
@@ -135,7 +135,7 @@ public class TagService {
      *             If an Exception occurred because pojo exists
      */
     @Transactional
-    public Tag insertTag(Tag entity) throws AlreadyExistsPojoException {
+    public Tag insertTag(Tag entity) {
         log.debug("Create Tag from {}", entity);
         final Optional<Tag> tmpt = tagRepository.findById(entity.getName());
         if (tmpt.isPresent()) {
@@ -158,7 +158,7 @@ public class TagService {
      *             If an Exception occurred
      */
     @Transactional
-    public Tag updateTag(Tag entity) throws NotExistsPojoException {
+    public Tag updateTag(Tag entity) {
         log.debug("Update tag from dto {}", entity
         );
         final Optional<Tag> tmpt = tagRepository.findById(entity.getName());
@@ -201,8 +201,7 @@ public class TagService {
      *             If an Exception occurred
      */
     @Transactional
-    public TagMetaDto insertTagMeta(TagMetaDto dto)
-            throws CdbServiceException, AlreadyExistsPojoException {
+    public TagMetaDto insertTagMeta(TagMetaDto dto) {
         log.debug("Create tag meta data from dto {}", dto);
         final TagMetaDto tmpt = tagmetaRepository.find(dto.getTagName());
         if (tmpt != null) {
@@ -224,7 +223,7 @@ public class TagService {
      * @throws CdbServiceException If an exception occurred.
      */
     @Transactional
-    public TagMetaDto updateTagMeta(TagMetaDto dto) throws CdbServiceException {
+    public TagMetaDto updateTagMeta(TagMetaDto dto) {
         log.debug("Update tag meta from dto {}", dto);
         final TagMetaDto saved = tagmetaRepository.update(dto);
         log.debug("Updated entity: {}", saved);
@@ -238,7 +237,7 @@ public class TagService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public TagMetaDto findMeta(String id) throws CdbServiceException {
+    public TagMetaDto findMeta(String id) {
         log.debug("Search for tag meta data by Id...{}", id);
         final TagMetaDto tmpt = tagmetaRepository.find(id);
         return tmpt; // This will trigger a response 404 if it is null
@@ -250,7 +249,7 @@ public class TagService {
      * @param name the name
      * @throws CdbServiceException the cdb service exception
      */
-    public void removeTagMeta(String name) throws CdbServiceException {
+    public void removeTagMeta(String name) {
         log.debug("Remove tag meta info for {}", name);
         tagmetaRepository.delete(name);
         log.debug("Removed tag meta info for: {}", name);  

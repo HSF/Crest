@@ -76,13 +76,13 @@ public final class IovPredicates {
         BooleanExpression pred = null;
 
         if ("<".equals(oper)) {
-            pred = QIov.iov.id.insertionTime.lt(new Date(new Long(num)));
+            pred = QIov.iov.id.insertionTime.lt(new Date(Long.valueOf(num)));
         }
         else if (">".equals(oper)) {
-            pred = QIov.iov.id.insertionTime.gt(new Date(new Long(num)));
+            pred = QIov.iov.id.insertionTime.gt(new Date(Long.valueOf(num)));
         }
         else if (":".equals(oper)) {
-            pred = QIov.iov.id.insertionTime.eq(new Date(new Long(num)));
+            pred = QIov.iov.id.insertionTime.eq(new Date(Long.valueOf(num)));
         }
         return pred;
     }

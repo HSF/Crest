@@ -49,7 +49,7 @@ public interface TagMetaDataBaseCustom {
      * @throws CdbServiceException
      *             It should in reality not throw any exception
      */
-    TagMetaDto save(TagMetaDto entity) throws CdbServiceException;
+    TagMetaDto save(TagMetaDto entity);
 
     /**
      * @param entity
@@ -58,7 +58,7 @@ public interface TagMetaDataBaseCustom {
      * @throws CdbServiceException
      *             It should in reality not throw any exception
      */
-    TagMetaDto update(TagMetaDto entity) throws CdbServiceException;
+    TagMetaDto update(TagMetaDto entity);
 
     /**
      * @param id

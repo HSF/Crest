@@ -18,6 +18,6 @@ public interface IMonitoringRepository {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    List<PayloadTagInfoDto> selectTagInfo(String tagpattern) throws CdbServiceException;
+    List<PayloadTagInfoDto> selectTagInfo(String tagpattern);
 
 }

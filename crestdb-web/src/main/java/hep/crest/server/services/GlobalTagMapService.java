@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -77,8 +76,7 @@ public class GlobalTagMapService {
      * @throws AlreadyExistsPojoException If an Exception occurred
      */
     @Transactional
-    public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity)
-            throws NotExistsPojoException, AlreadyExistsPojoException {
+    public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) {
         log.debug("Create GlobalTagMap from {}", entity);
         Optional<GlobalTagMap> map = globalTagMapRepository.findById(entity.getId());
         if (map.isPresent()) {
@@ -114,7 +112,7 @@ public class GlobalTagMapService {
      * @return the iterable
      */
     public Iterable<GlobalTagMap> findMapsByGlobalTagLabelTag(String globaltag, String label, String tag,
-            String record) {
+                                                              String record) {
         log.debug("Search for GlobalTagMap entries by Global, Label, Tag and eventually filter by record : {} {} {} {}",
                 globaltag, label, tag, record);
         if (tag == null || tag.isEmpty()) {

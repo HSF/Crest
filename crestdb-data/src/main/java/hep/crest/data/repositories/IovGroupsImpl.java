@@ -20,6 +20,7 @@ package hep.crest.data.repositories;
 import hep.crest.data.config.DatabasePropertyConfigurator;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Payload;
+import hep.crest.data.repositories.externals.SqlRequests;
 import hep.crest.swagger.model.IovPayloadDto;
 import hep.crest.swagger.model.TagSummaryDto;
 import org.slf4j.Logger;
@@ -58,6 +59,11 @@ public class IovGroupsImpl implements IovGroupsCustom {
      * Datasource.
      */
     private final DataSource ds;
+
+    /**
+     * The decoder.
+     */
+    private CharsetDecoder decoder = StandardCharsets.US_ASCII.newDecoder();
 
     /**
      * The upload directory for files.
@@ -255,22 +261,9 @@ public class IovGroupsImpl implements IovGroupsCustom {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
         final String tablename = this.tablename();
 
-        // sql : select only metadata from payload table and link with the IOV table
-        // select iv.*, pyld.VERSION, pyld.OBJECT_TYPE, pyld.DATA_SIZE from IOV iv
-        // left join PAYLOAD pyld ON pyld.HASH=iv.PAYLOAD_HASH
-        // where iv.TAG_NAME=? AND iv.SINCE>=COALESCE((SELECT max(iov2.SINCE) FROM
-        // IOV iov2 WHERE iov2.TAG_NAME=? AND iov2.SINCE<=? AND iov2.INSERTION_TIME<=? ),0)
-        // AND iv.SINCE<=? AND iv.INSERTION_TIME<=?
-        // order by iv.SINCE ASC, iv.INSERTION_TIME DESC
-
-        final String sql = "select iv.TAG_NAME, iv.SINCE, iv.INSERTION_TIME, iv.PAYLOAD_HASH, pyld.STREAMER_INFO, "
-                + " pyld.VERSION, pyld.OBJECT_TYPE, " + " pyld.DATA_SIZE from " + tablename + " iv "
-                + " LEFT JOIN " + payloadTablename() + " pyld " + " ON iv.PAYLOAD_HASH=pyld.HASH "
-                + " where iv.TAG_NAME=? AND iv.SINCE>=COALESCE(" + "  (SELECT max(iov2.SINCE) FROM "
-                + tablename + " iov2 "
-                + "  WHERE iov2.TAG_NAME=? AND iov2.SINCE<=? AND iov2.INSERTION_TIME<=? ),0)"
-                + " AND iv.SINCE<=? AND iv.INSERTION_TIME<=? "
-                + " ORDER BY iv.SINCE ASC, iv.INSERTION_TIME DESC";
+        // Get sql query.
+        final String sql = SqlRequests.getRangeIovPayloadQuery(tablename, payloadTablename());
+        // Execute request.
         return jdbcTemplate.query(sql,
                 new Object[] {name, name, since, snapshot, until, snapshot}, (rs, num) -> {
                     final IovPayloadDto entity = new IovPayloadDto();
@@ -297,7 +290,6 @@ public class IovGroupsImpl implements IovGroupsCustom {
      * @throws SQLException
      */
     protected String getBlob(ResultSet rs, String key) throws SQLException {
-        CharsetDecoder decoder = StandardCharsets.US_ASCII.newDecoder();
 
         decoder.onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT);
@@ -308,8 +300,29 @@ public class IovGroupsImpl implements IovGroupsCustom {
                     .toString();
         }
         catch (CharacterCodingException e) {
-            log.warn("Cannot decode as String with charset US_ASCII, use base64: {}", e);
+            log.warn("Cannot decode as String with charset US_ASCII, use base64: {}", e.getMessage());
             return Base64.getEncoder().encodeToString(streaminfoByteArr);
         }
     }
+
+    /**
+     *
+     * @param buf
+     * @return the String.
+     */
+    protected String getStringFromBuf(byte[] buf) {
+        decoder.onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        byte[] streaminfoByteArr = buf;
+        try {
+            return decoder.decode(ByteBuffer.wrap(streaminfoByteArr))
+                    .toString();
+        }
+        catch (CharacterCodingException e) {
+            log.warn("Cannot decode as String with charset US_ASCII, use base64: {}", e.getMessage());
+            return Base64.getEncoder().encodeToString(streaminfoByteArr);
+        }
+    }
+
 }

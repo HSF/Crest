@@ -36,8 +36,8 @@ public class RunLumiInfoFiltering implements IFilteringCriteria {
     public List<BooleanExpression> createFilteringConditions(List<SearchCriteria> criteria) {
         final List<BooleanExpression> expressions = new ArrayList<>();
         for (final SearchCriteria searchCriteria : criteria) {
-            log.debug("search criteria " + searchCriteria.getKey() + " "
-                    + searchCriteria.getOperation() + " " + searchCriteria.getValue());
+            log.debug("search criteria {} {} {}", searchCriteria.getKey(),
+                    searchCriteria.getOperation(), searchCriteria.getValue());
             if (searchCriteria.getKey().equals("run")) {
                 final BooleanExpression runxthan = RunLumiInfoPredicates.isRunXThan(
                         searchCriteria.getOperation(), searchCriteria.getValue().toString());

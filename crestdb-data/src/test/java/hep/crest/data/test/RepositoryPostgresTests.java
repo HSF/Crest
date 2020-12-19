@@ -3,10 +3,14 @@ package hep.crest.data.test;
 
 import hep.crest.data.handlers.PayloadHandler;
 import hep.crest.data.pojo.GlobalTag;
+import hep.crest.data.pojo.Tag;
 import hep.crest.data.repositories.GlobalTagRepository;
 import hep.crest.data.repositories.PayloadDataBaseCustom;
+import hep.crest.data.repositories.TagMetaDataBaseCustom;
+import hep.crest.data.repositories.TagRepository;
 import hep.crest.data.test.tools.DataGenerator;
 import hep.crest.swagger.model.PayloadDto;
+import hep.crest.swagger.model.TagMetaDto;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.FixMethodOrder;
@@ -45,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@TestPropertySource(locations="classpath:application-postgres.yml")
+@TestPropertySource(locations = "classpath:application-postgres.yml")
 @ActiveProfiles("postgres")
 @ContextConfiguration(initializers = {RepositoryPostgresTests.Initializer.class})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -55,9 +59,9 @@ public class RepositoryPostgresTests {
 
     @ClassRule
     public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:11.1")
-      .withDatabaseName("integration-tests-db")
-      .withUsername("sa")
-      .withPassword("sa");
+            .withDatabaseName("integration-tests-db")
+            .withUsername("sa")
+            .withPassword("sa");
 
     @Autowired
     private GlobalTagRepository globaltagrepository;
@@ -65,29 +69,36 @@ public class RepositoryPostgresTests {
     @Autowired
     @Qualifier("payloaddatadbrepo")
     private PayloadDataBaseCustom repobean;
-    
+
     @Autowired
-    @Qualifier("dataSource") 
+    private TagRepository tagrepository;
+
+    @Autowired
+    @Qualifier("tagmetarepo")
+    private TagMetaDataBaseCustom tagmetarepobean;
+
+    @Autowired
+    @Qualifier("dataSource")
     private DataSource mainDataSource;
 
     static class Initializer
-    implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-      public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-          TestPropertyValues.of(
-            "spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
-            "spring.datasource.username=" + postgreSQLContainer.getUsername(),
-            "spring.datasource.password=" + postgreSQLContainer.getPassword()
-          ).applyTo(configurableApplicationContext.getEnvironment());
-          
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues.of(
+                    "spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
+                    "spring.datasource.username=" + postgreSQLContainer.getUsername(),
+                    "spring.datasource.password=" + postgreSQLContainer.getPassword()
+            ).applyTo(configurableApplicationContext.getEnvironment());
+
 //          if (postgreSQLContainer != null) {
 //              // We initialize data source same way as before
 //              final DataSource dataSource = initializeDataSource(postgreSQLContainer);
 //              configurableApplicationContext.getBeanFactory().registerSingleton("dataSource",
 //           dataSource);
-      }
-  }
-    
+        }
+    }
+
     @Before
     public void setUp() {
         final Path bpath = Paths.get("/tmp/cdms");
@@ -120,14 +131,15 @@ public class RepositoryPostgresTests {
         assertThat(saved).isNotNull();
 
     }
+
     @Test
     public void test2_Payload() throws Exception {
-    // This is a trick, we do not have a postgresql connection
+        // This is a trick, we do not have a postgresql connection
         //final PayloadDataBaseCustom repobean = new PayloadDataPostgresImpl(mainDataSource);
         final Instant now = Instant.now();
         final Date time = new Date(now.toEpochMilli());
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhashpg1", "mydata", "mystreamer",
-                "test",time);
+                "test", time);
         log.info("Save payload {}", dto);
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
@@ -136,34 +148,59 @@ public class RepositoryPostgresTests {
         final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
         final PayloadDto loaded = repobean.find("myhashpg1");
-        assertThat(loaded.toString().length()).isGreaterThan(0);
-        
-        DataGenerator.generatePayloadData("/tmp/cdms/payloadataspg.blob"," for postgres");
+        assertThat(loaded.toString().length()).isPositive();
+
+        DataGenerator.generatePayloadData("/tmp/cdms/payloadataspg.blob", " for postgres");
         final File f = new File("/tmp/cdms/payloadataspg.blob");
         InputStream ds = new BufferedInputStream(new FileInputStream(f));
-        
+
         dto.hash("mynewhashpg1");
-        final PayloadDto savedfromblob = repobean.save(dto,ds);
-        assertThat(savedfromblob.toString().length()).isGreaterThan(0);
+        final PayloadDto savedfromblob = repobean.save(dto, ds);
+        assertThat(savedfromblob.toString().length()).isPositive();
         if (ds != null) {
             ds.close();
         }
         final InputStream loadedblob = repobean.findData(savedfromblob.getHash());
-        assertThat(loadedblob.available()).isGreaterThan(0);
+        assertThat(loadedblob.available()).isPositive();
         final PayloadDto loadedmeta = repobean.findMetaInfo(savedfromblob.getHash());
         assertThat(new String(loadedmeta.getStreamerInfo())).isEqualTo("mystreamer");
         repobean.delete(savedfromblob.getHash());
-        
+
         ds = new BufferedInputStream(new FileInputStream(f));
         PayloadHandler.saveStreamToFile(ds, "/tmp/cdms/payloadatacopypg.blob");
         final File f1 = new File("/tmp/cdms/payloadatacopypg.blob");
         final InputStream ds1 = new BufferedInputStream(new FileInputStream(f1));
         final byte[] barr = PayloadHandler.getBytesFromInputStream(ds1);
-        assertThat(barr.length).isGreaterThan(0);
+        assertThat(barr).isNotEmpty();
         if (ds1 != null) {
             ds1.close();
         }
         final PayloadDto loadedblob1 = repobean.find(savedfromblob.getHash());
         assertThat(loadedblob1).isNull();
     }
+
+    @Test
+    public void test1_Tags() throws Exception {
+        final Instant now = Instant.now();
+        final Date time = new Date(now.toEpochMilli());
+
+        final Tag mtag = DataGenerator.generateTag("A-TEST-FOR-META", "test");
+        final Tag savedtag = tagrepository.save(mtag);
+        final TagMetaDto metadto = DataGenerator.generateTagMetaDto("A-TEST-FOR-META", "{ \"key\" : \"val\" }", time);
+        final TagMetaDto savedmeta = tagmetarepobean.save(metadto);
+        assertThat(savedmeta).isNotNull();
+        assertThat(savedmeta.toString().length()).isPositive();
+        assertThat(savedmeta.getTagName()).isEqualTo(savedtag.getName());
+
+        final TagMetaDto storedmeta = tagmetarepobean.find(savedmeta.getTagName());
+        assertThat(storedmeta).isNotNull();
+        storedmeta.tagInfo("{ \"key1\" : \"val1\" }");
+        final TagMetaDto updmeta = tagmetarepobean.update(storedmeta);
+        assertThat(updmeta).isNotNull();
+        tagmetarepobean.delete(updmeta.getTagName());
+        assertThat(updmeta).isNotNull();
+        final TagMetaDto deletedmeta = tagmetarepobean.find(updmeta.getTagName());
+        assertThat(deletedmeta).isNull();
+    }
+
 }

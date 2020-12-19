@@ -28,19 +28,16 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(
             HttpServletRequest request,
             HttpServletResponse response,
-            AccessDeniedException exc) throws IOException, ServletException {
+            AccessDeniedException exc) throws IOException {
 
         Authentication auth
                 = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
-            log.warn("User: " + auth.getName()
-                    + " attempted to access the protected URL: "
-                    + request.getRequestURI());
+            log.warn("User: {} attempted to access the protected URL: {}", auth.getName(), request.getRequestURI());
         }
         log.warn("Redirect to accessDenied URL");
         final ApiResponseMessage resp = new ApiResponseMessage(ApiResponseMessage.ERROR,
                 "Access denied to protected URL using " + request.getMethod());
-        //response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
         HTTPResponse httpresp =
                 new HTTPResponse().code(Response.Status.FORBIDDEN.getStatusCode())
                         .message(resp.getMessage()).action(request.getMethod() + " " + request.getRequestURI());

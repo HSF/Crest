@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,7 +55,7 @@ public class DirectoryUtilities {
     /**
      * Charset.
      */
-    private final Charset charset = Charset.forName("UTF-8");
+    private static final Charset charset = StandardCharsets.UTF_8;
 
     /**
      * Mapper.
@@ -132,7 +133,7 @@ public class DirectoryUtilities {
      *             If an Exception occurred
      * @return Path
      */
-    public Path getTagPath(String tagname) throws CdbServiceException {
+    public Path getTagPath(String tagname) {
         return this.getTagPath(locbasedir, tagname);
     }
 
@@ -143,7 +144,7 @@ public class DirectoryUtilities {
      *             If an Exception occurred
      * @return Path
      */
-    public Path getTagFilePath(String tagname) throws CdbServiceException {
+    public Path getTagFilePath(String tagname) {
         return this.getTagFilePath(locbasedir, tagname);
     }
 
@@ -154,7 +155,7 @@ public class DirectoryUtilities {
      *             If an Exception occurred
      * @return Path
      */
-    public Path getIovFilePath(String tagname) throws CdbServiceException {
+    public Path getIovFilePath(String tagname) {
         return this.getIovFilePath(locbasedir, tagname);
     }
 
@@ -178,7 +179,7 @@ public class DirectoryUtilities {
      * @return Path
      * @throws CdbServiceException If an Exception occurred
      */
-    public Path createIfNotexistsTag(String name) throws CdbServiceException {
+    public Path createIfNotexistsTag(String name) {
         return createIfNotexistsTag(locbasedir, name);
     }
 
@@ -189,7 +190,7 @@ public class DirectoryUtilities {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public Path createIfNotexistsIov(String name) throws CdbServiceException {
+    public Path createIfNotexistsIov(String name) {
         return createIfNotexistsIov(locbasedir, name);
     }
 
@@ -202,7 +203,7 @@ public class DirectoryUtilities {
      *             If an Exception occurred
      * @return Path
      */
-    public Path getTagPath(String basedir, String tagname) throws CdbServiceException {
+    public Path getTagPath(String basedir, String tagname) {
         final Path tagpath = Paths.get(basedir, tagname);
         if (!tagpath.toFile().exists()) {
             throw new CdbServiceException("DirectoryUtility: cannot find directory for tag name " + tagname);
@@ -219,7 +220,7 @@ public class DirectoryUtilities {
      *             If an Exception occurred
      * @return Path
      */
-    public Path getTagFilePath(String basedir, String tagname) throws CdbServiceException {
+    public Path getTagFilePath(String basedir, String tagname) {
         final Path tagpath = getTagPath(basedir, tagname);
         final Path tagfilepath = Paths.get(tagpath.toString(), TAG_FILE);
         if (!tagfilepath.toFile().exists()) {
@@ -237,7 +238,7 @@ public class DirectoryUtilities {
      *             If an Exception occurred
      * @return Path
      */
-    public Path getIovFilePath(String basedir, String tagname) throws CdbServiceException {
+    public Path getIovFilePath(String basedir, String tagname) {
         final Path tagpath = getTagPath(basedir, tagname);
         final Path iovfilepath = Paths.get(tagpath.toString(), IOV_FILE);
         if (!iovfilepath.toFile().exists()) {
@@ -316,7 +317,7 @@ public class DirectoryUtilities {
      * @return Path
      * @throws CdbServiceException If an Exception occurred
      */
-    public Path createIfNotexistsTag(String basedir, String name) throws CdbServiceException {
+    public Path createIfNotexistsTag(String basedir, String name) {
         if (name == null) {
             throw new CdbServiceException("Cannot use null tag name");
         }
@@ -348,7 +349,7 @@ public class DirectoryUtilities {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public Path createIfNotexistsIov(String basedir, String name) throws CdbServiceException {
+    public Path createIfNotexistsIov(String basedir, String name) {
         if (name == null) {
             throw new CdbServiceException("Cannot use null tag name");
         }
@@ -455,5 +456,4 @@ public class DirectoryUtilities {
             }
         }
     }
-
 }

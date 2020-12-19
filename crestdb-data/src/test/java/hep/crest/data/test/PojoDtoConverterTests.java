@@ -78,16 +78,16 @@ public class PojoDtoConverterTests {
         final GlobalTag entity = DataGenerator.generateGlobalTag("GT-02");
         final GlobalTagDto dto = mapper.map(entity, GlobalTagDto.class);
         assertThat(entity.getName()).isEqualTo(dto.getName());
-        assertThat(entity.toString().length()).isGreaterThan(0);
-        assertThat(dto.toString().length()).isGreaterThan(0);
+        assertThat(entity.toString().length()).isPositive();
+        assertThat(dto.toString().length()).isPositive();
 
         final Instant now = Instant.now();
         final Date it = new Date(now.toEpochMilli());
 
         final GlobalTagDto dto1 = DataGenerator.generateGlobalTagDto("GT-02", it);
         assertThat(dto1.getDescription()).isEqualTo(dto.getDescription());
-        assertThat(dto1.equals(dto)).isFalse(); // Should be true
-        assertThat(dto1.hashCode()).isNotNull();
+        assertThat(dto1).isNotEqualTo(dto); // Should be true
+        assertThat(dto1.hashCode()).isNotZero();
     }
 
     @Test
@@ -95,14 +95,13 @@ public class PojoDtoConverterTests {
         final Tag entity = DataGenerator.generateTag("MT-02", "run");
         final TagDto dto = mapper.map(entity, TagDto.class);
         assertThat(entity.getName()).isEqualTo(dto.getName());
-        assertThat(entity.toString().length()).isGreaterThan(0);
-        assertThat(dto.toString().length()).isGreaterThan(0);
-        assertThat(dto.hashCode()).isNotNull();
+        assertThat(entity.toString().length()).isPositive();
+        assertThat(dto.toString().length()).isPositive();
+        assertThat(dto.hashCode()).isNotZero();
 
         final Tag entity1 = DataGenerator.generateTag("MT-02", "run");
         final TagDto dto1 = mapper.map(entity1, TagDto.class);
-        assertThat(dto1.equals(dto)).isTrue();
-        assertThat(dto1.equals(null)).isFalse();
+        assertThat(dto1).isNotNull().isEqualTo(dto);
     }
 
     @Test
@@ -116,12 +115,12 @@ public class PojoDtoConverterTests {
 
         final GlobalTagMap map1 = DataGenerator.generateMapping(gtag, tag1, id1);
         final GlobalTagMapDto dto = mapper.map(map1, GlobalTagMapDto.class);
-        assertThat(dto.toString().length()).isGreaterThan(0);
+        assertThat(dto.toString().length()).isPositive();
         assertThat(dto.getGlobalTagName()).isEqualTo(gtag.getName());
 
         final GlobalTagMapId id2 = new GlobalTagMapId(gtag.getName(), "aaa", "MY-TEST");
-        assertThat(id2.equals(id1)).isTrue();
-        assertThat(id2.hashCode()).isNotNull();
+        assertThat(id2).isEqualTo(id1);
+        assertThat(id2.hashCode()).isNotZero();
 
     }
 
@@ -139,10 +138,10 @@ public class PojoDtoConverterTests {
         assertThat(genid).isNotNull();
 
         assertThat(entity.getPayloadHash()).isEqualTo(dto.getPayloadHash());
-        assertThat(entity.toString().length()).isGreaterThan(0);
-        assertThat(dto.toString().length()).isGreaterThan(0);
-        assertThat(dto.hashCode()).isNotNull();
-        assertThat(entity.hashCode()).isNotNull();
+        assertThat(entity.toString().length()).isPositive();
+        assertThat(dto.toString().length()).isPositive();
+        assertThat(dto.hashCode()).isNotZero();
+        assertThat(entity.hashCode()).isNotZero();
     }
 
     @Test
@@ -154,10 +153,10 @@ public class PojoDtoConverterTests {
                 "test", time);
         final Payload entity = DataGenerator.generatePayload("myhash1", "test");
         assertThat(entity.getHash()).isEqualTo(dto.getHash());
-        assertThat(entity.toString().length()).isGreaterThan(0);
-        assertThat(dto.toString().length()).isGreaterThan(0);
-        assertThat(dto.hashCode()).isNotNull();
-        assertThat(entity.hashCode()).isNotNull();
+        assertThat(entity.toString().length()).isPositive();
+        assertThat(dto.toString().length()).isPositive();
+        assertThat(dto.hashCode()).isNotZero();
+        assertThat(entity.hashCode()).isNotZero();
     }
 
     @Test
@@ -169,24 +168,24 @@ public class PojoDtoConverterTests {
         final GlobalTagDto dto2 = DataGenerator.generateGlobalTagDto("MY-GTAG-02", it);
         final GlobalTagDto dto1bis = DataGenerator.generateGlobalTagDto("MY-GTAG-01", it);
         log.info("compare {} with {}", dto1, dto1bis);
-        assertThat(dto1.equals(dto1bis)).isTrue();
+        assertThat(dto1).isEqualTo(dto1bis);
         final GlobalTagSetDto setdto = new GlobalTagSetDto();
         setdto.datatype("globaltags");
         setdto.format("JSON");
         setdto.addResourcesItem(dto1).addResourcesItem(dto2);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto.toString().length()).isPositive();
+        assertThat(setdto.hashCode()).isNotZero();
         final List<GlobalTagDto> resources = setdto.getResources();
         for (final GlobalTagDto gtDto : resources) {
             if (gtDto.getName().equals("MY-GTAG-01")) {
-                assertThat(gtDto.equals(dto1)).isTrue();
+                assertThat(gtDto).isEqualTo(dto1);
             }
         }
         final GlobalTagSetDto setdto2 = new GlobalTagSetDto();
         setdto2.datatype("globaltags");
         setdto2.format("JSON");
         setdto2.setResources(resources);
-        assertThat(setdto2.equals(setdto)).isTrue();
+        assertThat(setdto2).isEqualTo(setdto);
     }
 
     @Test
@@ -195,28 +194,28 @@ public class PojoDtoConverterTests {
                 "a");
         final GlobalTagMapDto dto2 = DataGenerator.generateMappingDto("MY-GTAG-01", "S-02", "S",
                 "b");
-        assertThat(dto1.hashCode()).isNotNull();
+        assertThat(dto1.hashCode()).isNotZero();
         final GlobalTagMapDto dto1bis = DataGenerator.generateMappingDto("MY-GTAG-01", "T-01", "T",
                 "a");
-        assertThat(dto1.equals(dto1bis)).isTrue();
+        assertThat(dto1).isEqualTo(dto1bis);
 
         final GlobalTagMapSetDto setdto = new GlobalTagMapSetDto();
         setdto.datatype("maps");
         setdto.format("JSON");
         setdto.addResourcesItem(dto1).addResourcesItem(dto2);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto.toString().length()).isPositive();
+        assertThat(setdto.hashCode()).isNotZero();
         final List<GlobalTagMapDto> resources = setdto.getResources();
         for (final GlobalTagMapDto gtmapDto : resources) {
             if (gtmapDto.getGlobalTagName().equals("MY-GTAG-01")) {
-                assertThat(gtmapDto.equals(dto1)).isTrue();
+                assertThat(gtmapDto).isEqualTo(dto1);
             }
         }
         final GlobalTagMapSetDto setdto2 = new GlobalTagMapSetDto();
         setdto2.datatype("maps");
         setdto2.format("JSON");
         setdto2.setResources(resources);
-        assertThat(setdto2.equals(setdto)).isTrue();
+        assertThat(setdto2).isEqualTo(setdto);
     }
 
     @Test
@@ -227,19 +226,19 @@ public class PojoDtoConverterTests {
         setdto.datatype("iovs");
         setdto.format("JSON");
         setdto.addResourcesItem(dto1).addResourcesItem(dto2);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto.toString().length()).isPositive();
+        assertThat(setdto.hashCode()).isNotZero();
         final List<IovDto> resources = setdto.getResources();
         for (final IovDto iovDto : resources) {
             if (iovDto.getPayloadHash().equals("MYHASH1")) {
-                assertThat(iovDto.equals(dto1)).isTrue();
+                assertThat(iovDto).isEqualTo(dto1);
             }
         }
         final IovSetDto setdto2 = new IovSetDto();
         setdto2.datatype("iovs");
         setdto2.format("JSON");
         setdto2.setResources(resources);
-        assertThat(setdto2.equals(setdto)).isTrue();
+        assertThat(setdto2).isEqualTo(setdto);
     }
 
     @Test
@@ -250,20 +249,20 @@ public class PojoDtoConverterTests {
         setdto.datatype("tags");
         setdto.format("JSON");
         setdto.addResourcesItem(dto1).addResourcesItem(dto2);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto.toString().length()).isPositive();
+        assertThat(setdto.hashCode()).isNotZero();
 
         final List<TagDto> resources = setdto.getResources();
         for (final TagDto tagDto : resources) {
             if (tagDto.getName().equals("MY-TAG-01")) {
-                assertThat(tagDto.equals(dto1)).isTrue();
+                assertThat(tagDto).isEqualTo(dto1);
             }
         }
         final TagSetDto setdto2 = new TagSetDto();
         setdto2.datatype("tags");
         setdto2.format("JSON");
         setdto2.setResources(resources);
-        assertThat(setdto2.equals(setdto)).isTrue();
+        assertThat(setdto2).isEqualTo(setdto);
     }
 
     @Test
@@ -275,8 +274,8 @@ public class PojoDtoConverterTests {
         setdto.datatype("tags");
         setdto.format("JSON");
         setdto.addResourcesItem(dto1).addResourcesItem(dto2);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto.toString().length()).isPositive();
+        assertThat(setdto.hashCode()).isNotZero();
     }
 
     @Test
@@ -285,12 +284,12 @@ public class PojoDtoConverterTests {
         final Date end = new Date(start.getTime()+3600000);
         final RunLumiInfoDto dto1 = DataGenerator.generateRunLumiInfoDto(new BigDecimal(start.getTime()), new BigDecimal(end.getTime()), new BigDecimal(100L));
 
-        assertThat(dto1.toString().length()).isGreaterThan(0);
-        assertThat(dto1.hashCode()).isNotNull();
+        assertThat(dto1.toString().length()).isPositive();
+        assertThat(dto1.hashCode()).isNotZero();
         final RunLumiInfo entity = mapper.map(dto1, RunLumiInfo.class);
         assertThat(dto1.getRunNumber()).isEqualTo(entity.getRunNumber());
-        assertThat(entity.toString().length()).isGreaterThan(0);
-        assertThat(entity.hashCode()).isNotNull();
+        assertThat(entity.toString().length()).isPositive();
+        assertThat(entity.hashCode()).isNotZero();
         
         final RunLumiSetDto setdto = new RunLumiSetDto();
         setdto.datatype("RunLumiSetDto");
@@ -304,8 +303,10 @@ public class PojoDtoConverterTests {
         
         final RunLumiSetDto setdto2 = new RunLumiSetDto();
         setdto2.datatype("RunLumiSetDto");
+        setdto2.filter(filterm);
+        setdto2.format("RunInfo");
         setdto2.addResourcesItem(dto1);
-        assertThat(setdto2.equals(setdto)).isFalse();
+        assertThat(setdto2).isEqualTo(setdto);
         assertThat(setdto.toString()).isNotNull();
         setdto2.filter(setdto.getFilter());
         setdto2.format(setdto.getFormat());
@@ -316,21 +317,21 @@ public class PojoDtoConverterTests {
         final RunLumiInfoDto dto1 = DataGenerator.generateRunLumiInfoDto(new BigDecimal(2000L),
                 new BigDecimal(33333L), new BigDecimal(200L));
 
-        assertThat(dto1.toString().length()).isGreaterThan(0);
-        assertThat(dto1.hashCode()).isNotNull();
+        assertThat(dto1.toString().length()).isPositive();
+        assertThat(dto1.hashCode()).isNotZero();
         final RunLumiSetDto setdto = new RunLumiSetDto();
         setdto.datatype("runs").format("json");
         setdto.addResourcesItem(dto1);
         setdto.size(1L);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
+        assertThat(setdto.toString().length()).isPositive();
 
         final RunLumiSetDto setdto1 = new RunLumiSetDto();
         setdto1.datatype("runs").format("json");
         setdto1.addResourcesItem(dto1);
         setdto1.size(1L);
 
-        assertThat(setdto.equals(setdto1)).isTrue();
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto).isEqualTo(setdto1);
+        assertThat(setdto.hashCode()).isNotZero();
 
     }
 
@@ -339,12 +340,12 @@ public class PojoDtoConverterTests {
         final FolderDto dto1 = DataGenerator.generateFolderDto("T0BLOB", "/MDT/T0BLOB",
                 "COOLOFL_MDT");
 
-        assertThat(dto1.toString().length()).isGreaterThan(0);
-        assertThat(dto1.hashCode()).isNotNull();
+        assertThat(dto1.toString().length()).isPositive();
+        assertThat(dto1.hashCode()).isNotZero();
         final CrestFolders entity = mapper.map(dto1, CrestFolders.class);
         assertThat(dto1.getNodeFullpath()).isEqualTo(entity.getNodeFullpath());
-        assertThat(entity.toString().length()).isGreaterThan(0);
-        assertThat(entity.hashCode()).isNotNull();
+        assertThat(entity.toString().length()).isPositive();
+        assertThat(entity.hashCode()).isNotZero();
         
         dto1.setGroupRole("somerole");
         dto1.setNodeDescription("some node desc");
@@ -355,7 +356,7 @@ public class PojoDtoConverterTests {
   
         final FolderDto dto2 = DataGenerator.generateFolderDto("T0BLOB", "/MDT/T0BLOB",
                 "COOLOFL_MDT");
-        assertThat(dto1.equals(dto2)).isFalse();
+        assertThat(dto1).isNotEqualTo(dto2);
         
     }
 
@@ -364,21 +365,21 @@ public class PojoDtoConverterTests {
         final FolderDto dto1 = DataGenerator.generateFolderDto("T0BLOB", "/MDT/T0BLOB",
                 "COOLOFL_MDT");
 
-        assertThat(dto1.toString().length()).isGreaterThan(0);
-        assertThat(dto1.hashCode()).isNotNull();
+        assertThat(dto1.toString().length()).isPositive();
+        assertThat(dto1.hashCode()).isNotZero();
         final FolderSetDto setdto = new FolderSetDto();
         setdto.datatype("folders").format("json");
         setdto.addResourcesItem(dto1);
         setdto.size(1L);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
+        assertThat(setdto.toString().length()).isPositive();
 
         final FolderSetDto setdto1 = new FolderSetDto();
         setdto1.datatype("folders").format("json");
         setdto1.addResourcesItem(dto1);
         setdto1.size(1L);
 
-        assertThat(setdto.equals(setdto1)).isTrue();
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto).isEqualTo(setdto1);
+        assertThat(setdto.hashCode()).isNotZero();
     }
 
     @Test
@@ -393,17 +394,17 @@ public class PojoDtoConverterTests {
                 time);
         log.info("compare {} with {} having hash {} and {}", dto1, dto1bis, dto1.hashCode(),
                 dto1bis.hashCode());
-        assertThat(dto1.getHash().equals(dto1bis.getHash())).isTrue();
+        assertThat(dto1.getHash()).isEqualTo(dto1bis.getHash());
         final PayloadSetDto setdto = new PayloadSetDto();
         setdto.datatype("payloads");
         setdto.format("JSON");
         setdto.addResourcesItem(dto1);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto.toString().length()).isPositive();
+        assertThat(setdto.hashCode()).isNotZero();
         final List<PayloadDto> resources = setdto.getResources();
         for (final PayloadDto gtDto : resources) {
             if (gtDto.getHash().equals("somehash")) {
-                assertThat(gtDto.equals(dto1)).isTrue();
+                assertThat(gtDto).isEqualTo(dto1);
             }
         }
     }
@@ -434,18 +435,18 @@ public class PojoDtoConverterTests {
         psetdto.format("iovpayloaddto");
         
         assertThat(psetdto.getResources()).isNotNull();
-        assertThat(ipdto1.equals(ipdto2)).isFalse();
+        assertThat(ipdto1).isNotEqualTo(ipdto2);
         
         final List<IovPayloadDto> plist = new ArrayList<>();
         plist.add(ipdto1);
         plist.add(ipdto2);
         final IovPayloadSetDto psetdto1 = new IovPayloadSetDto();
-        psetdto.resources(plist);
-        psetdto.setDatatype("IovPayloadSetDto");
-        psetdto.setFormat("iovpayloaddto");
+        psetdto1.resources(plist);
+        psetdto1.setDatatype("IovPayloadSetDto");
+        psetdto1.setFormat("iovpayloaddto");
         
-        assertThat(psetdto.equals(psetdto1)).isFalse();
-        assertThat(psetdto.toString().length()).isGreaterThan(0);
+        assertThat(psetdto).isEqualTo(psetdto1);
+        assertThat(psetdto.toString().length()).isPositive();
     }
 
     @Test
@@ -462,12 +463,12 @@ public class PojoDtoConverterTests {
         setdto.datatype("TagMetaSetDto");
         setdto.format("tagmetas");
         setdto.addResourcesItem(dto1);
-        assertThat(setdto.toString().length()).isGreaterThan(0);
-        assertThat(setdto.hashCode()).isNotNull();
+        assertThat(setdto.toString().length()).isPositive();
+        assertThat(setdto.hashCode()).isPositive();
         final List<TagMetaDto> resources = setdto.getResources();
         for (final TagMetaDto gtDto : resources) {
             if (gtDto.getTagName().equals("A_TAG")) {
-                assertThat(gtDto.equals(dto1)).isTrue();
+                assertThat(gtDto).isEqualTo(dto1);
             }
         }
     }
@@ -479,39 +480,39 @@ public class PojoDtoConverterTests {
         groups.add(new BigDecimal(100L));
         final GroupDto dto = new GroupDto();
         dto.groups(groups);
-        assertThat(dto.getGroups().size()).isGreaterThan(0);
+        assertThat(dto.getGroups().size()).isPositive();
 
         final HTTPResponse resp = new HTTPResponse();
         resp.action("test");
         resp.code(200);
         resp.message("a successful test");
         resp.id("ahash");
-        assertThat(resp.toString().length()).isGreaterThan(0);
+        assertThat(resp.toString().length()).isPositive();
 
         final PayloadTagInfoDto ptdto = new PayloadTagInfoDto();
         ptdto.avgvolume(1.0F);
         ptdto.niovs(10);
         ptdto.tagname("A-TAG");
         ptdto.totvolume(1.2F);
-        assertThat(ptdto.toString().length()).isGreaterThan(0);
+        assertThat(ptdto.toString().length()).isPositive();
         ptdto.setAvgvolume(1.1F);
         ptdto.setNiovs(11);
         ptdto.setTagname("A-TAG-01");
         ptdto.setTotvolume(1.3F);
-        assertThat(ptdto.toString().length()).isGreaterThan(0);
-        assertThat(ptdto.hashCode()).isNotNull();
+        assertThat(ptdto.toString().length()).isPositive();
+        assertThat(ptdto.hashCode()).isNotZero();
         
         final PayloadTagInfoDto ptdto2 = new PayloadTagInfoDto();
         ptdto2.avgvolume(ptdto.getAvgvolume());
         ptdto2.tagname(ptdto.getTagname());
         ptdto2.totvolume(ptdto.getTotvolume());
         ptdto2.niovs(ptdto.getNiovs());
-        assertThat(ptdto2.equals(ptdto)).isTrue();
+        assertThat(ptdto2).isEqualTo(ptdto);
         
         final CrestUser user = new CrestUser("user", "password");
         user.setId("someid");
         user.setUsername("anothername");
-        assertThat(user.toString().length()).isGreaterThan(0);
+        assertThat(user.toString().length()).isPositive();
         user.setPassword("anewpass");
         assertThat(user.getId()).isEqualTo("someid");
         assertThat(user.getUsername()).isEqualTo("anothername");
@@ -521,7 +522,7 @@ public class PojoDtoConverterTests {
         
         final CrestRoles role = new CrestRoles("roleid", "admin");
         role.setRole("guest");
-        assertThat(role.toString().length()).isGreaterThan(0);
+        assertThat(role.toString().length()).isPositive();
         role.setId("anotherroleid");
         assertThat(role.getId()).isEqualTo("anotherroleid");
         assertThat(role.getRole()).isEqualTo("guest");

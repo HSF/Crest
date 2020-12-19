@@ -197,13 +197,13 @@ public final class RunLumiInfoPredicates {
         BooleanExpression pred = null;
 
         if (oper.equals("<")) {
-            pred = QRunLumiInfo.runLumiInfo.insertionTime.lt(new Date(new Long(num)));
+            pred = QRunLumiInfo.runLumiInfo.insertionTime.lt(new Date(Long.valueOf(num)));
         }
         else if (oper.equals(">")) {
-            pred = QRunLumiInfo.runLumiInfo.insertionTime.gt(new Date(new Long(num)));
+            pred = QRunLumiInfo.runLumiInfo.insertionTime.gt(new Date(Long.valueOf(num)));
         }
         else if (oper.equals(":")) {
-            pred = QRunLumiInfo.runLumiInfo.insertionTime.eq(new Date(new Long(num)));
+            pred = QRunLumiInfo.runLumiInfo.insertionTime.eq(new Date(Long.valueOf(num)));
         }
         return pred;
     }

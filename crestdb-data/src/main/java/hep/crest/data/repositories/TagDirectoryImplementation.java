@@ -67,7 +67,7 @@ public class TagDirectoryImplementation {
             return true;
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot find tag directory {} : {}", id, e);
+            log.error("Cannot find tag directory {} : {}", id, e.getMessage());
             return false;
         }
     }
@@ -85,7 +85,7 @@ public class TagDirectoryImplementation {
             return readTagFile(tagfilepath);
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot find tag {} : {}", id, e);
+            log.error("Cannot find tag {} : {}", id, e.getMessage());
         }
         return null;
     }
@@ -110,7 +110,7 @@ public class TagDirectoryImplementation {
             return readValue;
         }
         catch (final IOException e) {
-            log.error("Error in reading tag file from path {}: {}", tagfilepath, e);
+            log.error("Error in reading tag file from path {}: {}", tagfilepath, e.getMessage());
         }
         return null;
     }
@@ -121,7 +121,7 @@ public class TagDirectoryImplementation {
     public List<TagDto> findAll() {
         List<String> tagnames;
         tagnames = dirtools.getTagDirectories();
-        return tagnames.stream().map(x -> this.findOne(x)).collect(Collectors.toList());
+        return tagnames.stream().map(this::findOne).collect(Collectors.toList());
     }
 
     /**
@@ -141,8 +141,7 @@ public class TagDirectoryImplementation {
         final List<String> filteredByNameList;
         filteredByNameList = dirtools.getTagDirectories().stream().filter(x -> x.matches(name))
                 .collect(Collectors.toList());
-        return filteredByNameList.stream().map(x -> this.findOne(x)).collect(Collectors.toList());
-
+        return filteredByNameList.stream().map(this::findOne).collect(Collectors.toList());
     }
 
     /**
@@ -166,7 +165,7 @@ public class TagDirectoryImplementation {
             }
         }
         catch (final RuntimeException | IOException x) {
-            log.error("Cannot save tag dto {} : {}", entity, x);
+            log.error("Cannot save tag dto {} : {}", entity, x.getMessage());
         }
         return null;
     }
@@ -179,7 +178,7 @@ public class TagDirectoryImplementation {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    protected void writeTagFile(String jsonstr, Path filepath) throws CdbServiceException {
+    protected void writeTagFile(String jsonstr, Path filepath) {
         try (BufferedWriter writer = Files.newBufferedWriter(filepath, dirtools.getCharset())) {
             writer.write(jsonstr);
         }
@@ -187,5 +186,4 @@ public class TagDirectoryImplementation {
             throw new CdbServiceException("Cannot write " + jsonstr + " in JSON file", x);
         }
     }
-
 }

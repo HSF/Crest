@@ -176,7 +176,7 @@ public class TestCrestServices {
         try {
             final Iterable<Iov> iovlist = iovService.findAllIovs(null, PageRequest.of(0,10));
             final List<IovDto> dtolist = edh.entityToDtoList(iovlist, IovDto.class);
-            assertThat(dtolist.size()).isGreaterThan(0);
+            assertThat(dtolist.size()).isPositive();
         }
         catch (final RuntimeException e) {
             log.error("Exception in iov retrieval {}", e);

@@ -64,7 +64,7 @@ public class PayloadDirectoryImplementation {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public PayloadDto find(String hash) throws CdbServiceException {
+    public PayloadDto find(String hash) {
         final Path payloadpath = dirtools.getPayloadPath();
         final String hashdir = dirtools.hashdir(hash);
         final Path payloadhashpath = Paths.get(payloadpath.toString(), hashdir);

@@ -55,34 +55,6 @@ public class TagMeta implements java.io.Serializable {
     private Date insertionTime;
 
     /**
-     * Default ctor.
-     */
-    public TagMeta() {
-    }
-
-    /**
-     * @param tagName
-     *            the String
-     * @param description
-     *            the String
-     * @param chansize
-     *            the Integer
-     * @param colsize
-     *            the Integer
-     * @param tagInfo
-     *            the Blob
-     */
-    public TagMeta(String tagName, String description, Integer chansize, Integer colsize,
-            Blob tagInfo) {
-        super();
-        this.tagName = tagName;
-        this.description = description;
-        this.chansize = chansize;
-        this.colsize = colsize;
-        this.tagInfo = tagInfo;
-    }
-
-    /**
      * @return the tagName
      */
     @Id

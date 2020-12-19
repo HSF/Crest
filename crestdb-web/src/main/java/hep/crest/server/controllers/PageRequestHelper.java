@@ -45,7 +45,7 @@ public class PageRequestHelper {
     /**
      * The sort pattern.
      */
-    private static final String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)([ASC|DESC]+?),";
+    private static final String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)(ASC|DESC),";
 
     /**
      * Maximum page size.
@@ -160,7 +160,7 @@ public class PageRequestHelper {
             final String varname = matcher.group(1).toLowerCase(Locale.ENGLISH);
             final String op = matcher.group(2);
             String val = matcher.group(3);
-            val = val.replaceAll("\\*", "\\%");
+            val = val.replace("\\*", "\\%");
             if (dtformatter != null && varname.contains("time")) {
                 final ZonedDateTime zdtInstanceAtOffset = ZonedDateTime.parse(val, dtformatter);
                 final ZonedDateTime zdtInstanceAtUTC = zdtInstanceAtOffset

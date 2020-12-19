@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
 
-import hep.crest.data.repositories.externals.PayloadRequests;
+import hep.crest.data.repositories.externals.SqlRequests;
 
 public class JDBCExample {
 
@@ -85,7 +85,7 @@ public class JDBCExample {
                 sfis.close();
                 System.out.println("Start insertion");
                 // Now insert the row into imageslo
-                final String sql = PayloadRequests.getInsertAllQuery("PAYLOAD");
+                final String sql = SqlRequests.getInsertAllQuery("PAYLOAD");
                 final PreparedStatement ps = conn.prepareStatement(sql);
                 
                 
@@ -110,7 +110,7 @@ public class JDBCExample {
 
                 // Get the Large Object Manager to perform operations with
                 final LargeObjectManager rlobj = conn.unwrap(org.postgresql.PGConnection.class).getLargeObjectAPI();
-                final String rsql = PayloadRequests.getFindDataQuery("PAYLOAD");
+                final String rsql = SqlRequests.getFindDataQuery("PAYLOAD");
                 final PreparedStatement rps = conn.prepareStatement(rsql);
                 rps.setString(1, "ea0fcacc5e798719f4b84f06053ab377cb2ad9504a874d07aca509308bcdd057");
                 final ResultSet rs = rps.executeQuery();

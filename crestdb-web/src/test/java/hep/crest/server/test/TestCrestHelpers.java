@@ -39,10 +39,10 @@ public class TestCrestHelpers {
 
         String by="name:TEST,insertiontime>0";
         List<SearchCriteria> clist = prh.createMatcherCriteria(by,"ms");
-        assertThat(clist.size()).isGreaterThan(0);
+        assertThat(clist.size()).isPositive();
 
         String cond = prh.getParam(clist,"name");
-        assertThat(cond.length()).isGreaterThan(0);
+        assertThat(cond.length()).isPositive();
 
         IFilteringCriteria filtering = new GlobalTagFiltering();
         BooleanExpression exp = prh.buildWhere(filtering, clist);

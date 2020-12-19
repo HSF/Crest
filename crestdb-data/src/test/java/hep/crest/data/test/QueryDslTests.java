@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class QueryDslTests {
 
- 
+
     private static final String SORT_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:)([ASC|DESC]+?),";
     private static final String QRY_PATTERN = "([a-zA-Z0-9_\\-\\.]+?)(:|<|>)([a-zA-Z0-9_\\-\\/\\.\\*\\%]+?),";
 
@@ -77,7 +77,7 @@ public class QueryDslTests {
 
     @Autowired
     private TagRepository tagrepository;
-    
+
     @Autowired
     private IovRepository iovrepository;
 
@@ -91,7 +91,7 @@ public class QueryDslTests {
     private FolderRepository folderRepository;
 
     @Autowired
-    @Qualifier("dataSource") 
+    @Qualifier("dataSource")
     private DataSource mainDataSource;
 
     @Before
@@ -126,7 +126,8 @@ public class QueryDslTests {
         final IFilteringCriteria filter = new GlobalTagFiltering();
         final PageRequest preq = createPageRequest(0, 10, "name:ASC");
 
-        final List<SearchCriteria> params = createMatcherCriteria("name:M,workflow:%,scenario:%,release:rel,insertionTime>0");
+        final List<SearchCriteria> params = createMatcherCriteria("name:M,workflow:%,scenario:%,release:rel,"
+                                                                  + "insertionTime>0");
         final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
 
@@ -139,12 +140,12 @@ public class QueryDslTests {
             }
         }
         final Page<GlobalTag> dtolist = globaltagrepository.findAll(wherepred, preq);
-        assertThat(dtolist.getSize()).isGreaterThan(0);
-        
+        assertThat(dtolist.getSize()).isPositive();
+
         final GlobalTag loaded = globaltagrepository.findByName("MY-TEST-GT-01");
         assertThat(loaded).isNotNull();
     }
-    
+
     @Test
     public void testGlobalTags2() throws Exception {
         final GlobalTag gtag = DataGenerator.generateGlobalTag("MY-TEST-GT-02");
@@ -152,7 +153,8 @@ public class QueryDslTests {
         final IFilteringCriteria filter = new GlobalTagFiltering();
         final PageRequest preq = createPageRequest(0, 10, "workflow:ASC");
 
-        final List<SearchCriteria> params = createMatcherCriteria("name:M,scenario:%,insertionTime>0,insertionTime<0,insertionTime:0");
+        final List<SearchCriteria> params = createMatcherCriteria("name:M,scenario:%,insertionTime>0,insertionTime<0,"
+                                                                  + "insertionTime:0");
         final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
 
@@ -165,9 +167,10 @@ public class QueryDslTests {
             }
         }
         final Page<GlobalTag> dtolist = globaltagrepository.findAll(wherepred, preq);
-        assertThat(dtolist.getSize()).isGreaterThan(0);
-        
-        final List<SearchCriteria> params2 = createMatcherCriteria("type:T,scenario:%,validity>0,validity<0,validity:0");
+        assertThat(dtolist.getSize()).isPositive();
+
+        final List<SearchCriteria> params2 = createMatcherCriteria("type:T,scenario:%,validity>0,validity<0,"
+                                                                   + "validity:0");
         final List<BooleanExpression> expressions2 = filter.createFilteringConditions(params2);
         wherepred = null;
 
@@ -180,17 +183,18 @@ public class QueryDslTests {
             }
         }
         final Page<GlobalTag> dtolist2 = globaltagrepository.findAll(wherepred, preq);
-        assertThat(dtolist2.getSize()).isGreaterThanOrEqualTo(0);
+        assertThat(dtolist2.getSize()).isNotNegative();
     }
 
     @Test
     public void testTags() throws Exception {
-        final Tag tag = DataGenerator.generateTag("MY-TEST-01","time");
+        final Tag tag = DataGenerator.generateTag("MY-TEST-01", "time");
         tagrepository.save(tag);
         final IFilteringCriteria filter = new TagFiltering();
         final PageRequest preq = createPageRequest(0, 10, "name:ASC");
 
-        List<SearchCriteria> params = createMatcherCriteria("name:M,timetype:time,objecttype:%,insertiontime>-1,insertiontime<2,insertiontime:0");
+        List<SearchCriteria> params = createMatcherCriteria("name:M,timetype:time,objecttype:%,insertiontime>-1,"
+                                                            + "insertiontime<2,insertiontime:0");
         List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
 
@@ -203,9 +207,10 @@ public class QueryDslTests {
             }
         }
         final Page<Tag> dtolist = tagrepository.findAll(wherepred, preq);
-        assertThat(dtolist.getSize()).isGreaterThan(0);
-        
-        params = createMatcherCriteria("name:M,timetype:time,end:%,modificationtime>0,modificationtime:0,modificationtime<0");
+        assertThat(dtolist.getSize()).isPositive();
+
+        params = createMatcherCriteria("name:M,timetype:time,end:%,modificationtime>0,modificationtime:0,"
+                                       + "modificationtime<0");
         expressions = filter.createFilteringConditions(params);
         wherepred = null;
 
@@ -218,12 +223,12 @@ public class QueryDslTests {
             }
         }
         final Page<Tag> dtolist2 = tagrepository.findAll(wherepred, preq);
-        assertThat(dtolist2.getSize()).isGreaterThanOrEqualTo(0);
-        
+        assertThat(dtolist2.getSize()).isNotNegative();
+
         final String dumpcriteria = params.get(0).toString();
-        assertThat(dumpcriteria.length()).isGreaterThan(0);
+        assertThat(dumpcriteria.length()).isPositive();
         final String dumpby = params.get(0).dump();
-        assertThat(dumpby.length()).isGreaterThan(0);
+        assertThat(dumpby.length()).isPositive();
     }
 
     @Test
@@ -233,7 +238,7 @@ public class QueryDslTests {
 
         final PayloadDataDBImpl repobean = new PayloadDataDBImpl(mainDataSource);
         final PayloadDto dto = DataGenerator.generatePayloadDto("myhash3", "myrepodata", "mystreamer",
-                "test",time);
+                "test", time);
         log.debug("Save payload {}", dto);
         if (dto.getSize() == null) {
             dto.setSize(dto.getData().length);
@@ -243,18 +248,18 @@ public class QueryDslTests {
 
         final Tag mtag = DataGenerator.generateTag("A-TEST-10", "test");
         final Tag savedtag = tagrepository.save(mtag);
-        IovId id = new IovId("A-TEST-10",new BigDecimal(999L), new Date());
-        Iov miov = new Iov(id,savedtag,saved.getHash());
+        IovId id = new IovId("A-TEST-10", new BigDecimal(999L), new Date());
+        Iov miov = new Iov(id, savedtag, saved.getHash());
         Iov savediov = iovrepository.save(miov);
-        log.info("Saved iov {}",savediov);
-        id = new IovId("A-TEST-10",new BigDecimal(2000L), new Date());
-        miov = new Iov(id,savedtag,saved.getHash());
+        log.info("Saved iov {}", savediov);
+        id = new IovId("A-TEST-10", new BigDecimal(2000L), new Date());
+        miov = new Iov(id, savedtag, saved.getHash());
         savediov = iovrepository.save(miov);
-        log.info("Saved iov {}",savediov);
+        log.info("Saved iov {}", savediov);
 
         final List<Iov> iovlist = iovrepository.findByIdTagName("A-TEST-10");
-        assertThat(iovlist.size()).isGreaterThan(0);
-    
+        assertThat(iovlist.size()).isPositive();
+
         final IFilteringCriteria filter = new IovFiltering();
         final PageRequest preq = createPageRequest(0, 10, "id.since:ASC");
 
@@ -271,7 +276,7 @@ public class QueryDslTests {
             }
         }
         final Page<Iov> dtolist = iovrepository.findAll(wherepred, preq);
-        assertThat(dtolist.getSize()).isGreaterThan(0);
+        assertThat(dtolist.getSize()).isPositive();
 
         params = createMatcherCriteria("tagname:A-TEST-10,since:100,insertiontime<2,insertiontime:0");
         expressions = filter.createFilteringConditions(params);
@@ -286,24 +291,24 @@ public class QueryDslTests {
             }
         }
         final Page<Iov> dtolist2 = iovrepository.findAll(wherepred, preq);
-        assertThat(dtolist2.getSize()).isGreaterThanOrEqualTo(0);
+        assertThat(dtolist2.getSize()).isNotNegative();
     }
-    
+
     @Test
     public void testMappingTags() throws Exception {
         final GlobalTag gtag = DataGenerator.generateGlobalTag("MY-TEST-GT-02");
         globaltagrepository.save(gtag);
-        final Tag tag1 = DataGenerator.generateTag("MY-TEST-02","time");
-        final Tag tag2 = DataGenerator.generateTag("MY-SECOND-03","time");
+        final Tag tag1 = DataGenerator.generateTag("MY-TEST-02", "time");
+        final Tag tag2 = DataGenerator.generateTag("MY-SECOND-03", "time");
         tagrepository.save(tag1);
         tagrepository.save(tag2);
-        
+
         final GlobalTagMapId id1 = new GlobalTagMapId();
         id1.setGlobalTagName(gtag.getName());
         id1.setLabel("MY-TEST");
         id1.setRecord("aaa");
         final GlobalTagMap map1 = DataGenerator.generateMapping(gtag, tag1, id1);
-        
+
         final GlobalTagMapId id2 = new GlobalTagMapId();
         id2.setGlobalTagName(gtag.getName());
         id2.setLabel("MY-SECOND");
@@ -312,29 +317,31 @@ public class QueryDslTests {
 
         tagmaprepository.save(map1);
         tagmaprepository.save(map2);
-        
+
         final List<GlobalTagMap> gmlist = tagmaprepository.findByGlobalTagName(gtag.getName());
-        assertThat(gmlist.size()).isGreaterThan(0);
+        assertThat(gmlist.size()).isPositive();
 
         final List<GlobalTagMap> gmlistbytag = tagmaprepository.findByTagName(tag1.getName());
-        assertThat(gmlistbytag.size()).isGreaterThan(0);
+        assertThat(gmlistbytag.size()).isPositive();
 
-        final List<GlobalTagMap> gmlistbygtaglabeltag = tagmaprepository.findByGlobalTagNameAndLabelAndTagNameLike(gtag.getName(), "MY-TEST", "%");
-        assertThat(gmlistbygtaglabeltag.size()).isGreaterThan(0);
+        final List<GlobalTagMap> gmlistbygtaglabeltag =
+                tagmaprepository.findByGlobalTagNameAndLabelAndTagNameLike(gtag.getName(), "MY-TEST", "%");
+        assertThat(gmlistbygtaglabeltag.size()).isPositive();
     }
-    
+
     @Test
     public void testRunLumi() throws Exception {
         final Date start = new Date();
         final Date end = new Date(start.getTime()+3600000);
         final RunLumiInfo entity = DataGenerator.generateRunLumiInfo(new BigDecimal(start.getTime()), new BigDecimal(end.getTime()), new BigDecimal(100L));
-        
         runrepository.save(entity);
 
         final IFilteringCriteria filter = new RunLumiInfoFiltering();
         final PageRequest preq = createPageRequest(0, 10, "runNumber:ASC");
 
-        final List<SearchCriteria> params = createMatcherCriteria("runNumber>10,runNumber<1000,startTime>0,endtime>0,startTime<"+end.getTime()+",endtime<"+(end.getTime()+1));
+        final List<SearchCriteria> params = createMatcherCriteria(
+                "runNumber>10,runNumber<1000,startTime>0,endtime>0,startTime<" + end.getTime() + ",endtime<" + (
+                        end.getTime() + 1));
         final List<BooleanExpression> expressions = filter.createFilteringConditions(params);
         BooleanExpression wherepred = null;
 
@@ -347,9 +354,10 @@ public class QueryDslTests {
             }
         }
         final Page<RunLumiInfo> dtolist = runrepository.findAll(wherepred, preq);
-        assertThat(dtolist.getSize()).isGreaterThan(0);
+        assertThat(dtolist.getSize()).isPositive();
 
-        final List<SearchCriteria> params1 = createMatcherCriteria("runNumber:100,startTime:"+start.getTime()+",endtime:"+end.getTime());
+        final List<SearchCriteria> params1 = createMatcherCriteria(
+                "runNumber:100,startTime:" + start.getTime() + ",endtime:" + end.getTime());
         final List<BooleanExpression> expressions1 = filter.createFilteringConditions(params1);
         BooleanExpression wherepred1 = null;
 
@@ -362,15 +370,15 @@ public class QueryDslTests {
             }
         }
         final Page<RunLumiInfo> dtolist1 = runrepository.findAll(wherepred1, preq);
-        assertThat(dtolist1.getSize()).isGreaterThanOrEqualTo(0);
-
+        assertThat(dtolist1.getSize()).isNotNegative();
     }
-    
+
     @Test
     public void testFolders() throws Exception {
-        final CrestFolders folder = DataGenerator.generateFolder("MDTRT","/MDT/RT","COOLOFL_MDT");
+        final CrestFolders folder = DataGenerator.generateFolder("MDTRT", "/MDT/RT", "COOLOFL_MDT");
         folderRepository.save(folder);
-        final CrestFolders folder1 = DataGenerator.generateFolder("MUONALIGNBARREL","/MUONALIGN/MDT/BARREL","COOLOFL_MUONALIGN");
+        final CrestFolders folder1 = DataGenerator.generateFolder("MUONALIGNBARREL", "/MUONALIGN/MDT/BARREL",
+                "COOLOFL_MUONALIGN");
         folderRepository.save(folder1);
         final IFilteringCriteria filter = new FolderFiltering();
         final PageRequest preq = createPageRequest(0, 10, "nodeFullpath:ASC");
@@ -389,11 +397,11 @@ public class QueryDslTests {
         }
         log.info("Loading folders using where pred {}", wherepred.toString());
         final Page<CrestFolders> dtolist = folderRepository.findAll(wherepred, preq);
-        assertThat(dtolist.getSize()).isGreaterThan(0);
-        
+        assertThat(dtolist.getSize()).isPositive();
+
     }
 
-    
+
     protected PageRequest createPageRequest(Integer page, Integer size, String sort) {
 
         final Pattern sortpattern = Pattern.compile(SORT_PATTERN);

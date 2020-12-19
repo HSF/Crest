@@ -29,9 +29,18 @@ public final class TagMetaRequests {
      * @param tablename the String
      * @return String
      */
+    public static final String getFindTagInfoQuery(String tablename) {
+        return "select TAG_INFO from "
+               + tablename + " where TAG_NAME=?";
+    }
+
+    /**
+     * @param tablename the String
+     * @return String
+     */
     public static final String getInsertAllQuery(String tablename) {
         return "INSERT INTO " + tablename
-                + " (TAG_NAME, DESCRIPTION, CHANNEL_SIZE, COLUMN_SIZE, TAG_INFO, INSERTION_TIME) VALUES (?,?,?,?,?,?)";
+                + " (DESCRIPTION, CHANNEL_SIZE, COLUMN_SIZE, TAG_INFO, INSERTION_TIME, TAG_NAME) VALUES (?,?,?,?,?,?)";
 
     }
 

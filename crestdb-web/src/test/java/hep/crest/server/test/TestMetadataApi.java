@@ -66,7 +66,7 @@ public class TestMetadataApi {
             RunLumiSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, RunLumiSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
         log.info("Retrieve runs in a range in time");
@@ -81,7 +81,7 @@ public class TestMetadataApi {
             RunLumiSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, RunLumiSetDto.class);
-            assertThat(ok.getSize()).isGreaterThanOrEqualTo(0);
+            assertThat(ok.getSize()).isNotNegative();
         }
 
         log.info("Retrieve runs as run-lumi range");
@@ -96,7 +96,7 @@ public class TestMetadataApi {
             RunLumiSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, RunLumiSetDto.class);
-            assertThat(ok.getSize()).isGreaterThanOrEqualTo(0);
+            assertThat(ok.getSize()).isNotNegative();
         }
 
     }

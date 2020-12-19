@@ -9,6 +9,7 @@ import hep.crest.data.pojo.GlobalTagMapId;
 import hep.crest.data.pojo.IovId;
 import hep.crest.data.pojo.Payload;
 import hep.crest.data.pojo.Tag;
+import hep.crest.data.pojo.TagMeta;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -49,23 +50,21 @@ public class PojoTests {
         mapid3.setLabel("somelabel2");
         mapid3.setGlobalTagName("TGT-01");
 
-        assertThat(mapid.equals(mapid2)).isFalse();
-        assertThat(mapid.equals(mapid3)).isFalse();
-
+        assertThat(mapid).isNotEqualTo(mapid2).isNotEqualTo(mapid3);
         assertThat(mapid.hashCode()).isNotZero();
 
         mapid3.setRecord("somerecord2");
         mapid3.setLabel("somelabel");
         mapid3.setGlobalTagName("TGT-01");
-        assertThat(mapid.equals(mapid3)).isFalse();
-        assertThat(mapid3.equals(null)).isFalse();
+        assertThat(mapid).isNotEqualTo(mapid3);
+        assertThat(mapid3).isNotNull();
 
         Tag tag = new Tag("TAG-01");
         GlobalTag gtag = new GlobalTag("GT-01");
         GlobalTagMap map = new GlobalTagMap(mapid, tag, gtag);
         assertThat(map.getGlobalTag().getName()).isEqualTo("GT-01");
 
-        assertThat(map.equals(null)).isFalse();
+        assertThat(map).isNotNull();
     }
 
     @Test
@@ -84,10 +83,8 @@ public class PojoTests {
         iovid2.setSince(new BigDecimal(now));
         iovid2.setTagName(null);
 
-        assertThat(iovid2.equals(iovid)).isFalse();
         assertThat(iovid.hashCode()).isNotZero();
-        assertThat(iovid2.equals(iovid1)).isFalse();
-        assertThat(iovid2.equals(null)).isFalse();
+        assertThat(iovid2).isNotNull().isNotEqualTo(iovid).isNotEqualTo(iovid1);
     }
 
     @Test
@@ -99,14 +96,29 @@ public class PojoTests {
         pyld.setInsertionTime(new Date(now));
         pyld.setObjectType("sometype");
         pyld.setVersion("someversion");
-        assertThat(pyld.getSize()).isGreaterThan(0);
-        assertThat(pyld.getVersion().length()).isGreaterThan(0);
-        assertThat(pyld.getObjectType().length()).isGreaterThan(0);
+        assertThat(pyld.getSize()).isPositive();
+        assertThat(pyld.getVersion().length()).isPositive();
+        assertThat(pyld.getObjectType().length()).isPositive();
 
         assertThat(pyld.hashCode()).isNotZero();
 
         Payload pyld1 = new Payload("somehash","anotherobj", null, null, pyld.getInsertionTime());
         assertThat(pyld1).isNotNull();
+    }
+
+    @Test
+    public void testTagMeta() throws Exception {
+        TagMeta tagmeta = new TagMeta();
+        Long now = Instant.now().toEpochMilli();
+        tagmeta.setChansize(10);
+        tagmeta.setTagName("PIPPO");
+        tagmeta.setInsertionTime(new Date(now));
+        tagmeta.setDescription("a test");
+        tagmeta.setColsize(2);
+        assertThat(tagmeta.getColsize()).isPositive();
+        assertThat(tagmeta.getDescription().length()).isPositive();
+        assertThat(tagmeta.getTagName().length()).isPositive();
+        assertThat(tagmeta.hashCode()).isNotZero();
     }
 
 }

@@ -4,9 +4,9 @@ import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.server.exceptions.AlreadyExistsIovException;
 import hep.crest.server.exceptions.AlreadyExistsPojoException;
 
-public class ExceptionsTest {
+public class ExceptionsExample {
 
-    public ExceptionsTest() {
+    public ExceptionsExample() {
 
     }
 
