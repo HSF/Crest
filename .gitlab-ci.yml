@@ -1,7 +1,7 @@
 variables:
     IMAGE: crest-service
     VERSION: '0.2'
-    REGISTRY: 'svomtest.svom.eu:5543'
+    REGISTRY: 'svomtest.svom.fr:5543'
 #    REGISTRY: 'svomtest.svom.fr:5543'
     CONTAINER_IMAGE: $REGISTRY/$IMAGE:$VERSION
     WEB_CONTAINER_IMAGE: $REGISTRY/crest-ui:$VERSION
