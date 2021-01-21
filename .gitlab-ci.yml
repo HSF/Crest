@@ -93,14 +93,16 @@ release:
 
 webui:
   stage: webui
-  environment: dc0
-  tags:
-    - dc0-shell
+  image: docker:19.03.1
+  services:
+    - docker:19.03.1-dind
+  before_script:
+      - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
   script:
     - docker info
     - docker build --tag=$WEB_CONTAINER_IMAGE --file ./web-ui/crest-ui/Dockerfile.nginx.svom ./web-ui/crest-ui/
   only:
-  - svom-dc1
+  - cms-v0
 
 sonar_application:
   stage: sonar_application
