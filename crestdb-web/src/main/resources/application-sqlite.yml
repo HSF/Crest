@@ -30,7 +30,7 @@ spring:
       password:
       hikari:
         connection-test-query: SELECT 1 
-        maximum-pool-size: 3
+        maximum-pool-size: 1
     jpa:
       properties:
         hibernate.dialect: hep.crest.data.dialect.SQLiteDialect
