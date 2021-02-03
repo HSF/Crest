@@ -88,16 +88,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         }
         else {
             log.debug("Principal is {}", principal);
-//            final Authentication authentication = SecurityContextHolder.getContext()
-//                    .getAuthentication();
-//            final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-//            final Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-//            for (final GrantedAuthority grantedAuthority : authorities) {
-//                log.info("User has authority : {}", grantedAuthority);
-//            }
         }
-        // In future we can imagine to activate the access authorization with code like:
-        //        if <SOME CONDITION ON THE ROLE>
-        //          requestContext . abortWith ( ACCESS_FORBIDDEN )
     }
 }

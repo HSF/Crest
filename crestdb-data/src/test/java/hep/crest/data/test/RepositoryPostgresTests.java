@@ -134,7 +134,7 @@ public class RepositoryPostgresTests {
         final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
         final PayloadDto loaded = repobean.find("myhashpg1");
-        assertThat(loaded.toString().length()).isGreaterThan(0);
+        assertThat(loaded.toString().length()).isPositive();
         
         DataGenerator.generatePayloadData("/tmp/cdms/payloadataspg.blob"," for postgres");
         final File f = new File("/tmp/cdms/payloadataspg.blob");
@@ -142,12 +142,12 @@ public class RepositoryPostgresTests {
         
         dto.hash("mynewhashpg1");
         final PayloadDto savedfromblob = repobean.save(dto,ds);
-        assertThat(savedfromblob.toString().length()).isGreaterThan(0);
+        assertThat(savedfromblob.toString().length()).isPositive();
         if (ds != null) {
             ds.close();
         }
         final InputStream loadedblob = repobean.findData(savedfromblob.getHash());
-        assertThat(loadedblob.available()).isGreaterThan(0);
+        assertThat(loadedblob.available()).isPositive();
         final PayloadDto loadedmeta = repobean.findMetaInfo(savedfromblob.getHash());
         assertThat(new String(loadedmeta.getStreamerInfo())).isEqualTo("mystreamer");
         repobean.delete(savedfromblob.getHash());
@@ -157,7 +157,7 @@ public class RepositoryPostgresTests {
         final File f1 = new File("/tmp/cdms/payloadatacopypg.blob");
         final InputStream ds1 = new BufferedInputStream(new FileInputStream(f1));
         final byte[] barr = PayloadHandler.getBytesFromInputStream(ds1);
-        assertThat(barr.length).isGreaterThan(0);
+        assertThat(barr).isNotEmpty();
         if (ds1 != null) {
             ds1.close();
         }

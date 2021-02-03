@@ -1,6 +1,6 @@
 package hep.crest.data.test.tools;
 
-public class RegexpTest {
+public class RegexpExample {
 
     public static void main(String[] args) {
         final String aname = "A-TEST-02";

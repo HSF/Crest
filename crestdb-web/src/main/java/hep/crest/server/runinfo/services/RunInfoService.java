@@ -3,15 +3,12 @@
  */
 package hep.crest.server.runinfo.services;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import javax.transaction.Transactional;
-
+import com.querydsl.core.types.Predicate;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.runinfo.pojo.RunInfo;
+import hep.crest.data.runinfo.repositories.RunInfoRepository;
+import hep.crest.swagger.model.RunInfoDto;
+import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +16,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.querydsl.core.types.Predicate;
-
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.runinfo.pojo.RunInfo;
-import hep.crest.data.runinfo.repositories.RunInfoRepository;
-import hep.crest.swagger.model.RunInfoDto;
-import ma.glasnost.orika.MapperFacade;
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * @author formica
@@ -61,7 +58,7 @@ public class RunInfoService {
      * @throws CdbServiceException
      *             If an Exception occurred
      */
-    public List<RunInfoDto> findAllRunInfo(Predicate qry, Pageable req) throws CdbServiceException {
+    public List<RunInfoDto> findAllRunInfo(Predicate qry, Pageable req) {
         Iterable<RunInfo> entitylist = null;
         if (qry == null) {
             entitylist = runinfoRepository.findAll(req);
@@ -82,7 +79,7 @@ public class RunInfoService {
      *             If an Exception occurred
      */
     @Transactional
-    public RunInfoDto insertRunInfo(RunInfoDto dto) throws CdbServiceException {
+    public RunInfoDto insertRunInfo(RunInfoDto dto) {
         log.debug("Create runinfo from dto {}", dto);
         final RunInfo entity = mapper.map(dto, RunInfo.class);
         final RunInfo saved = runinfoRepository.save(entity);
@@ -99,8 +96,7 @@ public class RunInfoService {
      *             If an Exception occurred.
      * @return List<RunInfoDto>
      */
-    public List<RunInfoDto> selectInclusiveByRun(BigDecimal from, BigDecimal to)
-            throws CdbServiceException {
+    public List<RunInfoDto> selectInclusiveByRun(BigDecimal from, BigDecimal to) {
         List<RunInfo> entitylist = null;
         entitylist = runinfoRepository.findByRunNumberInclusive(from, to);
         if (entitylist == null) {
@@ -108,7 +104,7 @@ public class RunInfoService {
                     from, to);
             return new ArrayList<>();
         }
-        return StreamSupport.stream(entitylist.spliterator(), false)
+        return entitylist.stream()
                 .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
 
     }
@@ -122,7 +118,7 @@ public class RunInfoService {
      *             If an Exception occurred.
      * @return List<RunInfoDto>
      */
-    public List<RunInfoDto> selectInclusiveByDate(Date from, Date to) throws CdbServiceException {
+    public List<RunInfoDto> selectInclusiveByDate(Date from, Date to) {
         List<RunInfo> entitylist = null;
         entitylist = runinfoRepository.findByDateInclusive(from, to);
         if (entitylist == null) {
@@ -130,9 +126,8 @@ public class RunInfoService {
                     from, to);
             return new ArrayList<>();
         }
-        return StreamSupport.stream(entitylist.spliterator(), false)
+        return entitylist.stream()
                 .map(s -> mapper.map(s, RunInfoDto.class)).collect(Collectors.toList());
 
     }
-
 }

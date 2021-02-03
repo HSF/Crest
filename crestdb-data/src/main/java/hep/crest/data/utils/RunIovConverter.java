@@ -160,8 +160,8 @@ public final class RunIovConverter {
             lblong = COOL_MAX_LUMIBLOCK;
         }
         else {
-            runlong = new Long(arun);
-            lblong = new Long(lb);
+            runlong = Long.valueOf(arun);
+            lblong = Long.valueOf(lb);
         }
         return getCoolRunLumi(runlong, lblong);
     }
@@ -248,29 +248,10 @@ public final class RunIovConverter {
         final Calendar endofatlasyear = Calendar.getInstance();
         endofatlasyear.set(2100, 1, 1);
         if (iovBase.startsWith("run-")) {
-            if (time == RunIovConverter.COOL_MAX_DATE) {
-                iovstr = "Inf";
-            }
-            else {
-                final Long run = getRun(time);
-                final Long lb = getLumi(time);
-                iovstr = run + " - " + lb;
-                if (lb == COOL_MAX_LUMIBLOCK) {
-                    iovstr = run + " - maxlb";
-                }
-            }
+            iovstr = getRunLumiStr(time);
         }
         else if ("time".equals(iovBase)) {
-            if (time == 0) {
-                return "0";
-            }
-            if (time == RunIovConverter.COOL_MAX_DATE) {
-                return "Inf";
-            }
-            final Long timeInMilliSec = time / TO_NANOSECONDS;
-            final Date iov = new Date(timeInMilliSec);
-            iovstr = iov.toString();
-
+            iovstr = getTimeStr(time);
         }
         else {
             // Try to guess...
@@ -297,6 +278,45 @@ public final class RunIovConverter {
             }
         }
         return iovstr;
+    }
+
+    /**
+     * Transform time in Run-Lumi
+     *
+     * @param time
+     * @return String
+     */
+    private static String getRunLumiStr(final Long time) {
+        if (time == RunIovConverter.COOL_MAX_DATE) {
+            return "Inf";
+        }
+        else {
+            final Long run = getRun(time);
+            final Long lb = getLumi(time);
+            String iovstr = run + " - " + lb;
+            if (lb == COOL_MAX_LUMIBLOCK) {
+                iovstr = run + " - maxlb";
+            }
+            return iovstr;
+        }
+    }
+
+    /**
+     * Get a time string.
+     *
+     * @param time
+     * @return String
+     */
+    private static String getTimeStr(final Long time) {
+        if (time == 0) {
+            return "0";
+        }
+        if (time == RunIovConverter.COOL_MAX_DATE) {
+            return "Inf";
+        }
+        final Long timeInMilliSec = time / TO_NANOSECONDS;
+        final Date iov = new Date(timeInMilliSec);
+        return iov.toString();
     }
 
     /**

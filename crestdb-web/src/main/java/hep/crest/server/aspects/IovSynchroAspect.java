@@ -66,7 +66,7 @@ public class IovSynchroAspect {
             tagentity = tagService.findOne(entity.getTag().getName());
         }
         catch (final NotExistsPojoException e) {
-            log.error("Error checking synchronization, tag does not exists : {}", e);
+            log.error("Error checking synchronization, tag does not exists : {}", e.getMessage());
             return;
         }
         

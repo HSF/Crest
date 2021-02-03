@@ -72,13 +72,13 @@ public final class TagPredicates {
         BooleanExpression pred = null;
 
         if ("<".equals(oper)) {
-            pred = QTag.tag.insertionTime.lt(new Date(new Long(num)));
+            pred = QTag.tag.insertionTime.lt(new Date(Long.valueOf(num)));
         }
         else if (">".equals(oper)) {
-            pred = QTag.tag.insertionTime.gt(new Date(new Long(num)));
+            pred = QTag.tag.insertionTime.gt(new Date(Long.valueOf(num)));
         }
         else if (":".equals(oper)) {
-            pred = QTag.tag.insertionTime.eq(new Date(new Long(num)));
+            pred = QTag.tag.insertionTime.eq(new Date(Long.valueOf(num)));
         }
         return pred;
     }
@@ -95,13 +95,13 @@ public final class TagPredicates {
         BooleanExpression pred = null;
 
         if ("<".equals(oper)) {
-            pred = QTag.tag.modificationTime.lt(new Date(new Long(num)));
+            pred = QTag.tag.modificationTime.lt(new Date(Long.valueOf(num)));
         }
         else if (">".equals(oper)) {
-            pred = QTag.tag.modificationTime.gt(new Date(new Long(num)));
+            pred = QTag.tag.modificationTime.gt(new Date(Long.valueOf(num)));
         }
         else if (":".equals(oper)) {
-            pred = QTag.tag.modificationTime.eq(new Date(new Long(num)));
+            pred = QTag.tag.modificationTime.eq(new Date(Long.valueOf(num)));
         }
         return pred;
     }

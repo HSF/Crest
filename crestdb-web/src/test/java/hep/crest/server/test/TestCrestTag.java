@@ -96,7 +96,7 @@ public class TestCrestTag {
             this.testRestTemplate.delete(url);
         }
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getSize()).isGreaterThanOrEqualTo(0);
+        assertThat(response.getBody().getSize()).isNotNegative();
     }
 
     @Test
@@ -133,7 +133,7 @@ public class TestCrestTag {
         final ResponseEntity<TagSetDto> response = this.testRestTemplate
                 .getForEntity("/crestapi/tags", TagSetDto.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getSize()).isGreaterThanOrEqualTo(0);
+        assertThat(response.getBody().getSize()).isNotNegative();
     }
 
     @Test
@@ -181,7 +181,7 @@ public class TestCrestTag {
             TagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, TagSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
         // Successfull find one tag resource
@@ -249,7 +249,7 @@ public class TestCrestTag {
             TagSetDto ok;
             log.info("Response from server is: " + responseBody);
             ok = mapper.readValue(responseBody, TagSetDto.class);
-            assertThat(ok.getSize()).isGreaterThan(0);
+            assertThat(ok.getSize()).isPositive();
         }
 
         final ResponseEntity<String> resp2a = this.testRestTemplate

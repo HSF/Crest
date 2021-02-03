@@ -97,7 +97,7 @@ public class RepositorySqliteTests {
         final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
         final PayloadDto loaded = repobean.find("myhashsqlite1");
-        assertThat(loaded.toString().length()).isGreaterThan(0);
+        assertThat(loaded.toString().length()).isPositive();
         
         DataGenerator.generatePayloadData("/tmp/cdms/payloadatasqlite.blob"," for sqlite");
         final File f = new File("/tmp/cdms/payloadatasqlite.blob");
@@ -105,12 +105,12 @@ public class RepositorySqliteTests {
         
         dto.hash("mynewhashsqlite1");
         final PayloadDto savedfromblob = repobean.save(dto,ds);
-        assertThat(savedfromblob.toString().length()).isGreaterThan(0);
+        assertThat(savedfromblob.toString().length()).isNotNegative();
         if (ds != null) {
             ds.close();
         }
         final InputStream loadedblob = repobean.findData(savedfromblob.getHash());
-        assertThat(loadedblob.available()).isGreaterThan(0);
+        assertThat(loadedblob.available()).isPositive();
         repobean.delete(savedfromblob.getHash());
         
         ds = new BufferedInputStream(new FileInputStream(f));
@@ -118,7 +118,7 @@ public class RepositorySqliteTests {
         final File f1 = new File("/tmp/cdms/payloadatacopysqlite.blob");
         final InputStream ds1 = new BufferedInputStream(new FileInputStream(f1));
         final byte[] barr = PayloadHandler.getBytesFromInputStream(ds1);
-        assertThat(barr.length).isGreaterThan(0);
+        assertThat(barr).isNotEmpty();
         if (ds1 != null) {
             ds1.close();
         }

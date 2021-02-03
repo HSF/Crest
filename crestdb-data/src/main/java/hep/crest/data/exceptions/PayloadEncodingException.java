@@ -44,6 +44,15 @@ public class PayloadEncodingException extends RuntimeException {
         super(e);
     }
 
+    /**
+     * Add context information.
+     * @param message
+     * @param err
+     */
+    public PayloadEncodingException(String message, Throwable err) {
+        super(message, err);
+    }
+
     /*
      * (non-Javadoc)
      *

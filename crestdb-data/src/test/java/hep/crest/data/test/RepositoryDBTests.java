@@ -123,7 +123,7 @@ public class RepositoryDBTests {
         final PayloadDto saved = repobean.save(dto);
         assertThat(saved).isNotNull();
         final PayloadDto loaded = repobean.find("myhash1");
-        assertThat(loaded.toString().length()).isGreaterThan(0);
+        assertThat(loaded.toString().length()).isPositive();
 
         DataGenerator.generatePayloadData("/tmp/cdms/payloadata.blob", "none");
         final File f = new File("/tmp/cdms/payloadata.blob");
@@ -131,12 +131,12 @@ public class RepositoryDBTests {
 
         dto.hash("mynewhash1");
         final PayloadDto savedfromblob = repobean.save(dto, ds);
-        assertThat(savedfromblob.toString().length()).isGreaterThan(0);
+        assertThat(savedfromblob.toString().length()).isPositive();
         if (ds != null) {
             ds.close();
         }
         final InputStream loadedblob = repobean.findData(savedfromblob.getHash());
-        assertThat(loadedblob.available()).isGreaterThan(0);
+        assertThat(loadedblob.available()).isPositive();
         repobean.delete(savedfromblob.getHash());
 
         ds = new BufferedInputStream(new FileInputStream(f));
@@ -144,7 +144,7 @@ public class RepositoryDBTests {
         final File f1 = new File("/tmp/cdms/payloadatacopy.blob");
         final InputStream ds1 = new BufferedInputStream(new FileInputStream(f1));
         final byte[] barr = PayloadHandler.getBytesFromInputStream(ds1);
-        assertThat(barr.length).isGreaterThan(0);
+        assertThat(barr).isNotEmpty();
         if (ds1 != null) {
             ds1.close();
         }
@@ -160,11 +160,10 @@ public class RepositoryDBTests {
         log.info("loaded payload 1 {}", loadedblob1);
 
         final byte[] parr = PayloadHandler.readFromFile("/tmp/cdms/payloadatacopy.blob.copy");
-        assertThat(parr).isNotNull();
-        assertThat(parr.length).isGreaterThan(0);
+        assertThat(parr).isNotNull().isNotEmpty();
 
         final long fsize = PayloadHandler.lengthOfFile("/tmp/cdms/payloadatacopy.blob.copy");
-        assertThat(fsize).isGreaterThan(0);
+        assertThat(fsize).isPositive();
 //        final Blob bldata = lobhandler.createBlobFromByteArr(parr);
 //        assertThat(bldata).isNotNull();
 //        final Blob bldatastr = lobhandler
@@ -200,40 +199,40 @@ public class RepositoryDBTests {
         final IovId id = new IovId("A-TEST-01", new BigDecimal(999L), new Date());
         final Iov miov = new Iov(id, savedtag, loaded.getHash());
         final Iov savediov = iovrepository.save(miov);
-        assertThat(savediov.toString().length()).isGreaterThan(0);
+        assertThat(savediov.toString().length()).isPositive();
         log.info("Stored iov {}", savediov);
 
         final IovId id2 = new IovId("A-TEST-01", new BigDecimal(1999L), new Date());
         final Iov miov2 = new Iov(id2, savedtag, loaded.getHash());
         final Iov savediov2 = iovrepository.save(miov2);
         log.info("Stored iov2 {}", savediov2);
-        assertThat(savediov2.toString().length()).isGreaterThan(0);
-        assertThat(id2.hashCode()).isNotNull();
-        assertThat(id2.equals(id)).isFalse();
+        assertThat(savediov2.toString().length()).isPositive();
+        assertThat(id2.hashCode()).isNotZero();
+        assertThat(id2).isNotEqualTo(id);
 
         final Iterable<Iov> storedlist = iovrepository.findAll();
         for (final Iov iov : storedlist) {
             log.info("Found iov {}", iov);
         }
         final Long s = iovsrepobean.getSize("A-TEST-01");
-        assertThat(s).isGreaterThan(0);
+        assertThat(s).isPositive();
 
         final Long ssnap = iovsrepobean.getSizeBySnapshot("A-TEST-01", new Date());
-        assertThat(ssnap).isGreaterThan(0);
+        assertThat(ssnap).isPositive();
 
         final List<TagSummaryDto> iovlist = iovsrepobean.getTagSummaryInfo("A-TEST-01");
-        assertThat(iovlist.size()).isGreaterThan(0);
+        assertThat(iovlist.size()).isPositive();
 
         final List<BigDecimal> groups = iovsrepobean.selectGroups("A-TEST-01", 10L);
-        assertThat(groups.size()).isGreaterThan(0);
+        assertThat(groups.size()).isPositive();
 
         final List<BigDecimal> groupsnap = iovsrepobean.selectSnapshotGroups("A-TEST-01",
                 new Date(), 10L);
-        assertThat(groupsnap.size()).isGreaterThan(0);
+        assertThat(groupsnap.size()).isPositive();
 
         final List<IovPayloadDto> pdtolist = iovsrepobean.getRangeIovPayloadInfo("A-TEST-01", new BigDecimal(99L),
                 new BigDecimal(1200L), new Date());
-        assertThat(pdtolist.size()).isGreaterThanOrEqualTo(0);
+        assertThat(pdtolist.size()).isNotNegative();
 
     }
 
@@ -246,14 +245,14 @@ public class RepositoryDBTests {
         final TagDto loadedtag = tagrepo.findOne("A-TEST-02");
         assertThat(loadedtag.getName()).isEqualTo(savedtag.getName());
         final List<TagDto> taglist = tagrepo.findByNameLike("A-TEST.*");
-        assertThat(taglist.size()).isGreaterThan(0);
+        assertThat(taglist.size()).isPositive();
         assertThat(tagrepo.exists("A-TEST-02")).isTrue();
 
         final List<TagDto> alltaglist = tagrepo.findAll();
-        assertThat(alltaglist.size()).isGreaterThan(0);
+        assertThat(alltaglist.size()).isPositive();
 
         long ntags = tagrepo.count();
-        assertThat(ntags).isGreaterThan(0);
+        assertThat(ntags).isPositive();
 
         final PayloadDirectoryImplementation pyldrepo = new PayloadDirectoryImplementation(
                 new DirectoryUtilities());
@@ -283,9 +282,9 @@ public class RepositoryDBTests {
         dtolist.add(idto1);
         dtolist.add(idto2);
         final List<IovDto> idtolist = iovrepo.saveAll("A-TEST-03", dtolist);
-        assertThat(idtolist.size()).isGreaterThan(0);
+        assertThat(idtolist.size()).isPositive();
         final List<IovDto> savedidtolist = iovrepo.findByTagName("A-TEST-03");
-        assertThat(savedidtolist.size()).isGreaterThan(0);
+        assertThat(savedidtolist.size()).isPositive();
     }
 
     @Test
@@ -296,7 +295,7 @@ public class RepositoryDBTests {
         assertThat(saved.getGroupRole()).isEqualTo(entity.getGroupRole());
 
         final List<CrestFolders> flist = folderRepository.findBySchemaName("COOLOFL_MDT");
-        assertThat(flist.size()).isGreaterThan(0);
+        assertThat(flist.size()).isPositive();
     }
     
     @Test
@@ -324,14 +323,14 @@ public class RepositoryDBTests {
             assertThat(saved).isNotNull();
             final InputStream ds1 = new BufferedInputStream(new FileInputStream(f));
             final byte[] barr = PayloadHandler.getBytesFromInputStream(ds1);
-            assertThat(barr.length).isGreaterThan(0);
+            assertThat(barr).isNotEmpty();
             
         }
         catch (final IOException e) {
-            log.error("Cannot create or operate on blob: {}", e);
+            log.error("Cannot create or operate on blob: {}", e.getMessage());
         }
         catch (final CdbServiceException e) {
-            log.error("Cannot save payload: {}", e);
+            log.error("Cannot save payload: {}", e.getMessage());
         }
         try {
             final File fbad = new File("/tmp/cdms/payloadataforhandler.blob");

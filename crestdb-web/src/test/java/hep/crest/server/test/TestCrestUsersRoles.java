@@ -80,7 +80,7 @@ public class TestCrestUsersRoles {
         resource.setId("user");
         resource.setUsername("crest");
         resource.setPassword("guessit");
-        assertThat(resource.toString().length()).isGreaterThan(0);
+        assertThat(resource.toString().length()).isPositive();
         assertThat(resource.getId()).isEqualTo("user");
         assertThat(resource.getUsername()).isEqualTo("crest");
         assertThat(resource.getPassword()).isEqualTo("guessit");

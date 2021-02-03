@@ -106,13 +106,13 @@ public final class GlobalTagPredicates {
         BooleanExpression pred = null;
 
         if ("<".equals(oper)) {
-            pred = QGlobalTag.globalTag.insertionTime.lt(new Date(new Long(num)));
+            pred = QGlobalTag.globalTag.insertionTime.lt(new Date(Long.valueOf(num)));
         }
         else if (">".equals(oper)) {
-            pred = QGlobalTag.globalTag.insertionTime.gt(new Date(new Long(num)));
+            pred = QGlobalTag.globalTag.insertionTime.gt(new Date(Long.valueOf(num)));
         }
         else if (":".equals(oper)) {
-            pred = QGlobalTag.globalTag.insertionTime.eq(new Date(new Long(num)));
+            pred = QGlobalTag.globalTag.insertionTime.eq(new Date(Long.valueOf(num)));
         }
         return pred;
     }

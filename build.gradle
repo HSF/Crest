@@ -15,7 +15,6 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'maven'
-
 apply plugin: 'io.github.swagger2markup'
 
 ext {
@@ -79,14 +78,13 @@ allprojects {
     repositories {
         mavenCentral()
     }
-
     jacoco {
-        toolVersion = '0.8.4'
+        //toolVersion = '0.8.4'
         reportsDir = file("$buildDir/reports/jacoco")
     }
     jacocoTestReport {
         reports {
-            xml.enabled false
+            xml.enabled true
             csv.enabled false
             html.destination file("${buildDir}/jacocoHtml")
         }
@@ -98,6 +96,11 @@ allprojects {
 //./gradlew sonarqube -Dsonar.projectKey=crest -Dsonar.host.url=http://localhost:9000 -Dsonar.login=d7bef5b1a70c8f5812a14c196d9920c65ecbc28c
 sonarqube {
     properties {
+        property "sonar.host.url", "http://localhost:9000"
+        property "sonar.login", "d7bef5b1a70c8f5812a14c196d9920c65ecbc28c"
+        property "sonar.projectKey", "crest"
+        property "sonar.projectName", "crest"
+        property "sonar.junit.reportPaths", "build/test-results/test"
         property 'sonar.coverage.exclusions', "**/hep/crest/swagger/model/*"
         property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*,**/hep/crest/data/dialect/*"
     }

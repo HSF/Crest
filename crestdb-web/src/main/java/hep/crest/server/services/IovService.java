@@ -319,7 +319,7 @@ public class IovService {
      * @throws DataIntegrityViolationException If an sql exception occurred.
      */
     @Transactional(rollbackOn = {CdbServiceException.class})
-    public Iov insertIov(Iov entity) throws CdbServiceException, DataIntegrityViolationException {
+    public Iov insertIov(Iov entity) {
         log.debug("Create iov from {}", entity);
         final String tagname = entity.getTag().getName();
         // The IOV is not yet stored. Verify that the tag exists before inserting it.

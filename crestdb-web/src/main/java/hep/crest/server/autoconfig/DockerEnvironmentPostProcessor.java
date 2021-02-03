@@ -77,7 +77,7 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
             }
         }
         catch (final CdbServiceException e) {
-            log.error("POSTPROCESS ENV Exception {}", e);
+            log.error("POSTPROCESS ENV Exception {}", e.getMessage());
         }
     }
 
@@ -94,12 +94,12 @@ public class DockerEnvironmentPostProcessor implements EnvironmentPostProcessor 
      *             If an Exception occurred
      */
     private void loadSecret(String secpath, String springkey, ConfigurableEnvironment environment,
-            Map<String, Object> map) throws CdbServiceException {
+            Map<String, Object> map) {
         final Resource resource = new FileSystemResource(secpath);
         try {
             if (resource.exists()) {
                 String mPassword = getStringFromInputStream(resource.getInputStream());
-                mPassword = mPassword.replaceAll("\\n", "");
+                mPassword = mPassword.replace("\\n", "");
                 map.put(springkey, mPassword);
                 if ("store.password".equals(springkey)) {
                     System.setProperty("javax.net.ssl.trustStorePassword", mPassword);
