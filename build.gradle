@@ -159,7 +159,7 @@ subprojects {
 
         // DATABASES
         //implementation group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
-        implementation files("${project.rootDir}/jarlib/ojdbc7-12.1.0.2.jar")
+        implementation files("${project.rootDir}/jarlib/ojdbc8-12.2.0.1.jar")
 // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
         implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
         implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
