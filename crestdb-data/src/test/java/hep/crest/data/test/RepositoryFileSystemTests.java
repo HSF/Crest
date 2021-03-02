@@ -1,10 +1,6 @@
 package hep.crest.data.test;
 
 
-import hep.crest.data.pojo.Tag;
-import hep.crest.data.repositories.TagMetaDataBaseCustom;
-import hep.crest.data.repositories.TagMetaSQLITEImpl;
-import hep.crest.data.test.tools.DataGenerator;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -23,10 +19,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -69,14 +61,4 @@ public class RepositoryFileSystemTests {
 
 
     }
-
-    @Test
-    public void testTags() throws Exception {
-        final Instant now = Instant.now();
-        final Date time = new Date(now.toEpochMilli());
-        TagMetaDataBaseCustom tagmetarepobean = new TagMetaSQLITEImpl(mainDataSource);
-        final Tag mtag = DataGenerator.generateTag("ASQLITE-TEST-FOR-META", "test");
-
-    }
-
 }

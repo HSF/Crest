@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- configuration file for LogBack (slf4J implementation) See here for more 
+	details: http://gordondickens.com/wordpress/2013/03/27/sawing-through-the-java-loggers/ -->
+<configuration scan="true" scanPeriod="30 seconds">
+
+	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+		<resetJUL>true</resetJUL>
+	</contextListener>
+
+	<!-- To enable JMX Management -->
+	<jmxConfigurator />
+	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<Pattern>%d %-5level [%thread] %logger{35} - %msg %n</Pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>TRACE</level>
+		</filter>
+	</appender>
+    
+	<!--<logger name="org.hibernate" level="debug"/> -->
+	<!-- Uncomment and add your logger here: <logger name="org.springframework.samples.service.service" 
+		level="debug"/> -->
+	<logger name="org.hibernate" level="info" />
+	<logger name="org.springframework" level="debug" />
+	<logger name="org.glassfish" level="info" />
+	<logger name="io.swagger" level="warn" />
+	<logger name="hep.crest" level="debug" />
+   
+	<root level="DEBUG">
+		<appender-ref ref="consoleAppender" />
+	</root>
+</configuration>

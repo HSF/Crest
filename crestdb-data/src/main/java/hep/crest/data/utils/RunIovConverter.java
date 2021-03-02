@@ -281,7 +281,7 @@ public final class RunIovConverter {
     }
 
     /**
-     * Transform time in Run-Lumi
+     * Transform time in Run-Lumi.
      *
      * @param time
      * @return String

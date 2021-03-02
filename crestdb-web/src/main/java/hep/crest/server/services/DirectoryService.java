@@ -7,15 +7,14 @@ import hep.crest.data.config.CrestProperties;
 import hep.crest.data.exceptions.CdbServiceException;
 import hep.crest.data.pojo.Iov;
 import hep.crest.data.pojo.Tag;
-import hep.crest.data.repositories.IovDirectoryImplementation;
+import hep.crest.data.repositories.IIovCrud;
+import hep.crest.data.repositories.ITagCrud;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
-import hep.crest.data.repositories.TagDirectoryImplementation;
 import hep.crest.data.utils.DirectoryUtilities;
 import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.exceptions.NotExistsPojoException;
 import hep.crest.swagger.model.IovDto;
 import hep.crest.swagger.model.PayloadDto;
-import hep.crest.swagger.model.TagDto;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,13 +49,13 @@ public class DirectoryService {
      */
     @Autowired
     @Qualifier("fstagrepository")
-    private TagDirectoryImplementation fstagrepository;
+    private ITagCrud fstagrepository;
     /**
      * Repository.
      */
     @Autowired
     @Qualifier("fsiovrepository")
-    private IovDirectoryImplementation fsiovrepository;
+    private IIovCrud fsiovrepository;
     /**
      * Repository.
      */
@@ -101,19 +100,39 @@ public class DirectoryService {
     /**
      * @param tagname
      *            the String
-     * @return TagDto
+     * @param path
+     * @return Tag
      */
-    public TagDto getTag(String tagname) {
-        return fstagrepository.findOne(tagname);
+    public Tag getTag(String tagname, String path) {
+        DirectoryUtilities du = null;
+        if (!"none".equals(path)) {
+            du = new DirectoryUtilities(path);
+        }
+        else {
+            du = new DirectoryUtilities();
+        }
+        fstagrepository.setDirtools(du);
+        Tag atag = fstagrepository.findOne(tagname);
+        return atag;
     }
 
     /**
-     * @param dto
-     *            the TagDto
-     * @return TagDto or null.
+     * @param entity
+     *            the Tag
+     * @param path
+     * @return Tag or null.
      */
-    public TagDto insertTag(TagDto dto) {
-        return fstagrepository.save(dto);
+    public Tag insertTag(Tag entity, String path) {
+        DirectoryUtilities du = null;
+        if (!"none".equals(path)) {
+            du = new DirectoryUtilities(path);
+        }
+        else {
+            du = new DirectoryUtilities();
+        }
+        fstagrepository.setDirtools(du);
+        Tag saved = fstagrepository.save(entity);
+        return saved;
     }
 
     /**
@@ -123,7 +142,8 @@ public class DirectoryService {
      */
     public List<IovDto> listIovs(String tagname) {
         try {
-            return fsiovrepository.findByTagName(tagname);
+            List<Iov> iovlist = fsiovrepository.findByIdTagName(tagname);
+            return edh.entityToDtoList(iovlist, IovDto.class);
         }
         catch (final CdbServiceException e) {
             log.error("Cannot find iov list for tag {}: {}", tagname, e.getMessage());
@@ -170,19 +190,19 @@ public class DirectoryService {
 
             final Tag seltag = tagservice.findOne(tagname);
             final Iterable<Iov> iovlist = iovservice.selectSnapshotByTag(tagname, snapshot);
-            final TagDto dto = mapper.map(seltag, TagDto.class);
-            final List<IovDto> dtolist = edh.entityToDtoList(iovlist, IovDto.class);
-            fstagrepository.save(dto);
-            fsiovrepository.saveAll(tagname, dtolist);
-            for (final IovDto iovDto : dtolist) {
-                final PayloadDto pyld = pyldservice.getPayload(iovDto.getPayloadHash());
+            fstagrepository.save(seltag);
+            fsiovrepository.saveAll(tagname, iovlist);
+            int counter = 0;
+            for (final Iov iov : iovlist) {
+                final PayloadDto pyld = pyldservice.getPayload(iov.getPayloadHash());
                 fspayloadrepository.save(pyld);
+                counter++;
             }
             final String tarpath = cprops.getWebstaticdir() + File.separator + path;
             final String outtar = du.createTarFile(outdir, tarpath);
             log.debug("Created output tar file {}", outtar);
             return new AsyncResult<>(
-                    "Dump a list of " + dtolist.size() + " iovs into file system...");
+                    "Dump a list of " + counter + " iovs into file system...");
         }
         catch (final NotExistsPojoException e) {
             log.error("Cannot find tag or payload  : {}", e.getMessage());

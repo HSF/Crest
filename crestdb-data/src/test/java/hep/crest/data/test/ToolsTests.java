@@ -3,7 +3,30 @@
  */
 package hep.crest.data.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import hep.crest.data.config.CrestProperties;
+import hep.crest.data.exceptions.CdbServiceException;
+import hep.crest.data.exceptions.PayloadEncodingException;
+import hep.crest.data.handlers.DateFormatterHandler;
+import hep.crest.data.handlers.HashGenerator;
+import hep.crest.data.pojo.Iov;
+import hep.crest.data.pojo.Tag;
+import hep.crest.data.repositories.IovDirImpl;
+import hep.crest.data.repositories.TagDirImpl;
+import hep.crest.data.test.tools.DataGenerator;
+import hep.crest.data.utils.DirectoryUtilities;
+import hep.crest.data.utils.RunIovConverter;
+import hep.crest.swagger.model.IovDto;
+import hep.crest.swagger.model.TagDto;
+import ma.glasnost.orika.MapperFacade;
+import org.joda.time.Instant;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -20,27 +43,7 @@ import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import org.joda.time.Instant;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import hep.crest.data.config.CrestProperties;
-import hep.crest.data.exceptions.CdbServiceException;
-import hep.crest.data.exceptions.PayloadEncodingException;
-import hep.crest.data.handlers.DateFormatterHandler;
-import hep.crest.data.handlers.HashGenerator;
-import hep.crest.data.repositories.IovDirectoryImplementation;
-import hep.crest.data.repositories.TagDirectoryImplementation;
-import hep.crest.data.test.tools.DataGenerator;
-import hep.crest.data.utils.DirectoryUtilities;
-import hep.crest.data.utils.RunIovConverter;
-import hep.crest.swagger.model.IovDto;
-import hep.crest.swagger.model.TagDto;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author formica
@@ -51,6 +54,9 @@ import hep.crest.swagger.model.TagDto;
 public class ToolsTests {
 
     private static final Logger log = LoggerFactory.getLogger(ToolsTests.class);
+
+    @Autowired
+    private MapperFacade mapper;
 
     @Before
     public void setUp() {
@@ -141,25 +147,27 @@ public class ToolsTests {
         log.info("Retrieved file path for tag : {}", tp);
         assertThat(tp).endsWithRaw(Paths.get("tag.json"));
 
-        final TagDirectoryImplementation fstagrepository = new TagDirectoryImplementation(dirutils);
+        final TagDirImpl fstagrepository = new TagDirImpl(dirutils, mapper);
         final TagDto tag = DataGenerator.generateTagDto("MY-TAG-01", "time");
-        fstagrepository.save(tag);
+        Tag entity = mapper.map(tag, Tag.class);
+        fstagrepository.save(entity);
         try {
             tag.name(null);
-            fstagrepository.save(tag);
+            fstagrepository.save(entity);
         } catch (final RuntimeException e) {
             log.info("Cannot store tag");
         }
         
-        
-        final IovDirectoryImplementation fsiovrepository = new IovDirectoryImplementation(dirutils);
+        final IovDirImpl fsiovrepository = new IovDirImpl(dirutils, mapper);
         final IovDto iov = DataGenerator.generateIovDto("mydirhash", "MY-TAG-01",
                 new BigDecimal(1000L));
-        fsiovrepository.save(iov);
-        final List<IovDto> iovlist = fsiovrepository.findByTagName("MY-TAG-01");
+        Iov ientity = mapper.map(iov, Iov.class);
+        ientity.getId().setTagName(iov.getTagName());
+        fsiovrepository.save(ientity);
+        final List<Iov> iovlist = fsiovrepository.findByIdTagName("MY-TAG-01");
         assertThat(iovlist.size()).isPositive();
         try {
-            final List<IovDto> iovemptylist = fsiovrepository.findByTagName("MY-TAG-02");
+            final List<Iov> iovemptylist = fsiovrepository.findByIdTagName("MY-TAG-02");
             assertThat(iovemptylist.size()).isZero();
         }
         catch (final CdbServiceException e) {
@@ -168,11 +176,13 @@ public class ToolsTests {
         final IovDto iov1 = DataGenerator.generateIovDto("mydirhash", "MY-TAG-01",
                 new BigDecimal(1000L));
         iov1.tagName(null);
-        final IovDto saved1 = fsiovrepository.save(iov1);
+        Iov ientity1 = mapper.map(iov1, Iov.class);
+        ientity1.getId().setTagName(iov1.getTagName());
+        final Iov saved1 = fsiovrepository.save(ientity1);
         assertThat(saved1).isNull();
 
         fsiovrepository.saveAll("MY-TAG", null);
-        fsiovrepository.findByTagName(null);
+        fsiovrepository.findByIdTagName(null);
     }
 
     @Test

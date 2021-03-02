@@ -241,17 +241,19 @@ public class TestCrestServices {
         globaltagmapService.getTagMapByTagName(null);
 
     }
-        @Test
+
+    @Test
     public void testD_Directory() {
         directoryService.dumpTag("MY-TEST-01", null, "");
         final TagDto tobesaved = DataGenerator.generateTagDto("MY-TEST-02","time");
-        final TagDto saved = directoryService.insertTag(tobesaved);
+        Tag entity = mapperFacade.map(tobesaved, Tag.class);
+        final Tag saved = directoryService.insertTag(entity, "none");
         assertThat(saved).isNotNull();
-        final TagDto dto = directoryService.getTag("MY-TEST-02");
+        final Tag dto = directoryService.getTag("MY-TEST-02", "none");
         assertThat(dto).isNotNull();
         final List<IovDto> iovlist = directoryService.listIovs("MY-TEST-01");
         assertThat(iovlist).isNotNull();
-        final TagDto dtonotthere = directoryService.getTag("MY-TEST-NOT-THERE");
+        final Tag dtonotthere = directoryService.getTag("MY-TEST-NOT-THERE", "none");
         assertThat(dtonotthere).isNull();
         final List<IovDto> iovlistempty = directoryService.listIovs("MY-TEST-NOT-THERE");
         assertThat(iovlistempty.isEmpty()).isTrue();
