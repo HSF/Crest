@@ -3,45 +3,53 @@
  */
 package hep.crest.data.repositories;
 
+import java.util.List;
+
 import hep.crest.data.pojo.GlobalTagMapId;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import hep.crest.data.pojo.GlobalTagMap;
 
 /**
- * @author formica
+ * Repository for mappings.
  *
+ * @author formica
  */
 @Repository
-public interface GlobalTagMapRepository
-        extends CrudRepository<GlobalTagMap, GlobalTagMapId>, GlobalTagMapBaseRepository {
+@Transactional(readOnly = true)
+public interface GlobalTagMapRepository extends PagingAndSortingRepository<GlobalTagMap, GlobalTagMapId> {
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.repository.CrudRepository#deleteById(java.lang.
-     * Object)
+    /**
+     * @param gtag the String
+     * @return List<GlobalTagMap>
      */
-    @Override
-    void deleteById(GlobalTagMapId id);
+    @Query("SELECT distinct p FROM GlobalTagMap p JOIN FETCH p.globalTag g "
+            + "JOIN FETCH p.tag t WHERE g.name = (:globaltag)")
+    List<GlobalTagMap> findByGlobalTagName(@Param("globaltag") String gtag);
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Find by global tag name and label and tag name like.
      *
-     * @see
-     * org.springframework.data.repository.CrudRepository#delete(java.lang.Object)
+     * @param gtag the gtag
+     * @param label the label
+     * @param tag the tag
+     * @return the list
      */
-    @Override
-    void delete(GlobalTagMap entity);
+    @Query("SELECT distinct p FROM GlobalTagMap p JOIN FETCH p.globalTag g "
+            + "JOIN FETCH p.tag t WHERE g.name = (:globaltag) AND p.id.label = (:label) AND t.name like (:tag)")
+    List<GlobalTagMap> findByGlobalTagNameAndLabelAndTagNameLike(@Param("globaltag") String gtag,
+            @Param("label") String label, @Param("tag") String tag);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.repository.CrudRepository#save(S)
+    /**
+     * @param tag the String
+     * @return List<GlobalTagMap>
      */
-    @SuppressWarnings("unchecked")
-    @Override
-    GlobalTagMap save(GlobalTagMap entity);
+    @Query("SELECT distinct p FROM GlobalTagMap p JOIN FETCH p.globalTag g "
+            + "JOIN FETCH p.tag t WHERE t.name = (:tag)")
+    List<GlobalTagMap> findByTagName(@Param("tag") String tag);
 
 }

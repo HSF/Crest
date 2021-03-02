@@ -1,6 +1,6 @@
 package hep.crest.data.config;
 
-import hep.crest.data.repositories.IovDirectoryImplementation;
+import hep.crest.data.repositories.IovDirImpl;
 import hep.crest.data.repositories.IovGroupsCustom;
 import hep.crest.data.repositories.IovGroupsImpl;
 import hep.crest.data.repositories.IovGroupsPostgresImpl;
@@ -10,8 +10,9 @@ import hep.crest.data.repositories.PayloadDataDBImpl;
 import hep.crest.data.repositories.PayloadDataPostgresImpl;
 import hep.crest.data.repositories.PayloadDataSQLITEImpl;
 import hep.crest.data.repositories.PayloadDirectoryImplementation;
-import hep.crest.data.repositories.TagDirectoryImplementation;
+import hep.crest.data.repositories.TagDirImpl;
 import hep.crest.data.utils.DirectoryUtilities;
+import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,8 @@ import javax.sql.DataSource;
 
 /**
  * Repository configuration.
- * 
- * @author formica
  *
+ * @author formica
  */
 @Configuration
 @ComponentScan("hep.crest.data")
@@ -45,26 +45,26 @@ public class RepositoryConfig {
     private CrestProperties cprops;
 
     /**
+     * @param mapper
      * @return TagDirectoryImplementation
      */
     @Bean(name = "fstagrepository")
-    public TagDirectoryImplementation tagdirectoryRepository() {
-        final TagDirectoryImplementation tdi = new TagDirectoryImplementation();
+    public TagDirImpl tagdirectoryRepository(@Qualifier("mapper") MapperFacade mapper) {
         // Initialize directory utilities.
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
-        tdi.setDirtools(du);
+        final TagDirImpl tdi = new TagDirImpl(du, mapper);
         return tdi;
     }
 
     /**
+     * @param mapper
      * @return IovDirectoryImplementation
      */
     @Bean(name = "fsiovrepository")
-    public IovDirectoryImplementation iovdirectoryRepository() {
-        final IovDirectoryImplementation idi = new IovDirectoryImplementation();
+    public IovDirImpl iovdirectoryRepository(@Qualifier("mapper") MapperFacade mapper) {
         // Initialize directory utilities.
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
-        idi.setDirtools(du);
+        final IovDirImpl idi = new IovDirImpl(du, mapper);
         return idi;
     }
 
@@ -78,14 +78,13 @@ public class RepositoryConfig {
         final DirectoryUtilities du = new DirectoryUtilities(cprops.getDumpdir());
         pdi.setDirtools(du);
         return pdi;
-   }
+    }
 
     /**
-     * @param mainDataSource
-     *            the DataSource
+     * @param mainDataSource the DataSource
      * @return IovGroupsCustom
      */
-    @Profile({ "test", "default", "ssl", "mysql", "cmsprep", "oracle" })
+    @Profile({"test", "default", "ssl", "mysql", "cmsprep", "oracle"})
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsImpl bean = new IovGroupsImpl(mainDataSource);
@@ -97,11 +96,10 @@ public class RepositoryConfig {
     }
 
     /**
-     * @param mainDataSource
-     *            the DataSource
+     * @param mainDataSource the DataSource
      * @return IovGroupsCustom
      */
-    @Profile({ "postgres", "pgsvom" })
+    @Profile({"postgres", "pgsvom"})
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsPostgresRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsPostgresImpl bean = new IovGroupsPostgresImpl(mainDataSource);
@@ -113,11 +111,10 @@ public class RepositoryConfig {
     }
 
     /**
-     * @param mainDataSource
-     *            the DataSource
+     * @param mainDataSource the DataSource
      * @return IovGroupsCustom
      */
-    @Profile({ "sqlite" })
+    @Profile({"sqlite"})
     @Bean(name = "iovgroupsrepo")
     public IovGroupsCustom iovgroupsSqliteRepository(@Qualifier("dataSource") DataSource mainDataSource) {
         final IovGroupsSQLITEImpl bean = new IovGroupsSQLITEImpl(mainDataSource);
@@ -129,12 +126,11 @@ public class RepositoryConfig {
     }
 
     /**
-     * @param mainDataSource
-     *            the DataSource
+     * @param mainDataSource the DataSource
      * @return PayloadDataBaseCustom
      */
-    @Profile({ "test", "default", "ssl", "mysql", "cmsprep",
-            "oracle" })
+    @Profile({"test", "default", "ssl", "mysql", "cmsprep",
+            "oracle"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadDefaultRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
@@ -148,11 +144,10 @@ public class RepositoryConfig {
     }
 
     /**
-     * @param mainDataSource
-     *            the DataSource
+     * @param mainDataSource the DataSource
      * @return PayloadDataBaseCustom
      */
-    @Profile({ "postgres", "pgsvom" })
+    @Profile({"postgres", "pgsvom"})
     @Bean(name = "payloaddatadbrepo")
     public PayloadDataBaseCustom payloadPostgresRepository(
             @Qualifier("dataSource") DataSource mainDataSource) {
@@ -166,8 +161,7 @@ public class RepositoryConfig {
     }
 
     /**
-     * @param mainDataSource
-     *            the DataSource
+     * @param mainDataSource the DataSource
      * @return PayloadDataBaseCustom
      */
     @Profile("sqlite")

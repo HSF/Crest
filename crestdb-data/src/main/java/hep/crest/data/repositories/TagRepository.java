@@ -3,43 +3,19 @@
  */
 package hep.crest.data.repositories;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-
 import hep.crest.data.pojo.Tag;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author formica
  *
  */
+@Transactional(readOnly = true)
 @Repository
-public interface TagRepository extends CrudRepository<Tag, String>, TagBaseRepository {
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.repository.CrudRepository#deleteById(java.lang.
-     * Object)
-     */
-    @Override
-    void deleteById(String id);
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.springframework.data.repository.CrudRepository#delete(java.lang.Object)
-     */
-    @Override
-    void delete(Tag entity);
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.repository.CrudRepository#save(S)
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    Tag save(Tag entity);
+public interface TagRepository
+        extends PagingAndSortingRepository<Tag, String>, QuerydslPredicateExecutor<Tag>, ITagQuery {
 
 }
