@@ -100,7 +100,7 @@ webui:
       - docker login -u svom -p $SVOMREGISTRYPSWD $REGISTRY
   script:
     - docker info
-    - docker build --tag=$WEB_CONTAINER_IMAGE --file ./web-ui/crest-ui/Dockerfile.nginx.svom ./web-ui/crest-ui/
+    - docker build --tag=$WEB_CONTAINER_IMAGE --file ./web-ui/crest-ui/Dockerfile.nginx ./web-ui/crest-ui/
   only:
   - cms-v0
 
