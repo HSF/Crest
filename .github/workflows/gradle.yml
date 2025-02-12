@@ -22,7 +22,7 @@ jobs:
         java-version: '23' # Use a string for the Java version
         distribution: 'temurin' # Use Temurin (recommended for Java 23)
     - name: Cache Gradle dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
