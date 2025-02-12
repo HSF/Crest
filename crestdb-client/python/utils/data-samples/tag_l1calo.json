@@ -1,8 +1,0 @@
-{ "description": "A new tag for testing L1Calo",
-  "endOfValidity": -1.0,
-  "lastValidatedTime": -1.0,
-  "name": "L1CALO-RUN3-01",
-  "objectType": "JSON",
-  "synchronization": "any",
-  "timeType": "time"
-}

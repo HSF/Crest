@@ -1,0 +1,129 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: runinfo
+
+
+paths:
+  /runinfo:
+    post:
+      tags:
+        - runinfo
+      summary: Create an entry for run information.
+      description: Run informations go into a separate table.
+      operationId: createRunInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunInfoSetDto'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunInfoSetDto"
+    get:
+      tags:
+        - runinfo
+      summary: Finds a RunLumiInfoDto lists using parameters.
+      description: 'This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]'
+      operationId: listRunInfo
+      parameters:
+        - name: from
+          in: query
+          description: 'from: the starting time or run-lumi'
+          required: false
+          schema:
+            type: string
+            default: none
+        - name: to
+          in: query
+          description: 'to: the ending time or run-lumi'
+          required: false
+          schema:
+            type: string
+            default: none
+        - name: format
+          in: query
+          description: |
+            the format to digest previous arguments [iso], [number].
+            Time(iso) = yyyymmddhhmiss, Run(number) = runnumber,
+            Time(number) = milliseconds
+          required: false
+          schema:
+            type: string
+            default: number
+        - name: mode
+          in: query
+          description: |
+            the mode for the request : [daterange] or [runrange]
+          required: false
+          schema:
+            type: string
+            enum: [daterange, runrange]
+            default: runrange
+        - name: page
+          in: query
+          description: 'page: the page number {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int32
+        - name: size
+          in: query
+          description: 'size: the page size {1000}'
+          required: false
+          schema:
+            type: integer
+            default: 1000
+            format: int32
+        - name: sort
+          in: query
+          description: 'sort: the sort pattern {name:ASC}'
+          required: false
+          schema:
+            type: string
+            default: 'runNumber:ASC'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunInfoSetDto"
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    RunInfoSetDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunInfoSetDto'
+    RunInfoDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunInfoDto'

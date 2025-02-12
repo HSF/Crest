@@ -1,0 +1,4 @@
+{{#allowableValues}}schema=@Schema(allowableValues={
+{{#values}}"{{{.}}}"{{^-last}}, {{/-last}}{{/values}}{{^values}}range=[{{min}}{{^min}}-infinity{{/min}}, {{max}}{{^max}}infinity{{/max}}]{{/values}}
+})
+{{/allowableValues}}

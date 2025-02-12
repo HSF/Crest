@@ -1,7 +1,0 @@
-spring.profiles.active=prod
-user.timezone=GMT
-crest.web.static=/data/web
-crest.dump.dir=/data/dump
-crest.log.dir=/data/logs
-crest.db.password=xxx
-management.endpoint.health.show-details=ALWAYS

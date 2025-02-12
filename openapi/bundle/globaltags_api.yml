@@ -1,0 +1,369 @@
+openapi: 3.0.0
+info:
+  version: '5.0'
+  title: CREST Server
+  description: OpenApi3 for CREST Server
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'https://crest-undertow.web.cern.ch/api'
+security:
+  - BearerAuth: []
+  - OpenID:
+      - openid
+tags:
+  - name: globaltags
+paths:
+  /globaltags:
+    get:
+      tags:
+        - globaltags
+      summary: Finds a GlobalTagDtos lists.
+      description: |
+        This method allows to perform search and sorting.
+        Arguments: name=<pattern>, workflow, scenario, release, validity, description
+        page={ipage}, size={isize}, sort=<sortpattern>.
+      operationId: listGlobalTags
+      parameters:
+        - name: name
+          in: query
+          description: 'the global tag name search pattern {none}'
+          required: false
+          schema:
+            type: string
+            default: all
+        - name: workflow
+          in: query
+          description: 'the global tag workflow search pattern {none}'
+          required: false
+          schema:
+            type: string
+        - name: scenario
+          in: query
+          description: 'the global tag scenario search pattern {none}'
+          required: false
+          schema:
+            type: string
+        - name: release
+          in: query
+          description: 'the global tag release search pattern {none}'
+          required: false
+          schema:
+            type: string
+        - name: validity
+          in: query
+          description: 'the global tag validity low limit {x>=validity}'
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: description
+          in: query
+          description: 'the global tag description search pattern {none}'
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 'page: the page number {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int32
+        - name: size
+          in: query
+          description: 'size: the page size {1000}'
+          required: false
+          schema:
+            type: integer
+            default: 1000
+            format: int32
+        - name: sort
+          in: query
+          description: 'sort: the sort pattern {name:ASC}'
+          required: false
+          schema:
+            type: string
+            default: 'name:ASC'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalTagSetDto'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+    post:
+      tags:
+        - globaltags
+      summary: Create a GlobalTag in the database.
+      description: 'This method allows to insert a GlobalTag.Arguments: GlobalTagDto should be provided in the body as a JSON file.'
+      operationId: createGlobalTag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalTagDto'
+      parameters:
+        - name: force
+          in: query
+          description: 'force: tell the server if it should use or not the insertion time provided {default: false}'
+          required: false
+          schema:
+            type: string
+            default: false
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalTagDto'
+        default:
+          $ref: '#/components/responses/genericError'
+  '/globaltags/{name}':
+    get:
+      tags:
+        - globaltags
+      summary: Finds a GlobalTagDto by name
+      description: This method will search for a global tag with the given name. Only one global tag should be returned.
+      operationId: findGlobalTag
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalTagSetDto'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+  '/globaltags/{name}/tags':
+    get:
+      tags:
+        - globaltags
+      summary: Finds a TagDtos lists associated to the global tag name in input.
+      description: 'This method allows to trace a global tag.Arguments: record=<record> filter output by record, label=<label> filter output by label'
+      operationId: findGlobalTagFetchTags
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: record
+          in: query
+          description: 'record:  the record string {}'
+          required: false
+          schema:
+            type: string
+            default: none
+        - name: label
+          in: query
+          description: 'label:  the label string {}'
+          required: false
+          schema:
+            type: string
+            default: none
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagSetDto'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OpenID:
+      type: openIdConnect
+      openIdConnectUrl: 'https://auth.cern.ch/auth/realms/cern/.well-known/openid-configuration'
+  requestBodies:
+    GenericMapBody:
+      description: A JSON object containing generic map used for updates
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericMap'
+  responses:
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '404':
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '409':
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    genericError:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+  schemas:
+    HTTPResponse:
+      description: general response object that can be used for POST and PUT methods
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        code:
+          type: integer
+          description: HTTP status code of the response
+        error:
+          type: string
+        type:
+          type: string
+          description: A generic string specifying the exception type.
+        message:
+          type: string
+        id:
+          type: string
+          description: path or URI of the requested or generated resource
+    CrestBaseResponse:
+      type: object
+      required:
+        - size
+        - format
+      properties:
+        size:
+          type: integer
+          format: int64
+        datatype:
+          type: string
+        format:
+          type: string
+        page:
+          $ref: '#/components/schemas/RespPage'
+        filter:
+          $ref: '#/components/schemas/GenericMap'
+      discriminator:
+        propertyName: format
+    RespPage:
+      type: object
+      required:
+        - size
+        - totalElements
+        - totalPages
+        - number
+      properties:
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        number:
+          type: integer
+    GenericMap:
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties:
+        type: string
+    TagSetDto:
+      description: An Set containing TagDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              timeType:
+                type: string
+              payloadSpec:
+                type: string
+              synchronization:
+                type: string
+              description:
+                type: string
+              lastValidatedTime:
+                type: integer
+                format: int64
+              endOfValidity:
+                type: integer
+                format: int64
+              insertionTime:
+                type: string
+                format: date-time
+              modificationTime:
+                type: string
+                format: date-time
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    GlobalTagSetDto:
+      description: An GlobalTagSet containing GlobalTagDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalTagDto'
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    GlobalTagDto:
+      type: object
+      properties:
+        name:
+          type: string
+        validity:
+          type: integer
+          format: int64
+        description:
+          type: string
+        release:
+          type: string
+        insertionTime:
+          type: string
+          format: date-time
+        snapshotTime:
+          type: string
+          format: date-time
+        scenario:
+          type: string
+        workflow:
+          type: string
+        type:
+          type: string
+        snapshotTimeMilli:
+          type: integer
+          format: int64
+        insertionTimeMilli:
+          type: integer
+          format: int64

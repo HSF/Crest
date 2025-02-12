@@ -1,0 +1,48 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: globaltags
+
+paths:
+  # tags
+  /globaltags:
+    $ref: 'crestdb_globaltagsapi.yml#/paths/~1globaltags'
+  /globaltags/{name}:
+    $ref: 'crestdb_globaltagsapi.yml#/paths/~1globaltags~1{name}'
+  /globaltags/{name}/tags:
+    $ref: 'crestdb_globaltagsapi.yml#/paths/~1globaltags~1{name}~1tags'
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    TagSetDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagSetDto'
+    GlobalTagSetDto:
+      $ref: 'schemas/globaltags.yml#/components/schemas/GlobalTagSetDto'
+    GlobalTagDto:
+      $ref: 'schemas/globaltags.yml#/components/schemas/GlobalTagDto'

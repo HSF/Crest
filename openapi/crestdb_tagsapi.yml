@@ -1,0 +1,274 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: tags
+
+
+paths:
+  /tags:
+    get:
+      tags:
+        - tags
+      summary: Finds a TagDtos lists.
+      description: |
+        This method allows to perform search and sorting.
+        Arguments: name=<pattern>, objectType, timeType, description
+        page={ipage}, size={isize}, sort=<sortpattern>.
+      operationId: listTags
+      parameters:
+        - name: name
+          in: query
+          description: 'the tag name search pattern {all}'
+          required: false
+          schema:
+            type: string
+            default: all
+        - name: timeType
+          in: query
+          description: 'the tag timeType {none}'
+          required: false
+          schema:
+            type: string
+        - name: objectType
+          in: query
+          description: 'the tag objectType search pattern {none}'
+          required: false
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: 'the global tag description search pattern {none}'
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 'page: the page number {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int32
+        - name: size
+          in: query
+          description: 'size: the page size {1000}'
+          required: false
+          schema:
+            type: integer
+            default: 1000
+            format: int32
+        - name: sort
+          in: query
+          description: 'sort: the sort pattern {name:ASC}'
+          required: false
+          schema:
+            type: string
+            default: name:ASC
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagSetDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+    post:
+      tags:
+        - tags
+      summary: Create a Tag in the database.
+      description: 'This method allows to insert a Tag.Arguments: TagDto should be provided in the body as a JSON file.'
+      operationId: createTag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagDto'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagDto"
+        default:
+          $ref: "#/components/responses/genericError"
+  /tags/{name}:
+    get:
+      tags:
+        - tags
+      summary: Finds a TagDto by name
+      description: This method will search for a tag with the given name. Only one tag should be returned.
+      operationId: findTag
+      parameters:
+        - name: name
+          in: path
+          description: 'name: the tag name'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagSetDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+    put:
+      tags:
+        - tags
+      summary: Update a TagDto by name
+      description: 'This method will search for a tag with the given name, and update its content for the provided body fields. Only the following fields can be updated: description, timeType, objectTime, endOfValidity, lastValidatedTime.'
+      operationId: updateTag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericMap'
+      parameters:
+        - name: name
+          in: path
+          description: 'name: the tag name'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+  /tags/{name}/meta:
+    get:
+      tags:
+        - tags
+      summary: Finds a TagMetaDto by name
+      description: This method will search for a tag metadata with the given name. Only one tag should be returned.
+      operationId: findTagMeta
+      parameters:
+        - name: name
+          in: path
+          description: 'name: the tag name'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagMetaSetDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+    post:
+      tags:
+        - tags
+      summary: Create a TagMeta in the database.
+      description: 'This method allows to insert a TagMeta.Arguments: TagMetaDto should be provided in the body as a JSON file.'
+      operationId: createTagMeta
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagMetaDto'
+      parameters:
+        - name: name
+          in: path
+          description: 'name: the tag name'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagMetaDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+    put:
+      tags:
+        - tags
+      summary: Update a TagMetaDto by name
+      description: 'This method will search for a tag with the given name, and update its content for the provided body fields. Only the following fields can be updated: description, timeType, objectTime, endOfValidity, lastValidatedTime.'
+      operationId: updateTagMeta
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericMap'
+      parameters:
+        - name: name
+          in: path
+          description: 'name: the tag name'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagMetaDto"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/TagMetaDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    TagSetDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagSetDto'
+    TagDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagDto'
+    TagMetaSetDto:
+      $ref: 'schemas/tagsmeta.yml#/components/schemas/TagMetaSetDto'
+    TagMetaDto:
+      $ref: 'schemas/tagsmeta.yml#/components/schemas/TagMetaDto'

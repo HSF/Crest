@@ -1,187 +1,246 @@
-buildscript {
-	repositories {
-		jcenter()
-	}
-
-	dependencies {
-		classpath 'io.github.swagger2markup:swagger2markup-gradle-plugin:1.3.3'
-	}
-}
 plugins {
-    id "org.sonarqube" version "2.6"
-    id 'org.hidetake.swagger.generator' version '2.9.0'
-    id 'jacoco'
+	id 'java'
+	id 'org.springframework.boot' version '3.3.4'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id("org.openapi.generator") version "7.8.0"
+	id 'jacoco'
+	id 'checkstyle'
 }
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'io.github.swagger2markup'
+group = 'hep.crest'
+version = '5.0.0'
 
-ext {
-    swagger_annotations_version = "1.5.13"
-    jackson_version = "2.7.5"
-    spring_version = "4.1.4.RELEASE"
-    springboot_version = "2.1.0.RELEASE"
-    junit_version = "4.12"
-    oltu_version = "1.0.1"
-    orika_version = "1.5.1"
-    querydsl_version = "4.2.1"
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(23)
+	}
+}
+
+springBoot {
+	// This statement tells the Gradle Spring Boot plugin
+	// to generate a file
+	// build/resources/main/META-INF/build-info.properties
+	// that is picked up by Spring Boot to display
+	// via /info endpoint.
+	buildInfo()
+}
+
+bootJar {
+	archiveFileName = 'crest.jar'
+//    metaInf { from 'src/main/resources/spring.factories' }
+}
+
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	querydsl.extendsFrom annotationProcessor
+}
+configurations.all {
+	exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+}
+
+checkstyleMain {
+	setExcludes(new HashSet(['**/hep/crest/data/**/Q*java',
+							 '**/src/gen/**',
+							 '**/hep/crest/data/repositories/externals/*',
+							 '**/hep/crest/server/swagger/**',
+							 '**/plugins/nats/**',
+							 '**/plugin/nats/model/*java']))
+}
+
+tasks.withType(Checkstyle) {
+	checkstyleTest.enabled = false
+	reports {
+		xml.required = false
+		html.required = true
+	}
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
+}
+
+ext {
+	swaggerDirectory = "$rootDir/openapi".toString()
+	swaggerSpecDirectory =  "$swaggerDirectory".toString()
+	swaggerBundleDirectory = "$swaggerDirectory/bundle".toString()
+	swaggerJaxrsTemplateDirectory = "$swaggerDirectory/templates/JavaJaxRs".toString()
+}
+
+task openApiBundle {
+	// Bundle the openapi spec files together, to mitigate a bug with the main openapi generator
+	// Bug: https://github.com/OpenAPITools/openapi-generator/issues/1976
+	// For this to work, the swagger-cli (from the javascript world) needs to be installed
+	// with e.g: npm install -g @apidevtools/swagger-cli
+	inputs.files(fileTree(dir: swaggerSpecDirectory, include: '**/*.yml'))
+	outputs.file("$swaggerBundleDirectory/crestAtlasApi_all.yml".toString())
+	outputs.file("$swaggerBundleDirectory/admin_api.yml".toString())
+	outputs.file("$swaggerBundleDirectory/globaltags_api.yml".toString())
+	outputs.file("$swaggerBundleDirectory/tags_api.yml".toString())
+/// not for CMS
+	outputs.file("$swaggerBundleDirectory/tagsmeta_api.yml".toString())
+	outputs.file("$swaggerBundleDirectory/globaltagmaps_api.yml".toString())
+	outputs.file("$swaggerBundleDirectory/iovs_api.yml".toString())
+	outputs.file("$swaggerBundleDirectory/payloads_api.yml".toString())
+	outputs.file("$swaggerBundleDirectory/monitoring_api.yml".toString())
+	outputs.file("$swaggerBundleDirectory/runinfo_api.yml".toString())
+
+	doLast {
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/crestApi_all.yml".toString(), "$swaggerSpecDirectory/crestAtlasApi_all.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/admin_api.yml".toString(), "$swaggerSpecDirectory/admin_api.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/globaltags_api.yml".toString(), "$swaggerSpecDirectory/globaltags_api.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/tags_api.yml".toString(), "$swaggerSpecDirectory/tags_api.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/tagsmeta_api.yml".toString(), "$swaggerSpecDirectory/tagsmeta_api.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/globaltagmaps_api.yml".toString(), "$swaggerSpecDirectory/globaltagmaps_api.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/iovs_api.yml".toString(), "$swaggerSpecDirectory/iovs_api.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/payloads_api.yml".toString(), "$swaggerSpecDirectory/payloads_api.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/runinfo_api.yml".toString(), "$swaggerSpecDirectory/runinfo_api.yml".toString()
+		}
+		exec {
+			workingDir swaggerSpecDirectory
+			commandLine 'swagger-cli', 'bundle', '-t', 'yaml', '-o', "$swaggerBundleDirectory/monitoring_api.yml".toString(), "$swaggerSpecDirectory/monitoring_api.yml".toString()
+		}
+	}
+}
+
+openApiGenerate {
+	generatorName = "jaxrs-jersey"
+	inputSpec = "$swaggerBundleDirectory/crestApi_all.yml".toString()
+	outputDir = "$projectDir".toString()
+	templateDir = swaggerJaxrsTemplateDirectory
+	apiPackage = "hep.crest.server.swagger.api"
+	modelPackage = "hep.crest.server.swagger.model"
+	configOptions = [
+			dateLibrary: "java8",
+			hideGenerationTimestamp: "true",
+			useJakartaEe: "true"
+	]
+}
+
+task buildCrestPythonClient(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+	generatorName = "python"
+	inputSpec = "$swaggerBundleDirectory/crestApi_all.yml".toString()
+	outputDir = "$rootDir/pycrest".toString()
+	packageName = "hep.crest.client"
+	configOptions = [
+			packageVersion: "5.0.0",
+			projectName: "hep-crest-client"]
+
 }
 
 dependencies {
-    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.1'
+	compileOnly 'org.projectlombok:lombok:1.18.34'
+	annotationProcessor 'org.projectlombok:lombok:1.18.34'
+	// Mappper
+	implementation 'org.mapstruct:mapstruct:1.6.2'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
+	// Lombok-MapStruct Binding
+	implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	// QueryDSL
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta' // QueryDSL for JPA
+	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	// Spring Boot
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+// Exclude default Tomcat
+	implementation('org.springframework.boot:spring-boot-starter-web') {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+	}
+	// Add Undertow as the embedded server
+	implementation 'org.springframework.boot:spring-boot-starter-undertow'
+
+	implementation ('org.springframework.boot:spring-boot-starter-jersey'){
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+	}
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation('org.springframework.boot:spring-boot-starter-oauth2-client')
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
+	// Jackson libraries
+	implementation "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.17.2"
+	implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '3.1.0'
+	// Keycloak
+	// implementation 'org.keycloak:keycloak-spring-boot-starter:22.0.1'
+	// Hibernate
+	// Hibernate Core
+	implementation 'org.hibernate:hibernate-core:6.5.3.Final' // Adjust to your Hibernate version
+	implementation 'org.hibernate:hibernate-jpamodelgen:6.5.3.Final' // For JPA model generation, if needed
+
+	// Swagger
+	implementation group: 'io.swagger.core.v3', name: 'swagger-annotations', version: '2.2.7'
+	implementation group: 'io.swagger.core.v3', name: 'swagger-models', version: '2.2.7'
+
+	runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'com.h2database:h2'  // Add H2 database dependency
+
+	testImplementation "org.mockito:mockito-inline:+"
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'com.h2database:h2'  // Add H2 database dependency
+	testImplementation 'org.projectlombok:lombok:1.18.34'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
-// Task to generate sources in build output directory
-convertSwagger2markup {
-	swaggerInput file("swagger_schemas/swagger/json/crestdb_full.json").getAbsolutePath()
-	outputDir file("build/asciidoc")
-	config = ['swagger2markup.markupLanguage' : 'MARKDOWN',
-			  'swagger2markup.pathsGroupedBy' : 'TAGS',
-			  'swagger2markup.interDocumentCrossReferencesEnabled' : true]
+tasks.named('test') {
+	useJUnitPlatform()
 }
 
-swaggerSources {
-    crestdb {
-        inputFile = file('swagger_schemas/swagger/json/crestdb_full.json')
-        code {
-            language = 'jaxrs'
-            templateDir = file('./templates/java/JavaJaxRs')
-            configFile = file('swagger_schemas/swagger/json/crestdb-config.json')
-        }
-    }
-    crestdb_client {
-        inputFile = file('swagger_schemas/swagger/json/crestdb.json')
-        code {
-            language = 'python'
-            //templateDir = file('./templates/2.3.0/python-client/model')
-            configFile = file('swagger_schemas/swagger/json/crestdb-pyclient-config.json')
-        }
-    }
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java', 'src/gen/java']
+			// srcDirs = ['src/main/java', 'src/gen/java', 'plugins/nats/java']
+		}
+	}
+	// println main.output.classesDir
+	test {
+		java {
+			srcDirs = ['src/test/java']
+		}
+	}
 }
 
-configurations.compile.each {
-    println "compile: $it"
+// Clean files and directories used for unit testing
+task purgedb(type: Delete) {
+	delete fileTree('/tmp') {
+		include 'crest*.db'
+		include 'crest*sqlite*'
+	}
 }
 
-allprojects {
-    apply plugin: 'maven'
-    apply plugin: 'jacoco'
-    apply plugin: 'java'
-
-    group = 'hep.crest'
-    version = '2.0-SNAPSHOT'
-    repositories {
-        mavenCentral()
-    }
-    jacoco {
-        //toolVersion = '0.8.4'
-        reportsDir = file("$buildDir/reports/jacoco")
-    }
-    jacocoTestReport {
-        reports {
-            xml.enabled true
-            csv.enabled false
-            html.destination file("${buildDir}/jacocoHtml")
-        }
-    }
-}
-
-// An example for sonarqube configuration: to run the code on a local sonarqube instance you should
-// use commands like : ./gradlew sonarqube   -Dsonar.host.url=http://localhost:9000   -Dsonar.login=180fe2ea3c768359eb5fa680f7bbe6667ceeb238
-sonarqube {
-    properties {
-        property "sonar.host.url", "http://localhost:9000"
-        property "sonar.login", "d7bef5b1a70c8f5812a14c196d9920c65ecbc28c"
-        property "sonar.projectKey", "crest"
-        property "sonar.projectName", "crest"
-        property "sonar.junit.reportPaths", "build/test-results/test"
-        property 'sonar.coverage.exclusions', "**/hep/crest/swagger/model/*"
-        property "sonar.exclusions", "**/hep/crest/swagger/model/*,**/hep/crest/server/swagger/api/*,**/hep/crest/data/dialect/*"
-    }
-}
-
-subprojects {
-    sourceCompatibility = 11
-    targetCompatibility = 11
-    ext {
-        swagger_annotations_version = "1.5.13"
-        jackson_version = "2.10.5"
-        springboot_version = "2.3.1.RELEASE"
-        junit_version = "4.12"
-        oltu_version = "1.0.1"
-        orika_version = "1.5.1"
-        jersey2_version = "2.22.2"
-        swagger_core_version = "1.5.13"
-        querydsl_version = "4.4.0"
-        server = "undertow"
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-    }
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven { url "https://repo.spring.io/milestone" }
-        maven { url "https://jcenter.bintray.com/" }
-        maven { url "https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo" }
-        maven { url "https://repo.maven.apache.org/maven2" }
-    }
-
-    configurations {
-        compile.exclude module: "tomcat-jdbc"
-    }
-
-    dependencies {
-        // JAX-B dependencies for JDK 9+
-        implementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
-        implementation "org.glassfish.jaxb:jaxb-runtime:2.3.2"
-        // javassist for JDK 9+
-        implementation "org.javassist:javassist:3.23.1-GA"
-        // swagger
-        implementation "io.swagger:swagger-annotations:$swagger_annotations_version"
-        implementation "io.swagger:swagger-core:$swagger_core_version"
-        implementation "io.swagger:swagger-jersey2-jaxrs:$swagger_core_version"
-        implementation group: 'ma.glasnost.orika', name: 'orika-core', version: orika_version
-
-
-        implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
-        implementation "com.fasterxml.jackson.core:jackson-core:$jackson_version"
-        implementation "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
-        implementation "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
-        implementation "com.fasterxml.jackson.datatype:jackson-datatype-joda:$jackson_version"
-
-        // DATABASES
-        //implementation group: 'com.oracle', name: 'ojdbc7', version:'12.1.0.2'
-        implementation files("${project.rootDir}/jarlib/ojdbc8-12.2.0.1.jar")
-// https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
-        implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
-        implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
-        implementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
-        implementation("com.h2database:h2")
-        implementation("commons-io:commons-io:2.6")
-        implementation group: 'commons-codec', name: 'commons-codec', version: '1.11'
-
-    }
-
-    task wrapper(type: Wrapper) {
-        gradleVersion = '6.4' //version required
-    }
-
-    // Clean files and directories used for unit testing
-    task purgedb(type: Delete) {
-        delete fileTree('/tmp') {
-            include 'crest*.db'
-            include 'crest*sqlite*'
-            include 'tagtar*'
-        }
-        delete '/tmp/cdms'
-    }
-    test.dependsOn purgedb
-}
+test.dependsOn purgedb

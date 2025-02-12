@@ -1,0 +1,149 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: admin
+  - name: folders
+
+paths:
+  /admin/globaltags/{name}:
+    put:
+      tags:
+        - admin
+      summary: Update a GlobalTag in the database.
+      description: 'This method allows to update a GlobalTag.Arguments: the name has to uniquely identify a global tag.'
+      operationId: updateGlobalTag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalTagDto'
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalTagDto"
+    delete:
+      tags:
+        - admin
+      summary: Remove a GlobalTag from the database.
+      description: 'This method allows to remove a GlobalTag.Arguments: the name has to uniquely identify a global tag.'
+      operationId: removeGlobalTag
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+
+  /admin/tags/{name}:
+    delete:
+      tags:
+        - admin
+      summary: Remove a Tag from the database.
+      description: 'This method allows to remove a Tag.Arguments: the name has to uniquely identify a tag.'
+      operationId: removeTag
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+  /folders:
+    post:
+      tags:
+        - folders
+      summary: Create an entry for folder information.
+      description: Folder informations go into a dedicated table.
+      operationId: createFolder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDto'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FolderDto"
+    get:
+      tags:
+        - folders
+      summary: Finds a FolderDto list.
+      description: 'This method allows to perform search and sorting.Arguments: by=<pattern>, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]'
+      operationId: listFolders
+      parameters:
+        - name: schema
+          in: query
+          description: 'the schema pattern {none}'
+          required: false
+          schema:
+            type: string
+            default: none
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FolderSetDto"
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    TagSetDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagSetDto'
+    GlobalTagDto:
+      $ref: 'schemas/globaltags.yml#/components/schemas/GlobalTagDto'
+    FolderDto:
+      $ref: 'schemas/admin.yml#/components/schemas/FolderDto'
+    FolderSetDto:
+      $ref: 'schemas/admin.yml#/components/schemas/FolderSetDto'

@@ -1,0 +1,51 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: admin
+  - name: folders
+
+paths:
+  # tags
+  /admin/globaltags/{name}:
+    $ref: 'crestdb_adminapi.yml#/paths/~1admin~1globaltags~1{name}'
+  /admin/tags/{name}:
+    $ref: 'crestdb_adminapi.yml#/paths/~1admin~1tags~1{name}'
+  /folders:
+    $ref: 'crestdb_adminapi.yml#/paths/~1folders'
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    TagSetDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagSetDto'
+    GlobalTagDto:
+      $ref: 'schemas/globaltags.yml#/components/schemas/GlobalTagDto'
+    FolderDto:
+      $ref: 'schemas/admin.yml#/components/schemas/FolderDto'
+    FolderSetDto:
+      $ref: 'schemas/admin.yml#/components/schemas/FolderSetDto'

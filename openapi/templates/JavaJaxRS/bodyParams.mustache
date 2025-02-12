@@ -1,0 +1,13 @@
+{{#isBodyParam}}{{!
+
+    }}@Parameter(description = "{{{description}}}"{{!
+        }}{{#required}}, required = true{{/required}}{{!
+        }}{{#allowableValues}}, {{> allowableValues}}{{/allowableValues}}{{!
+        }}{{#defaultValue}}, example = "{{{.}}}"{{/defaultValue}}{{!
+    }}){{!
+
+    }}{{#useBeanValidation}} {{>beanValidation}}{{/useBeanValidation}}{{!
+
+    }} {{{dataType}}} {{paramName}}{{!
+
+}}{{/isBodyParam}}

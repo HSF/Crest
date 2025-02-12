@@ -1,0 +1,50 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: iovs
+
+paths:
+  # iovs
+  /iovs:
+    $ref: 'crestdb_iovsapi.yml#/paths/~1iovs'
+  /iovs/infos:
+    $ref: 'crestdb_iovsapi.yml#/paths/~1iovs~1infos'
+  /iovs/size:
+    $ref: 'crestdb_iovsapi.yml#/paths/~1iovs~1size'
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    IovDto:
+      $ref: 'schemas/iovs.yml#/components/schemas/IovDto'
+    IovSetDto:
+      $ref: 'schemas/iovs.yml#/components/schemas/IovSetDto'
+    IovPayloadSetDto:
+      $ref: 'schemas/iovs.yml#/components/schemas/IovPayloadSetDto'
+    IovPayloadDto:
+      $ref: 'schemas/iovs.yml#/components/schemas/IovPayloadDto'

@@ -1,0 +1,296 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: payloads
+
+paths:
+  /payloads:
+    post:
+      tags:
+        - payloads
+      summary: Create Payloads in the database, associated to a given iov since list and tag name.
+      description: |
+        This method allows to insert list of Payloads and IOVs.
+        Payload can be contained in the HASH of the IOV (in case it is a small JSON)
+        or as a reference to external file (FILE).
+        In the first case, the files list can be null.
+        Arguments: tag,version,endtime,objectType,compressionType
+        The header parameter X-Crest-PayloadFormat can be FILE or JSON
+      operationId: storePayloadBatch
+      parameters:
+        - in: header
+          name: X-Crest-PayloadFormat
+          description: |
+            The format of the input data. StoreSetDto entries will have either the content inline (JSON)
+            or stored via external files (FILE).
+          schema:
+            type: string
+            enum: [ FILE, JSON ]
+            default: FILE
+      requestBody:
+        description: A json string that is used to construct the form data object.
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                tag:
+                  description: The tag name
+                  type: string
+                storeset:
+                  description: the string representing a StoreSetDto in json
+                  type: string
+                files:
+                  description: The payload files as an array of streams
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                objectType:
+                  description: The object type
+                  type: string
+                compressionType:
+                  description: The compression type
+                  type: string
+                version:
+                  description: The version
+                  type: string
+                endtime:
+                  description: The tag end time. This represents a number.
+                  type: string
+              required:
+                - storeset
+                - tag
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoreSetDto"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/StoreSetDto"
+        default:
+          $ref: "#/components/responses/genericError"
+    get:
+      tags:
+        - payloads
+      summary: Finds Payloads metadata.
+      description: |
+        This method allows to perform search and sorting.
+        Arguments: hash=<the payload hash>, minsize=<min size>, objectType=<the type>
+        page={ipage}, size={isize}, sort=<sortpattern>.
+      operationId: listPayloads
+      parameters:
+        - name: hash
+          in: query
+          description: 'the hash to search {none}'
+          required: false
+          schema:
+            type: string
+        - name: objectType
+          in: query
+          description: 'the objectType to search'
+          required: false
+          schema:
+            type: string
+        - name: minsize
+          in: query
+          description: 'the minimum size to search'
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: page
+          in: query
+          description: 'page: the page number {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int32
+        - name: size
+          in: query
+          description: 'size: the page size {1000}'
+          required: false
+          schema:
+            type: integer
+            default: 1000
+            format: int32
+        - name: sort
+          in: query
+          description: 'sort: the sort pattern {insertionTime:DESC}'
+          required: false
+          schema:
+            type: string
+            default: 'insertionTime:DESC'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayloadSetDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+    put:
+      tags:
+        - payloads
+      summary: Upload and process large JSON data.
+      operationId: uploadJson
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                tag:
+                  description: The tag name
+                  type: string
+                storeset:
+                  description: the string representing a StoreSetDto in json
+                  type: string
+                  format: binary
+                objectType:
+                  description: The object type
+                  type: string
+                compressionType:
+                  description: The compression type
+                  type: string
+                version:
+                  description: The version
+                  type: string
+                endtime:
+                  description: The tag end time, represent a number.
+                  type: string
+              required:
+                - storeset
+                - tag
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoreSetDto"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/StoreSetDto"
+        default:
+          $ref: "#/components/responses/genericError"
+  /payloads/data:
+    get:
+      tags:
+        - payloads
+      summary: Finds a payload resource associated to the hash.
+      description: |
+        This method retrieves a payload resource.
+        Arguments: hash=<hash> the hash of the payload
+        Depending on the header, this method will either retrieve the data, the metadata of the payload 
+        or the streamerInfo alone.
+      operationId: getPayload
+      parameters:
+        - name: hash
+          in: query
+          description: 'hash:  the hash of the payload'
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: |
+            The format of the output data. 
+            It can be : BLOB (default), META (meta data) or STREAMER (streamerInfo).
+          required: true
+          schema:
+            type: string
+            enum: [BLOB, META, STREAMER]
+            default: BLOB
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/octet-stream:
+              schema:
+                type: string  # Modify the schema type to 'string' for octet-stream
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayloadDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+    put:
+      tags:
+        - payloads
+      summary: Update a streamerInfo in a payload
+      description: |
+        This method will update the streamerInfo.
+        This is provided via a generic map in the request body containing the key 'streamerInfo'
+      operationId: updatePayload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericMap'
+      parameters:
+        - name: hash
+          in: path
+          description: 'hash:  the hash of the payload'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayloadDto"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/PayloadDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+    PayloadSetDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/PayloadSetDto'
+    PayloadDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/PayloadDto'
+    StoreDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/StoreDto'
+    StoreSetDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/StoreSetDto'

@@ -1,0 +1,26 @@
+components:
+  schemas:
+    FolderDto:
+      type: object
+      properties:
+        nodeFullpath:
+          type: string
+        schemaName:
+          type: string
+        nodeName:
+          type: string
+        nodeDescription:
+          type: string
+        tagPattern:
+          type: string
+        groupRole:
+          type: string
+    FolderSetDto:
+      description: An FolderSet containing FolderDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'

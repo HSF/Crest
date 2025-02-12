@@ -1,0 +1,240 @@
+openapi: 3.0.0
+info:
+  version: '5.0'
+  title: CREST Server
+  description: OpenApi3 for CREST Server
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'https://crest-undertow.web.cern.ch/api'
+security:
+  - BearerAuth: []
+  - OpenID:
+      - openid
+tags:
+  - name: globaltagmaps
+paths:
+  /globaltagmaps:
+    post:
+      tags:
+        - globaltagmaps
+      summary: Create a GlobalTagMap in the database.
+      description: 'This method allows to insert a GlobalTagMap.Arguments: GlobalTagMapDto should be provided in the body as a JSON file.'
+      operationId: createGlobalTagMap
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalTagMapDto'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalTagMapDto'
+        default:
+          $ref: '#/components/responses/genericError'
+  '/globaltagmaps/{name}':
+    get:
+      tags:
+        - globaltagmaps
+      summary: Find GlobalTagMapDto lists.
+      description: This method search for mappings using the global tag name.
+      operationId: findGlobalTagMap
+      parameters:
+        - name: X-Crest-MapMode
+          in: header
+          description: If the mode is BackTrace then it will search for global tags containing the tag <name>
+          schema:
+            default: Trace
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalTagMapSetDto'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+    delete:
+      tags:
+        - globaltagmaps
+      summary: Delete GlobalTagMapDto lists.
+      description: This method search for mappings using the global tag name and deletes all mappings.
+      operationId: deleteGlobalTagMap
+      parameters:
+        - name: name
+          in: path
+          description: the global tag name
+          required: true
+          schema:
+            type: string
+        - name: label
+          in: query
+          description: 'label: the generic name labelling all tags of a certain kind.'
+          required: true
+          schema:
+            type: string
+            default: none
+        - name: record
+          in: query
+          description: 'record: the record.'
+          required: false
+          schema:
+            type: string
+        - name: tagname
+          in: query
+          description: 'tagname: the name of the tag associated.'
+          required: true
+          schema:
+            type: string
+            default: none
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalTagMapSetDto'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OpenID:
+      type: openIdConnect
+      openIdConnectUrl: 'https://auth.cern.ch/auth/realms/cern/.well-known/openid-configuration'
+  requestBodies:
+    GenericMapBody:
+      description: A JSON object containing generic map used for updates
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericMap'
+  responses:
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '404':
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '409':
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    genericError:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+  schemas:
+    HTTPResponse:
+      description: general response object that can be used for POST and PUT methods
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        code:
+          type: integer
+          description: HTTP status code of the response
+        error:
+          type: string
+        type:
+          type: string
+          description: A generic string specifying the exception type.
+        message:
+          type: string
+        id:
+          type: string
+          description: path or URI of the requested or generated resource
+    CrestBaseResponse:
+      type: object
+      required:
+        - size
+        - format
+      properties:
+        size:
+          type: integer
+          format: int64
+        datatype:
+          type: string
+        format:
+          type: string
+        page:
+          $ref: '#/components/schemas/RespPage'
+        filter:
+          $ref: '#/components/schemas/GenericMap'
+      discriminator:
+        propertyName: format
+    RespPage:
+      type: object
+      required:
+        - size
+        - totalElements
+        - totalPages
+        - number
+      properties:
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        number:
+          type: integer
+    GenericMap:
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties:
+        type: string
+    GlobalTagMapSetDto:
+      description: An GlobalTagMapSet containing GlobalTagMapDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalTagMapDto'
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    GlobalTagMapDto:
+      type: object
+      properties:
+        globalTagName:
+          type: string
+        record:
+          type: string
+        label:
+          type: string
+        tagName:
+          type: string

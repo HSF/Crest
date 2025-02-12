@@ -1,0 +1,59 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# schemaname : ATLAS_PHYS_COND or none
+# security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)
+server:
+    port: 8080
+    connection-timeout: 120s
+spring:
+    security:
+      strategy: MODE_INHERITABLETHREADLOCAL
+    jersey:
+      application-path: ${crest.apiname}
+      servlet:
+        load-on-startup: 1
+      multipart:
+        max-file-size: 100MB
+        max-request-size: 1GB
+    datasource:
+      main:
+        jdbcUrl: jdbc:h2:${crest.dbfile};DB_CLOSE_ON_EXIT=FALSE
+        driverClassName: org.h2.Driver
+        username: root
+        password: root
+        hikari:
+          connection-test-query: SELECT 1
+          maximum-pool-size: 2
+      trigger:
+        jdbcUrl: jdbc:h2:/tmp/triggdbh2web;DB_CLOSE_ON_EXIT=FALSE
+        driverClassName: org.h2.Driver
+        username: root
+        password: root
+        hikari:
+          connection-test-query: SELECT 1
+          maximum-pool-size: 2
+    jpa:
+      properties:
+        hibernate.dialect: org.hibernate.dialect.H2Dialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: update
+        hibernate.show_sql: false
+info:
+  app:
+    name: Crest Application
+    description: Rest services for conditions data management 
+    profile: default
+crest:
+  dumpdir: /tmp
+  schemaname: none
+  security: none
+  synchro: none
+  webstaticdir: /tmp
+  dbfile: /tmp/crestdbh2
+  apiname: /api
+  authenticationtype: none
+
+    
