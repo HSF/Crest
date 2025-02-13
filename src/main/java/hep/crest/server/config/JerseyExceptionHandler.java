@@ -29,7 +29,6 @@ public class JerseyExceptionHandler implements ExceptionMapper<Exception> {
     /**
      * Service.
      */
-    @Autowired
     private CachingPolicyService cachesvc;
 
     /**
@@ -39,9 +38,12 @@ public class JerseyExceptionHandler implements ExceptionMapper<Exception> {
 
     /**
      * Default ctor.
+     * @param cachesvc
+     *
      */
-    public JerseyExceptionHandler() {
-        // Empty constructor. All initialization in postConstruct().
+    @Autowired
+    public JerseyExceptionHandler(CachingPolicyService cachesvc) {
+        this.cachesvc = cachesvc;
     }
 
     /**

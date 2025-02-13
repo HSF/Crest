@@ -23,6 +23,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Repository configuration.
@@ -86,8 +87,10 @@ public class RepositoryConfig {
     @Primary
     @Bean(name = "mainTransactionManager")
     public PlatformTransactionManager mainTransactionManager(
-            @Qualifier("mainEntityManagerFactory") LocalContainerEntityManagerFactoryBean mainEntityManagerFactory) {
-        return new JpaTransactionManager(mainEntityManagerFactory.getObject());
+            @Qualifier("mainEntityManagerFactory")
+            LocalContainerEntityManagerFactoryBean mainEntityManagerFactory) {
+        return new JpaTransactionManager(
+                Objects.requireNonNull(mainEntityManagerFactory.getObject()));
     }
 
     /**

@@ -43,7 +43,7 @@ public class TagSecurityAspect {
      * @param userinfo
      */
     @Autowired
-    public TagSecurityAspect(CrestProperties cprops, UserInfo userinfo) {
+    TagSecurityAspect(CrestProperties cprops, UserInfo userinfo) {
         this.cprops = cprops;
         this.userinfo = userinfo;
     }

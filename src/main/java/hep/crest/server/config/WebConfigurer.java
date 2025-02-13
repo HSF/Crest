@@ -19,8 +19,16 @@ class WebConfigurer implements WebMvcConfigurer {
     /**
      * Properties.
      */
-    @Autowired
     private CrestProperties cprops;
+
+    /**
+     * Ctor for injection.
+     * @param cprops
+     */
+    @Autowired
+    WebConfigurer(CrestProperties cprops) {
+        this.cprops = cprops;
+    }
 
     /*
      * (non-Javadoc)

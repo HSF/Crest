@@ -24,9 +24,16 @@ public class CachingPolicyService {
     /**
      * Properties.
      */
-    @Autowired
     private CachingProperties cprops;
 
+    /**
+     * Ctor for injection.
+     * @param cprops
+     */
+    @Autowired
+    public CachingPolicyService(CachingProperties cprops) {
+        this.cprops = cprops;
+    }
     /**
      * @param snapshot
      *            the Long

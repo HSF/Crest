@@ -40,8 +40,17 @@ public class PayloadDataRepositoryImpl implements PayloadDataRepositoryCustom {
     /**
      * Helper.
      */
-    @Autowired
     private CrestTableNames crestTableNames;
+
+    /**
+     * Ctor for injection.
+     * @param crestTableNames
+     */
+    @Autowired
+    public PayloadDataRepositoryImpl(CrestTableNames crestTableNames) {
+        this.crestTableNames = crestTableNames;
+    }
+
 
     @Override
     @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -77,10 +86,12 @@ public class PayloadDataRepositoryImpl implements PayloadDataRepositoryCustom {
         if (dialect instanceof org.hibernate.dialect.PostgreSQLDialect) {
             //your database is postgres
             String tablename = crestTableNames.getPayloadDataTableName();
-            String delStatement = "SELECT lo_unlink(d.data) as n FROM " + tablename + " d WHERE d.hash = '" + id + "'";
+            String delStatement = "SELECT lo_unlink(d.data) as n FROM " + tablename
+                    + " d WHERE d.hash = :id";
             List<Integer> reslist =
-                    session.createNativeQuery(delStatement)
-                            .addScalar("n", StandardBasicTypes.INTEGER).list();
+                    session.createNativeQuery(delStatement, Integer.class)
+                            .setParameter("id", id)
+                            .addScalar("n", StandardBasicTypes.INTEGER).getResultList();
             log.debug("Postgres deletion : {}", reslist.get(0));
         }
     }

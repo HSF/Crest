@@ -61,7 +61,7 @@ public class IovSynchroAspect {
      *
      */
     @Autowired
-    public IovSynchroAspect(CrestProperties cprops, UserInfo userinfo,
+    IovSynchroAspect(CrestProperties cprops, UserInfo userinfo,
                             TagService tagService, IovService iovService) {
         this.cprops = cprops;
         this.userinfo = userinfo;
