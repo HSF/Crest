@@ -62,13 +62,13 @@ public class SecurityDefaultConfig {
                     .anyRequest().denyAll()  // Deny all other requests
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-
         }
         else {
             log.info("Allow all requests....");
             http.securityMatcher("/**").authorizeHttpRequests(
                     authorize -> authorize.anyRequest().permitAll()  // Allow all requests
             );
+            http.csrf(AbstractHttpConfigurer::disable);  // Disable CSRF, only for testing purposes
         }
         return http.build();
     }
