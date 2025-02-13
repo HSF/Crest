@@ -31,13 +31,22 @@ public class TagSecurityAspect {
     /**
      * Properties.
      */
-    @Autowired
     private CrestProperties cprops;
     /**
      * The user info.
      */
-    @Autowired
     private UserInfo userinfo;
+
+    /**
+     * Ctor for injection.
+     * @param cprops
+     * @param userinfo
+     */
+    @Autowired
+    public TagSecurityAspect(CrestProperties cprops, UserInfo userinfo) {
+        this.cprops = cprops;
+        this.userinfo = userinfo;
+    }
 
     /**
      * @param pjp

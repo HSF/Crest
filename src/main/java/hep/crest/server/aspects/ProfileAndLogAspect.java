@@ -3,15 +3,12 @@
  */
 package hep.crest.server.aspects;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.CodeSignature;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -26,20 +23,6 @@ import java.util.Map;
 @Component
 @Slf4j
 public class ProfileAndLogAspect {
-
-    /**
-     * The jackson mapper.
-     */
-    private final ObjectMapper mapper;
-
-    /**
-     * Default constructor, using injection.
-     * @param mapper
-     */
-    @Autowired
-    public ProfileAndLogAspect(@Qualifier("jacksonMapper") ObjectMapper mapper) {
-        this.mapper = mapper;
-    }
 
     /**
      * @param joinPoint

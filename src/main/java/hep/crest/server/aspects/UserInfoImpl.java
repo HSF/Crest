@@ -32,8 +32,7 @@ public class UserInfoImpl implements UserInfo {
         }
 
         // Check if authentication is an OAuth2 token (for JWT or Opaque tokens)
-        if (auth instanceof JwtAuthenticationToken) {
-            JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) auth;
+        if (auth instanceof JwtAuthenticationToken jwtAuth) {
             Jwt jwt = jwtAuth.getToken();
             log.info("JWT Principal: {}", jwtAuth.getPrincipal());
 
@@ -44,8 +43,7 @@ public class UserInfoImpl implements UserInfo {
                 clientId = getClientId(claims);
             }
         }
-        else if (auth instanceof OAuth2AuthenticationToken) {
-            OAuth2AuthenticationToken oauth2Auth = (OAuth2AuthenticationToken) auth;
+        else if (auth instanceof OAuth2AuthenticationToken oauth2Auth) {
             OAuth2User oauth2User = oauth2Auth.getPrincipal();
             log.info("OAuth2 Principal: {}", oauth2User);
 
