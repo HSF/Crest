@@ -28,10 +28,6 @@ public class JsonStreamProcessor {
      */
     private PayloadService payloadService;
     /**
-     * Thee iov service.
-     */
-    private IovService iovService;
-    /**
      * Mapper.
      */
     private ObjectMapper jsonMapper;
@@ -48,7 +44,6 @@ public class JsonStreamProcessor {
                                IovService iovService,
                                @Qualifier("jacksonMapper") ObjectMapper mapper) {
         this.payloadService = payloadService;
-        this.iovService = iovService;
         this.jsonMapper = mapper;
     }
 

@@ -237,7 +237,7 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         log.debug("Set cache control to {}", cc);
         String finalLocalFormat = localFormat;
         StreamingOutput streamingOutput = edh.makeStreamingOutputFromLob(
-                new SimpleLobStreamerProvider(hash, finalLocalFormat) {
+                new SimpleLobStreamerProvider() {
                     @Override
                     public InputStream getInputStream() {
                         PayloadService.LobStream lob =

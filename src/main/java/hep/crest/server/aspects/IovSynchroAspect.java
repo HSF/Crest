@@ -36,25 +36,38 @@ public class IovSynchroAspect {
     /**
      * Properties.
      */
-    @Autowired
     private CrestProperties cprops;
 
     /**
      * The user info.
      */
-    @Autowired
     private UserInfo userinfo;
 
     /**
      * Service.
      */
-    @Autowired
     private TagService tagService;
     /**
      * Service.
      */
-    @Autowired
     private IovService iovService;
+
+    /**
+     * Ctor using injection.
+     * @param cprops
+     * @param userinfo
+     * @param tagService
+     * @param iovService
+     *
+     */
+    @Autowired
+    public IovSynchroAspect(CrestProperties cprops, UserInfo userinfo,
+                            TagService tagService, IovService iovService) {
+        this.cprops = cprops;
+        this.userinfo = userinfo;
+        this.tagService = tagService;
+        this.iovService = iovService;
+    }
 
     /**
      * Check synchronization.
@@ -80,7 +93,7 @@ public class IovSynchroAspect {
             final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String role = entity.getTag().getName().split("-")[0].toLowerCase();
             Boolean hasrole = userinfo.isUserInRole(auth, role);
-            if (hasrole || entity.getTag().getName().startsWith("TEST")) {
+            if (hasrole.equals(Boolean.TRUE) || entity.getTag().getName().startsWith("TEST")) {
                 log.info("User is allowed to write IOVs into tag {}", entity.getTag().getName());
                 allowedOperation = true;
             }

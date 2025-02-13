@@ -30,9 +30,17 @@ public class ProfileAndLogAspect {
     /**
      * The jackson mapper.
      */
+    private final ObjectMapper mapper;
+
+    /**
+     * Default constructor, using injection.
+     * @param mapper
+     */
     @Autowired
-    @Qualifier("jacksonMapper")
-    private ObjectMapper mapper;
+    public ProfileAndLogAspect(@Qualifier("jacksonMapper") ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
+
     /**
      * @param joinPoint
      *            the ProceedingJoinPoint
