@@ -69,7 +69,6 @@ public class SecurityDefaultConfig {
             http.securityMatcher("/**").authorizeHttpRequests(
                     authorize -> authorize.anyRequest().permitAll()  // Allow all requests
             );
-            http.csrf(AbstractHttpConfigurer::disable);  // Disable CSRF
         }
         return http.build();
     }

@@ -294,7 +294,7 @@ public final class RunIovConverter {
             final Long run = getRun(time);
             final Long lb = getLumi(time);
             String iovstr = run + " - " + lb;
-            if (lb == COOL_MAX_LUMIBLOCK) {
+            if (lb != null && lb == COOL_MAX_LUMIBLOCK) {
                 iovstr = run + " - maxlb";
             }
             return iovstr;
