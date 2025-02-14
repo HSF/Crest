@@ -90,6 +90,20 @@ public class TestCrestTags {
             assertThat(respb).isNotNull();
             assertThat(respb.getTagName()).isEqualTo(tagname);
         }
+        String urltag = "/crestapi/tags?name=" + tagname
+                + "&objectType=0&timeType=time&description=1000000&size=1000&page=0";
+        final ResponseEntity<TagSetDto> resptags = this.testRestTemplate
+                .exchange(urltag, HttpMethod.GET, null,
+                        TagSetDto.class);
+        {
+            log.info("Retrieved tags " + resptags.getBody());
+            final TagSetDto responseBody = resptags.getBody();
+            assertThat(resptags.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseBody).isNotNull();
+            assertThat(responseBody.getResources()).isNotNull();
+            assertThat(responseBody.getResources().size()).isEqualTo(0);
+        }
+
         String url = "/crestapi/globaltags/A-TEST-GT-50/tags";
         final ResponseEntity<TagSetDto> respft = this.testRestTemplate
                 .exchange(url, HttpMethod.GET, null,
