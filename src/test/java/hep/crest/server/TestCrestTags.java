@@ -145,6 +145,7 @@ public class TestCrestTags {
                             log.info("Found iov: {}", iov);
                         }
                 );
+                checkIovs(tagname);
             }
         }
         catch (JsonProcessingException e) {
@@ -152,7 +153,32 @@ public class TestCrestTags {
         }
     }
 
-    public ResponseEntity<String> uploadJson(String tag, StoreSetDto storesetDto, String objectType, String compressionType, String version, String endtime) throws JsonProcessingException {
+    public void checkIovs(String tagname) {
+        String url = "/crestapi/iovs?tagname=" + tagname + "&snapshot=0" + "&since=0"
+                + "&until=1000000" + "&size=1000" + "&page=0";
+        final ResponseEntity<IovSetDto> response = testRestTemplate
+                .getForEntity(url, IovSetDto.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        IovSetDto iovs = response.getBody();
+        assertThat(iovs).isNotNull();
+        assertThat(iovs.getResources()).isNotNull();
+        response.getBody().getResources().forEach(iov -> {
+            log.info("Found iov: {}", iov);
+        });
+
+        // Now query using payload hash
+        url = "/crestapi/iovs?tagname=" + tagname + "&hash=somefakehash";
+        final ResponseEntity<IovSetDto> response2 = testRestTemplate.getForEntity(url, IovSetDto.class);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        IovSetDto iovs2 = response2.getBody();
+        assertThat(iovs2).isNotNull();
+        assertThat(iovs2.getResources()).isNotNull();
+        assertThat(iovs2.getResources().size()).isEqualTo(0);
+    }
+
+    public ResponseEntity<String> uploadJson(String tag, StoreSetDto storesetDto,
+                                             String objectType, String compressionType,
+                                             String version, String endtime) throws JsonProcessingException {
         // Prepare the multipart request
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         byte[] data = mapper.writeValueAsBytes(storesetDto);

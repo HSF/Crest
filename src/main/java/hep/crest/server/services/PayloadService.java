@@ -9,6 +9,7 @@ import hep.crest.server.converters.HashGenerator;
 import hep.crest.server.data.pojo.Iov;
 import hep.crest.server.data.pojo.IovId;
 import hep.crest.server.data.pojo.Payload;
+import hep.crest.server.data.pojo.PayloadData;
 import hep.crest.server.data.pojo.PayloadInfoData;
 import hep.crest.server.data.pojo.Tag;
 import hep.crest.server.data.repositories.IovRepository;
@@ -339,6 +340,7 @@ public class PayloadService {
     public Payload insertPayload(Payload entity, InputStream is, PayloadInfoData streamer)
             throws AbstractCdbServiceException {
         log.debug("Save payload {}", entity);
+        Payload saved = null;
         if (entity.getSize() == null) {
             throw new CdbBadRequestException("Cannot store payload without size being set");
         }
@@ -348,12 +350,31 @@ public class PayloadService {
             log.warn("Payload already exists for hash {}: send back the saved instance",
                     entity.getHash());
             // Having the existing instance will allow to store IOVs.
-            return exists.get();
+            saved = exists.get();
         }
-        // Store the payload dto
-        final Payload saved = payloadRepository.save(entity);
-        payloadDataRepository.saveData(entity.getHash(), is, entity.getSize());
-        payloadInfoDataRepository.save(streamer);
+        else {
+            // Store the payload dto
+            log.info("Save payload for hash {}", entity.getHash());
+            saved = payloadRepository.save(entity);
+        }
+        Optional<PayloadInfoData> existsinfo = payloadInfoDataRepository.findById(entity.getHash());
+        if (existsinfo.isPresent()) {
+            log.warn("Payload info already exists for hash {}", entity.getHash());
+        }
+        else {
+            // Store the streamer info
+            log.info("Save streamer info for hash {}", entity.getHash());
+            payloadInfoDataRepository.save(streamer);
+        }
+        Optional<PayloadData> existsdata = payloadDataRepository.findById(entity.getHash());
+        if (existsdata.isPresent()) {
+            log.warn("Payload data already exists for hash {}", entity.getHash());
+        }
+        else {
+            // Store the payload data
+            log.info("Save payload data for hash {}", entity.getHash());
+            payloadDataRepository.saveData(entity.getHash(), is, entity.getSize());
+        }
         log.debug("Saved payload and related entity: {}", saved);
         return saved;
     }

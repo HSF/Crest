@@ -1,13 +1,25 @@
 package hep.crest.server;
 
 import hep.crest.server.controllers.PageRequestHelper;
+import hep.crest.server.converters.CustomMapper;
+import hep.crest.server.converters.DateFormatterHandler;
+import hep.crest.server.converters.HashGenerator;
+import hep.crest.server.converters.PayloadHandler;
 import hep.crest.server.serializers.ArgTimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,6 +75,60 @@ public class ToolsTest {
 
         BigInteger cr3 = prh.getCoolRunLumi("INF", "200");
         assertThat(cr3).isGreaterThan(new BigInteger("2147483647"));
+    }
+
+    @Test
+    public void converterTest() {
+        // Test the conversion of a string to a BigInteger
+        CustomMapper cm = new CustomMapper();
+        Timestamp now = Timestamp.from(Instant.now());
+        OffsetDateTime nowdt = cm.asOffsetDateTime(now);
+        Long nowdtl = nowdt.toEpochSecond();
+        Long nowt = now.getTime()/1000;
+        assertThat(nowdtl).isEqualTo(nowt);
+        Timestamp fromdt = cm.asTimestamp(nowdt);
+        assertThat(fromdt).isEqualTo(now);
+        byte[] b = cm.stringToByteArray("test");
+        assertThat(b).isNotNull();
+        String s = cm.byteArrayToString(b);
+        assertThat(s).isEqualTo("test");
+
+        DateFormatterHandler dfh = new DateFormatterHandler();
+        String timestr = "2011-12-03T10:15:30+01:00";
+        Timestamp tsf = dfh.format(timestr);
+        assertThat(tsf).isNotNull();
+        String tsfstr = dfh.format(tsf);
+        assertThat(tsfstr).contains("2011-12-03T09:15:30"); // is in UTC
+        dfh.setDatePATTERN("yyyy-MM-dd'T'HH:mm:ss");
+        DateTimeFormatter dtf = dfh.getLocformatter();
+        assertThat(dtf).isNotNull();
+
+        String payload = "test";
+        InputStream is = new ByteArrayInputStream(payload.getBytes());
+        byte[] b2 = PayloadHandler.getBytesFromInputStream(is);
+        assertThat(b2).isNotNull();
+        String hash =
+                PayloadHandler.saveToFileGetHash(is, "testfile");
+        assertThat(hash).isNotNull();
+        String hash2 = PayloadHandler.getHashFromStream(new BufferedInputStream(is));
+        assertThat(hash2).isNotNull();
+
+        PayloadHandler.saveStreamToFile(is, "testfile2");
+        File f = new File("testfile2");
+        assertThat(f.exists()).isTrue();
+
+        String hash3 = HashGenerator.md5Java("test");
+        assertThat(hash3).isNotNull();
+        String hash3r = HashGenerator.md5Java("test".getBytes());
+        assertThat(hash3r).isNotNull();
+        assertThat(hash3).isEqualTo(hash3r);
+        String hash4 = HashGenerator.shaJava("test".getBytes());
+        assertThat(hash4).isNotNull();
+        String hash5 = HashGenerator.md5Spring("test");
+        assertThat(hash5).isNotNull();
+        String hash6 = HashGenerator.md5Spring("test".getBytes());
+        assertThat(hash6).isNotNull();
+        assertThat(hash5).isEqualTo(hash6);
     }
 
 }
