@@ -33,18 +33,31 @@ public class GlobalTagMapService {
     /**
      * Repository.
      */
-    @Autowired
     private GlobalTagMapRepository globalTagMapRepository;
     /**
      * Repository.
      */
-    @Autowired
     private GlobalTagRepository globalTagRepository;
     /**
      * Repository.
      */
-    @Autowired
     private TagRepository tagRepository;
+
+    /**
+     * Ctor with injection.
+     * @param globalTagMapRepository
+     * @param globalTagRepository
+     * @param tagRepository
+     */
+    @Autowired
+    public GlobalTagMapService(GlobalTagMapRepository globalTagMapRepository,
+                               GlobalTagRepository globalTagRepository,
+                               TagRepository tagRepository) {
+        this.globalTagMapRepository = globalTagMapRepository;
+        this.globalTagRepository = globalTagRepository;
+        this.tagRepository = tagRepository;
+    }
+
 
     /**
      * @param gtName the String represnting the GlobalTag name

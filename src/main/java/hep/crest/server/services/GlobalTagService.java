@@ -34,13 +34,22 @@ public class GlobalTagService {
     /**
      * Repository.
      */
-    @Autowired
     private GlobalTagRepository globalTagRepository;
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
+
+    /**
+     * Ctor with injection.
+     * @param globalTagRepository
+     * @param prh
+     */
+    @Autowired
+    public GlobalTagService(GlobalTagRepository globalTagRepository, PageRequestHelper prh) {
+        this.globalTagRepository = globalTagRepository;
+        this.prh = prh;
+    }
 
     /**
      * Select GlobalTags.

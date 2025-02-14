@@ -8,8 +8,7 @@ import hep.crest.server.data.repositories.CrestFoldersRepository;
 import hep.crest.server.exceptions.AbstractCdbServiceException;
 import hep.crest.server.exceptions.ConflictException;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,18 +24,22 @@ import java.util.Optional;
  *
  */
 @Service
+@Slf4j
 public class FolderService {
-
-    /**
-     * Logger.
-     */
-    private static final Logger log = LoggerFactory.getLogger(FolderService.class);
 
     /**
      * Repository.
      */
-    @Autowired
     private CrestFoldersRepository crestFoldersRepository;
+
+    /**
+     * Ctor with injection.
+     * @param crestFoldersRepository
+     */
+    @Autowired
+    public FolderService(CrestFoldersRepository crestFoldersRepository) {
+        this.crestFoldersRepository = crestFoldersRepository;
+    }
 
     /**
      * @param entity

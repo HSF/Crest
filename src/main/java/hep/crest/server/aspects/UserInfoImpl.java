@@ -66,19 +66,18 @@ public class UserInfoImpl implements UserInfo {
         if (user != null) {
             // Search if tagname is in list of roles.
             String crestrole = "ROLE_crest-" + role;
-            if (isRole(crestrole, roles)) {
+            if (Boolean.TRUE.equals(isRole(crestrole, roles))) {
                 return Boolean.TRUE;
             }
-            if (isRole("ROLE_crest-admin", roles)) {
+            if (Boolean.TRUE.equals(isRole("ROLE_crest-admin", roles))) {
                 return Boolean.TRUE;
             }
-            if (isRole("ROLE_crest-developers", roles)) {
+            if (Boolean.TRUE.equals(isRole("ROLE_crest-developers", roles))) {
                 return Boolean.TRUE;
             }
         }
         // Seems that the user is not in the role.
-        roles.stream()
-                .forEach(s -> log.debug("Selected role is {}", s.getAuthority()));
+        roles.forEach(s -> log.debug("Selected role is {}", s.getAuthority()));
         return Boolean.FALSE;
     }
 

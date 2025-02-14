@@ -21,6 +21,7 @@ import hep.crest.server.swagger.model.IovDto;
 import hep.crest.server.swagger.model.IovPayloadDto;
 import hep.crest.server.swagger.model.IovSetDto;
 import hep.crest.server.swagger.model.TagSummaryDto;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -43,47 +44,65 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@Getter
 public class IovService {
 
     /**
      * Repository.
      */
-    @Autowired
     private IovRepository iovRepository;
     /**
      * Repository.
      */
-    @Autowired
     private TagRepository tagRepository;
     /**
      * Repository.
      */
-    @Autowired
     private IMonitoringRepository iMonitoringRepository;
 
     /**
      * Repository.
      */
-    @Autowired
     private IovGroupsCustom iovgroupsrepo;
 
     /**
      * Repository.
      */
-    @Autowired
     private PayloadRepository payloadRepository;
 
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
 
     /**
      * Properties.
      */
-    @Autowired
     private CachingProperties cprops;
+
+    /**
+     * Ctor with injection.
+     * @param iovRepository
+     * @param tagRepository
+     * @param iMonitoringRepository
+     * @param iovgroupsrepo
+     * @param payloadRepository
+     * @param prh
+     * @param cprops
+     */
+    @Autowired
+    public IovService(IovRepository iovRepository, TagRepository tagRepository,
+                      IMonitoringRepository iMonitoringRepository, IovGroupsCustom iovgroupsrepo,
+                      PayloadRepository payloadRepository, PageRequestHelper prh,
+                      CachingProperties cprops) {
+        this.iovRepository = iovRepository;
+        this.tagRepository = tagRepository;
+        this.iMonitoringRepository = iMonitoringRepository;
+        this.iovgroupsrepo = iovgroupsrepo;
+        this.payloadRepository = payloadRepository;
+        this.prh = prh;
+        this.cprops = cprops;
+    }
 
     /**
      * @param tagname   the String

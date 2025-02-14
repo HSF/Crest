@@ -15,7 +15,6 @@ import hep.crest.server.data.repositories.IovRepository;
 import hep.crest.server.data.repositories.PayloadDataRepository;
 import hep.crest.server.data.repositories.PayloadInfoDataRepository;
 import hep.crest.server.data.repositories.PayloadRepository;
-import hep.crest.server.data.repositories.TagRepository;
 import hep.crest.server.data.repositories.args.PayloadQueryArgs;
 import hep.crest.server.exceptions.AbstractCdbServiceException;
 import hep.crest.server.exceptions.CdbBadRequestException;
@@ -62,51 +61,62 @@ public class PayloadService {
     /**
      * Repository.
      */
-    @Autowired
-    private TagRepository tagRepository;
-    /**
-     * Repository.
-     */
-    @Autowired
     private IovRepository iovRepository;
     /**
      * Repository.
      */
-    @Autowired
     private IovService iovService;
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
-
     /**
      * Repository.
      */
-    @Autowired
     private PayloadRepository payloadRepository;
     /**
      * Repository.
      */
-    @Autowired
     private PayloadDataRepository payloadDataRepository;
     /**
      * Repository.
      */
-    @Autowired
     private PayloadInfoDataRepository payloadInfoDataRepository;
     /**
      * Repository.
      */
-    @Autowired
     private ITriggerDb triggerDbService;
-
     /**
      * Mapper.
      */
-    @Autowired
-    @Qualifier("jacksonMapper")
     private ObjectMapper jsonMapper;
+
+    /**
+     * Ctor with injection.
+     * @param iovService
+     * @param payloadRepository
+     * @param payloadDataRepository
+     * @param payloadInfoDataRepository
+     * @param triggerDbService
+     * @param jsonMapper
+     */
+    @Autowired
+    public PayloadService(IovService iovService,
+                          PayloadRepository payloadRepository,
+                          PayloadDataRepository payloadDataRepository,
+                          PayloadInfoDataRepository payloadInfoDataRepository,
+                          ITriggerDb triggerDbService,
+                          @Qualifier("jacksonMapper") ObjectMapper jsonMapper) {
+        this.iovService = iovService;
+        this.iovRepository = iovService.getIovRepository();
+        this.prh = iovService.getPrh();
+        this.payloadRepository = payloadRepository;
+        this.payloadDataRepository = payloadDataRepository;
+        this.payloadInfoDataRepository = payloadInfoDataRepository;
+        this.triggerDbService = triggerDbService;
+        this.jsonMapper = jsonMapper;
+    }
+
 
     /**
      * Select Payloads.

@@ -33,8 +33,16 @@ public class SecurityDefaultConfig {
     /**
      * Properties.
      */
-    @Autowired
     private CrestProperties cprops;
+
+    /**
+     * Ctor for injection.
+     * @param cprops
+     */
+    @Autowired
+    SecurityDefaultConfig(CrestProperties cprops) {
+        this.cprops = cprops;
+    }
 
     /**
      * JwtDecoder. This is a fake one
