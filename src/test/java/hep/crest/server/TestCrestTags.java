@@ -9,6 +9,7 @@ import hep.crest.server.swagger.model.IovSetDto;
 import hep.crest.server.swagger.model.StoreDto;
 import hep.crest.server.swagger.model.StoreSetDto;
 import hep.crest.server.swagger.model.TagDto;
+import hep.crest.server.swagger.model.TagSetDto;
 import hep.crest.server.utils.RandomGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -89,6 +90,19 @@ public class TestCrestTags {
             assertThat(respb).isNotNull();
             assertThat(respb.getTagName()).isEqualTo(tagname);
         }
+        String url = "/crestapi/globaltags/A-TEST-GT-50/tags";
+        final ResponseEntity<TagSetDto> respft = this.testRestTemplate
+                .exchange(url, HttpMethod.GET, null,
+                        TagSetDto.class);
+        {
+            log.info("Retrieved global tag associated tags " + respft.getBody());
+            final TagSetDto responseBody = respft.getBody();
+            assertThat(respft.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseBody).isNotNull();
+            assertThat(responseBody.getResources()).isNotNull();
+            assertThat(responseBody.getResources().size()).isEqualTo(1);
+        }
+
         // Now fill the tag with IOVs
         StoreSetDto storeSetDto = new StoreSetDto();
         StoreDto sdto = new StoreDto();

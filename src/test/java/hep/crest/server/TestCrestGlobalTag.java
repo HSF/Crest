@@ -207,6 +207,18 @@ public class TestCrestGlobalTag {
             ok = mapper.readValue(responseBody, GlobalTagSetDto.class);
             assertThat(ok.getSize()).isPositive();
         }
+
+        String url = "/crestapi/globaltags?type=N&release=1&snapshot=1&workflow"
+                + "=prod&scenario=update&description=Description%20has%20changed&validity=1990";
+        final ResponseEntity<String> resp3 = this.testRestTemplate
+                .exchange(url, HttpMethod.GET, null,
+                        String.class);
+        {
+            log.info("Retrieved empty global tag list " + resp3.getBody());
+            final String responseBody = resp3.getBody();
+            assertThat(resp3.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
+
     }
 
     @Test
