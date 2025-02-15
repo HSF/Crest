@@ -25,14 +25,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RunInfoSetDto'
+              $ref: '#/components/schemas/RunLumiSetDto'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RunInfoSetDto"
+                $ref: "#/components/schemas/RunLumiSetDto"
     get:
       tags:
         - runinfo
@@ -102,7 +102,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RunInfoSetDto"
+                $ref: "#/components/schemas/RunLumiSetDto"
 
 components:
   securitySchemes:
@@ -127,3 +127,8 @@ components:
       $ref: 'schemas/runinfo.yml#/components/schemas/RunInfoSetDto'
     RunInfoDto:
       $ref: 'schemas/runinfo.yml#/components/schemas/RunInfoDto'
+
+    RunLumiSetDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunLumiSetDto'
+    RunLumiInfoDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunLumiInfoDto'

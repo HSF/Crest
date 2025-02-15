@@ -26,14 +26,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RunInfoSetDto'
+              $ref: '#/components/schemas/RunLumiSetDto'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunInfoSetDto'
+                $ref: '#/components/schemas/RunLumiSetDto'
     get:
       tags:
         - runinfo
@@ -105,7 +105,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunInfoSetDto'
+                $ref: '#/components/schemas/RunLumiSetDto'
 components:
   securitySchemes:
     BearerAuth:
@@ -234,3 +234,23 @@ components:
         endTime:
           type: string
           format: date-time
+    RunLumiSetDto:
+      description: An RunLumiSet containing RunLumiInfoDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunLumiInfoDto'
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    RunLumiInfoDto:
+      type: object
+      properties:
+        runNumber:
+          type: number
+        lb:
+          type: number
+        starttime:
+          type: number
+        endtime:
+          type: number

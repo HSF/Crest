@@ -40,3 +40,8 @@ components:
       $ref: 'schemas/runinfo.yml#/components/schemas/RunInfoSetDto'
     RunInfoDto:
       $ref: 'schemas/runinfo.yml#/components/schemas/RunInfoDto'
+
+    RunLumiSetDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunLumiSetDto'
+    RunLumiInfoDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunLumiInfoDto'
