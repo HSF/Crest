@@ -8,6 +8,7 @@ import hep.crest.server.data.repositories.TagMetaRepository;
 import hep.crest.server.exceptions.AbstractCdbServiceException;
 import hep.crest.server.exceptions.CdbNotFoundException;
 import hep.crest.server.exceptions.ConflictException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -24,18 +25,28 @@ import java.util.Optional;
  */
 @Service
 @Slf4j
+@Getter
 public class TagMetaService {
 
     /**
      * Repository.
      */
-    @Autowired
     private TagMetaRepository tagmetaRepository;
     /**
      * Cache manager.
      */
-    @Autowired
     private CacheManager cacheManager;
+
+    /**
+     * Ctor with injected repository.
+     * @param tagmetaRepository the repository
+     * @param cacheManager the cache manager
+     */
+    @Autowired
+    public TagMetaService(TagMetaRepository tagmetaRepository, CacheManager cacheManager) {
+        this.tagmetaRepository = tagmetaRepository;
+        this.cacheManager = cacheManager;
+    }
 
     /**
      * Find TagMeta.

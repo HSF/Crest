@@ -45,33 +45,27 @@ public class TagService {
     /**
      * Repository.
      */
-    @Autowired
     private TagRepository tagRepository;
     /**
      * Repository.
      */
-    @Autowired
     private IovRepository iovRepository;
     /**
      * Repository.
      */
-    @Autowired
     private IovService iovService;
     /**
      * Repository.
      */
-    @Autowired
     private PayloadService payloadService;
     /**
      * Service.
      */
-    @Autowired
     private TagMetaService tagMetaService;
 
     /**
      * Repository.
      */
-    @Autowired
     private TagMetaRepository tagMetaRepository;
 
     /**
@@ -83,14 +77,35 @@ public class TagService {
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
 
     /**
      * Cache manager.
      */
-    @Autowired
     private CacheManager cacheManager;
+
+    /**
+     * Ctors with injected services.
+     * @param tagRepository
+     * @param cacheManager
+     * @param iovService
+     * @param payloadService
+     * @param tagMetaService
+     *
+     */
+    @Autowired
+    TagService(TagRepository tagRepository, CacheManager cacheManager, IovService iovService,
+            PayloadService payloadService, TagMetaService tagMetaService) {
+        this.tagRepository = tagRepository;
+        this.cacheManager = cacheManager;
+        this.iovService = iovService;
+        this.iovRepository = iovService.getIovRepository();
+        this.prh = iovService.getPrh();
+        this.iovGroupsCustom = iovService.getIovGroupsCustom();
+        this.payloadService = payloadService;
+        this.tagMetaService = tagMetaService;
+        this.tagMetaRepository = tagMetaService.getTagmetaRepository();
+    }
 
     /**
      * @param name the tag name

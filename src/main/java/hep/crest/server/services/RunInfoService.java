@@ -30,19 +30,29 @@ public class RunInfoService {
     /**
      * Repository.
      */
-    @Autowired
     private RunLumiInfoRepository runinfoRepository;
-
     /**
      * Mapper.
      */
-    @Autowired
     private RunLumiMapper mapper;
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
+
+    /**
+     * Ctors with injected repository.
+     * @param runinfoRepository the repository
+     * @param mapper the RunLumi mapper
+     * @param prh the PageRequestHelper
+     */
+    @Autowired
+    public RunInfoService(RunLumiInfoRepository runinfoRepository,
+                          RunLumiMapper mapper, PageRequestHelper prh) {
+        this.runinfoRepository = runinfoRepository;
+        this.mapper = mapper;
+        this.prh = prh;
+    }
 
     /**
      * @param dto the RunInfoDto

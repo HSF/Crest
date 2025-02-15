@@ -63,7 +63,7 @@ public class IovService {
     /**
      * Repository.
      */
-    private IovGroupsCustom iovgroupsrepo;
+    private IovGroupsCustom iovGroupsCustom;
 
     /**
      * Repository.
@@ -85,20 +85,20 @@ public class IovService {
      * @param iovRepository
      * @param tagRepository
      * @param iMonitoringRepository
-     * @param iovgroupsrepo
+     * @param iovGroupsCustom
      * @param payloadRepository
      * @param prh
      * @param cprops
      */
     @Autowired
     public IovService(IovRepository iovRepository, TagRepository tagRepository,
-                      IMonitoringRepository iMonitoringRepository, IovGroupsCustom iovgroupsrepo,
+                      IMonitoringRepository iMonitoringRepository, IovGroupsCustom iovGroupsCustom,
                       PayloadRepository payloadRepository, PageRequestHelper prh,
                       CachingProperties cprops) {
         this.iovRepository = iovRepository;
         this.tagRepository = tagRepository;
         this.iMonitoringRepository = iMonitoringRepository;
-        this.iovgroupsrepo = iovgroupsrepo;
+        this.iovGroupsCustom = iovGroupsCustom;
         this.payloadRepository = payloadRepository;
         this.prh = prh;
         this.cprops = cprops;
@@ -113,7 +113,7 @@ public class IovService {
     public List<BigInteger> selectGroupsByTagNameAndSnapshotTime(String tagname, Date snapshot,
                                                                  Long groupsize) {
         log.debug("Search for iovs groups by tag name {} and snapshot time {}", tagname, snapshot);
-        List<BigInteger> minsincelist = iovgroupsrepo.selectSnapshotGroups(tagname, snapshot,
+        List<BigInteger> minsincelist = iovGroupsCustom.selectSnapshotGroups(tagname, snapshot,
                 groupsize);
         if (minsincelist == null) {
             minsincelist = new ArrayList<>();
@@ -188,7 +188,7 @@ public class IovService {
      */
     public Long getSizeByTag(String tagname) {
         log.debug("Count number of iovs by tag name {}", tagname);
-        return iovgroupsrepo.getSize(tagname);
+        return iovGroupsCustom.getSize(tagname);
     }
 
     /**
@@ -198,7 +198,7 @@ public class IovService {
      */
     public Long getSizeByTagAndSnapshot(String tagname, Date snapshot) {
         log.debug("Count number of iovs by tag name {} and snapshot {}", tagname, snapshot);
-        return iovgroupsrepo.getSizeBySnapshot(tagname, snapshot);
+        return iovGroupsCustom.getSizeBySnapshot(tagname, snapshot);
     }
 
     /**
