@@ -192,6 +192,7 @@ public class TestCrestTags {
         assertThat(iovs.getResources()).isNotNull();
         response.getBody().getResources().forEach(iov -> {
             log.info("Found iov: {}", iov);
+            checkPayload(iov.getPayloadHash());
         });
 
         // Now query using payload hash
@@ -202,6 +203,12 @@ public class TestCrestTags {
         assertThat(iovs2).isNotNull();
         assertThat(iovs2.getResources()).isNotNull();
         assertThat(iovs2.getResources().size()).isEqualTo(0);
+    }
+
+    public void checkPayload(String hash) {
+        String url = "/crestapi/payloads?hash=" + hash;
+        final ResponseEntity<String> response = testRestTemplate
+                .getForEntity(url, String.class);
     }
 
     public ResponseEntity<String> uploadJson(String tag, StoreSetDto storesetDto,
