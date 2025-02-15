@@ -100,32 +100,26 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Service.
      */
-    @Autowired
     private PayloadService payloadService;
     /**
      * Repository.
      */
-    @Autowired
     private PayloadRepository payloadRepository;
     /**
      * Repository.
      */
-    @Autowired
     private PayloadDataRepository payloadDataRepository;
     /**
      * Repository.
      */
-    @Autowired
     private PayloadInfoDataRepository payloadInfoDataRepository;
     /**
      * Service.
      */
-    @Autowired
     private IovService iovService;
     /**
      * Service.
      */
-    @Autowired
     private TagService tagService;
     /**
      * Service.
@@ -135,7 +129,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Service.
      */
-    @Autowired
     private CachingPolicyService cachesvc;
     /**
      * Properties.
@@ -170,6 +163,27 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     @Autowired
     private JAXRSContext context;
+
+    /**
+     * Ctor with injected services.
+     * @param payloadService the payload service
+     * @param iovService the iov service
+     * @param tagService the tag service
+     * @param cachingPolicyService caching service
+     *
+     */
+    public PayloadsApiServiceImpl(PayloadService payloadService,
+                                  IovService iovService,
+                                  TagService tagService,
+                                  CachingPolicyService cachingPolicyService) {
+        this.payloadService = payloadService;
+        this.iovService = iovService;
+        this.tagService = tagService;
+        this.cachesvc = cachingPolicyService;
+        this.payloadRepository = payloadService.getPayloadRepository();
+        this.payloadDataRepository = payloadService.getPayloadDataRepository();
+        this.payloadInfoDataRepository = payloadService.getPayloadInfoDataRepository();
+    }
 
     @Override
     public Response listPayloads(String hash, String objectType, Integer minsize,

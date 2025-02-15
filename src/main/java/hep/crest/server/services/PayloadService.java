@@ -27,6 +27,7 @@ import hep.crest.server.repositories.triggerdb.UrlComponents;
 import hep.crest.server.swagger.model.StoreDto;
 import hep.crest.server.swagger.model.StoreSetDto;
 import lombok.Data;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,6 +58,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @Service
 @Slf4j
+@Getter
 public class PayloadService {
 
     /**
