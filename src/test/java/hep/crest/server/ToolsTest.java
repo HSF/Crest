@@ -5,6 +5,7 @@ import hep.crest.server.converters.CustomMapper;
 import hep.crest.server.converters.DateFormatterHandler;
 import hep.crest.server.converters.HashGenerator;
 import hep.crest.server.converters.PayloadHandler;
+import hep.crest.server.data.utils.RunIovConverter;
 import hep.crest.server.serializers.ArgTimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -129,6 +131,33 @@ public class ToolsTest {
         String hash6 = HashGenerator.md5Spring("test".getBytes());
         assertThat(hash6).isNotNull();
         assertThat(hash5).isEqualTo(hash6);
+
+        BigDecimal cooltime1 = RunIovConverter.getCoolTime(40000L,"run-lumi");
+        BigDecimal coolrun1 = RunIovConverter.getCoolRun("40000");
+        assertThat(cooltime1).isEqualTo(coolrun1);
+
+        Long run1 = RunIovConverter.getRun(cooltime1.toBigInteger());
+        assertThat(run1).isEqualTo(40000L);
+
+        BigDecimal coolrunlumi1 = RunIovConverter.getCoolRunLumi(39000L, 10L);
+        BigDecimal coolrunlumi2 = RunIovConverter.getCoolRunLumi("39000", "10");
+        assertThat(coolrunlumi1).isEqualTo(coolrunlumi2);
+
+        Long lb1 = RunIovConverter.getLumi(coolrunlumi1.toBigInteger());
+        assertThat(lb1).isEqualTo(10L);
+
+        BigDecimal runinf = RunIovConverter.getCoolRun("inf");
+        assertThat(runinf).isGreaterThan(new BigDecimal("2147483647"));
+
+        runinf = RunIovConverter.getCoolRunLumi("inf", "10");
+        assertThat(runinf).isGreaterThan(new BigDecimal("2147483647"));
+
+        BigInteger time1 =
+                BigInteger.valueOf(1739640284L*1000)
+                        .multiply(RunIovConverter.TO_NANOSECOND.toBigInteger());
+        Long cooltime3 =
+                RunIovConverter.getTime(time1);
+        assertThat(cooltime3).isEqualTo(1739640284000L);
     }
 
 }
