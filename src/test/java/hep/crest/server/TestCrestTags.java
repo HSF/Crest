@@ -209,6 +209,11 @@ public class TestCrestTags {
         String url = "/crestapi/payloads?hash=" + hash;
         final ResponseEntity<String> response = testRestTemplate
                 .getForEntity(url, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        url = "/crestapi/payloads/data?hash=" + hash;
+        final ResponseEntity<String> response2 = testRestTemplate
+                .getForEntity(url, String.class);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     public ResponseEntity<String> uploadJson(String tag, StoreSetDto storesetDto,
