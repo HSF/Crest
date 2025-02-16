@@ -131,7 +131,6 @@ public class TestCrestTags {
         sdto1.streamerInfo("A_FAKE_STREAMER_INFO");
         storeSetDto.addresourcesItem(sdto1);
         // Store the payloads into the tag
-
         try {
             final ResponseEntity<String> response2 = uploadJson(tagname, storeSetDto, "ascii", "none",
                     "1.0", "0");
@@ -183,6 +182,61 @@ public class TestCrestTags {
             log.error("Error in processing json: ", e);
         }
     }
+
+    @Test
+    public void testTagPayloadRest() {
+        log.info("=======> testTagPayloadRest ");
+        String tagname = "A-CRESTTAG-60";
+        initializeGtag("A-TEST-GT-60");
+        initializeTag(tagname);
+        GlobalTagMapDto mapDto = new GlobalTagMapDto();
+        mapDto.tagName(tagname)
+                .globalTagName("A-TEST-GT-60").record("some-rec").label("TEST-6");
+        log.info("Store global tag to tag mapping : {} ", mapDto);
+        final ResponseEntity<GlobalTagMapDto> response = testRestTemplate
+                .postForEntity("/crestapi/globaltagmaps", mapDto, GlobalTagMapDto.class);
+        {
+            log.info("Created global tag to tag mapping {} ", response.getBody());
+            GlobalTagMapDto respb = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+            log.info("Response from server is: " + respb);
+            assertThat(respb).isNotNull();
+            assertThat(respb.getTagName()).isEqualTo(tagname);
+        }
+
+        // Now fill the tag with IOVs
+        StoreSetDto storeSetDto = new StoreSetDto();
+        StoreDto sdto = new StoreDto();
+        sdto.data("A_BATCH_FAKE_PAYLOAD_TO_TEST");
+        sdto.since(9000L);
+        sdto.streamerInfo("BATCH_FAKE_STREAMER_INFO");
+        storeSetDto.addresourcesItem(sdto);
+        StoreDto sdto1 = new StoreDto();
+        sdto1.data("ANOTHER_BATCH_FAKE_PAYLOAD_TO_TEST");
+        sdto1.since(10000L);
+        sdto1.streamerInfo("ANOTHER_BATCH_FAKE_STREAMER_INFO");
+        storeSetDto.addresourcesItem(sdto1);
+        // Store the payloads into the tag
+        try {
+            final ResponseEntity<String> response2 = uploadPayload(tagname, storeSetDto, "ascii", "none",
+                    "1.0", "0");
+            {
+                log.info("Created payloads batch for tag {} ", response2.getBody());
+                assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+                // Verify IOV loading
+                final ResponseEntity<IovSetDto> response3 = testRestTemplate
+                        .getForEntity("/crestapi/iovs?tagname=" + tagname, IovSetDto.class);
+                assertThat(response3.getStatusCode()).isEqualTo(HttpStatus.OK);
+                response3.getBody().getResources().forEach(iov -> {
+                    log.info("Found iov: {}", iov);
+                });
+            }
+        }
+        catch (JsonProcessingException e) {
+            log.error("Error in processing json: ", e);
+        }
+    }
+
 
     public void checkIovs(String tagname) {
         String url = "/crestapi/iovs?tagname=" + tagname + "&snapshot=0" + "&since=0"
@@ -284,4 +338,45 @@ public class TestCrestTags {
                 String.class
         );
     }
+
+
+    public ResponseEntity<String> uploadPayload(String tag, StoreSetDto storesetDto,
+                                             String objectType, String compressionType,
+                                             String version, String endtime) throws JsonProcessingException {
+        // Prepare the multipart request
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        byte[] data = mapper.writeValueAsBytes(storesetDto);
+        // Add the StoreSetDto as a file part
+        ByteArrayResource storesetResource = new ByteArrayResource(data) {
+            @Override
+            public String getFilename() {
+                return "storeset.json"; // Filename for the file part
+            }
+        };
+        body.add("storeset", storesetResource);
+
+        // Add other form parameters
+        body.add("tag", tag);
+        body.add("objectType", objectType);
+        body.add("compressionType", compressionType);
+        body.add("version", version);
+        body.add("endtime", endtime);
+
+        // Set headers for multipart/form-data
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.set("X-Crest-PayloadFormat", "JSON");
+        // Create the request entity
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        // Send the request
+        //
+        return testRestTemplate.exchange(
+                "/crestapi/payloads", // Replace with the actual URL
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
+    }
+
 }
