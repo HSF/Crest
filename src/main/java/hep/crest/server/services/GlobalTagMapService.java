@@ -20,7 +20,6 @@ import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
@@ -134,7 +133,7 @@ public class GlobalTagMapService {
         if (mrecord != null && !mrecord.isEmpty()) {
             return StreamSupport.stream(maplist.spliterator(), false)
                     .filter(c -> c.getId().getTagRecord().equals(mrecord))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return maplist;
     }

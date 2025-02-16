@@ -176,6 +176,7 @@ public class TestCrestTags {
                 checkIovs(tagname);
                 checkPayloadInfo(tagname);
                 updateTag(tagname);
+                removeTag(tagname, "A-TEST-GT-50");
             }
         }
         catch (JsonProcessingException e) {
@@ -287,6 +288,22 @@ public class TestCrestTags {
         TagSetDto tags = response2.getBody();
         assertThat(tags).isNotNull();
         assertThat(tags.getResources()).isNotNull();
+    }
+
+    public void removeTag(String tagname, String globaltagname) {
+        String url = "/crestapi/admin/tags/" + tagname;
+        ResponseEntity<String> resp = testRestTemplate
+                .exchange(url, HttpMethod.DELETE, null, String.class);
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        url = "/crestapi/globaltagmaps/" + globaltagname + "?label=TEST-5&tagname=" + tagname;
+        ResponseEntity<String> resp2 = testRestTemplate
+                .exchange(url, HttpMethod.DELETE, null, String.class);
+        assertThat(resp2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        url = "/crestapi/admin/tags/" + tagname;
+        ResponseEntity<String> resp3 = testRestTemplate
+                .exchange(url, HttpMethod.DELETE, null, String.class);
+        assertThat(resp3.getStatusCode()).isEqualTo(HttpStatus.OK);
+
     }
 
     public void checkPayloadInfo(String tagname) {

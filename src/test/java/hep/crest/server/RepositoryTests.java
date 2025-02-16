@@ -56,6 +56,7 @@ public class RepositoryTests {
         TagMeta mmeta = (TagMeta) rndgen.generate(TagMeta.class);
         mmeta.setTagName(savedtag.getName());
         mmeta.setTagInfo("test".getBytes());
+        mmeta.setInsertionTime(null);
         final TagMeta savedmeta = tagMetaRepository.save(mmeta);
         assertThat(savedmeta).isNotNull();
         assertThat(savedmeta.getTagName()).isEqualTo(savedtag.getName());
