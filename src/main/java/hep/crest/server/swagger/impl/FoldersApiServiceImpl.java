@@ -1,7 +1,6 @@
 package hep.crest.server.swagger.impl;
 
 import hep.crest.server.controllers.EntityDtoHelper;
-import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.converters.FolderMapper;
 import hep.crest.server.data.pojo.CrestFolders;
 import hep.crest.server.services.FolderService;
@@ -33,10 +32,7 @@ import java.util.List;
 @Component
 @Slf4j
 public class FoldersApiServiceImpl extends FoldersApiService {
-    /**
-     * Helper.
-     */
-    private PageRequestHelper prh;
+
     /**
      * Helper.
      */
@@ -60,15 +56,13 @@ public class FoldersApiServiceImpl extends FoldersApiService {
     /**
      * Ctor with injected service.
      * @param folderService the service.
-     * @param prh the PageRequestHelper
      * @param edh the EntityDtoHelper
      * @param context the context.
      */
     @Autowired
-    public FoldersApiServiceImpl(FolderService folderService, PageRequestHelper prh,
+    public FoldersApiServiceImpl(FolderService folderService,
                                  EntityDtoHelper edh, JAXRSContext context) {
         this.folderService = folderService;
-        this.prh = prh;
         this.edh = edh;
         this.context = context;
     }

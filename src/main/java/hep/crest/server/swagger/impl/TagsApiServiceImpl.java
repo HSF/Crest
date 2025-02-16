@@ -34,10 +34,8 @@ import jakarta.ws.rs.core.SecurityContext;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.ResourceBundle;
 
 /**
  * Rest endpoint for tag management.
@@ -47,10 +45,6 @@ import java.util.ResourceBundle;
 @Component
 @Slf4j
 public class TagsApiServiceImpl extends TagsApiService {
-    /**
-     * Resource bundle.
-     */
-    private final ResourceBundle bundle = ResourceBundle.getBundle("messages", new Locale("US"));
     /**
      * Helper.
      */
@@ -146,28 +140,29 @@ public class TagsApiServiceImpl extends TagsApiService {
         if (body == null) {
             throw new CdbBadRequestException("Cannot update tag with null body");
         }
-        // Loop over map body keys.
-        for (final String key : body.keySet()) {
-            if ("description".equals(key)) {
+        // Loop over map body entries.
+        for (final Map.Entry<String, String> entry : body.entrySet()) {
+            String key = entry.getKey();
+            if ("description".equals(entry.getKey())) {
                 // Update description.
-                entity.setDescription(body.get(key));
+                entity.setDescription(entry.getValue());
             }
             else if (Objects.equals(key, "timeType")) {
-                entity.setTimeType(body.get(key));
+                entity.setTimeType(entry.getValue());
             }
             else if (Objects.equals(key, "lastValidatedTime")) {
-                final BigInteger val = new BigInteger(body.get(key));
+                final BigInteger val = new BigInteger(entry.getValue());
                 entity.setLastValidatedTime(val);
             }
             else if (Objects.equals(key, "endOfValidity")) {
-                final BigInteger val = new BigInteger(body.get(key));
+                final BigInteger val = new BigInteger(entry.getValue());
                 entity.setEndOfValidity(val);
             }
             else if (Objects.equals(key, "synchronization")) {
-                entity.setSynchronization(body.get(key));
+                entity.setSynchronization(entry.getValue());
             }
             else if (Objects.equals(key, "payloadSpec")) {
-                entity.setObjectType(body.get(key));
+                entity.setObjectType(entry.getValue());
             }
             else {
                 log.warn("Ignored key {} in updateTag: field does not exists", key);

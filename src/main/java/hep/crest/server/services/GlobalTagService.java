@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author formica
@@ -110,7 +109,7 @@ public class GlobalTagService {
                 globalTagRepository.findGlobalTagFetchTags(globaltagname, rec, lab).orElseThrow(
                 () -> new CdbNotFoundException("Cannot find global tag for " + globaltagname));
 
-        return entity.getGlobalTagMaps().stream().map(GlobalTagMap::getTag).collect(Collectors.toList());
+        return entity.getGlobalTagMaps().stream().map(GlobalTagMap::getTag).toList();
     }
 
     /**

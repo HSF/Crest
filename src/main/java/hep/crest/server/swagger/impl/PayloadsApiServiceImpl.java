@@ -138,11 +138,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     private PayloadMapper mapper;
 
     /**
-     * Context.
-     */
-    private JAXRSContext context;
-
-    /**
      * Ctor with injected services.
      * @param payloadService the payload service
      * @param tagService the tag service
@@ -150,15 +145,13 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      * @param jsonStreamProcessor the json stream processor
      * @param crestProperties the crest properties
      * @param entityDtoHelper the entity dto helper
-     * @param context the context.
      */
     public PayloadsApiServiceImpl(PayloadService payloadService,
                                   TagService tagService,
                                   CachingPolicyService cachingPolicyService,
                                   JsonStreamProcessor jsonStreamProcessor,
                                   CrestProperties crestProperties,
-                                  EntityDtoHelper entityDtoHelper,
-                                  JAXRSContext context) {
+                                  EntityDtoHelper entityDtoHelper) {
         this.payloadService = payloadService;
         this.iovService = payloadService.getIovService();
         this.jacksonMapper = payloadService.getJsonMapper();
@@ -169,7 +162,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
         this.edh = entityDtoHelper;
         this.prh = iovService.getPrh();
         this.jsonStreamProcessor = jsonStreamProcessor;
-        this.context = context;
     }
 
     @Override

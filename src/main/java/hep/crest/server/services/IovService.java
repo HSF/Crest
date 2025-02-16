@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author formica
@@ -140,7 +139,7 @@ public class IovService {
                 snapshot, groupsize);
         final List<IovDto> iovlist =
                 minsincelist.stream().map(s -> new IovDto().since(s.longValue()).tagName(tagname))
-                        .collect(Collectors.toList());
+                        .toList();
         return new IovSetDto().resources(iovlist).size((long) iovlist.size());
     }
 
@@ -261,7 +260,7 @@ public class IovService {
         final Tag t = checkTag(tagname);
         // Check if payload exists. Cannot store IOV without payload.
         if (!entity.getPayloadHash().startsWith("triggerdb")
-                & payloadRepository.findById(entity.getPayloadHash()).isEmpty()) {
+                && payloadRepository.findById(entity.getPayloadHash()).isEmpty()) {
             log.warn("Payload not found for hash: {}", entity.getPayloadHash());
             throw new CdbNotFoundException("Payload not found: " + entity.getPayloadHash());
         }

@@ -2,7 +2,6 @@ package hep.crest.server.swagger.impl;
 
 import hep.crest.server.annotations.ProfileAndLog;
 import hep.crest.server.caching.CachingPolicyService;
-import hep.crest.server.caching.CachingProperties;
 import hep.crest.server.config.CrestProperties;
 import hep.crest.server.controllers.EntityDtoHelper;
 import hep.crest.server.controllers.PageRequestHelper;
@@ -79,11 +78,6 @@ public class IovsApiServiceImpl extends IovsApiService {
      * Service.
      */
     private TagService tagService;
-
-    /**
-     * Properties.
-     */
-    private CachingProperties cprops;
     /**
      * Mapper.
      */

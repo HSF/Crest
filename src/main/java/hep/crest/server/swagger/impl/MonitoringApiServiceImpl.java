@@ -37,23 +37,15 @@ public class MonitoringApiServiceImpl extends MonitoringApiService {
     IMonitoringRepository monitoringrepo;
 
     /**
-     * Context
-     *
-     */
-    private JAXRSContext context;
-
-    /**
      * Ctor with injected service.
      * @param monitoringrepo the monitoring repository.
      * @param prh the page request helper.
-     * @param context the context.
      */
     @Autowired
     public MonitoringApiServiceImpl(IMonitoringRepository monitoringrepo,
-                                    PageRequestHelper prh, JAXRSContext context) {
+                                    PageRequestHelper prh) {
         this.monitoringrepo = monitoringrepo;
         this.prh = prh;
-        this.context = context;
     }
 
     /*

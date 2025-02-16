@@ -29,8 +29,6 @@ import jakarta.ws.rs.core.SecurityContext;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 /**
  * Rest endpoint to manage global tags. It is used for creation or search of
@@ -65,12 +63,6 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
      * Context
      */
     private JAXRSContext context;
-
-    /**
-     * Resource bundle.
-     */
-    private final ResourceBundle bundle =
-            ResourceBundle.getBundle("messages", new Locale("US"));
 
     /**
      * Ctor with injected service.
