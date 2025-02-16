@@ -174,6 +174,7 @@ public class TestCrestTags {
                         }
                 );
                 checkIovs(tagname);
+                checkPayloadInfo(tagname);
             }
         }
         catch (JsonProcessingException e) {
@@ -214,6 +215,18 @@ public class TestCrestTags {
         final ResponseEntity<String> response2 = testRestTemplate
                 .getForEntity(url, String.class);
         assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+
+    public void checkPayloadInfo(String tagname) {
+        String url = "/crestapi/monitoring/payloads?tagname=" + tagname;
+        final ResponseEntity<String> response = testRestTemplate
+                .getForEntity(url, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        {
+            log.info("Received response: {}", response);
+            assertThat(response.getBody()).isNotNull();
+        }
     }
 
     public ResponseEntity<String> uploadJson(String tag, StoreSetDto storesetDto,
