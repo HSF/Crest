@@ -57,6 +57,12 @@ public class TestCrestTags {
                 .postForEntity("/crestapi/tags", dto, TagDto.class);
         log.info("Received response: {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        // Try to insert the same
+        final ResponseEntity<String> responseconflict = testRestTemplate
+                .postForEntity("/crestapi/tags", dto, String.class);
+        log.info("Received response: {}", responseconflict);
+        assertThat(responseconflict.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+
     }
 
     public void initializeGtag(String gtname) {
@@ -288,6 +294,14 @@ public class TestCrestTags {
         TagSetDto tags = response2.getBody();
         assertThat(tags).isNotNull();
         assertThat(tags.getResources()).isNotNull();
+
+        url = "/crestapi/tags/notfound";
+        dto = new GenericMap();
+        dto.put("synchronization", TagSynchroEnum.NONE.type());
+        dto.put("description", "A new description");
+        dto.put("payloadSpec", "ascii2");
+        testRestTemplate.put(url, dto);
+
     }
 
     public void removeTag(String tagname, String globaltagname) {
