@@ -66,17 +66,15 @@ public class JerseyExceptionHandler implements ExceptionMapper<Exception> {
         log.warn("Handling exception type {}", exception.getClass());
         MDC.clear();
         // If exception is a webapplication exception
-        if (exception instanceof WebApplicationException) {
+        if (exception instanceof WebApplicationException e) {
             log.debug("Instance of WebApplicationException...get Response from there.");
             // Jersey exceptions: return their standard response
-            WebApplicationException e = (WebApplicationException) exception;
             return e.getResponse();
         }
         // If exception is a AbstractCdbServiceException exception
-        if (exception instanceof AbstractCdbServiceException) {
+        if (exception instanceof AbstractCdbServiceException e) {
             log.debug("Instance of CdbServiceException...generate HTTPResponse");
             // Exceptions thrown by the crest server code
-            AbstractCdbServiceException e = (AbstractCdbServiceException) exception;
             HTTPResponse resp = new HTTPResponse().timestamp(OffsetDateTime.now())
                     .code(e.getResponseStatus().getStatusCode())
                     .error(e.getResponseStatus().getReasonPhrase())

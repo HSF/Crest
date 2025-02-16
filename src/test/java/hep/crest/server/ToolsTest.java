@@ -105,6 +105,11 @@ public class ToolsTest {
         DateTimeFormatter dtf = dfh.getLocformatter();
         assertThat(dtf).isNotNull();
 
+        dfh.setDatePATTERN("ISO_LOCAL_DATE_TIME");
+        DateTimeFormatter dtf2 = dfh.getLocformatter();
+        assertThat(dtf2).isNotNull();
+
+
         String payload = "test";
         InputStream is = new ByteArrayInputStream(payload.getBytes());
         byte[] b2 = PayloadHandler.getBytesFromInputStream(is);
