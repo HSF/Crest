@@ -303,7 +303,10 @@ public class TestCrestTags {
         ResponseEntity<String> resp3 = testRestTemplate
                 .exchange(url, HttpMethod.DELETE, null, String.class);
         assertThat(resp3.getStatusCode()).isEqualTo(HttpStatus.OK);
-
+        url = "/crestapi/tags/" + tagname;
+        ResponseEntity<String> resp4 = testRestTemplate
+                .exchange(url, HttpMethod.GET, null, String.class);
+        assertThat(resp4.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     public void checkPayloadInfo(String tagname) {
