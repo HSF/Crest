@@ -10,6 +10,7 @@ import hep.crest.server.swagger.model.IovSetDto;
 import hep.crest.server.swagger.model.StoreDto;
 import hep.crest.server.swagger.model.StoreSetDto;
 import hep.crest.server.swagger.model.TagDto;
+import hep.crest.server.swagger.model.TagMetaDto;
 import hep.crest.server.swagger.model.TagSetDto;
 import hep.crest.server.utils.RandomGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -62,8 +63,19 @@ public class TestCrestTags {
                 .postForEntity("/crestapi/tags", dto, String.class);
         log.info("Received response: {}", responseconflict);
         assertThat(responseconflict.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-
     }
+
+    public void testTagMeta(String tname) {
+        TagMetaDto dto = (TagMetaDto) rnd.generate(TagMetaDto.class);
+        dto.tagName(tname);
+        dto.tagInfo("some info on the payload content");
+        log.info("Store tag meta : {} ", dto);
+        final ResponseEntity<TagMetaDto> response = testRestTemplate
+                .postForEntity("/crestapi/tags/" + tname + "/meta", dto, TagMetaDto.class);
+        log.info("Received response: {}", response);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
+
 
     public void initializeGtag(String gtname) {
         GlobalTagDto dto = (GlobalTagDto) rnd.generate(GlobalTagDto.class);
@@ -83,6 +95,7 @@ public class TestCrestTags {
         String tagname = "A-CRESTTAG-50";
         initializeGtag("A-TEST-GT-50");
         initializeTag(tagname);
+        testTagMeta(tagname);
         GlobalTagMapDto mapDto = new GlobalTagMapDto();
         mapDto.tagName(tagname)
                 .globalTagName("A-TEST-GT-50").record("some-rec").label("TEST-5");
