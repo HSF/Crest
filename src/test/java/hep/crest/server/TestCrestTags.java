@@ -3,6 +3,7 @@ package hep.crest.server;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hep.crest.server.data.pojo.TagSynchroEnum;
+import hep.crest.server.swagger.model.GenericMap;
 import hep.crest.server.swagger.model.GlobalTagDto;
 import hep.crest.server.swagger.model.GlobalTagMapDto;
 import hep.crest.server.swagger.model.IovSetDto;
@@ -175,6 +176,7 @@ public class TestCrestTags {
                 );
                 checkIovs(tagname);
                 checkPayloadInfo(tagname);
+                updateTag(tagname);
             }
         }
         catch (JsonProcessingException e) {
@@ -217,6 +219,18 @@ public class TestCrestTags {
         assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
+    public void updateTag(String tagname) {
+        String url = "/crestapi/tags/" + tagname;
+        GenericMap dto = new GenericMap();
+        dto.put("synchronization", TagSynchroEnum.NONE.type());
+        dto.put("description", "A new description");
+        dto.put("payloadSpec", "ascii2");
+        testRestTemplate.put(url, dto);
+        url = "/crestapi/tags/" + tagname;
+        final ResponseEntity<TagSetDto> response2 = testRestTemplate
+                .getForEntity(url, TagSetDto.class);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 
     public void checkPayloadInfo(String tagname) {
         String url = "/crestapi/monitoring/payloads?tagname=" + tagname;
