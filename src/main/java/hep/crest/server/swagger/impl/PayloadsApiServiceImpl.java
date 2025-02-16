@@ -124,7 +124,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Service.
      */
-    @Autowired
     private JsonStreamProcessor jsonStreamProcessor;
     /**
      * Service.
@@ -133,7 +132,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Properties.
      */
-    @Autowired
     private CrestProperties cprops;
     /**
      * Mapper.
@@ -144,12 +142,10 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Helper.
      */
-    @Autowired
     private EntityDtoHelper edh;
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
 
     /**
@@ -167,19 +163,26 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Ctor with injected services.
      * @param payloadService the payload service
-     * @param iovService the iov service
      * @param tagService the tag service
      * @param cachingPolicyService caching service
-     *
+     * @param jsonStreamProcessor the json stream processor
+     * @param crestProperties the crest properties
+     * @param entityDtoHelper the entity dto helper
      */
     public PayloadsApiServiceImpl(PayloadService payloadService,
-                                  IovService iovService,
                                   TagService tagService,
-                                  CachingPolicyService cachingPolicyService) {
+                                  CachingPolicyService cachingPolicyService,
+                                  JsonStreamProcessor jsonStreamProcessor,
+                                  CrestProperties crestProperties,
+                                  EntityDtoHelper entityDtoHelper) {
         this.payloadService = payloadService;
-        this.iovService = iovService;
+        this.iovService = payloadService.getIovService();
         this.tagService = tagService;
         this.cachesvc = cachingPolicyService;
+        this.cprops = crestProperties;
+        this.edh = entityDtoHelper;
+        this.prh = iovService.getPrh();
+        this.jsonStreamProcessor = jsonStreamProcessor;
         this.payloadRepository = payloadService.getPayloadRepository();
         this.payloadDataRepository = payloadService.getPayloadDataRepository();
         this.payloadInfoDataRepository = payloadService.getPayloadInfoDataRepository();

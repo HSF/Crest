@@ -33,7 +33,6 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
     /**
      * Service.
      */
-    @Autowired
     private GlobalTagMapService globaltagmapService;
 
     /**

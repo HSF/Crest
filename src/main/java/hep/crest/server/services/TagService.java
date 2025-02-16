@@ -15,6 +15,7 @@ import hep.crest.server.data.repositories.args.TagQueryArgs;
 import hep.crest.server.exceptions.AbstractCdbServiceException;
 import hep.crest.server.exceptions.CdbNotFoundException;
 import hep.crest.server.exceptions.ConflictException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -41,6 +42,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @Service
 @Slf4j
+@Getter
 public class TagService {
     /**
      * Repository.

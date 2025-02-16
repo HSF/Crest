@@ -54,37 +54,30 @@ public class TagsApiServiceImpl extends TagsApiService {
     /**
      * Helper.
      */
-    @Autowired
     EntityDtoHelper edh;
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
     /**
      * Service.
      */
-    @Autowired
     private CachingPolicyService cachesvc;
     /**
      * Service.
      */
-    @Autowired
     private TagService tagService;
     /**
      * Service.
      */
-    @Autowired
     private TagMetaService tagMetaService;
     /**
      * Mapper.
      */
-    @Autowired
     private TagMapper tagmapper;
     /**
      * Mapper.
      */
-    @Autowired
     private TagMetaMapper tagmetamapper;
 
     /**
@@ -92,6 +85,28 @@ public class TagsApiServiceImpl extends TagsApiService {
      */
     @Autowired
     private JAXRSContext context;
+
+    /**
+     * Ctor with injected service.
+     * @param tagService
+     * @param tagmapper
+     * @param tagmetamapper
+     * @param edh
+     * @param cachesvc
+     */
+    @Autowired
+    public TagsApiServiceImpl(TagService tagService, TagMapper tagmapper,
+                              TagMetaMapper tagmetamapper, EntityDtoHelper edh,
+                              CachingPolicyService cachesvc) {
+        this.tagService = tagService;
+        this.tagMetaService = tagService.getTagMetaService();
+        this.tagmapper = tagmapper;
+        this.tagmetamapper = tagmetamapper;
+        this.prh = tagService.getPrh();
+        this.edh = edh;
+        this.cachesvc = cachesvc;
+    }
+
     /*
      * (non-Javadoc)
      *
