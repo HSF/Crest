@@ -17,6 +17,7 @@ import hep.crest.server.data.pojo.IovId;
 import hep.crest.server.data.pojo.PayloadInfoData;
 import hep.crest.server.data.pojo.Tag;
 import hep.crest.server.data.pojo.TagMeta;
+import hep.crest.server.data.repositories.externals.SqlRequests;
 import hep.crest.server.data.runinfo.pojo.RunLumiId;
 import hep.crest.server.data.runinfo.pojo.RunLumiInfo;
 import hep.crest.server.repositories.monitoring.PayloadInfoMapper;
@@ -46,6 +47,7 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Random;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -203,4 +205,19 @@ public class MapperTest {
         testMapper(TagMeta.class, TagMetaDto.class, TagMetaMapper.class);
     }
 
+    @Test
+    public void testSqlRequest() {
+        String ex = SqlRequests.getDataQuery("test");
+        assertThat(ex).isNotNull();
+        ex = SqlRequests.getDeleteQuery("test");
+        assertThat(ex).isNotNull();
+        ex = SqlRequests.getInsertDataQuery("test");
+        assertThat(ex).isNotNull();
+        ex = SqlRequests.getInfoDataQuery("test");
+        assertThat(ex).isNotNull();
+        ex = SqlRequests.getInsertInfoQuery("test");
+        assertThat(ex).isNotNull();
+        ex = SqlRequests.getUpdateInfoQuery("test");
+        assertThat(ex).isNotNull();
+    }
 }
