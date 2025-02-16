@@ -9,7 +9,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
@@ -59,7 +58,7 @@ public class EntityDtoHelper {
                                           Class<? extends GenericMapper<D, T>> mapperClass) {
         GenericMapper<D, T> mapper = applicationContext.getBean(mapperClass);
         return StreamSupport.stream(entitylist.spliterator(), false).map(mapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -78,7 +77,7 @@ public class EntityDtoHelper {
                                           Class<? extends GenericMapper<D, T>> mapperClass) {
         GenericMapper<D, T> mapper = applicationContext.getBean(mapperClass);
         return StreamSupport.stream(entitylist.spliterator(), false).map(mapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 

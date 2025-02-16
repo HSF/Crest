@@ -85,7 +85,6 @@ public class JsonStreamProcessor {
                     log.info("Data size : {}", size);
                 }
             }
-            parser.close();
             if (nstored != size) {
                 log.warn("The stored data are not equal to input data");
             }

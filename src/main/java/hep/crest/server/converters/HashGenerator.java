@@ -209,7 +209,7 @@ public final class HashGenerator {
      * @throws NoSuchAlgorithmException
      */
     public static String sha256Hash(byte[] bytes) throws NoSuchAlgorithmException {
-        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        MessageDigest sha256 = MessageDigest.getInstance(SHA);
         // Update the digest with your data
         sha256.update(bytes);
 

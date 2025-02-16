@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * An implementation for groups queries.
@@ -78,7 +77,7 @@ public class IovGroupsImpl extends DataGeneral implements IovGroupsCustom {
         BigDecimal a = sinceList.get(0);
         log.info("Return elements like {} ", a);
         return sinceList.stream().map(BigDecimal::toBigInteger)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
