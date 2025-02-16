@@ -230,6 +230,9 @@ public class TestCrestTags {
         final ResponseEntity<TagSetDto> response2 = testRestTemplate
                 .getForEntity(url, TagSetDto.class);
         assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        TagSetDto tags = response2.getBody();
+        assertThat(tags).isNotNull();
+        assertThat(tags.getResources()).isNotNull();
     }
 
     public void checkPayloadInfo(String tagname) {
