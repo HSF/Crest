@@ -4,7 +4,9 @@ package hep.crest.server;
 import hep.crest.server.data.pojo.Iov;
 import hep.crest.server.data.pojo.IovId;
 import hep.crest.server.data.pojo.Tag;
+import hep.crest.server.data.pojo.TagMeta;
 import hep.crest.server.data.repositories.IovRepository;
+import hep.crest.server.data.repositories.TagMetaRepository;
 import hep.crest.server.data.repositories.TagRepository;
 import hep.crest.server.utils.RandomGenerator;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,8 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Date;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class RepositoryTests {
@@ -28,6 +32,8 @@ public class RepositoryTests {
 
     @Autowired
     private TagRepository tagrepository;
+    @Autowired
+    private TagMetaRepository tagMetaRepository;
 
     @Autowired
     private IovRepository iovRepository;
@@ -47,7 +53,12 @@ public class RepositoryTests {
         mtag.setInsertionTime(null);
         mtag.setModificationTime(null);
         final Tag savedtag = tagrepository.save(mtag);
-
+        TagMeta mmeta = (TagMeta) rndgen.generate(TagMeta.class);
+        mmeta.setTagName(savedtag.getName());
+        mmeta.setTagInfo("test".getBytes());
+        final TagMeta savedmeta = tagMetaRepository.save(mmeta);
+        assertThat(savedmeta).isNotNull();
+        assertThat(savedmeta.getTagName()).isEqualTo(savedtag.getName());
         final IovId id =
                 new IovId().setTagName(savedtag.getName()).setSince(BigInteger.valueOf(999L))
                         .setInsertionTime(new Date());
