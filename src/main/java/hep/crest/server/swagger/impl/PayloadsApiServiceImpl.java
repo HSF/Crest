@@ -17,9 +17,6 @@ import hep.crest.server.data.pojo.Payload;
 import hep.crest.server.data.pojo.PayloadData;
 import hep.crest.server.data.pojo.PayloadInfoData;
 import hep.crest.server.data.pojo.Tag;
-import hep.crest.server.data.repositories.PayloadDataRepository;
-import hep.crest.server.data.repositories.PayloadInfoDataRepository;
-import hep.crest.server.data.repositories.PayloadRepository;
 import hep.crest.server.data.repositories.args.PayloadQueryArgs;
 import hep.crest.server.exceptions.AbstractCdbServiceException;
 import hep.crest.server.exceptions.CdbBadRequestException;
@@ -102,18 +99,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      */
     private PayloadService payloadService;
     /**
-     * Repository.
-     */
-    private PayloadRepository payloadRepository;
-    /**
-     * Repository.
-     */
-    private PayloadDataRepository payloadDataRepository;
-    /**
-     * Repository.
-     */
-    private PayloadInfoDataRepository payloadInfoDataRepository;
-    /**
      * Service.
      */
     private IovService iovService;
@@ -136,7 +121,6 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Mapper.
      */
-    @Inject
     private ObjectMapper jacksonMapper;
 
     /**
@@ -151,13 +135,11 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
     /**
      * Mapper.
      */
-    @Autowired
     private PayloadMapper mapper;
 
     /**
      * Context.
      */
-    @Autowired
     private JAXRSContext context;
 
     /**
@@ -168,24 +150,26 @@ public class PayloadsApiServiceImpl extends PayloadsApiService {
      * @param jsonStreamProcessor the json stream processor
      * @param crestProperties the crest properties
      * @param entityDtoHelper the entity dto helper
+     * @param context the context.
      */
     public PayloadsApiServiceImpl(PayloadService payloadService,
                                   TagService tagService,
                                   CachingPolicyService cachingPolicyService,
                                   JsonStreamProcessor jsonStreamProcessor,
                                   CrestProperties crestProperties,
-                                  EntityDtoHelper entityDtoHelper) {
+                                  EntityDtoHelper entityDtoHelper,
+                                  JAXRSContext context) {
         this.payloadService = payloadService;
         this.iovService = payloadService.getIovService();
+        this.jacksonMapper = payloadService.getJsonMapper();
+        this.mapper = payloadService.getPayloadMapper();
         this.tagService = tagService;
         this.cachesvc = cachingPolicyService;
         this.cprops = crestProperties;
         this.edh = entityDtoHelper;
         this.prh = iovService.getPrh();
         this.jsonStreamProcessor = jsonStreamProcessor;
-        this.payloadRepository = payloadService.getPayloadRepository();
-        this.payloadDataRepository = payloadService.getPayloadDataRepository();
-        this.payloadInfoDataRepository = payloadService.getPayloadInfoDataRepository();
+        this.context = context;
     }
 
     @Override

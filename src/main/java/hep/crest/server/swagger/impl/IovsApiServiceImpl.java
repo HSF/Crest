@@ -92,7 +92,6 @@ public class IovsApiServiceImpl extends IovsApiService {
     /**
      * The context from the request.
      */
-    @Autowired
     private JAXRSContext context;
 
     /**
@@ -103,16 +102,19 @@ public class IovsApiServiceImpl extends IovsApiService {
      * @param prh        the PageRequestHelper
      * @param edh        the EntityDtoHelper
      * @param mapper     the iov mapper.
+     * @param context    the context.
      */
     @Autowired
     public IovsApiServiceImpl(IovService iovService, TagService tagService,
-                              PageRequestHelper prh, EntityDtoHelper edh, IovMapper mapper) {
+                              PageRequestHelper prh, EntityDtoHelper edh,
+                              IovMapper mapper, JAXRSContext context) {
         this.iovService = iovService;
         this.tagService = tagService;
         this.cachesvc = iovService.getCachingPolicyService();
         this.prh = prh;
         this.edh = edh;
         this.mapper = mapper;
+        this.context = context;
     }
 
     /*

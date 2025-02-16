@@ -55,7 +55,6 @@ public class FoldersApiServiceImpl extends FoldersApiService {
     /**
      * Context.
      */
-    @Autowired
     private JAXRSContext context;
 
     /**
@@ -63,13 +62,15 @@ public class FoldersApiServiceImpl extends FoldersApiService {
      * @param folderService the service.
      * @param prh the PageRequestHelper
      * @param edh the EntityDtoHelper
+     * @param context the context.
      */
     @Autowired
     public FoldersApiServiceImpl(FolderService folderService, PageRequestHelper prh,
-                                 EntityDtoHelper edh) {
+                                 EntityDtoHelper edh, JAXRSContext context) {
         this.folderService = folderService;
         this.prh = prh;
         this.edh = edh;
+        this.context = context;
     }
 
 

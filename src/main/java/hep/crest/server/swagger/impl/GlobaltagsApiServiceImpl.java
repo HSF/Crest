@@ -64,7 +64,6 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
     /**
      * Context
      */
-    @Autowired
     private JAXRSContext context;
 
     /**
@@ -80,15 +79,17 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
      * @param prh              the PageRequestHelper
      * @param edh              the EntityDtoHelper
      * @param mapper           the global tag mapper.
-     *
+     * @param context          the context.
      */
     @Autowired
     public GlobaltagsApiServiceImpl(GlobalTagService globaltagService, PageRequestHelper prh,
-                                    EntityDtoHelper edh, GlobalTagMapper mapper) {
+                                    EntityDtoHelper edh, GlobalTagMapper mapper,
+                                    JAXRSContext context) {
         this.globaltagService = globaltagService;
         this.prh = prh;
         this.edh = edh;
         this.mapper = mapper;
+        this.context = context;
     }
 
     /*

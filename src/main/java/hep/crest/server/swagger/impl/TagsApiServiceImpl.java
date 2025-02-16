@@ -83,21 +83,22 @@ public class TagsApiServiceImpl extends TagsApiService {
     /**
      * Context
      */
-    @Autowired
     private JAXRSContext context;
 
     /**
      * Ctor with injected service.
-     * @param tagService
-     * @param tagmapper
-     * @param tagmetamapper
-     * @param edh
-     * @param cachesvc
+     * @param tagService the service.
+     * @param tagmapper the mapper.
+     * @param tagmetamapper the meta mapper.
+     * @param edh the entity dto helper.
+     * @param cachesvc the caching service.
+     * @param context the context.
      */
     @Autowired
     public TagsApiServiceImpl(TagService tagService, TagMapper tagmapper,
                               TagMetaMapper tagmetamapper, EntityDtoHelper edh,
-                              CachingPolicyService cachesvc) {
+                              CachingPolicyService cachesvc,
+                              JAXRSContext context) {
         this.tagService = tagService;
         this.tagMetaService = tagService.getTagMetaService();
         this.tagmapper = tagmapper;
@@ -105,6 +106,7 @@ public class TagsApiServiceImpl extends TagsApiService {
         this.prh = tagService.getPrh();
         this.edh = edh;
         this.cachesvc = cachesvc;
+        this.context = context;
     }
 
     /*
@@ -150,21 +152,21 @@ public class TagsApiServiceImpl extends TagsApiService {
                 // Update description.
                 entity.setDescription(body.get(key));
             }
-            else if (key == "timeType") {
+            else if (Objects.equals(key, "timeType")) {
                 entity.setTimeType(body.get(key));
             }
-            else if (key == "lastValidatedTime") {
+            else if (Objects.equals(key, "lastValidatedTime")) {
                 final BigInteger val = new BigInteger(body.get(key));
                 entity.setLastValidatedTime(val);
             }
-            else if (key == "endOfValidity") {
+            else if (Objects.equals(key, "endOfValidity")) {
                 final BigInteger val = new BigInteger(body.get(key));
                 entity.setEndOfValidity(val);
             }
-            else if (key == "synchronization") {
+            else if (Objects.equals(key, "synchronization")) {
                 entity.setSynchronization(body.get(key));
             }
-            else if (key == "payloadSpec") {
+            else if (Objects.equals(key, "payloadSpec")) {
                 entity.setObjectType(body.get(key));
             }
             else {
@@ -244,9 +246,7 @@ public class TagsApiServiceImpl extends TagsApiService {
                 .format("TagSetDto");
         // Create filters
         GenericMap filters = new GenericMap();
-        if (name != null) {
-            filters.put("name", name);
-        }
+        filters.put("name", name);
         if (objectType != null) {
             filters.put("objectType", objectType);
         }

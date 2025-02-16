@@ -55,7 +55,6 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
     /**
      * Context.
      */
-    @Autowired
     private JAXRSContext context;
 
     /**
@@ -63,13 +62,15 @@ public class RuninfoApiServiceImpl extends RuninfoApiService {
      * @param RunInfoService the service.
      * @param prh the PageRequestHelper
      * @param edh the EntityDtoHelper
+     * @param context the context.
      */
     @Autowired
     public RuninfoApiServiceImpl(RunInfoService RunInfoService, PageRequestHelper prh,
-                                 EntityDtoHelper edh) {
+                                 EntityDtoHelper edh, JAXRSContext context) {
         this.runinfoService = RunInfoService;
         this.prh = prh;
         this.edh = edh;
+        this.context = context;
     }
     /*
      * (non-Javadoc)
