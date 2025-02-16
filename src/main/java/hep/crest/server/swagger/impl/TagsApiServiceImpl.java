@@ -320,19 +320,21 @@ public class TagsApiServiceImpl extends TagsApiService {
         log.info("TagRestController processing request for updating a tag meta information for "
                  + "name {}", name);
         TagMeta entity = tagMetaService.find(name);
-        for (final String key : body.keySet()) {
+        for (Map.Entry<String, String> entry : body.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
             if (Objects.equals(key, "description")) {
-                entity.setDescription(body.get(key));
+                entity.setDescription(value);
             }
             if (Objects.equals(key, "chansize")) {
-                entity.setChansize(Integer.valueOf(body.get(key)));
+                entity.setChansize(Integer.valueOf(value));
             }
             if (Objects.equals(key, "colsize")) {
-                entity.setColsize(Integer.valueOf(body.get(key)));
+                entity.setColsize(Integer.valueOf(value));
             }
             if (Objects.equals(key, "tagInfo")) {
                 // The field is a string ... this is mandatory for the moment....
-                entity.setTagInfo(body.get(key).getBytes(StandardCharsets.UTF_8));
+                entity.setTagInfo(value.getBytes(StandardCharsets.UTF_8));
             }
         }
         final TagMeta saved = tagMetaService.updateTagMeta(entity);
