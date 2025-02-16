@@ -7,6 +7,7 @@ import hep.crest.server.converters.GlobalTagMapper;
 import hep.crest.server.converters.IovMapper;
 import hep.crest.server.converters.RunLumiMapper;
 import hep.crest.server.converters.TagMapper;
+import hep.crest.server.converters.TagMetaMapper;
 import hep.crest.server.data.pojo.CrestFolders;
 import hep.crest.server.data.pojo.GlobalTag;
 import hep.crest.server.data.pojo.GlobalTagMap;
@@ -15,6 +16,7 @@ import hep.crest.server.data.pojo.Iov;
 import hep.crest.server.data.pojo.IovId;
 import hep.crest.server.data.pojo.PayloadInfoData;
 import hep.crest.server.data.pojo.Tag;
+import hep.crest.server.data.pojo.TagMeta;
 import hep.crest.server.data.runinfo.pojo.RunLumiId;
 import hep.crest.server.data.runinfo.pojo.RunLumiInfo;
 import hep.crest.server.repositories.monitoring.PayloadInfoMapper;
@@ -25,6 +27,7 @@ import hep.crest.server.swagger.model.IovDto;
 import hep.crest.server.swagger.model.PayloadTagInfoDto;
 import hep.crest.server.swagger.model.RunLumiInfoDto;
 import hep.crest.server.swagger.model.TagDto;
+import hep.crest.server.swagger.model.TagMetaDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,6 +194,13 @@ public class MapperTest {
     public void testCrestFolders() {
         log.info("Test Folder conversion");
         testMapper(CrestFolders.class, FolderDto.class, FolderMapper.class);
+    }
+
+
+    @Test
+    public void testTagMeta() {
+        log.info("Test Tag Meta conversion");
+        testMapper(TagMeta.class, TagMetaDto.class, TagMetaMapper.class);
     }
 
 }

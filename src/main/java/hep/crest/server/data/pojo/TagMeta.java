@@ -12,6 +12,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
@@ -66,6 +67,8 @@ public class TagMeta implements java.io.Serializable {
      * The insertion time.
      */
     @Temporal(TemporalType.TIMESTAMP)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Column(name = "INSERTION_TIME", nullable = false, updatable = true, length = 11)
     private Date insertionTime;
 
