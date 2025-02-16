@@ -30,26 +30,39 @@ public class AdminApiServiceImpl extends AdminApiService {
     /**
      * Service.
      */
-    @Autowired
     private GlobalTagService globalTagService;
 
     /**
      * Service.
      */
-    @Autowired
     private TagService tagService;
 
     /**
      * Service.
      */
-    @Autowired
     private GlobalTagMapService globalTagMapService;
 
     /**
      * Mapper.
      */
-    @Autowired
     private GlobalTagMapper mapper;
+
+    /**
+     * Ctor with injected service.
+     * @param globalTagService the global tag service.
+     * @param tagService the tag service.
+     * @param globalTagMapService the global tag map service.
+     * @param mapper the global tag mapper.
+     *
+     */
+    @Autowired
+    public AdminApiServiceImpl(GlobalTagService globalTagService, TagService tagService,
+            GlobalTagMapService globalTagMapService, GlobalTagMapper mapper) {
+        this.globalTagService = globalTagService;
+        this.tagService = tagService;
+        this.globalTagMapService = globalTagMapService;
+        this.mapper = mapper;
+    }
 
     /* (non-Javadoc)
      * @see hep.crest.server.swagger.api.AdminApiService#removeGlobalTag(java.lang.String, jakarta.ws.rs.core.SecurityContext, jakarta.ws.rs.core.UriInfo)

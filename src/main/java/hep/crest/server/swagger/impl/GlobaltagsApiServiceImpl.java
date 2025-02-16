@@ -44,25 +44,21 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
 
     /**
      * Helper.
      */
-    @Autowired
     private EntityDtoHelper edh;
 
     /**
      * Service.
      */
-    @Autowired
     private GlobalTagService globaltagService;
 
     /**
      * Mapper.
      */
-    @Autowired
     private GlobalTagMapper mapper;
 
     /**
@@ -74,7 +70,26 @@ public class GlobaltagsApiServiceImpl extends GlobaltagsApiService {
     /**
      * Resource bundle.
      */
-    private final ResourceBundle bundle = ResourceBundle.getBundle("messages", new Locale("US"));
+    private final ResourceBundle bundle =
+            ResourceBundle.getBundle("messages", new Locale("US"));
+
+    /**
+     * Ctor with injected service.
+     *
+     * @param globaltagService the global tag service.
+     * @param prh              the PageRequestHelper
+     * @param edh              the EntityDtoHelper
+     * @param mapper           the global tag mapper.
+     *
+     */
+    @Autowired
+    public GlobaltagsApiServiceImpl(GlobalTagService globaltagService, PageRequestHelper prh,
+                                    EntityDtoHelper edh, GlobalTagMapper mapper) {
+        this.globaltagService = globaltagService;
+        this.prh = prh;
+        this.edh = edh;
+        this.mapper = mapper;
+    }
 
     /*
      * (non-Javadoc)

@@ -39,13 +39,11 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
     /**
      * Helper.
      */
-    @Autowired
-    EntityDtoHelper edh;
+    private EntityDtoHelper edh;
 
     /**
      * Mapper.
      */
-    @Autowired
     private GlobalTagMapMapper mapper;
 
     /**
@@ -54,6 +52,23 @@ public class GlobaltagmapsApiServiceImpl extends GlobaltagmapsApiService {
      */
     @Autowired
     private JAXRSContext context;
+
+    /**
+     * Ctor with injected service.
+     * @param globaltagmapService the global tag map service.
+     * @param mapper the global tag map mapper.
+     * @param edh the entity dto helper.
+     *
+     */
+    @Autowired
+    public GlobaltagmapsApiServiceImpl(GlobalTagMapService globaltagmapService,
+                                       GlobalTagMapMapper mapper,
+                                       EntityDtoHelper edh) {
+        this.globaltagmapService = globaltagmapService;
+        this.mapper = mapper;
+        this.edh = edh;
+    }
+
 
     /*
      * (non-Javadoc)

@@ -2,6 +2,7 @@ package hep.crest.server.caching;
 
 import hep.crest.server.config.CrestProperties;
 import hep.crest.server.data.pojo.Tag;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.util.Date;
  */
 @Component
 @Slf4j
+@Getter
 public class CachingPolicyService {
     /**
      * Properties.

@@ -4,6 +4,7 @@
 package hep.crest.server.services;
 
 import hep.crest.server.annotations.ProfileAndLog;
+import hep.crest.server.caching.CachingPolicyService;
 import hep.crest.server.caching.CachingProperties;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.data.pojo.Iov;
@@ -79,6 +80,10 @@ public class IovService {
      * Properties.
      */
     private CachingProperties cprops;
+    /**
+     * Caching policy service.
+     */
+    private CachingPolicyService cachingPolicyService;
 
     /**
      * Ctor with injection.
@@ -88,20 +93,21 @@ public class IovService {
      * @param iovGroupsCustom
      * @param payloadRepository
      * @param prh
-     * @param cprops
+     * @param cps
      */
     @Autowired
     public IovService(IovRepository iovRepository, TagRepository tagRepository,
                       IMonitoringRepository iMonitoringRepository, IovGroupsCustom iovGroupsCustom,
                       PayloadRepository payloadRepository, PageRequestHelper prh,
-                      CachingProperties cprops) {
+                      CachingPolicyService cps) {
         this.iovRepository = iovRepository;
         this.tagRepository = tagRepository;
         this.iMonitoringRepository = iMonitoringRepository;
         this.iovGroupsCustom = iovGroupsCustom;
         this.payloadRepository = payloadRepository;
         this.prh = prh;
-        this.cprops = cprops;
+        this.cachingPolicyService = cps;
+        this.cprops = cps.getCprops();
     }
 
     /**

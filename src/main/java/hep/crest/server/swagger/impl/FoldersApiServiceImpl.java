@@ -36,24 +36,20 @@ public class FoldersApiServiceImpl extends FoldersApiService {
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
     /**
      * Helper.
      */
-    @Autowired
     EntityDtoHelper edh;
 
     /**
      * Mapper.
      */
-    @Autowired
     private FolderMapper mapper;
 
     /**
      * Service.
      */
-    @Autowired
     private FolderService folderService;
 
     /**
@@ -61,6 +57,21 @@ public class FoldersApiServiceImpl extends FoldersApiService {
      */
     @Autowired
     private JAXRSContext context;
+
+    /**
+     * Ctor with injected service.
+     * @param folderService the service.
+     * @param prh the PageRequestHelper
+     * @param edh the EntityDtoHelper
+     */
+    @Autowired
+    public FoldersApiServiceImpl(FolderService folderService, PageRequestHelper prh,
+                                 EntityDtoHelper edh) {
+        this.folderService = folderService;
+        this.prh = prh;
+        this.edh = edh;
+    }
+
 
     /*
      * (non-Javadoc)

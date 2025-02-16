@@ -59,41 +59,34 @@ public class IovsApiServiceImpl extends IovsApiService {
     /**
      * Helper.
      */
-    @Autowired
     private PageRequestHelper prh;
     /**
      * Helper.
      */
-    @Autowired
     EntityDtoHelper edh;
 
     /**
      * Service.
      */
-    @Autowired
     private CachingPolicyService cachesvc;
 
     /**
      * Service.
      */
-    @Autowired
     private IovService iovService;
 
     /**
      * Service.
      */
-    @Autowired
     private TagService tagService;
 
     /**
      * Properties.
      */
-    @Autowired
     private CachingProperties cprops;
     /**
      * Mapper.
      */
-    @Autowired
     private IovMapper mapper;
 
     /**
@@ -101,6 +94,26 @@ public class IovsApiServiceImpl extends IovsApiService {
      */
     @Autowired
     private JAXRSContext context;
+
+    /**
+     * Ctor with injected service.
+     *
+     * @param iovService the iov service.
+     * @param tagService the tag service.
+     * @param prh        the PageRequestHelper
+     * @param edh        the EntityDtoHelper
+     * @param mapper     the iov mapper.
+     */
+    @Autowired
+    public IovsApiServiceImpl(IovService iovService, TagService tagService,
+                              PageRequestHelper prh, EntityDtoHelper edh, IovMapper mapper) {
+        this.iovService = iovService;
+        this.tagService = tagService;
+        this.cachesvc = iovService.getCachingPolicyService();
+        this.prh = prh;
+        this.edh = edh;
+        this.mapper = mapper;
+    }
 
     /*
      * (non-Javadoc)

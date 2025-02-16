@@ -71,7 +71,6 @@ public class TagService {
     /**
      * Repository.
      */
-    @Autowired
     private IovGroupsCustom iovGroupsCustom;
 
     /**

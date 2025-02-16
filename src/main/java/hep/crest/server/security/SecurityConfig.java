@@ -1,8 +1,7 @@
 package hep.crest.server.security;
 
 import hep.crest.server.config.CrestProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,18 +22,22 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@Slf4j
 public class SecurityConfig {
-
-    /**
-     * Logger.
-     */
-    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     /**
      * Properties.
      */
-    @Autowired
     private CrestProperties cprops;
+
+    /**
+     * Ctor with injected properties.
+     * @param cprops the properties.
+     */
+    @Autowired
+    public SecurityConfig(CrestProperties cprops) {
+        this.cprops = cprops;
+    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

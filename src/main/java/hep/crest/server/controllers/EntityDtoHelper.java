@@ -24,13 +24,24 @@ public class EntityDtoHelper {
     /**
      * Mapper.
      */
-    @Autowired
     private ApplicationContext applicationContext;
     /**
      * The transaction manager.
      */
-    @Autowired
     private PlatformTransactionManager transactionManager;
+
+    /**
+     * Ctor with injected service.
+     * @param applicationContext the application context.
+     * @param transactionManager the transaction manager.
+     */
+    @Autowired
+    public EntityDtoHelper(ApplicationContext applicationContext,
+                           PlatformTransactionManager transactionManager) {
+        this.applicationContext = applicationContext;
+        this.transactionManager = transactionManager;
+    }
+
 
     /**
      * @param <D>
