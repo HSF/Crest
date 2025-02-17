@@ -189,25 +189,6 @@ public class IovService {
 
     /**
      * @param tagname the String
-     * @return Long
-     */
-    public Long getSizeByTag(String tagname) {
-        log.debug("Count number of iovs by tag name {}", tagname);
-        return iovGroupsCustom.getSize(tagname);
-    }
-
-    /**
-     * @param tagname  the String
-     * @param snapshot the Date
-     * @return Long
-     */
-    public Long getSizeByTagAndSnapshot(String tagname, Date snapshot) {
-        log.debug("Count number of iovs by tag name {} and snapshot {}", tagname, snapshot);
-        return iovGroupsCustom.getSizeBySnapshot(tagname, snapshot);
-    }
-
-    /**
-     * @param tagname the String
      * @return List<TagSummaryDto>
      */
     public List<TagSummaryDto> getTagSummaryInfo(String tagname) {

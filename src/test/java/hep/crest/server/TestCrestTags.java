@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hep.crest.server.converters.HashGenerator;
+import hep.crest.server.data.pojo.Iov;
 import hep.crest.server.data.pojo.TagSynchroEnum;
+import hep.crest.server.services.IovService;
 import hep.crest.server.swagger.model.GenericMap;
 import hep.crest.server.swagger.model.GlobalTagDto;
 import hep.crest.server.swagger.model.GlobalTagMapDto;
@@ -51,6 +53,9 @@ public class TestCrestTags {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
+
+    @Autowired
+    private IovService iovService;
 
     @Autowired
     @Qualifier("jacksonMapper")
@@ -379,6 +384,10 @@ public class TestCrestTags {
         assertThat(iovs2).isNotNull();
         assertThat(iovs2.getResources()).isNotNull();
         assertThat(iovs2.getResources().size()).isEqualTo(0);
+
+        Iov last = iovService.latest(tagname);
+        assertThat(last).isNotNull();
+        assertThat(last.getPayloadHash()).isNotNull();
     }
 
     public void checkPayload(String hash) {
