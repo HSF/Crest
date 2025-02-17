@@ -517,12 +517,50 @@ public class TestCrestTags {
 
         // Send the request
         //
-        return testRestTemplate.exchange(
+        testRestTemplate.exchange(
                 "/crestapi/payloads", // Replace with the actual URL
                 HttpMethod.POST,
                 requestEntity,
                 String.class
         );
+
+        // Prepare the multipart request with an external data file
+        byte[] dataf = mapper.writeValueAsBytes("This is my file with data");
+        // Add the StoreSetDto as a file part
+        ByteArrayResource fileresource = new ByteArrayResource(data) {
+            @Override
+            public String getFilename() {
+                return "data.txt"; // Filename for the file part
+            }
+        };
+        StoreSetDto storesetDto2 = new StoreSetDto();
+        StoreDto sdto = new StoreDto();
+        sdto.data("file://data.txt");
+        sdto.since(999L);
+        sdto.streamerInfo("A_FAKE_STREAMER_INFO");
+        storesetDto2.addresourcesItem(sdto);
+        MultiValueMap<String, Object> body2 = new LinkedMultiValueMap<>();
+        body2.add("storeset", storesetDto2);
+        body2.add("files", fileresource);
+        // Add other form parameters
+        body2.add("tag", tag);
+
+        // Set headers for multipart/form-data
+        HttpHeaders headers2 = new HttpHeaders();
+        headers2.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers2.set("X-Crest-PayloadFormat", "FILE");
+        // Create the request entity
+        HttpEntity<MultiValueMap<String, Object>> requestEntity2 = new HttpEntity<>(body2,
+                headers2);
+        // Send the request
+        //
+        return testRestTemplate.exchange(
+                "/crestapi/payloads", // Replace with the actual URL
+                HttpMethod.POST,
+                requestEntity2,
+                String.class
+        );
+
     }
 
 }
