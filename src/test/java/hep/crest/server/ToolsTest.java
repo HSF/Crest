@@ -1,5 +1,6 @@
 package hep.crest.server;
 
+import hep.crest.server.config.CrestTableNames;
 import hep.crest.server.controllers.PageRequestHelper;
 import hep.crest.server.converters.CustomMapper;
 import hep.crest.server.converters.DateFormatterHandler;
@@ -173,6 +174,14 @@ public class ToolsTest {
         Long cooltime3 =
                 RunIovConverter.getTime(time1);
         assertThat(cooltime3).isEqualTo(1739640284000L);
+
+        CrestTableNames ctn = new CrestTableNames();
+        assertThat(ctn.getIovTableName()).isEqualTo("IOV");
+        assertThat(ctn.getTagMetaTableName()).isEqualTo("TAG_META");
+        assertThat(ctn.getTagTableName()).isEqualTo("TAG");
+        assertThat(ctn.getPayloadDataTableName()).isEqualTo("PAYLOAD_DATA");
+        assertThat(ctn.getPayloadTableName()).isEqualTo("PAYLOAD");
+        assertThat(ctn.getPayloadInfoDataTableName()).isEqualTo("PAYLOAD_STREAMER_DATA");
     }
 
 }
