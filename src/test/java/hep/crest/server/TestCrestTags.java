@@ -290,6 +290,15 @@ public class TestCrestTags {
                     url, HttpMethod.POST, new HttpEntity<>(iovSetDto), String.class);
             log.info("Created iovs for tag COPY-TAG ");
             assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+            // Add one iov only
+            IovDto iovDto = iovSetDto.getResources().get(0);
+            iovDto.setTagName("COPY-TAG");
+            iovDto.setSince(2000000L);
+            // Store it
+            String url2 = "/crestapi/iovs";
+            final ResponseEntity<String> response3 = testRestTemplate.exchange(
+                    url2, HttpMethod.PUT, new HttpEntity<>(iovDto), String.class);
+            assertThat(response3.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
             // Now get size by tag
             String urltag = "/crestapi/iovs/size?tagname=COPY-TAG";
@@ -324,6 +333,16 @@ public class TestCrestTags {
             {
                 log.info("Retrieved iovs snapshot 10 GROUPS " + respgroup.getBody());
                 assertThat(respgroup.getStatusCode()).isEqualTo(HttpStatus.OK);
+            }
+
+            // Select iovs and payloads meta
+            String urlmeta = "/crestapi/iovs/infos?tagname=COPY-TAG&since=0&until=10000000";
+            final ResponseEntity<String> respmeta = this.testRestTemplate
+                    .exchange(urlmeta, HttpMethod.GET, null,
+                            String.class);
+            {
+                log.info("Retrieved iovs payloads " + respmeta.getBody());
+                assertThat(respmeta.getStatusCode()).isEqualTo(HttpStatus.OK);
             }
 
         }
