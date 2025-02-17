@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -94,6 +95,15 @@ public class ToolsTest {
         assertThat(b).isNotNull();
         String s = cm.byteArrayToString(b);
         assertThat(s).isEqualTo("test");
+
+        OffsetDateTime nullodt = cm.asOffsetDateTime(null);
+        assertThat(nullodt).isNull();
+        Timestamp nullts = cm.asTimestamp(null);
+        assertThat(nullts).isNull();
+        Date nulld = cm.toDate(null);
+        assertThat(nulld).isNull();
+        BigInteger nullbi = cm.bigDecimalToBigInt(null);
+        assertThat(nullbi).isNull();
 
         DateFormatterHandler dfh = new DateFormatterHandler();
         String timestr = "2011-12-03T10:15:30+01:00";

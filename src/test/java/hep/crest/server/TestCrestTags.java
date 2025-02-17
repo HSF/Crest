@@ -1,17 +1,22 @@
 package hep.crest.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hep.crest.server.converters.HashGenerator;
 import hep.crest.server.data.pojo.TagSynchroEnum;
 import hep.crest.server.swagger.model.GenericMap;
 import hep.crest.server.swagger.model.GlobalTagDto;
 import hep.crest.server.swagger.model.GlobalTagMapDto;
+import hep.crest.server.swagger.model.IovDto;
 import hep.crest.server.swagger.model.IovSetDto;
 import hep.crest.server.swagger.model.StoreDto;
 import hep.crest.server.swagger.model.StoreSetDto;
 import hep.crest.server.swagger.model.TagDto;
 import hep.crest.server.swagger.model.TagMetaDto;
 import hep.crest.server.swagger.model.TagSetDto;
+import hep.crest.server.swagger.model.TagSummaryDto;
+import hep.crest.server.swagger.model.TagSummarySetDto;
 import hep.crest.server.utils.RandomGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -31,6 +36,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -250,6 +259,7 @@ public class TestCrestTags {
                 response3.getBody().getResources().forEach(iov -> {
                     log.info("Found iov: {}", iov);
                 });
+                copyIovs(tagname, storeSetDto);
             }
         }
         catch (JsonProcessingException e) {
@@ -257,6 +267,55 @@ public class TestCrestTags {
         }
     }
 
+
+    public void copyIovs(String tagname, StoreSetDto storeSetDto) {
+        IovSetDto iovSetDto = new IovSetDto();
+        List<IovDto> iovDtoList = new ArrayList<>();
+        try {
+            for (StoreDto storeDto : storeSetDto.getResources()) {
+                IovDto iovDto = new IovDto();
+                String hash = HashGenerator.sha256Hash(storeDto.getData().getBytes());
+                iovDto.payloadHash(hash);
+                iovDto.since(storeDto.getSince());
+                iovDto.setTagName("COPY-TAG");
+                iovDtoList.add(iovDto);
+            }
+            iovSetDto.resources(iovDtoList);
+            iovSetDto.format("IovSetDto");
+            iovSetDto.size((long)iovDtoList.size());
+            // Now store the list of iovs in a new tag
+            initializeTag("COPY-TAG");
+            String url = "/crestapi/iovs";
+            final ResponseEntity<String> response2 = testRestTemplate.exchange(
+                    url, HttpMethod.POST, new HttpEntity<>(iovSetDto), String.class);
+            log.info("Created iovs for tag COPY-TAG ");
+            assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+            // Now get size by tag
+            String urltag = "/crestapi/iovs/size?tagname=COPY-TAG";
+            final ResponseEntity<String> resptags = this.testRestTemplate
+                    .exchange(urltag, HttpMethod.GET, null,
+                            String.class);
+            {
+                log.info("Retrieved iovs size " + resptags.getBody());
+                assertThat(resptags.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(resptags.getBody()).isNotNull();
+                TagSummarySetDto responseBody = (TagSummarySetDto) mapper.readValue(
+                        resptags.getBody(), TagSummarySetDto.class);
+                assertThat(responseBody.getResources().size()).isEqualTo(1);
+            }
+
+        }
+        catch (NoSuchAlgorithmException e) {
+            log.error("Error in processing json: ", e);
+        }
+        catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        }
+        catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void checkIovs(String tagname) {
         String url = "/crestapi/iovs?tagname=" + tagname + "&snapshot=0" + "&since=0"
