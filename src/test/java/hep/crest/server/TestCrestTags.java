@@ -305,6 +305,27 @@ public class TestCrestTags {
                 assertThat(responseBody.getResources().size()).isEqualTo(1);
             }
 
+            String urlrange = "/crestapi/iovs?tagname=COPY-TAG&since=9900&until=1000000&snapshot=10"
+                    + "&method=AT";
+            final ResponseEntity<IovSetDto> resprange = this.testRestTemplate
+                    .exchange(urlrange, HttpMethod.GET, null,
+                            IovSetDto.class);
+            {
+                log.info("Retrieved iovs snapshot 10 AT 9900" + resprange.getBody());
+                assertThat(resprange.getStatusCode()).isEqualTo(HttpStatus.OK);
+            }
+
+            // Select groups
+            String urlgroup = "/crestapi/iovs?tagname=COPY-TAG&since=0&until=1000000"
+                    + "&method=GROUPS";
+            final ResponseEntity<String> respgroup = this.testRestTemplate
+                    .exchange(urlgroup, HttpMethod.GET, null,
+                            String.class);
+            {
+                log.info("Retrieved iovs snapshot 10 GROUPS " + respgroup.getBody());
+                assertThat(respgroup.getStatusCode()).isEqualTo(HttpStatus.OK);
+            }
+
         }
         catch (NoSuchAlgorithmException e) {
             log.error("Error in processing json: ", e);
