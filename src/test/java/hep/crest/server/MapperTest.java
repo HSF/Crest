@@ -219,5 +219,11 @@ public class MapperTest {
         assertThat(ex).isNotNull();
         ex = SqlRequests.getUpdateInfoQuery("test");
         assertThat(ex).isNotNull();
+        ex = SqlRequests.getRangeIovPayloadQuery("test", "test2");
+        assertThat(ex).isNotNull();
+        ex = SqlRequests.getStreamerInfoQuery("test");
+        assertThat(ex).isNotNull();
+        ex = SqlRequests.getExistsHashQuery("test");
+        assertThat(ex).isNotNull();
     }
 }
