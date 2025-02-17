@@ -112,6 +112,18 @@ public class TestCrestTags {
         catch (Exception e) {
             log.info("Caught exception: ", e);
         }
+        try {
+            tagMetaService.removeTagMeta("notexists");
+        }
+        catch (Exception e) {
+            log.info("Caught exception: ", e);
+        }
+        try {
+            TagMeta notfound = tagMetaService.find("notfound");
+        }
+        catch (Exception e) {
+            log.info("Caught exception: ", e);
+        }
 
     }
 
