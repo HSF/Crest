@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hep.crest.server.converters.HashGenerator;
 import hep.crest.server.data.pojo.Iov;
+import hep.crest.server.data.pojo.Tag;
 import hep.crest.server.data.pojo.TagMeta;
 import hep.crest.server.data.pojo.TagSynchroEnum;
 import hep.crest.server.services.IovService;
 import hep.crest.server.services.TagMetaService;
+import hep.crest.server.services.TagService;
 import hep.crest.server.swagger.model.GenericMap;
 import hep.crest.server.swagger.model.GlobalTagDto;
 import hep.crest.server.swagger.model.GlobalTagMapDto;
@@ -59,6 +61,8 @@ public class TestCrestTags {
     private IovService iovService;
     @Autowired
     private TagMetaService tagMetaService;
+    @Autowired
+    private TagService tagService;
 
     @Autowired
     @Qualifier("jacksonMapper")
@@ -463,6 +467,22 @@ public class TestCrestTags {
         ResponseEntity<String> resp4 = testRestTemplate
                 .exchange(url, HttpMethod.GET, null, String.class);
         assertThat(resp4.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        try {
+            tagService.removeTag("notfound");
+        }
+        catch (Exception e) {
+            log.info("Caught exception: ", e);
+        }
+        try {
+            Tag tag = new Tag();
+            tag.setName("notfound");
+            tag.setDescription("This is a test tag for testing the tag service");
+            tagService.updateTag(tag);
+        }
+        catch (Exception e) {
+            log.info("Caught exception: ", e);
+        }
     }
 
     public void checkPayloadInfo(String tagname) {
