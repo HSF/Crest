@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hep.crest.server.converters.HashGenerator;
 import hep.crest.server.data.pojo.Iov;
+import hep.crest.server.data.pojo.TagMeta;
 import hep.crest.server.data.pojo.TagSynchroEnum;
 import hep.crest.server.services.IovService;
+import hep.crest.server.services.TagMetaService;
 import hep.crest.server.swagger.model.GenericMap;
 import hep.crest.server.swagger.model.GlobalTagDto;
 import hep.crest.server.swagger.model.GlobalTagMapDto;
@@ -17,7 +19,6 @@ import hep.crest.server.swagger.model.StoreSetDto;
 import hep.crest.server.swagger.model.TagDto;
 import hep.crest.server.swagger.model.TagMetaDto;
 import hep.crest.server.swagger.model.TagSetDto;
-import hep.crest.server.swagger.model.TagSummaryDto;
 import hep.crest.server.swagger.model.TagSummarySetDto;
 import hep.crest.server.utils.RandomGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,8 @@ public class TestCrestTags {
 
     @Autowired
     private IovService iovService;
+    @Autowired
+    private TagMetaService tagMetaService;
 
     @Autowired
     @Qualifier("jacksonMapper")
@@ -88,6 +91,24 @@ public class TestCrestTags {
                 .postForEntity("/crestapi/tags/" + tname + "/meta", dto, TagMetaDto.class);
         log.info("Received response: {}", response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        // Now get the meta
+        TagMeta meta = tagMetaService.find(tname);
+        assertThat(meta).isNotNull();
+        // Update tag meta
+        meta.setChansize(1000);
+        meta.setColsize(2);
+        TagMeta updmeta = tagMetaService.updateTagMeta(meta);
+        assertThat(updmeta).isNotNull();
+        TagMeta mne = new TagMeta();
+        mne.setTagName("notexists");
+        try {
+            TagMeta notexists = tagMetaService.updateTagMeta(mne);
+        }
+        catch (Exception e) {
+            log.info("Caught exception: ", e);
+        }
+
     }
 
 
