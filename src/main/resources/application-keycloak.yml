@@ -1,0 +1,9 @@
+keycloak:
+  enabled: true
+  realm: ${crest.keycloak.realm}
+  auth-server-url: ${crest.keycloak.url}
+  resource: ${crest.keycloak.resource}
+  credentials.secret: ${crest.keycloak.secret}
+  ssl-required: external
+  use-resource-role-mappings: true
+  bearer-only: true

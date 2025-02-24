@@ -1,0 +1,43 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# schemaname : ATLAS_PHYS_COND or none
+# security options: reco (no POST allowed), weak (no authentication needed), active (GET and POST requires roles)
+crest:
+  dumpdir: /tmp
+  schemaname: none
+  security: none
+  synchro: none
+  webstaticdir: /tmp/data/web
+  dbfile: /tmp/crestdb.sqlite
+  apiname: ${crest.api.name}
+  authenticationtype: none
+server:
+    port: 8090
+    servlet.path: /    
+    connection-timeout: 60s
+spring:
+    config:
+      use-legacy-processing: true
+    profiles:
+      include: crest
+    jersey:
+      application-path: ${crest.api.name}
+    datasource:
+      url: jdbc:sqlite:${crest.dbfile}?cache=shared&mode=rwc&nolock=1
+      driverClassName: org.sqlite.JDBC
+      username: 
+      password:
+      open_mode: 1
+      hikari:
+        connection-test-query: SELECT 1 
+        maximum-pool-size: 3
+    jpa:
+      properties:
+        hibernate.dialect: org.sqlite.hibernate.dialect.SQLiteDialect
+        hibernate.jdbc.fetch_size: 100
+        hibernate.hbm2ddl.auto: update
+        hibernate.show_sql: false
+        hibernate.ddl-auto: update

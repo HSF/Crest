@@ -1,0 +1,53 @@
+components:
+  schemas:
+    TagSummaryDto:
+      type: object
+      properties:
+        tagname:
+          type: string
+        niovs:
+          type: integer
+          format: int64
+    TagDto:
+      type: object
+      properties:
+        name:
+          type: string
+        timeType:
+          type: string
+        payloadSpec:
+          type: string
+        synchronization:
+          type: string
+        description:
+          type: string
+        lastValidatedTime:
+          type: integer
+          format: int64
+        endOfValidity:
+          type: integer
+          format: int64
+        insertionTime:
+          type: string
+          format: date-time
+        modificationTime:
+          type: string
+          format: date-time
+    TagSetDto:
+      description: An Set containing TagDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'
+    TagSummarySetDto:
+      description: An Set containing TagSummaryDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSummaryDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'

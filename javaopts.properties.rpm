@@ -1,0 +1,13 @@
+logging.config=./logback.xml
+crest.log.dir=/tmp/crest/data
+oracle.jdbc.fanEnabled=false
+oracle.net.tns_admin=/etc
+management.endpoints.web.base-path=/mgmt
+management.endpoints.web.exposure.include=health,info,metrics,loggers,heapdump
+management.endpoint.health.show-details=always
+management.endpoint.info.enabled=true
+management.endpoint.metrics.enabled=true
+management.endpoint.heapdump.enabled=true
+management.health.defaults.enabled=false
+management.health.db.enabled=true
+management.health.diskSpace.enabled=true

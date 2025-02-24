@@ -1,0 +1,48 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: payloads
+
+paths:
+  # tags
+  /payloads:
+    $ref: 'crestdb_payloadsapi.yml#/paths/~1payloads'
+  /payloads/data:
+    $ref: 'crestdb_payloadsapi.yml#/paths/~1payloads~1data'
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    PayloadSetDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/PayloadSetDto'
+    PayloadDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/PayloadDto'
+    StoreDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/StoreDto'
+    StoreSetDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/StoreSetDto'

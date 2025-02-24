@@ -1,0 +1,137 @@
+info:
+  version: "5.0"
+  title: "CREST Server"
+  description: "OpenApi3 for CREST Server"
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://crest-undertow.web.cern.ch/api
+
+security:
+  - BearerAuth: []
+  - OpenID: # Does not work (no code generated)
+      - openid
+
+components:
+  responses:
+    "400":
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HTTPResponse"
+    "404":
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HTTPResponse"
+    "409":
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HTTPResponse"
+    genericError:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HTTPResponse"
+
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OpenID: # Does not work (no code generated)
+      type: openIdConnect
+      openIdConnectUrl: https://auth.cern.ch/auth/realms/cern/.well-known/openid-configuration
+
+  requestBodies:
+    GenericMapBody:
+      description: A JSON object containing generic map used for updates
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericMap'
+
+  schemas:
+    HTTPResponse:
+      description: general response object that can be used for POST and PUT methods
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        code:
+          type: integer
+          description: HTTP status code of the response
+        error:
+          type: string
+        type:
+          type: string
+          description: A generic string specifying the exception type.
+        message:
+          type: string
+        id:
+          type: string
+          description: path or URI of the requested or generated resource
+
+    GenericObjMap:
+      type: object
+      additionalProperties:
+        type: string
+
+    RespPage:
+      type: object
+      required:
+        - size
+        - totalElements
+        - totalPages
+        - number
+      properties:
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        number:
+          type: integer
+
+    CrestBaseResponse:
+      type: object
+      required:
+        - size
+        - format
+      properties:
+        size:
+          type: integer
+          format: int64
+        datatype:
+          type: string
+        format:
+          type: string
+        page:
+          $ref: "#/components/schemas/RespPage"
+        filter:
+          $ref: '#/components/schemas/GenericMap'
+      discriminator:
+        propertyName: format
+
+    GenericMap:
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties:
+        type: string
+

@@ -1,0 +1,487 @@
+openapi: 3.0.0
+info:
+  version: '5.0'
+  title: CREST Server
+  description: OpenApi3 for CREST Server
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'https://crest-undertow.web.cern.ch/api'
+security:
+  - BearerAuth: []
+  - OpenID:
+      - openid
+tags:
+  - name: iovs
+paths:
+  /iovs:
+    get:
+      tags:
+        - iovs
+      summary: Finds a IovDtos lists.
+      description: |
+        Retrieves IOVs, with parameterizable method and arguments
+      operationId: findAllIovs
+      parameters:
+        - name: method
+          in: query
+          description: |
+            the method used will determine which query is executed
+            IOVS, RANGE and AT is a standard IOV query requiring a precise tag name
+            GROUPS is a group query type
+          required: true
+          schema:
+            type: string
+            enum:
+              - IOVS
+              - GROUPS
+              - MONITOR
+            default: IOVS
+        - name: tagname
+          in: query
+          description: the tag name
+          required: false
+          schema:
+            type: string
+            default: none
+        - name: snapshot
+          in: query
+          description: 'snapshot: the snapshot time {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int64
+        - name: since
+          in: query
+          description: 'the since time as a string {0}'
+          required: false
+          schema:
+            type: string
+            default: 0
+        - name: until
+          in: query
+          description: 'the until time as a string {INF}'
+          required: false
+          schema:
+            type: string
+            default: INF
+        - name: timeformat
+          in: query
+          description: |
+            the format for since and until {number | ms | iso | run-lumi | custom (yyyyMMdd'T'HHmmssX)}
+            If timeformat is equal number, we just parse the argument as a long.
+          required: false
+          schema:
+            type: string
+            enum:
+              - NUMBER
+              - MS
+              - ISO
+              - RUN
+              - RUN_LUMI
+              - CUSTOM
+            default: NUMBER
+        - name: groupsize
+          in: query
+          description: |
+            The group size represent the pagination type provided for GROUPS query method.
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: hash
+          in: query
+          description: |
+            the hash for searching specific IOV list for a given hash.
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 'the page number {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int32
+        - name: size
+          in: query
+          description: 'the page size {10000}'
+          required: false
+          schema:
+            type: integer
+            default: 10000
+            format: int32
+        - name: sort
+          in: query
+          description: 'the sort pattern {id.since:ASC}'
+          required: false
+          schema:
+            type: string
+            default: 'id.since:ASC'
+        - name: X-Crest-Query
+          in: header
+          description: |
+            The query type. The header parameter X-Crest-Query can be : iovs, ranges, at.
+            The iovs represents an exclusive interval, while ranges and at include previous since.
+            This has an impact on how the since and until ranges are applied.
+          schema:
+            enum:
+              - IOVS
+              - RANGES
+              - AT
+            default: IOVS
+            type: string
+        - name: X-Crest-Since
+          in: header
+          description: |
+            The since type required in the query. It can be : ms, cool.
+            Since and until will be transformed in these units.
+            It differs from timeformat which indicates how to interpret the since and until
+            strings in input.
+          schema:
+            type: string
+            enum:
+              - MS
+              - COOL
+              - NUMBER
+            default: NUMBER
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IovSetDto'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+    post:
+      tags:
+        - iovs
+      summary: 'Create IOVs in the database, associated to a tag name.'
+      description: |
+        Insert a list of Iovs using an IovSetDto in the request body. It is mandatory
+        to provide an existing tag in input. The referenced payloads should already exists in the DB.
+      operationId: storeIovBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IovSetDto'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IovSetDto'
+        default:
+          $ref: '#/components/responses/genericError'
+    put:
+      tags:
+        - iovs
+      summary: 'Create a single IOV in the database, associated to a tag name.'
+      description: |
+        Insert an Iov using an IovDto in the request body. It is mandatory
+        to provide an existing tag in input. The referenced payloads should already exists in the DB.
+      operationId: storeIovOne
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IovDto'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IovSetDto'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+  /iovs/infos:
+    get:
+      tags:
+        - iovs
+      summary: Select iovs and payload meta info for a given tagname and in a given range.
+      description: |
+        Retrieve a list of iovs with payload metadata associated. The arguments are:
+        tagname={a tag name}, since={since time as string}, until={until time as string}, snapshot={snapshot time as long}'
+        and timeformat={format of since/until}.
+      operationId: selectIovPayloads
+      parameters:
+        - name: tagname
+          in: query
+          description: the tag name
+          required: true
+          schema:
+            type: string
+            default: none
+        - name: since
+          in: query
+          description: 'the since time as a string {0}'
+          required: false
+          schema:
+            type: string
+            default: 0
+        - name: until
+          in: query
+          description: 'the until time as a string {INF}'
+          required: false
+          schema:
+            type: string
+            default: INF
+        - name: timeformat
+          in: query
+          description: |
+            the format for since and until {number | ms | iso | custom (yyyyMMdd'T'HHmmssX)}
+            If timeformat is equal number, we just parse the argument as a long.
+          required: false
+          schema:
+            type: string
+            default: number
+        - name: page
+          in: query
+          description: 'the page number {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int32
+        - name: size
+          in: query
+          description: 'the page size {10000}'
+          required: false
+          schema:
+            type: integer
+            default: 10000
+            format: int32
+        - name: sort
+          in: query
+          description: 'the sort pattern {id.since:ASC}'
+          required: false
+          schema:
+            type: string
+            default: 'id.since:ASC'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IovPayloadSetDto'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+  /iovs/size:
+    get:
+      tags:
+        - iovs
+      summary: Get the number o iovs for tags matching pattern.
+      description: |
+        This method allows to retrieve the number of iovs in a tag (or pattern).
+      operationId: getSizeByTag
+      parameters:
+        - name: tagname
+          in: query
+          description: 'the tag name, can be a pattern like MDT%'
+          required: true
+          schema:
+            type: string
+            default: none
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                description: An Set containing TagSummaryDto objects.
+                properties:
+                  resources:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        tagname:
+                          type: string
+                        niovs:
+                          type: integer
+                          format: int64
+                allOf:
+                  - $ref: '#/components/schemas/CrestBaseResponse'
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OpenID:
+      type: openIdConnect
+      openIdConnectUrl: 'https://auth.cern.ch/auth/realms/cern/.well-known/openid-configuration'
+  requestBodies:
+    GenericMapBody:
+      description: A JSON object containing generic map used for updates
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericMap'
+  responses:
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '404':
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '409':
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    genericError:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+  schemas:
+    HTTPResponse:
+      description: general response object that can be used for POST and PUT methods
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        code:
+          type: integer
+          description: HTTP status code of the response
+        error:
+          type: string
+        type:
+          type: string
+          description: A generic string specifying the exception type.
+        message:
+          type: string
+        id:
+          type: string
+          description: path or URI of the requested or generated resource
+    CrestBaseResponse:
+      type: object
+      required:
+        - size
+        - format
+      properties:
+        size:
+          type: integer
+          format: int64
+        datatype:
+          type: string
+        format:
+          type: string
+        page:
+          $ref: '#/components/schemas/RespPage'
+        filter:
+          $ref: '#/components/schemas/GenericMap'
+      discriminator:
+        propertyName: format
+    RespPage:
+      type: object
+      required:
+        - size
+        - totalElements
+        - totalPages
+        - number
+      properties:
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        number:
+          type: integer
+    GenericMap:
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties:
+        type: string
+    IovDto:
+      type: object
+      required:
+        - since
+        - payloadHash
+      properties:
+        tagName:
+          type: string
+        since:
+          type: integer
+          format: int64
+        insertionTime:
+          type: string
+          format: date-time
+        payloadHash:
+          type: string
+    IovSetDto:
+      description: An Set containing IovDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IovDto'
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    IovPayloadSetDto:
+      description: An Set containing IovPayloadDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IovPayloadDto'
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    IovPayloadDto:
+      type: object
+      properties:
+        since:
+          type: number
+        insertionTime:
+          type: string
+          format: date-time
+        version:
+          type: string
+        objectType:
+          type: string
+        objectName:
+          type: string
+        compressionType:
+          type: string
+        size:
+          type: integer
+          format: int32
+        payloadHash:
+          type: string

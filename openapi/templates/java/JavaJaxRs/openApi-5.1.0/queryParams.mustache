@@ -1,0 +1,31 @@
+{{#isQueryParam}}{{!
+
+    }}@ApiParam(value = "{{{description}}}"{{!
+        }}{{#required}}, required = true{{/required}}{{!
+        }}{{^isContainer}}{{!
+            }}{{#allowableValues}}, {{> allowableValues}}{{/allowableValues}}{{!
+            }}{{#defaultValue}}, defaultValue = "{{{defaultValue}}}"{{/defaultValue}}{{!
+        }}{{/isContainer}}{{!
+    }}){{!
+
+    }}{{^isContainer}}{{!
+        }}{{#defaultValue}}{{!
+            }} @DefaultValue("{{{defaultValue}}}"){{!
+        }}{{/defaultValue}}{{!
+    }}{{/isContainer}}{{!
+
+    }}{{^isContainer}}{{!
+        }}{{#isString}}{{#isEnum}}{{#allowableValues}}{{!
+            }} @Pattern(regexp="{{!
+              }}{{#values}}{{{.}}}{{^-last}}|{{/-last}}{{/values}}{{!
+              }}"){{!
+            }}{{/allowableValues}}{{/isEnum}}{{/isString}}{{!
+        }}{{/isContainer}}{{!
+
+    }} @QueryParam("{{baseName}}"){{!
+
+    }}{{#useBeanValidation}} {{>beanValidation}}{{/useBeanValidation}}{{!
+
+    }} {{{dataType}}} {{paramName}}{{!
+
+}}{{/isQueryParam}}

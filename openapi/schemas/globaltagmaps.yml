@@ -1,0 +1,22 @@
+components:
+  schemas:
+    GlobalTagMapDto:
+      type: object
+      properties:
+        globalTagName:
+          type: string
+        record:
+          type: string
+        label:
+          type: string
+        tagName:
+          type: string
+    GlobalTagMapSetDto:
+      description: An GlobalTagMapSet containing GlobalTagMapDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalTagMapDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'

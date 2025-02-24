@@ -1,0 +1,149 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: runinfo
+
+
+paths:
+  /runinfo:
+    post:
+      tags:
+        - runinfo
+      summary: Create an entry for run information.
+      description: Run informations go into a separate table.
+      operationId: createRunInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunLumiSetDto'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunLumiSetDto"
+    put:
+      tags:
+        - runinfo
+      summary: Update an entry for run information.
+      description: Run informations go into a separate table. To update an entry, the run number and the lumi section must be provided.
+      operationId: updateRunInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunLumiInfoDto'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunLumiSetDto"
+    get:
+      tags:
+        - runinfo
+      summary: Finds a RunLumiInfoDto lists using parameters.
+      description: 'This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]'
+      operationId: listRunInfo
+      parameters:
+        - name: since
+          in: query
+          description: 'since: the starting time or run-lumi'
+          required: false
+          schema:
+            type: string
+            default: none
+        - name: until
+          in: query
+          description: 'until: the ending time or run-lumi'
+          required: false
+          schema:
+            type: string
+            default: none
+        - name: format
+          in: query
+          description: |
+            the format to digest previous arguments [iso], [number], [run-lumi].
+            Time(iso) = yyyymmddhhmiss, 
+            Time(number) = milliseconds or Run(number) = runnumber
+            Run(run-lumi) = runnumber-lumisection
+          required: false
+          schema:
+            type: string
+            default: number
+        - name: mode
+          in: query
+          description: |
+            the mode for the request : [daterange] or [runrange]
+          required: false
+          schema:
+            type: string
+            enum: [daterange, runrange]
+            default: runrange
+        - name: page
+          in: query
+          description: 'page: the page number {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int32
+        - name: size
+          in: query
+          description: 'size: the page size {1000}'
+          required: false
+          schema:
+            type: integer
+            default: 1000
+            format: int32
+        - name: sort
+          in: query
+          description: 'sort: the sort pattern {id.runNumber:ASC}'
+          required: false
+          schema:
+            type: string
+            default: 'id.runNumber:ASC'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunLumiSetDto"
+
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    RunLumiSetDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunLumiSetDto'
+    RunLumiInfoDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunLumiInfoDto'

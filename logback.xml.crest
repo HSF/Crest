@@ -23,7 +23,7 @@
 		<file>${crest.log.dir}/crest.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<FileNamePattern>${crest.log.dir}/crest.%d{yyyy-MM-dd}.log</FileNamePattern>
-			<maxHistory>30</maxHistory>
+			<maxHistory>10</maxHistory>
 		</rollingPolicy>
 		<encoder>
 			<Pattern>%d %-5level [%thread] %logger{35} - %msg %n</Pattern>
@@ -32,7 +32,15 @@
 			<level>TRACE</level>
 		</filter>
 	</appender>
-    
+
+    	<appender name="HIKARI" class="ch.qos.logback.core.FileAppender">
+    		<file>${crest.log.dir}/hikari.log</file>
+    		<append>true</append>
+    		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+    			<Pattern>[%d{dd-MMM-yyyy HH:mm:ss.SSS}] [%logger] [%-5level] - %msg%n</Pattern>
+    		</encoder>
+    	</appender>
+
 	<!--<logger name="org.hibernate" level="debug"/> -->
 	<!-- Uncomment and add your logger here: <logger name="org.springframework.samples.service.service" 
 		level="debug"/> -->
@@ -40,8 +48,11 @@
 	<logger name="org.springframework" level="info" />
 	<logger name="org.glassfish" level="info" />
 	<logger name="io.swagger" level="warn" />
-	<logger name="hep.crest" level="debug" />
-   
+<!-- remove this to enable json logging
+	<logger name="com.zaxxer.hikari" level="ALL" additivity="false">
+		<appender-ref ref="HIKARI" />
+	</logger>
+-->
 	<root level="DEBUG">
 		<appender-ref ref="consoleAppender" />
 		<appender-ref ref="fileAppender" />

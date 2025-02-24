@@ -1,0 +1,44 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: globaltagmaps
+
+paths:
+  # tags
+  /globaltagmaps:
+    $ref: 'crestdb_globaltagmapsapi.yml#/paths/~1globaltagmaps'
+  /globaltagmaps/{name}:
+    $ref: 'crestdb_globaltagmapsapi.yml#/paths/~1globaltagmaps~1{name}'
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    GlobalTagMapSetDto:
+      $ref: 'schemas/globaltagmaps.yml#/components/schemas/GlobalTagMapSetDto'
+    GlobalTagMapDto:
+      $ref: 'schemas/globaltagmaps.yml#/components/schemas/GlobalTagMapDto'

@@ -1,0 +1,316 @@
+openapi: 3.0.0
+info:
+  version: '5.0'
+  title: CREST Server
+  description: OpenApi3 for CREST Server
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'https://crest-undertow.web.cern.ch/api'
+security:
+  - BearerAuth: []
+  - OpenID:
+      - openid
+tags:
+  - name: admin
+  - name: folders
+paths:
+  '/admin/globaltags/{name}':
+    put:
+      tags:
+        - admin
+      summary: Update a GlobalTag in the database.
+      description: 'This method allows to update a GlobalTag.Arguments: the name has to uniquely identify a global tag.'
+      operationId: updateGlobalTag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalTagDto'
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalTagDto'
+    delete:
+      tags:
+        - admin
+      summary: Remove a GlobalTag from the database.
+      description: 'This method allows to remove a GlobalTag.Arguments: the name has to uniquely identify a global tag.'
+      operationId: removeGlobalTag
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+  '/admin/tags/{name}':
+    delete:
+      tags:
+        - admin
+      summary: Remove a Tag from the database.
+      description: 'This method allows to remove a Tag.Arguments: the name has to uniquely identify a tag.'
+      operationId: removeTag
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+        '404':
+          $ref: '#/components/responses/404'
+        default:
+          $ref: '#/components/responses/genericError'
+  /folders:
+    post:
+      tags:
+        - folders
+      summary: Create an entry for folder information.
+      description: Folder informations go into a dedicated table.
+      operationId: createFolder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDto'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderDto'
+    get:
+      tags:
+        - folders
+      summary: Finds a FolderDto list.
+      description: 'This method allows to perform search and sorting.Arguments: by=<pattern>, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]'
+      operationId: listFolders
+      parameters:
+        - name: schema
+          in: query
+          description: 'the schema pattern {none}'
+          required: false
+          schema:
+            type: string
+            default: none
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderSetDto'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OpenID:
+      type: openIdConnect
+      openIdConnectUrl: 'https://auth.cern.ch/auth/realms/cern/.well-known/openid-configuration'
+  requestBodies:
+    GenericMapBody:
+      description: A JSON object containing generic map used for updates
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericMap'
+  responses:
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '404':
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '409':
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    genericError:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+  schemas:
+    HTTPResponse:
+      description: general response object that can be used for POST and PUT methods
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        code:
+          type: integer
+          description: HTTP status code of the response
+        error:
+          type: string
+        type:
+          type: string
+          description: A generic string specifying the exception type.
+        message:
+          type: string
+        id:
+          type: string
+          description: path or URI of the requested or generated resource
+    CrestBaseResponse:
+      type: object
+      required:
+        - size
+        - format
+      properties:
+        size:
+          type: integer
+          format: int64
+        datatype:
+          type: string
+        format:
+          type: string
+        page:
+          $ref: '#/components/schemas/RespPage'
+        filter:
+          $ref: '#/components/schemas/GenericMap'
+      discriminator:
+        propertyName: format
+    RespPage:
+      type: object
+      required:
+        - size
+        - totalElements
+        - totalPages
+        - number
+      properties:
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        number:
+          type: integer
+    GenericMap:
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties:
+        type: string
+    TagSetDto:
+      description: An Set containing TagDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              timeType:
+                type: string
+              payloadSpec:
+                type: string
+              synchronization:
+                type: string
+              description:
+                type: string
+              lastValidatedTime:
+                type: integer
+                format: int64
+              endOfValidity:
+                type: integer
+                format: int64
+              insertionTime:
+                type: string
+                format: date-time
+              modificationTime:
+                type: string
+                format: date-time
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    GlobalTagDto:
+      type: object
+      properties:
+        name:
+          type: string
+        validity:
+          type: integer
+          format: int64
+        description:
+          type: string
+        release:
+          type: string
+        insertionTime:
+          type: string
+          format: date-time
+        snapshotTime:
+          type: string
+          format: date-time
+        scenario:
+          type: string
+        workflow:
+          type: string
+        type:
+          type: string
+        snapshotTimeMilli:
+          type: integer
+          format: int64
+        insertionTimeMilli:
+          type: integer
+          format: int64
+    FolderDto:
+      type: object
+      properties:
+        nodeFullpath:
+          type: string
+        schemaName:
+          type: string
+        nodeName:
+          type: string
+        nodeDescription:
+          type: string
+        tagPattern:
+          type: string
+        groupRole:
+          type: string
+    FolderSetDto:
+      description: An FolderSet containing FolderDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderDto'
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'

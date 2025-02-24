@@ -1,0 +1,24 @@
+components:
+  schemas:
+    PayloadTagInfoDto:
+      type: object
+      properties:
+        tagname:
+          type: string
+        niovs:
+          type: integer
+        totvolume:
+          type: number
+          format: float
+        avgvolume:
+          type: number
+          format: float
+    PayloadTagInfoSetDto:
+      description: An PayloadTagInfoSet containing PayloadTagInfoDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/PayloadTagInfoDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'

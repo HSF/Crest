@@ -1,0 +1,13 @@
+# ===============================
+# = PROFILES /
+#             server
+#             ...
+# ===============================
+# Defaults
+nats:
+  server: ${svom.nats.server}
+  port: ${svom.nats.port}
+  user: ${svom.nats.user}
+  password: ${svom.nats.password}
+  cluster: ${svom.nats.cluster}
+  queue: data.crest

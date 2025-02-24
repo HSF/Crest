@@ -1,8 +1,0 @@
-{
-  "groupId":"hep.crest.server",
-  "artifactId":"crest-web",
-  "artifactVersion":"1.0.0",
-  "apiPackage":"hep.crest.server.swagger.api",
-  "invokerPackage":"hep.crest.server.swagger.services",
-  "modelPackage":"hep.crest.swagger.model"
-}

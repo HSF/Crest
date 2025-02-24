@@ -1,0 +1,53 @@
+components:
+  schemas:
+    PayloadDto:
+      type: object
+      properties:
+        hash:
+          type: string
+        version:
+          type: string
+        objectType:
+          type: string
+        objectName:
+          type: string
+        compressionType:
+          type: string
+        checkSum:
+          type: string
+        size:
+          type: integer
+          format: int32
+        insertionTime:
+          type: string
+          format: date-time
+    StoreDto:
+      type: object
+      properties:
+        hash:
+          type: string
+        since:
+          type: integer
+          format: int64
+        data:
+          type: string
+        streamerInfo:
+          type: string
+    PayloadSetDto:
+      description: An Set containing PayloadDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+           $ref: '#/components/schemas/PayloadDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'
+    StoreSetDto:
+      description: An Set containing StoreDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+           $ref: '#/components/schemas/StoreDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'

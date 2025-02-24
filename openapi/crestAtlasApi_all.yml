@@ -1,0 +1,135 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: admin
+  - name: folders
+  - name: globaltagmaps
+  - name: globaltags
+  - name: tags
+  - name: iovs
+  - name: monitoring
+  - name: payloads
+  - name: runinfo
+
+paths:
+  # tags
+  /admin/globaltags/{name}:
+    $ref: 'crestdb_adminapi.yml#/paths/~1admin~1globaltags~1{name}'
+  /admin/tags/{name}:
+    $ref: 'crestdb_adminapi.yml#/paths/~1admin~1tags~1{name}'
+  /folders:
+    $ref: 'crestdb_adminapi.yml#/paths/~1folders'
+  # globaltagmaps
+  /globaltagmaps:
+    $ref: 'crestdb_globaltagmapsapi.yml#/paths/~1globaltagmaps'
+  /globaltagmaps/{name}:
+    $ref: 'crestdb_globaltagmapsapi.yml#/paths/~1globaltagmaps~1{name}'
+  # globaltags
+  /globaltags:
+    $ref: 'crestdb_globaltagsapi.yml#/paths/~1globaltags'
+  /globaltags/{name}:
+    $ref: 'crestdb_globaltagsapi.yml#/paths/~1globaltags~1{name}'
+  /globaltags/{name}/tags:
+    $ref: 'crestdb_globaltagsapi.yml#/paths/~1globaltags~1{name}~1tags'
+  # tags
+  /tags:
+    $ref: 'crestdb_tagsapi.yml#/paths/~1tags'
+  /tags/{name}:
+    $ref: 'crestdb_tagsapi.yml#/paths/~1tags~1{name}'
+  /tags/{name}/meta:
+    $ref: 'crestdb_tagsapi.yml#/paths/~1tags~1{name}~1meta'
+
+  # iovs
+  /iovs:
+    $ref: 'crestdb_iovsapi.yml#/paths/~1iovs'
+  /iovs/infos:
+    $ref: 'crestdb_iovsapi.yml#/paths/~1iovs~1infos'
+  /iovs/size:
+    $ref: 'crestdb_iovsapi.yml#/paths/~1iovs~1size'
+
+  # payloads
+  /payloads:
+    $ref: 'crestdb_payloadsapi.yml#/paths/~1payloads'
+  /payloads/data:
+    $ref: 'crestdb_payloadsapi.yml#/paths/~1payloads~1data'
+  /monitoring/payloads:
+    $ref: 'crestdb_monitoringapi.yml#/paths/~1monitoring~1payloads'
+  # runinfo
+  /runinfo:
+    $ref: 'crestdb_atlasruninfoapi.yml#/paths/~1runinfo'
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    TagDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagDto'
+    TagSetDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagSetDto'
+    TagMetaSetDto:
+      $ref: 'schemas/tagsmeta.yml#/components/schemas/TagMetaSetDto'
+    TagMetaDto:
+      $ref: 'schemas/tagsmeta.yml#/components/schemas/TagMetaDto'
+    GlobalTagDto:
+      $ref: 'schemas/globaltags.yml#/components/schemas/GlobalTagDto'
+    FolderDto:
+      $ref: 'schemas/admin.yml#/components/schemas/FolderDto'
+    FolderSetDto:
+      $ref: 'schemas/admin.yml#/components/schemas/FolderSetDto'
+    GlobalTagMapSetDto:
+      $ref: 'schemas/globaltagmaps.yml#/components/schemas/GlobalTagMapSetDto'
+    GlobalTagMapDto:
+      $ref: 'schemas/globaltagmaps.yml#/components/schemas/GlobalTagMapDto'
+    GlobalTagSetDto:
+      $ref: 'schemas/globaltags.yml#/components/schemas/GlobalTagSetDto'
+    IovDto:
+      $ref: 'schemas/iovs.yml#/components/schemas/IovDto'
+    IovSetDto:
+      $ref: 'schemas/iovs.yml#/components/schemas/IovSetDto'
+    IovPayloadSetDto:
+      $ref: 'schemas/iovs.yml#/components/schemas/IovPayloadSetDto'
+    IovPayloadDto:
+      $ref: 'schemas/iovs.yml#/components/schemas/IovPayloadDto'
+    PayloadSetDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/PayloadSetDto'
+    PayloadDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/PayloadDto'
+    StoreDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/StoreDto'
+    StoreSetDto:
+      $ref: 'schemas/payloads.yml#/components/schemas/StoreSetDto'
+    PayloadTagInfoSetDto:
+      $ref: 'schemas/monitoring.yml#/components/schemas/PayloadTagInfoSetDto'
+    PayloadTagInfoDto:
+      $ref: 'schemas/monitoring.yml#/components/schemas/PayloadTagInfoDto'
+    TagSummarySetDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagSummarySetDto'
+    TagSummaryDto:
+      $ref: 'schemas/tags.yml#/components/schemas/TagSummaryDto'
+    RunLumiSetDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunLumiSetDto'
+    RunLumiInfoDto:
+      $ref: 'schemas/runinfo.yml#/components/schemas/RunLumiInfoDto'

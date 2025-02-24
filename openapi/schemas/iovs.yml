@@ -1,0 +1,64 @@
+components:
+  schemas:
+    IovDto:
+      type: object
+      required:
+        - since
+        - payloadHash
+      properties:
+        tagName:
+          type: string
+        since:
+          type: integer
+          format: int64
+        insertionTime:
+          type: string
+          format: date-time
+        payloadHash:
+          type: string
+    IovPayloadDto:
+      type: object
+      properties:
+        since:
+          type: number
+        insertionTime:
+          type: string
+          format: date-time
+        version:
+          type: string
+        objectType:
+          type: string
+        objectName:
+          type: string
+        compressionType:
+          type: string
+        size:
+          type: integer
+          format: int32
+        payloadHash:
+          type: string
+    GroupDto:
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            type: number
+    IovSetDto:
+      description: An Set containing IovDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IovDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'
+    IovPayloadSetDto:
+      description: An Set containing IovPayloadDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IovPayloadDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'

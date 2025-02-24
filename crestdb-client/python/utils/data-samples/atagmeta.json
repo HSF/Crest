@@ -1,7 +1,0 @@
-{ "description": "A new tag for testing",
-  "chansize": 2,
-  "colsize": 1,
-  "tagName": "GEOMODEL-V1",
-  "channelInfo": "[{\"1\":\"ch1\"},{\"2\":\"ch2\"}]",
-  "payloadInfo": "none"
-}

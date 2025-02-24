@@ -1,0 +1,135 @@
+openapi: 3.0.0
+
+info:
+  $ref: 'schemas/common.yml#/info'
+
+servers:
+  $ref: 'schemas/common.yml#/servers'
+
+security:
+  $ref: 'schemas/common.yml#/security'
+
+tags:
+  - name: globaltagmaps
+
+
+paths:
+  /globaltagmaps:
+    post:
+      tags:
+        - globaltagmaps
+      summary: Create a GlobalTagMap in the database.
+      description: 'This method allows to insert a GlobalTagMap.Arguments: GlobalTagMapDto should be provided in the body as a JSON file.'
+      operationId: createGlobalTagMap
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalTagMapDto'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalTagMapDto"
+        default:
+          $ref: "#/components/responses/genericError"
+  /globaltagmaps/{name}:
+    get:
+      tags:
+        - globaltagmaps
+      summary: Find GlobalTagMapDto lists.
+      description: This method search for mappings using the global tag name.
+      operationId: findGlobalTagMap
+      parameters:
+        - name: X-Crest-MapMode
+          in: header
+          description: If the mode is BackTrace then it will search for global tags containing the tag <name>
+          schema:
+            default: Trace
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalTagMapSetDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+    delete:
+      tags:
+        - globaltagmaps
+      summary: Delete GlobalTagMapDto lists.
+      description: This method search for mappings using the global tag name and deletes all mappings.
+      operationId: deleteGlobalTagMap
+      parameters:
+        - name: name
+          in: path
+          description: the global tag name
+          required: true
+          schema:
+            type: string
+        - name: label
+          in: query
+          description: 'label: the generic name labelling all tags of a certain kind.'
+          required: true
+          schema:
+            type: string
+            default: none
+        - name: record
+          in: query
+          description: 'record: the record.'
+          required: false
+          schema:
+            type: string
+        - name: tagname
+          in: query
+          description: 'tagname: the name of the tag associated.'
+          required: true
+          schema:
+            type: string
+            default: none
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalTagMapSetDto"
+        '404':
+          $ref: "#/components/responses/404"
+        default:
+          $ref: "#/components/responses/genericError"
+
+components:
+  securitySchemes:
+    $ref: 'schemas/common.yml#/components/securitySchemes'
+  requestBodies:
+    $ref: 'schemas/common.yml#/components/requestBodies'
+  responses:
+    $ref: 'schemas/common.yml#/components/responses'
+
+  schemas:
+    # commons
+    HTTPResponse:
+      $ref: 'schemas/common.yml#/components/schemas/HTTPResponse'
+    CrestBaseResponse:
+      $ref: 'schemas/common.yml#/components/schemas/CrestBaseResponse'
+    RespPage:
+      $ref: 'schemas/common.yml#/components/schemas/RespPage'
+    GenericMap:
+      $ref: 'schemas/common.yml#/components/schemas/GenericMap'
+
+    GlobalTagMapSetDto:
+      $ref: 'schemas/globaltagmaps.yml#/components/schemas/GlobalTagMapSetDto'
+    GlobalTagMapDto:
+      $ref: 'schemas/globaltagmaps.yml#/components/schemas/GlobalTagMapDto'

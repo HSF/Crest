@@ -1,0 +1,256 @@
+openapi: 3.0.0
+info:
+  version: '5.0'
+  title: CREST Server
+  description: OpenApi3 for CREST Server
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'https://crest-undertow.web.cern.ch/api'
+security:
+  - BearerAuth: []
+  - OpenID:
+      - openid
+tags:
+  - name: runinfo
+paths:
+  /runinfo:
+    post:
+      tags:
+        - runinfo
+      summary: Create an entry for run information.
+      description: Run informations go into a separate table.
+      operationId: createRunInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunLumiSetDto'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunLumiSetDto'
+    get:
+      tags:
+        - runinfo
+      summary: Finds a RunLumiInfoDto lists using parameters.
+      description: 'This method allows to perform search.Arguments: from=<someformat>,to=<someformat>, format=<describe previous types>, page={ipage}, size={isize}, sort=<sortpattern>. The pattern <pattern> is in the form <param-name><operation><param-value>       <param-name> is the name of one of the fields in the dto       <operation> can be [< : >] ; for string use only [:]        <param-value> depends on the chosen parameter. A list of this criteria can be provided       using comma separated strings for <pattern>.      The pattern <sortpattern> is <field>:[DESC|ASC]'
+      operationId: listRunInfo
+      parameters:
+        - name: from
+          in: query
+          description: 'from: the starting time or run-lumi'
+          required: false
+          schema:
+            type: string
+            default: none
+        - name: to
+          in: query
+          description: 'to: the ending time or run-lumi'
+          required: false
+          schema:
+            type: string
+            default: none
+        - name: format
+          in: query
+          description: |
+            the format to digest previous arguments [iso], [number].
+            Time(iso) = yyyymmddhhmiss, Run(number) = runnumber,
+            Time(number) = milliseconds
+          required: false
+          schema:
+            type: string
+            default: number
+        - name: mode
+          in: query
+          description: |
+            the mode for the request : [daterange] or [runrange]
+          required: false
+          schema:
+            type: string
+            enum:
+              - daterange
+              - runrange
+            default: runrange
+        - name: page
+          in: query
+          description: 'page: the page number {0}'
+          required: false
+          schema:
+            type: integer
+            default: 0
+            format: int32
+        - name: size
+          in: query
+          description: 'size: the page size {1000}'
+          required: false
+          schema:
+            type: integer
+            default: 1000
+            format: int32
+        - name: sort
+          in: query
+          description: 'sort: the sort pattern {name:ASC}'
+          required: false
+          schema:
+            type: string
+            default: 'runNumber:ASC'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunLumiSetDto'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OpenID:
+      type: openIdConnect
+      openIdConnectUrl: 'https://auth.cern.ch/auth/realms/cern/.well-known/openid-configuration'
+  requestBodies:
+    GenericMapBody:
+      description: A JSON object containing generic map used for updates
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericMap'
+  responses:
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '404':
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    '409':
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+    genericError:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HTTPResponse'
+  schemas:
+    HTTPResponse:
+      description: general response object that can be used for POST and PUT methods
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        code:
+          type: integer
+          description: HTTP status code of the response
+        error:
+          type: string
+        type:
+          type: string
+          description: A generic string specifying the exception type.
+        message:
+          type: string
+        id:
+          type: string
+          description: path or URI of the requested or generated resource
+    CrestBaseResponse:
+      type: object
+      required:
+        - size
+        - format
+      properties:
+        size:
+          type: integer
+          format: int64
+        datatype:
+          type: string
+        format:
+          type: string
+        page:
+          $ref: '#/components/schemas/RespPage'
+        filter:
+          $ref: '#/components/schemas/GenericMap'
+      discriminator:
+        propertyName: format
+    RespPage:
+      type: object
+      required:
+        - size
+        - totalElements
+        - totalPages
+        - number
+      properties:
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        number:
+          type: integer
+    GenericMap:
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties:
+        type: string
+    RunInfoSetDto:
+      description: An RunInfoSet containing RunInfoDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunInfoDto'
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    RunInfoDto:
+      type: object
+      properties:
+        runNumber:
+          type: number
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+    RunLumiSetDto:
+      description: An RunLumiSet containing RunLumiInfoDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunLumiInfoDto'
+      allOf:
+        - $ref: '#/components/schemas/CrestBaseResponse'
+    RunLumiInfoDto:
+      type: object
+      properties:
+        runNumber:
+          type: number
+        lb:
+          type: number
+        starttime:
+          type: number
+        endtime:
+          type: number

@@ -1,0 +1,29 @@
+components:
+  schemas:
+    TagMetaDto:
+      type: object
+      properties:
+        tagName:
+          type: string
+        description:
+          type: string
+        chansize:
+          type: integer
+          format: int32
+        colsize:
+          type: integer
+          format: int32
+        tagInfo:
+          type: string
+        insertionTime:
+          type: string
+          format: date-time
+    TagMetaSetDto:
+      description: An Set containing TagMetaDto objects.
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagMetaDto'
+      allOf:
+        - $ref: 'common.yml#/components/schemas/CrestBaseResponse'
